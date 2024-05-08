@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<resource version="2.3.0.1">
+	<object class="wxBitmap" name="toolNew32">18_FileNew_32.png</object>
+	<object class="wxBitmap" name="toolOpen32">23_FileOpen_32.png</object>
+	<object class="wxBitmap" name="toolClose32">923_PrintPreviewClose_32.png</object>
+	<object class="wxBitmap" name="toolDelete32">478_Delete_32.png</object>
+	<object class="wxBitmap" name="toolRefreshDoc32">26115_RefreshEngagements_32.png</object>
+	<object class="wxBitmap" name="toolRefresh32">26040_ReplaceClientWithServerVersionVisibleByContext_32.png</object>
+	<object class="wxBitmap" name="toolLink32">2169_TasksLink_32.png</object>
+	<object class="wxBitmap" name="toolUnlink32">2137_TasksUnlink_32.png</object>
+	<object class="wxBitmap" name="toolSubversion32">33163_Subversion_32.png</object>
+	<object class="wxBitmap" name="toolStart32">24848_PlayVideo_32.png</object>
+	<object class="wxBitmap" name="toolPause32">33379_PauseGif_32.png</object>
+	<object class="wxBitmap" name="toolStop32">92399_Stop_32.png</object>
+	<object class="wxBitmap" name="toolRemove32">15501_Remove_32.png</object>
+	<object class="wxBitmap" name="toolFavorite32">1021_Favorites_32.png</object>
+        <object class="wxBitmap" name="toolAdd32">137_Add_32.png</object>
+        <object class="wxBitmap" name="toolEdit32">15796_Edit_32.png</object>
+        <object class="wxBitmap" name="toolAddFTP32">13205_SmartArtAddShapeBefore_32.png</object>
+        <object class="wxBitmap" name="treeProject32">20696_Project_32.png</object>
+        <object class="wxBitmap" name="treeSite32">3945_Web_32.png</object>
+        <object class="wxBitmap" name="toolLog32">1698_SubscriberOptions_32.png</object>
+        <object class="wxBitmap" name="oss32">oss_32.png</object>
+        <object class="wxBitmap" name="ftp32">ftp_32.png</object>
+        <object class="wxBitmap" name="package32">package_32.png</object>
+        <object class="wxBitmap" name="toolCVSZip32">19523_DeliverableCreate_32.png</object>
+        <object class="wxBitmap" name="toolCVSZipUpload32">20056_GroupCompareProjectsCompare_32.png</object>
+	
+	<object class="wxBitmap" name="toolNew16">18_FileNew_16.png</object>
+	<object class="wxBitmap" name="toolOpen16">23_FileOpen_16.png</object>
+	<object class="wxBitmap" name="toolClose16">923_PrintPreviewClose_16.png</object>
+	<object class="wxBitmap" name="toolDelete16">478_Delete_16.png</object>
+	<object class="wxBitmap" name="toolRefreshDoc16">26115_RefreshEngagements_16.png</object>
+	<object class="wxBitmap" name="toolRefresh16">26040_ReplaceClientWithServerVersionVisibleByContext_16.png</object>
+	<object class="wxBitmap" name="toolLink16">2169_TasksLink_16.png</object>
+	<object class="wxBitmap" name="toolUnlink16">2137_TasksUnlink_16.png</object>
+	<object class="wxBitmap" name="toolSubversion16">33163_Subversion_16.png</object>
+	<object class="wxBitmap" name="toolStart16">24848_PlayVideo_16.png</object>
+	<object class="wxBitmap" name="toolPause16">33379_PauseGif_16.png</object>
+	<object class="wxBitmap" name="toolStop16">92399_Stop_16.png</object>
+	<object class="wxBitmap" name="toolRemove16">15501_Remove_16.png</object>
+	<object class="wxBitmap" name="toolFavorite16">1021_Favorites_16.png</object>
+        <object class="wxBitmap" name="toolAdd16">137_Add_16.png</object>
+        <object class="wxBitmap" name="toolEdit16">15796_Edit_16.png</object>
+
+        <object class="wxBitmap" name="toolAddFTP16">13205_SmartArtAddShapeBefore_16.png</object>
+        <object class="wxBitmap" name="treeProject16">20696_Project_16.png</object>
+        <object class="wxBitmap" name="treeSite16">3945_Web_16.png</object>
+        <object class="wxBitmap" name="toolLog16">1698_SubscriberOptions_16.png</object>
+        <object class="wxBitmap" name="oss16">oss_16.png</object>
+        <object class="wxBitmap" name="ftp16">ftp_16.png</object>
+        <object class="wxIcon" name="logo">anycode.png</object>
+        <object class="wxBitmap" name="package16">package_16.png</object>
+
+        <object class="wxBitmap" name="toolCVSZip16">19523_DeliverableCreate_16.png</object>
+        <object class="wxBitmap" name="toolCVSZipUpload16">20056_GroupCompareProjectsCompare_16.png</object>
+
+        <object class="wxBitmap" name="toolAllPackage">all_packages.png</object>
+        <object class="wxBitmap" name="toolInstalledPackage">installed_pkgs.png</object>
+        <object class="wxBitmap" name="toolUpgradeablePackage">package_upgradeable.png</object>
+        <object class="wxBitmap" name="toolAddPackage">package_add.png</object>
+        <object class="wxBitmap" name="toolDeletePackage">package_delete.png</object>
+        <object class="wxBitmap" name="toolGo">go.png</object>
+</resource>

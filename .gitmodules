@@ -1,0 +1,35 @@
+[submodule "3party/curl"]
+	path = 3party/curl
+	url = https://github.com/curl/curl.git
+[submodule "3party/libssh2"]
+	path = 3party/libssh2
+	url = https://github.com/libssh2/libssh2.git
+[submodule "3party/libgit2"]
+	path = 3party/libgit2
+	url = https://github.com/libgit2/libgit2.git
+[submodule "3party/openssl"]
+	path = 3party/openssl
+	url = https://github.com/openssl/openssl.git
+	branch = OpenSSL_1_1_1-stable
+[submodule "3party/zlib"]
+	path = 3party/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "3party/subversion"]
+	path = 3party/subversion
+	url = https://github.com/apache/subversion.git
+[submodule "3party/apr"]
+	path = 3party/apr
+	url = https://github.com/apache/apr.git
+[submodule "3party/apr-util"]
+	path = 3party/apr-util
+	url = https://github.com/apache/apr-util.git
+	branch = 1.6.x
+[submodule "3party/libexpat"]
+	path = 3party/libexpat
+	url = https://github.com/libexpat/libexpat.git
+[submodule "3party/sqlite"]
+	path = 3party/sqlite
+	url = https://github.com/sqlite/sqlite.git
+[submodule "dockingpane"]
+	path = dockingpane
+	url = https://github.com/fengzhu2007/dockingpane.git
