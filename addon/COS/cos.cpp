@@ -15,8 +15,7 @@
 #ifdef Q_OS_WIN
 #include <openssl/hmac_local.h>
 #endif
-//AKIDY1E91bi3D5fx1soe4CNP9c2E8nOmck5F
-//4vSjDOKbdR3ey1mFQQK2R4PRJsFm2z59
+
 
 #include <QDebug>
 
