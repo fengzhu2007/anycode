@@ -27,9 +27,6 @@
 [submodule "3party/libexpat"]
 	path = 3party/libexpat
 	url = https://github.com/libexpat/libexpat.git
-[submodule "3party/sqlite"]
-	path = 3party/sqlite
-	url = https://github.com/sqlite/sqlite.git
 [submodule "dockingpane"]
 	path = dockingpane
 	url = https://github.com/fengzhu2007/dockingpane.git
