@@ -1,5 +1,6 @@
 #include "Storage.h"
-
+#include <QSqlQuery>
+#include <QSqlError>
 namespace ady {
     Storage::Storage()
     {

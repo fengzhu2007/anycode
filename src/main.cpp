@@ -2,6 +2,7 @@
 #include <QTranslator>
 #include <QDateTime>
 #include "mainwindow.h"
+#include "dockwindow.h"
 #include <QDebug>
 #ifdef Q_OS_WIN
 #include <tchar.h>
@@ -9,6 +10,7 @@
 #include <DbgHelp.h>
 #pragma comment(lib, "user32.lib")
 #endif
+
 
 
 
@@ -25,7 +27,7 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
         PMINIDUMP_CALLBACK_INFORMATION
         );
     MiniDumpWriteDumpT pfnMiniDumpWriteDump = NULL;
-    HMODULE hDbgHelp = LoadLibrary(L"DbgHelp.dll");
+    HMODULE hDbgHelp = LoadLibraryW(L"DbgHelp.dll");
     if (NULL == hDbgHelp)
     {
         return EXCEPTION_CONTINUE_EXECUTION;
@@ -36,15 +38,17 @@ int GenerateMiniDump(PEXCEPTION_POINTERS pExceptionPointers)
     {
         FreeLibrary(hDbgHelp);
         return EXCEPTION_CONTINUE_EXECUTION;
+
+
     }
     wchar_t szFileName[MAX_PATH] = { 0 };
     wchar_t szVersion[] = L"DumpFile";
     SYSTEMTIME stLocalTime;
     GetLocalTime(&stLocalTime);
-    wsprintf(szFileName, L"%s-%04d%02d%02d-%02d%02d%02d.dmp",
+    wsprintfW(szFileName, L"%s-%04d%02d%02d-%02d%02d%02d.dmp",
         szVersion, stLocalTime.wYear, stLocalTime.wMonth, stLocalTime.wDay,
         stLocalTime.wHour, stLocalTime.wMinute, stLocalTime.wSecond);
-    HANDLE hDumpFile = CreateFile(szFileName, GENERIC_READ | GENERIC_WRITE,
+    HANDLE hDumpFile = CreateFileW(szFileName, GENERIC_READ | GENERIC_WRITE,
         FILE_SHARE_WRITE | FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
     if (INVALID_HANDLE_VALUE == hDumpFile)
     {
@@ -106,8 +110,8 @@ int main(int argc, char *argv[])
         }
     }*/
 
-
     ady::MainWindow w;
+    //ady::DockWindow w;
     //w.setLocale(QLocale::Chinese);
     w.show();
     return a.exec();

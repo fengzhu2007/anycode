@@ -4,7 +4,7 @@
 //#include <QtCore/qglobal.h>
 #if defined(_WIN32)
 
-#if defined(LIBSVNPP_LIBRARY)
+#if defined(SVNPP_LIBRARY)
 #  define LIBSVNPP_EXPORT __declspec(dllexport)
 #else
 #  define LIBSVNPP_EXPORT __declspec(dllimport)

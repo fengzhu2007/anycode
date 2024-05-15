@@ -13,7 +13,7 @@
 #include <locale.h>
 
 #ifdef Q_OS_WIN
-#include <openssl/hmac_local.h>
+#include <hmac/hmac_local.h>
 #endif
 
 

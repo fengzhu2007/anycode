@@ -1,7 +1,7 @@
 #include "SiteStorage.h"
 #include "DatabaseHelper.h"
 #include <QVariant>
-
+#include <QSqlQuery>
 #include <QDebug>
 namespace ady {
 constexpr const  char SiteStorage::TABLE_NAME[] ;

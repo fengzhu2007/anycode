@@ -3,7 +3,7 @@
 
 #include <QtCore/qglobal.h>
 
-#if defined(ANYDEPLOYUI_LIB)
+#if defined(APP_LIBRARY)
 #  define ANYENGINE_EXPORT Q_DECL_EXPORT
 #else
 #  define ANYENGINE_EXPORT Q_DECL_IMPORT

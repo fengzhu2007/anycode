@@ -11,6 +11,7 @@ int diff_output(const git_diff_delta *d, const git_diff_hunk *h, const git_diff_
 
     QList<ady::cvs::DiffFile>* payload = (QList<ady::cvs::DiffFile>*)p;
     ady::cvs::DiffFile::Status status = ady::cvs::DiffFile::Normal;
+    qDebug()<<"name:"<<QString::fromUtf8(d->new_file.path)<<"status:"<<d->status;
     if(d->status==GIT_DELTA_ADDED){
         status = ady::cvs::DiffFile::Addition;
     }else if(d->status==GIT_DELTA_DELETED){
@@ -170,6 +171,7 @@ QList<DiffFile> GitRepository::diffFileLists(QString oid1,QString oid2)
     git_tree *b = nullptr;//old tree
     git_diff *diff = nullptr;
     git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
+
     int result = 0;
     if(oid1.isEmpty()){
         //workdir
@@ -214,13 +216,14 @@ QList<DiffFile> GitRepository::diffFileLists(QString oid1,QString oid2)
         if(oid2.isEmpty()){
             //current commit diff
             int parents = (int)git_commit_parentcount(commit);
+            qDebug()<<"parents num:"<<parents;
             if (parents == 1) {
                 git_commit_parent(&parent, commit, 0);
                 //git_tree *a = nullptr;
                 git_commit_tree(&b, parent);
                 git_commit_free(parent);
                 git_diff_tree_to_tree(&diff, this->m_repo, b, a, &diffopts);
-                git_diff_print(diff, GIT_DIFF_FORMAT_PATCH_HEADER, diff_output, &lists);
+                git_diff_print(diff, GIT_DIFF_FORMAT_NAME_STATUS, diff_output, &lists);
                 git_tree_free(b);
             }else{
                 for (int i = 0; i < parents; i++) {
@@ -229,7 +232,7 @@ QList<DiffFile> GitRepository::diffFileLists(QString oid1,QString oid2)
                     git_commit_tree(&b, parent);
                     git_commit_free(parent);
                     git_diff_tree_to_tree(&diff, this->m_repo, b, a, &diffopts);
-                    git_diff_print(diff, GIT_DIFF_FORMAT_PATCH_HEADER, diff_output, &lists);
+                    git_diff_print(diff, GIT_DIFF_FORMAT_NAME_STATUS, diff_output, &lists);
                     git_tree_free(b);
                 }
             }
@@ -243,7 +246,7 @@ QList<DiffFile> GitRepository::diffFileLists(QString oid1,QString oid2)
                     if(result==0){
 
                         git_diff_tree_to_tree(&diff, this->m_repo, b, a, &diffopts);
-                        git_diff_print(diff, GIT_DIFF_FORMAT_PATCH_HEADER, diff_output, &lists);
+                        git_diff_print(diff, GIT_DIFF_FORMAT_NAME_STATUS, diff_output, &lists);
                         git_tree_free(b);
 
                     }else{

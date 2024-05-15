@@ -1,0 +1,4 @@
+#define COMPANY_NAME        "Your Company Name"
+#define FILE_DESCRIPTION    "Your File Description"
+#define FILE_VERSION        "1.0.0.0"
+#define PRODUCT_VERSION     "1.0.0.0"
