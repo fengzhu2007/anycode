@@ -2,3 +2,5 @@ __pycache__
 bin
 build
 /CMakeLists.txt.user
+/CMakePresets.json
+/CMakeUserPresets.json

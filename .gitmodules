@@ -30,3 +30,6 @@
 [submodule "dockingpane"]
 	path = dockingpane
 	url = https://github.com/fengzhu2007/dockingpane.git
+[submodule "wRect"]
+	path = wRect
+	url = https://github.com/fengzhu2007/wRect.git

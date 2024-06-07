@@ -99,5 +99,11 @@
         <file>Resource/clear_32.png</file>
         <file>Resource/alipay.jpg</file>
     </qresource>
-    <qresource prefix="/"/>
+    <qresource prefix="/">
+        <file>Resource/icons/OpenFile_16x.svg</file>
+        <file>Resource/icons/OpenProject_16x.svg</file>
+        <file>Resource/icons/NewFile_16x.svg</file>
+        <file>Resource/icons/NewFileCollection_16x.svg</file>
+        <file>Resource/icons/OpenFolder_16x.svg</file>
+    </qresource>
 </RCC>

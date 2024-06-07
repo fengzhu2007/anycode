@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include "mainwindow.h"
 #include "dockwindow.h"
+#include "idewindow.h"
 #include <QDebug>
 #ifdef Q_OS_WIN
 #include <tchar.h>
@@ -78,8 +79,11 @@ LONG WINAPI ExceptionFilter(LPEXCEPTION_POINTERS lpExceptionInfo)
 
 int main(int argc, char *argv[])
 {
+
     #ifdef Q_OS_WIN
-    SetUnhandledExceptionFilter(ExceptionFilter);
+    #ifndef Q_DEBUG
+        SetUnhandledExceptionFilter(ExceptionFilter);
+    #endif
     #endif
 
     QApplication a(argc, argv);
@@ -110,8 +114,8 @@ int main(int argc, char *argv[])
         }
     }*/
 
-    ady::MainWindow w;
-    //ady::DockWindow w;
+    //ady::MainWindow w;
+    ady::IDEWindow w;
     //w.setLocale(QLocale::Chinese);
     w.show();
     return a.exec();

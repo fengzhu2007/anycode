@@ -21,6 +21,10 @@ namespace ady{
         explicit DockWindow(QWidget *parent = nullptr);
         ~DockWindow();
 
+    public slots:
+        void onDump();
+        void onShow();
+
     private:
         Ui::DockWindow *ui;
         DockingPaneManager* m_dockingPaneManager;

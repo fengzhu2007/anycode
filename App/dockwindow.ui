@@ -27,10 +27,16 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionDump"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionDump">
+   <property name="text">
+    <string>Dump</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

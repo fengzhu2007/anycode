@@ -17,6 +17,7 @@ include_directories(SYSTEM "../3party/bin/x64/include")
 
 include_directories(SYSTEM "../libsvnpp/include")
 include_directories(SYSTEM "../dockingpane/src")
+include_directories(SYSTEM "../wRect/src")
 
 
 find_library(CRYPTO_LIB libcrypto PATHS "../3party/bin/x64/lib")
@@ -58,78 +59,7 @@ qt5_add_resources(RESOURCE_ADDED ${RESOURCES})
 
 
 set(SOURCES
-    AddonLoader.cpp
-    components/DirComboBox.cpp
-    components/DirMappingView.cpp
-    components/IconWidget.cpp
-    components/MessageDialog.cpp
-    components/Notification.cpp
-    components/TreeView.cpp
-    core/des.cpp
-    cvs/Branch.cpp
-    cvs/Commit.cpp
-    cvs/CommitModel.cpp
-    cvs/DiffFile.cpp
-    cvs/DiffFileModel.cpp
-    cvs/Repository.cpp
-    cvs/git/GitRepository.cpp
-    cvs/svn/SvnRepository.cpp
-    interface/FormPanel.cpp
-    interface/NewFileDialog.cpp
-    interface/NotificationImpl.cpp
-    interface/Panel.cpp
-    interface/RemoteFileItemModel.cpp
-    local/FileItem.cpp
-    local/FileItemModel.cpp
-    localdirpanel.cpp
-    mainwindow.cpp
-    modules/addon/AddonManageWindow.cpp
-    modules/addon/AddonModel.cpp
-    modules/export/DataExport.cpp
-    modules/favorite/AddDialog.cpp
-    modules/favorite/FavoriteItemModel.cpp
-    modules/favorite/ManageDialog.cpp
-    modules/help/AboutDialog.cpp
-    modules/help/DonationDialog.cpp
-    modules/import/DataImport.cpp
-    modules/log/Log.cpp
-    modules/log/LogViewer.cpp
-    network/NetworkListen.cpp
-    network/NetworkManager.cpp
-    network/NetworkRequest.cpp
-    network/NetworkResponse.cpp
-    network/http/HttpClient.cpp
-    network/http/HttpResponse.cpp
-    project/ManagerTreeItem.cpp
-    project/ManagerTreeModel.cpp
-    project/ManagerWindow.cpp
-    project/OpenProjectWindow.cpp
-    project/ProjectEditWidget.cpp
-    project/ProjectListModel.cpp
-    project/SiteFrameworkWidget.cpp
-    project/SiteGroupListModel.cpp
-    project/SiteTypeListModel.cpp
-    project/SplitterHandleWidget.cpp
-    storage/AddonStorage.cpp
-    storage/CommitStorage.cpp
-    storage/CommonStorage.cpp
-    storage/DatabaseHelper.cpp
-    storage/FavoriteStorage.cpp
-    storage/GroupStorage.cpp
-    storage/ProjectStorage.cpp
-    storage/SiteSetting.cpp
-    storage/SiteStorage.cpp
-    storage/Storage.cpp
-    transfer/Task.cpp
-    transfer/TaskPoolModel.cpp
-    transfer/TaskThread.cpp
-    utils.cpp
-    view/StatusBarView.cpp
-    zip/ZipArchive.cpp
-    zip/minizip/ioapi.c
-    zip/minizip/mztools.c
-    zip/minizip/unzip.c
-    zip/minizip/zip.c
+
 )
 
 if(WIN32)
@@ -142,8 +72,83 @@ add_library(App SHARED
         ${FORMS_HEADERS}
         ${RESOURCE_ADDED}
         ${SOURCES}
+        AddonLoader.cpp
+        components/DirComboBox.cpp
+        components/DirMappingView.cpp
+        components/IconWidget.cpp
+        components/MessageDialog.cpp
+        components/Notification.cpp
+        components/TreeView.cpp
+        core/des.cpp
+        cvs/Branch.cpp
+        cvs/Commit.cpp
+        cvs/CommitModel.cpp
+        cvs/DiffFile.cpp
+        cvs/DiffFileModel.cpp
+        cvs/Repository.cpp
+        cvs/git/GitRepository.cpp
+        cvs/svn/SvnRepository.cpp
+        interface/FormPanel.cpp
+        interface/NewFileDialog.cpp
+        interface/NotificationImpl.cpp
+        interface/Panel.cpp
+        interface/RemoteFileItemModel.cpp
+        local/FileItem.cpp
+        local/FileItemModel.cpp
+        localdirpanel.cpp
+        mainwindow.cpp
+        modules/addon/AddonManageWindow.cpp
+        modules/addon/AddonModel.cpp
+        modules/export/DataExport.cpp
+        modules/favorite/AddDialog.cpp
+        modules/favorite/FavoriteItemModel.cpp
+        modules/favorite/ManageDialog.cpp
+        modules/help/AboutDialog.cpp
+        modules/help/DonationDialog.cpp
+        modules/import/DataImport.cpp
+        modules/log/Log.cpp
+        modules/log/LogViewer.cpp
+        network/NetworkListen.cpp
+        network/NetworkManager.cpp
+        network/NetworkRequest.cpp
+        network/NetworkResponse.cpp
+        network/http/HttpClient.cpp
+        network/http/HttpResponse.cpp
+        project/ManagerTreeItem.cpp
+        project/ManagerTreeModel.cpp
+        project/ManagerWindow.cpp
+        project/OpenProjectWindow.cpp
+        project/ProjectEditWidget.cpp
+        project/ProjectListModel.cpp
+        project/SiteFrameworkWidget.cpp
+        project/SiteGroupListModel.cpp
+        project/SiteTypeListModel.cpp
+        project/SplitterHandleWidget.cpp
+        storage/AddonStorage.cpp
+        storage/CommitStorage.cpp
+        storage/CommonStorage.cpp
+        storage/DatabaseHelper.cpp
+        storage/FavoriteStorage.cpp
+        storage/GroupStorage.cpp
+        storage/ProjectStorage.cpp
+        storage/SiteSetting.cpp
+        storage/SiteStorage.cpp
+        storage/Storage.cpp
+        transfer/Task.cpp
+        transfer/TaskPoolModel.cpp
+        transfer/TaskThread.cpp
+        utils.cpp
+        view/StatusBarView.cpp
+        zip/ZipArchive.cpp
+        zip/minizip/ioapi.c
+        zip/minizip/mztools.c
+        zip/minizip/unzip.c
+        zip/minizip/zip.c
         mainwindow.h
         dockwindow.h dockwindow.cpp
+        idewindow.h idewindow.cpp
+        idewindow.ui
+        panes/resource_manager_pane.h panes/resource_manager_pane.cpp panes/resource_manager_pane.ui
 
 )
 
@@ -151,7 +156,7 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} libsvnpp dockingpane)
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} libsvnpp dockingpane wRect)
 
 target_compile_definitions(App PRIVATE APP_LIBRARY)
 

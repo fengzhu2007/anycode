@@ -19,6 +19,12 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Xml Sql Gui Netwo
 #find_package(DbgHelp)
 
 include_directories(SYSTEM "../App")
+include_directories(SYSTEM "../wRect/src")
+
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DQ_DEBUG)
+endif()
 
 
 set(ANYCODE_SOURCES
@@ -55,7 +61,7 @@ endif()
 
 
 
-target_link_libraries(anycode PRIVATE Qt${QT_VERSION_MAJOR}::Widgets DbgHelp App)
+target_link_libraries(anycode PRIVATE Qt${QT_VERSION_MAJOR}::Widgets DbgHelp App wRect)
 
 
 
