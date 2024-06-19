@@ -125,6 +125,13 @@ namespace ady {
         }
     }
 
+    void AddonLoader::destory(){
+        if(instance!=nullptr){
+            delete instance;
+            instance = nullptr;
+        }
+    }
+
 
 
 }

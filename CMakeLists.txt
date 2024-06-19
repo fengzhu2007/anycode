@@ -15,6 +15,9 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 
 # 添加 DependencyProject 子目录
+add_subdirectory(dockingpane)
+add_subdirectory(wRect)
+
 add_subdirectory(App)
 
 add_subdirectory(libsvnpp)
@@ -22,8 +25,7 @@ add_subdirectory(libsvnpp)
 
 add_subdirectory(addon)
 
-add_subdirectory(dockingpane)
-add_subdirectory(wRect)
+
 
 # 添加 MainProject 子目录
 add_subdirectory(src)

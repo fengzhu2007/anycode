@@ -13,6 +13,10 @@ namespace ady {
         QString path;
         long long datetime=0;
         long long updatetime=0;
+        QString cvs;
+        QString cvs_url;
+        QString cvs_username;
+        QString cvs_password;
 
     };
 
@@ -22,6 +26,10 @@ namespace ady {
         constexpr const static char COL_NAME[] = "name";
         constexpr const static char COL_PATH[] = "path";
         constexpr const static char COL_UPDATETIME[] = "updatetime";
+        constexpr const static char COL_CVS[] = "cvs";
+        constexpr const static char COL_CVS_URL[] = "cvs_url";
+        constexpr const static char COL_CVS_USERNAME[] = "cvs_username";
+        constexpr const static char COL_CVS_PASSWORD[] = "cvs_password";
 
         ProjectStorage();
         ProjectRecord one(long long id);

@@ -9,6 +9,10 @@ constexpr const  char ProjectStorage::TABLE_NAME[];
 constexpr const  char ProjectStorage::COL_NAME[] ;
 constexpr const  char ProjectStorage::COL_PATH[] ;
 constexpr const  char ProjectStorage::COL_UPDATETIME[] ;
+constexpr const  char ProjectStorage::COL_CVS[];//svn , git
+constexpr const  char ProjectStorage::COL_CVS_URL[];
+constexpr const  char ProjectStorage::COL_CVS_USERNAME[];
+constexpr const  char ProjectStorage::COL_CVS_PASSWORD[];
 
 
 ProjectStorage::ProjectStorage(){

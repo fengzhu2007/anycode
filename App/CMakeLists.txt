@@ -10,8 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Xml Sql Gui Network Concurrent LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Xml Sql Gui Network Concurrent LinguistTools)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Xml Sql Gui Network Concurrent LinguistTools Svg)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Xml Sql Gui Network Concurrent LinguistTools Svg)
 
 include_directories(SYSTEM "../3party/bin/x64/include")
 
@@ -40,7 +40,7 @@ set(FORMS
     modules/help/donationdialog.ui
     modules/log/LogViewer.ui
     project/ManagerWindow.ui
-    project/OpenProjectWindow.ui
+    project/open_project_window.ui
     project/ProjectEditWidget.ui
     project/SiteFrameworkWidget.ui
     project/splitterhandlewidgetui.ui
@@ -117,7 +117,7 @@ add_library(App SHARED
         project/ManagerTreeItem.cpp
         project/ManagerTreeModel.cpp
         project/ManagerWindow.cpp
-        project/OpenProjectWindow.cpp
+        project/open_project_window.cpp
         project/ProjectEditWidget.cpp
         project/ProjectListModel.cpp
         project/SiteFrameworkWidget.cpp
@@ -148,7 +148,23 @@ add_library(App SHARED
         dockwindow.h dockwindow.cpp
         idewindow.h idewindow.cpp
         idewindow.ui
-        panes/resource_manager_pane.h panes/resource_manager_pane.cpp panes/resource_manager_pane.ui
+        panes/resource_manager/resource_manager_pane.h panes/resource_manager/resource_manager_pane.cpp panes/resource_manager/resource_manager_pane.ui
+        panes/resource_manager/resource_manager_model.h panes/resource_manager/resource_manager_model.cpp
+        panes/resource_manager/resource_manager_model_item.h panes/resource_manager/resource_manager_model_item.cpp
+        panes/resource_manager/resource_manage_icon_provider.h panes/resource_manager/resource_manage_icon_provider.cpp
+        core/event_bus/subscriber.h core/event_bus/subscriber.cpp
+        core/event_bus/publisher.h core/event_bus/publisher.cpp
+        core/event_bus/event.h core/event_bus/event.cpp
+        project/new_project_window.h project/new_project_window.cpp project/new_project_window.ui
+        project/new_project_one_widget.h project/new_project_one_widget.cpp project/new_project_one_widget.ui
+        project/new_project_two_widget.h project/new_project_two_widget.cpp project/new_project_two_widget.ui
+        project/new_project_zero_widget.h project/new_project_zero_widget.cpp project/new_project_zero_widget.ui
+        project/project_manage_model.h project/project_manage_model.cpp
+        components/itd_button.h components/itd_button.cpp
+        components/listview/listview.h components/listview/listview.cpp
+        components/listview/listview_model.h components/listview/listview_model.cpp
+        project/site_list_model.h project/site_list_model.cpp
+
 
 )
 
@@ -156,7 +172,7 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} libsvnpp dockingpane wRect)
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} libsvnpp dockingpane wRect)
 
 target_compile_definitions(App PRIVATE APP_LIBRARY)
 

@@ -23,6 +23,8 @@ namespace ady{
         void onPaneClosed(QString&id,QString&group,bool isClient);
         void onBeforePaneClose(DockingPane* pane,bool isClient);
 
+        void onActionTriggered();
+
     private:
         Ui::IDEWindow *ui;
         DockingPaneManager* m_dockingPaneManager;

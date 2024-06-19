@@ -14,7 +14,7 @@
 #include "ProjectEditWidget.h"
 #include "SiteFrameworkWidget.h"
 #include "components/MessageDialog.h"
-#include "OpenProjectWindow.h"
+#include "open_project_window.h"
 
 #include <QDebug>
 namespace ady{

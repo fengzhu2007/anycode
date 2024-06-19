@@ -105,5 +105,11 @@
         <file>Resource/icons/NewFile_16x.svg</file>
         <file>Resource/icons/NewFileCollection_16x.svg</file>
         <file>Resource/icons/OpenFolder_16x.svg</file>
+        <file>Resource/icons/Home_16x.svg</file>
+        <file>Resource/icons/Refresh_16x.svg</file>
+        <file>Resource/icons/CollapseAll_16x.svg</file>
+        <file>Resource/icons/ExpandAll_16x.svg</file>
+        <file>Resource/icons/Search_16x.svg</file>
+        <file>Resource/icons/CustomActionEditor_16x.svg</file>
     </qresource>
 </RCC>

@@ -21,7 +21,7 @@ void FTPFormGeneral::initFormData(SiteRecord record)
     ui->usernameLineEdit->setText(record.username);
     ui->passwordLineEdit->setText(record.password);
     ui->pathLineEdit->setText(record.path);
-    ui->statusCheckBox->setCheckState(record.status==1?Qt::Checked:Qt::Unchecked);
+    //ui->statusCheckBox->setCheckState(record.status==1?Qt::Checked:Qt::Unchecked);
 }
 
 bool FTPFormGeneral::validateFormData(SiteRecord& record)
@@ -32,7 +32,7 @@ bool FTPFormGeneral::validateFormData(SiteRecord& record)
     record.username = ui->usernameLineEdit->text();
     record.password = ui->passwordLineEdit->text();
     record.path = ui->pathLineEdit->text();
-    record.status = ui->statusCheckBox->isChecked()?1:0;
+    //record.status = ui->statusCheckBox->isChecked()?1:0;
     if(record.host.isEmpty()){
         //QMessageBox::information(this,tr("Warning"),tr("Host required"));
         MessageDialog::error(this,tr("Host required"));

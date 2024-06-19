@@ -32,6 +32,22 @@ AddonRecord AddonStorage::one(long long id)
     return record;
 }
 
+AddonRecord AddonStorage::one(QString name){
+    AddonRecord record;
+    QString sql = QString("SELECT * FROM [%1] WHERE [%2]=?").arg(TABLE_NAME).arg(AddonStorage::COL_TYPENAME);
+    QSqlQuery query(DatabaseHelper::getDatabase()->get());
+    query.prepare(sql);
+    query.bindValue(0,name);
+    bool ret = query.exec();
+    this->error = query.lastError();
+    if(ret&& query.next()){
+        record = toRecord(query);
+    }else{
+        record.id = 0l;
+    }
+    return record;
+}
+
 QList<AddonRecord> AddonStorage::all()
 {
     QList<AddonRecord> lists;

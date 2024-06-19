@@ -32,6 +32,7 @@ namespace ady {
 
         AddonStorage();
         AddonRecord one(long long id);
+        AddonRecord one(QString name);
         QList<AddonRecord> all();
         QList<AddonRecord> list(int status);
         bool update(AddonRecord record);

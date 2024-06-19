@@ -5,7 +5,7 @@
 #include "network/NetworkRequest.h"
 #include "network/NetworkListen.h"
 #include "project/ManagerWindow.h"
-#include "project/OpenProjectWindow.h"
+#include "project/open_project_window.h"
 #include "storage/ProjectStorage.h"
 #include "storage/SiteStorage.h"
 #include "storage/AddonStorage.h"

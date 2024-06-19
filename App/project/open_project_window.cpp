@@ -1,17 +1,21 @@
-#include "OpenProjectWindow.h"
-#include "ui_OpenProjectWindow.h"
+#include "open_project_window.h"
+#include "ui_open_project_window.h"
 #include "ProjectListModel.h"
 #include "components/MessageDialog.h"
 #include <QDebug>
 namespace ady {
 OpenProjectWindow::OpenProjectWindow(QWidget* parent)
-    :QDialog(parent),
+    :wDialog(parent),
      ui(new Ui::OpenProjectWindow)
 {
+
     ui->setupUi(this);
+
+    this->resetupUi();
 
     connect(ui->okButton,&QPushButton::clicked,this,&OpenProjectWindow::onSelected);
     connect(ui->cancelButton,&QPushButton::clicked,this,&OpenProjectWindow::close);
+
 
     this->initData();
 }
@@ -23,6 +27,14 @@ void OpenProjectWindow::initData()
     ProjectListModel* model = new ProjectListModel(ui->treeView);
     model->setData(lists);
     ui->treeView->setModel(model);
+}
+
+OpenProjectWindow* OpenProjectWindow::open(QWidget* parent){
+    OpenProjectWindow* window = new OpenProjectWindow(parent);
+    //window->setWindowModality(Qt::ApplicationModal);
+    window->setModal(true);
+    window->show();
+    return window;
 }
 
 void OpenProjectWindow::onSelected()

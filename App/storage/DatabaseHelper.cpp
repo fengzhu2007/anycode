@@ -189,6 +189,8 @@ namespace ady {
                 upgradeV3();
             case 4:
                 upgradeV4();
+            case 5:
+                upgradeV5();
             default:
 
                 break;
@@ -364,6 +366,21 @@ namespace ady {
 
 
             this->db.exec(sql);
+         }
+     }
+
+     void DatabaseHelper::upgradeV5()
+     {
+         int type = this->dbType();
+         if(type==1){
+                QString sql = QString("alter table [%1] add column "
+                                      "[%2] VARCHAR(60) NULL,"
+                                      "[%3] VARCHAR(250) NULL,"
+                                      "[%4] VARCHAR(100) NULL,"
+                                      "[%5] VARCHAR(250) NULL").arg(ProjectStorage::TABLE_NAME).arg(ProjectStorage::COL_CVS).arg(ProjectStorage::COL_CVS_URL)
+                    .arg(ProjectStorage::COL_CVS_USERNAME).arg(ProjectStorage::COL_CVS_PASSWORD);
+                this->db.exec(sql);
+
          }
      }
 

@@ -107,6 +107,8 @@ int main(int argc, char *argv[])
             a.installTranslator(translator);
         }
     }
+    //QFont globalFont("Microsoft YaHei", 10);
+    //a.setFont(globalFont);
     /*{
         QTranslator* translator = new QTranslator(&a);
         if(translator->load(dir + "/langs/qtbase_zh_TW.qm")){
@@ -117,6 +119,7 @@ int main(int argc, char *argv[])
     //ady::MainWindow w;
     ady::IDEWindow w;
     //w.setLocale(QLocale::Chinese);
+    w.showMaximized();
     w.show();
     return a.exec();
 }

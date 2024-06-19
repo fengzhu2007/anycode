@@ -18,6 +18,7 @@ namespace ady {
         size_t getFormPanelSize(QString name);
         FormPanel* getFormPanel(QWidget* parent,QString name,size_t n);
         int requestConnect(void* ptr);
+        static void destory();
 
 
     private:

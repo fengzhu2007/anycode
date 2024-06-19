@@ -20,7 +20,7 @@ namespace ady {
         constexpr const static char DBNAME[] = "data.s3db";
         constexpr const static char DBNAMEPRJ[] = "project%1.s3db";//project database
 
-        const static int VERSIONID = 5;
+        const static int VERSIONID = 6;
 
 
     private:
@@ -54,6 +54,7 @@ namespace ady {
         void upgradeV2();
         void upgradeV3();
         void upgradeV4();
+        void upgradeV5();
 
 
     public:
