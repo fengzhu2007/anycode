@@ -135,7 +135,7 @@ long long SiteStorage::insert(SiteRecord record)
     query.bindValue(9,record.status);
     query.bindValue(10,record.listorder);
     query.bindValue(11,record.settings);
-    query.bindValue(12,record.datatime);
+    query.bindValue(12,record.datetime);
     bool ret = query.exec();
     this->error = query.lastError();
     qDebug()<<"error:"<<this->error.driverText();

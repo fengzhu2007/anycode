@@ -140,7 +140,8 @@ public:
 ListView::ListView(QWidget* parent)
     :QScrollArea(parent)
 {
-    this->setStyleSheet(".ady--ListView>QWidget#qt_scrollarea_viewport>.QWidget{background-color:white;}"
+    this->setStyleSheet(""
+                        ".ady--ListView>QWidget#qt_scrollarea_viewport>.QWidget{background-color:white;}"
                         "ady--ListViewItem[state='1']{background-color:#d9e0f8}"
                         "ady--ListViewItem:hover{background-color:#c9def5}");
     d = new ListViewPrivate();
@@ -153,6 +154,18 @@ ListView::ListView(QWidget* parent)
 
 ListView::~ListView(){
     delete d;
+}
+
+void ListView::clearSelected(){
+    //d->selected.clear();
+    if(d->selected.length()>0){
+        foreach(int i,d->selected){
+            ListViewItem* w = d->model->at(d->selected.at(0));
+            if(w!=nullptr){
+                w->setState(ListViewItem::Normal);
+            }
+        }
+    }
 }
 
 void ListView::setModel(ListViewModel* model){
@@ -184,28 +197,51 @@ void ListView::render(){
             for(int i=n;i<total;i++){
                 ListViewItem* w = d->model->takeAt(n);
                 QLayoutItem* item = layout->takeAt(n);
-                //ListViewItem* w = (ListViewItem*)item->widget();
                 w->close();
                 w->deleteLater();
                 delete item;
             }
         }
+        QWidget* w = d->model->emptyWidget();
+        if(n==0){
+            //show no data
+            w->show();
+        }else{
+            w->hide();
+        }
         layout->update();
     }
 }
 
-void ListView::mousePressEvent(QMouseEvent *e){
-    d->i = this->findItem(e->pos());
+void ListView::renderItem(int i){
+    QWidget* widget = this->widget();
+    ListViewContentLayout* layout = (ListViewContentLayout*)widget->layout();
+    if(layout==nullptr){
+        layout = new ListViewContentLayout(widget);
+        widget->setLayout(layout);
+    }
+    if(d->model!=nullptr){
+        QWidget* w = d->model->item(i);
+        layout->addWidget(w);
+        layout->update();
+        d->model->emptyWidget()->hide();
+    }
 }
 
-void ListView::mouseMoveEvent(QMouseEvent *e) {
-
+void ListView::removeItem(int i){
+    QWidget* widget = this->widget();
+    auto layout = static_cast<ListViewContentLayout*>(widget->layout());
+    if(layout!=nullptr){
+        QLayoutItem* item = layout->takeAt(i);
+        delete item;
+        if(d->model->count()==0){
+            d->model->emptyWidget()->show();
+        }
+    }
 }
 
-void ListView::mouseReleaseEvent(QMouseEvent *e){
-    int i = this->findItem(e->pos());
-    if(i>=0 && i==d->i){
-        //set selected
+void ListView::setSelection(const QList<int>& indexes){
+    foreach(auto i,indexes){
         if(d->multiple==false){
             if(d->selected.size()>0){
                 ListViewItem* w = d->model->at(d->selected.at(0));
@@ -235,10 +271,42 @@ void ListView::mouseReleaseEvent(QMouseEvent *e){
                 w->setState(ListViewItem::Selected);
             }
         }
+    }
+}
 
+QList<int> ListView::selection(){
+    return d->selected;
+}
+
+void ListView::mousePressEvent(QMouseEvent *e){
+    if(e->button()==Qt::LeftButton)
+        d->i = this->findItem(e->pos());
+}
+
+void ListView::mouseMoveEvent(QMouseEvent *e) {
+
+}
+
+void ListView::mouseReleaseEvent(QMouseEvent *e){
+    int i = this->findItem(e->pos());
+    if(i>=0 && i==d->i){
+        //set selected
+        this->setSelection(QList<int>{i});
         emit itemClicked(d->i);
     }
     d->i = -1;
+}
+
+void ListView::resizeEvent(QResizeEvent *event){
+    QScrollArea::resizeEvent(event);
+    if(d->model!=nullptr && d->model->count()==0){
+        //show empty state widget
+        QWidget* w = d->model->emptyWidget();
+        if(w && w->isHidden()==false){
+            QRect rc = this->geometry();
+            w->setGeometry(QRect(0,10,rc.width() - 2,w->sizeHint().height()));
+        }
+    }
 }
 
 

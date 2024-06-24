@@ -24,7 +24,7 @@ namespace ady {
         int status = 1;
         long long listorder = 0;
         QString settings;
-        long long datatime = 0;
+        long long datetime = 0;
         SiteSetting data;
     };
 

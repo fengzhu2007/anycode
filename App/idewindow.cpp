@@ -7,6 +7,7 @@
 #include "project/open_project_window.h"
 #include "project/new_project_window.h""
 #include "panes/resource_manager/resource_manager_pane.h"
+#include "w_toast.h"
 #include <QLabel>
 #include <QDebug>
 
@@ -25,9 +26,6 @@ IDEWindow::IDEWindow(QWidget *parent) :
     m_dockingPaneManager = new DockingPaneManager(this);
 
     this->setCentralWidget(m_dockingPaneManager->widget());
-
-
-
     m_dockingPaneManager->createPane(new ResourceManagerPane(this),DockingPaneManager::S_Left);
 
     /*QString group="label";
@@ -47,12 +45,14 @@ IDEWindow::IDEWindow(QWidget *parent) :
 
     connect(ui->actionOpen_Project,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionNew_Project,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    wToastManager::init(this);
 
 }
 
 IDEWindow::~IDEWindow()
 {
     delete ui;
+    wToastManager::destory();
 }
 
 void IDEWindow::onDump(){
@@ -74,7 +74,6 @@ void IDEWindow::onActionTriggered(){
     if(sender==ui->actionOpen_Project){
         OpenProjectWindow::open(this);
     }else if(sender==ui->actionNew_Project){
-        qDebug()<<"111";
         NewProjectWindow::open(this);
     }
 }

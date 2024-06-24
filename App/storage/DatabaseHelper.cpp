@@ -195,7 +195,9 @@ namespace ady {
 
                 break;
         }
+
         //qDebug()<<"version:"<<version;
+        upgradeV5();
         if(version != VERSIONID){
            bool ret = this->setVersion();
         }
@@ -373,14 +375,11 @@ namespace ady {
      {
          int type = this->dbType();
          if(type==1){
-                QString sql = QString("alter table [%1] add column "
-                                      "[%2] VARCHAR(60) NULL,"
-                                      "[%3] VARCHAR(250) NULL,"
-                                      "[%4] VARCHAR(100) NULL,"
-                                      "[%5] VARCHAR(250) NULL").arg(ProjectStorage::TABLE_NAME).arg(ProjectStorage::COL_CVS).arg(ProjectStorage::COL_CVS_URL)
-                    .arg(ProjectStorage::COL_CVS_USERNAME).arg(ProjectStorage::COL_CVS_PASSWORD);
-                this->db.exec(sql);
-
+            //alter table [%1] add column [%2] INTEGER  NULL
+            this->db.exec(QString::fromUtf8("ALTER TABLE [%1] ADD COLUMN [%2] VARCHAR(60) NULL").arg(ProjectStorage::TABLE_NAME).arg(ProjectStorage::COL_CVS));
+            this->db.exec(QString::fromUtf8("ALTER TABLE [%1] ADD COLUMN [%2] VARCHAR(250) NULL").arg(ProjectStorage::TABLE_NAME).arg(ProjectStorage::COL_CVS_URL));
+            this->db.exec(QString::fromUtf8("ALTER TABLE [%1] ADD COLUMN [%2] VARCHAR(100) NULL").arg(ProjectStorage::TABLE_NAME).arg(ProjectStorage::COL_CVS_USERNAME));
+            this->db.exec(QString::fromUtf8("ALTER TABLE [%1] ADD COLUMN [%2] VARCHAR(250) NULL").arg(ProjectStorage::TABLE_NAME).arg(ProjectStorage::COL_CVS_PASSWORD));
          }
      }
 

@@ -21,6 +21,10 @@ public slots:
     void onNewSite();
     void onSiteItemClicked(int i);
     void onTypeChanged(int i);
+    void onAdjustHeight(int i);
+    void onDeleteSite(int i);
+    void onSave();
+    void showSiteContextMenu(const QPoint &pos);
 protected:
     virtual void paintEvent(QPaintEvent *e) override;
 private:

@@ -35,6 +35,7 @@ public:
     ProjectManageModel(ListView* parent);
     virtual int count() override;
     virtual ListViewItem* item(int i)  override;
+    virtual void itemRemoved(int i) override;
     void setDataSource(QList<ProjectRecord> list);
     ProjectRecord itemAt(int i);
 

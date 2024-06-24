@@ -36,11 +36,7 @@ ProjectItemWidget::ProjectItemWidget(QWidget* parent)
     vLayout->addWidget(d->title);
     vLayout->addWidget(d->description);
     layout->addWidget(d->edit);
-    //qDebug()<<"parent:"<<parent->parentWidget()->parentWidget();
-    //ListView* listView = (ListView*)parent->parentWidget()->parentWidget();
     connect(d->edit,&QPushButton::clicked,this,&ProjectItemWidget::onEditClicked);
-
-
 }
 
 ProjectItemWidget::~ProjectItemWidget(){
@@ -97,6 +93,11 @@ ListViewItem* ProjectManageModel::item(int i){
     w->setDescription(one.path);
     w->setIndex(i);
     return w;
+}
+
+void ProjectManageModel::itemRemoved(int i){
+    d->list.takeAt(i);
+    ListViewModel::itemRemoved(i);
 }
 
 void ProjectManageModel::setDataSource(QList<ProjectRecord> list){

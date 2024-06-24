@@ -33,14 +33,20 @@ class ANYENGINE_EXPORT ListView : public QScrollArea
 public:
     explicit ListView(QWidget* parent);
     ~ListView();
+    void clearSelected();
     void setModel(ListViewModel* model);
     ListViewModel* model();
     void render();
+    void renderItem(int i);
+    void removeItem(int i);
+    void setSelection(const QList<int>& indexes);
+    QList<int> selection();
+    int findItem(const QPoint& pos);
 protected:
     virtual void mousePressEvent(QMouseEvent *e) override;
     virtual void mouseMoveEvent(QMouseEvent *e) override;
     virtual void mouseReleaseEvent(QMouseEvent *e) override;
-    int findItem(const QPoint& pos);
+    virtual void resizeEvent(QResizeEvent *event) override;
 
 signals:
     void itemClicked(int i);

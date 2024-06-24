@@ -164,6 +164,7 @@ add_library(App SHARED
         components/listview/listview.h components/listview/listview.cpp
         components/listview/listview_model.h components/listview/listview_model.cpp
         project/site_list_model.h project/site_list_model.cpp
+        project/project_select_model.h project/project_select_model.cpp
 
 
 )

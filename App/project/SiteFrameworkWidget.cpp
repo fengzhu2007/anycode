@@ -257,7 +257,7 @@ namespace ady {
                 }
             }else{
                 //insert data
-                this->record.datatime = QDateTime::currentDateTime().toSecsSinceEpoch();
+                this->record.datetime = QDateTime::currentDateTime().toSecsSinceEpoch();
                 long long id = siteStorage.insert(this->record);
                 if(id>0l){
                     this->record.id = id;

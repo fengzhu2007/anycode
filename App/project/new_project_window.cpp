@@ -22,7 +22,6 @@ NewProjectWindow::NewProjectWindow(QWidget *parent) :
                         "QStackedWidget .QLineEdit:focus,QStackedWidget .QSpinBox:focus{border-color:#007acc}"
                         "QStackedWidget .QPushButton,QStackedWidget .QComboBox{height:28px}"
                         "QStackedWidget .QPushButton#next,QStackedWidget .QPushButton#previous,QStackedWidget .QPushButton#save,QStackedWidget .QPushButton#newSite{height:22px}"
-                        "QStackedWidget .QTreeView{border:0}"
                         "QStackedWidget QScrollArea{border:0;}");
     ui = new Ui::NewProjectWindow;
     d = new NewProjectWindowPrivate;

@@ -1,6 +1,7 @@
 #include "listview_model.h"
 #include "listview.h"
 #include <QList>
+#include <QLabel>
 #include <QStyleOption>
 #include <QPainter>
 #include <QDebug>
@@ -25,7 +26,7 @@ ListViewItem::~ListViewItem(){
 }
 
 void ListViewItem::setState(State state){
-    qDebug()<<"setState:"<<state;
+    //qDebug()<<"setState:"<<state;
     if(state!=d->state){
         d->state = state;
         //update style
@@ -47,6 +48,7 @@ class ListViewModelPrivate{
 public:
     QList<ListViewItem*>widgets;
     ListView* listView;
+    QWidget* empty=nullptr;
 };
 
 
@@ -84,6 +86,35 @@ ListViewItem* ListViewModel::takeAt(int i){
 void ListViewModel::dataChanged(){
     //auto listView = static_cast<ListView*>(parent());
     d->listView->render();
+}
+
+void ListViewModel::itemChanged(int i){
+    d->listView->renderItem(i);
+
+}
+
+void ListViewModel::itemRemoved(int i){
+    QWidget* widget = d->widgets.takeAt(i);
+    d->listView->removeItem(i);
+    widget->close();
+    widget->deleteLater();
+}
+
+QWidget* ListViewModel::emptyWidget(){
+    if(d->empty==nullptr){
+        auto label = new QLabel(d->listView->widget());
+        label->setAlignment(Qt::AlignCenter);
+        label->setText(QString::fromUtf8("<img src=':/Resource/images/nodata.svg'/><br/><br/>%1").arg(tr("No Data")));
+        d->empty = label;
+        QRect rc = d->listView->geometry();
+        d->empty->setGeometry(QRect(0,10,rc.width() - 2,label->sizeHint().height()));
+    }
+    d->empty->show();
+    return d->empty;
+}
+
+ListView* ListViewModel::listView(){
+    return d->listView;
 }
 
 }

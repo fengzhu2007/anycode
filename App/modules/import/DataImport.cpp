@@ -278,7 +278,7 @@ int DataImport::importData(){
                     Q_FOREACH(SiteRecord r,g.sites){
                         r.pid = pid;
                         r.groupid = gid;
-                        r.datatime = p.project.datetime;
+                        r.datetime = p.project.datetime;
                         long long id = siteStorage.insert(r);
                         qDebug()<<"id:"<<id;
                     }

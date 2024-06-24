@@ -19,6 +19,8 @@ namespace ady {
         void onNewProject();
         void onProjectItemClicked(int i);
         void onProjectEditClicked(int i);
+        void showProjectContextMenu(const QPoint &pos);
+        void onDeleteProject(int i);
 
     private:
         Ui::NewProjectZeroWidget *ui;

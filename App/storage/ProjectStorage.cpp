@@ -53,13 +53,17 @@ QList<ProjectRecord> ProjectStorage::all(){
 
 bool ProjectStorage::update(ProjectRecord record)
 {
-    QString sql = QString("UPDATE [%1] SET [%2]=?,[%3]=?,[%4]=? WHERE [%5]=?").arg(TABLE_NAME).arg(COL_NAME).arg(COL_PATH).arg(COL_UPDATETIME).arg(DatabaseHelper::COL_ID);
+    QString sql = QString("UPDATE [%1] SET [%2]=?,[%3]=?,[%4]=?,[%5]=?,[%6]=?,[%7]=?,[%8]=? WHERE [%9]=?").arg(TABLE_NAME).arg(COL_NAME).arg(COL_PATH).arg(COL_UPDATETIME).arg(COL_CVS).arg(COL_CVS_URL).arg(COL_CVS_USERNAME).arg(COL_CVS_PASSWORD).arg(DatabaseHelper::COL_ID);
     QSqlQuery query(DatabaseHelper::getDatabase()->get());
     query.prepare(sql);
     query.bindValue(0,record.name);
     query.bindValue(1,record.path);
     query.bindValue(2,record.updatetime);
-    query.bindValue(3,record.id);
+    query.bindValue(3,record.cvs);
+    query.bindValue(4,record.cvs_url);
+    query.bindValue(5,record.cvs_username);
+    query.bindValue(6,record.cvs_password);
+    query.bindValue(7,record.id);
     bool ret = query.exec();
     this->error = query.lastError();
     return ret;
@@ -67,13 +71,18 @@ bool ProjectStorage::update(ProjectRecord record)
 
 long long ProjectStorage::insert(ProjectRecord record)
 {
-    QString sql = QString("INSERT INTO [%1] ([%2],[%3],[%4],[%5]) VALUES (?,?,?,?)").arg(TABLE_NAME).arg(COL_NAME).arg(COL_PATH).arg(DatabaseHelper::COL_DATETIME).arg(COL_PATH);
+    QString sql = QString("INSERT INTO [%1] ([%2],[%3],[%4],[%5],[%6],[%7],[%8],[%9]) VALUES (?,?,?,?,?,?,?,?)").arg(TABLE_NAME).arg(COL_NAME).arg(COL_PATH).arg(DatabaseHelper::COL_DATETIME).arg(COL_UPDATETIME).arg(COL_CVS).arg(COL_CVS_URL).arg(COL_CVS_USERNAME).arg(COL_CVS_PASSWORD);
     QSqlQuery query(DatabaseHelper::getDatabase()->get());
     query.prepare(sql);
     query.bindValue(0,record.name);
     query.bindValue(1,record.path);
     query.bindValue(2,record.datetime);
     query.bindValue(3,record.updatetime);
+    query.bindValue(4,record.cvs);
+    query.bindValue(5,record.cvs_url);
+    query.bindValue(6,record.cvs_username);
+    query.bindValue(7,record.cvs_password);
+    qDebug()<<"sql:"<<sql;
     bool ret =  query.exec();
     this->error = query.lastError();
     if(ret){
@@ -103,6 +112,10 @@ ProjectRecord ProjectStorage::toRecord(QSqlQuery& query)
     record.path = query.value(COL_PATH).toString();
     record.datetime = query.value(DatabaseHelper::COL_DATETIME).toLongLong();
     record.updatetime = query.value(COL_PATH).toLongLong();
+    record.cvs =query.value(COL_CVS).toString();
+    record.cvs_url = query.value(COL_CVS_URL).toString();
+    record.cvs_username = query.value(COL_CVS_USERNAME).toString();
+    record.cvs_password = query.value(COL_CVS_PASSWORD).toString();
     return record;
 }
 

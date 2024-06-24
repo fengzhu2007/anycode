@@ -9,10 +9,14 @@
 #include "SiteTypeListModel.h"
 #include "AddonLoader.h"
 #include "interface/FormPanel.h"
+#include "components/MessageDialog.h"
+#include "w_toast.h"
 #include <QStyleOption>
 #include <QPainter>
 #include <QPushButton>
+#include <QMessageBox>
 #include <QList>
+#include <QMenu>
 namespace ady{
 class NewProjectTwoWidgetPrivate{
 public:
@@ -27,14 +31,19 @@ NewProjectTwoWidget::NewProjectTwoWidget(QWidget *parent) :
     ui(new Ui::NewProjectTwoWidget)
 {
     d = new NewProjectTwoWidgetPrivate;
-    this->setStyleSheet(QString::fromUtf8("QTabWidget::pane{border:0;border-top:1px solid #ccc}"));
+    this->setStyleSheet(QString::fromUtf8("QTabWidget::pane{border:0;border-top:1px solid #ccc}"
+                                          "QAbstractScrollArea>QWidget{background:transparent}"));
     ui->setupUi(this);
+    ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
     NewProjectWindow* window = (NewProjectWindow*)this->parentWidget()->parentWidget();
     connect(ui->newSite,&QPushButton::clicked,this,&NewProjectTwoWidget::onNewSite);
     connect(ui->previous,&QPushButton::clicked,window,&NewProjectWindow::previous);
     connect(ui->listView,&ListView::itemClicked,this,&NewProjectTwoWidget::onSiteItemClicked);
     connect(ui->type,QOverload<int>::of(&QComboBox::currentIndexChanged),this,&NewProjectTwoWidget::onTypeChanged);
+    connect(ui->tabWidget,&QTabWidget::currentChanged, this, &NewProjectTwoWidget::onAdjustHeight);
+    connect(ui->save,&QPushButton::clicked,this,&NewProjectTwoWidget::onSave);
+    connect(ui->listView, &QWidget::customContextMenuRequested, this, &NewProjectTwoWidget::showSiteContextMenu);
 
     AddonStorage addonStorage;
     d->addons = addonStorage.list(1);
@@ -75,13 +84,16 @@ void NewProjectTwoWidget::initData(){
         auto model = static_cast<SiteGroupListModel*>(ui->group->model());
         model->setData(d->groups);
     }
-
+    this->onNewSite();//clear form item data
 }
 
 void NewProjectTwoWidget::onNewSite(){
     ui->name->clear();
     ui->type->setCurrentIndex(-1);
     ui->group->setCurrentIndex(-1);
+    ui->status->setChecked(false);
+    ui->listView->clearSelected();
+    d->current = {};
 }
 
 void NewProjectTwoWidget::onSiteItemClicked(int i){
@@ -121,6 +133,7 @@ void NewProjectTwoWidget::onTypeChanged(int i){
     }
     d->panels.clear();
     if(i>=0){
+        ui->tabWidget->show();
         AddonRecord one = d->addons.at(i);
         QString name = one.name;
         AddonLoader* loader = AddonLoader::getInstance();
@@ -145,8 +158,118 @@ void NewProjectTwoWidget::onTypeChanged(int i){
         }else{
             //Toast
         }
+    }else{
+        ui->tabWidget->hide();
     }
+}
 
+void NewProjectTwoWidget::onAdjustHeight(int i){
+    if (i < 0 || i >= ui->tabWidget->count()) return;
+
+    QWidget *currentTab = ui->tabWidget->widget(i);
+    if (!currentTab) return;
+
+    QSize size = currentTab->sizeHint();
+    ui->tabWidget->setMaximumHeight(size.height() + ui->tabWidget->tabBar()->height());
+}
+
+void NewProjectTwoWidget::onDeleteSite(int i){
+    auto model = static_cast< SiteListModel*>(ui->listView->model());
+    if(model!=nullptr){
+        SiteRecord one = model->itemAt(i);
+        if(MessageDialog::confirm(this,tr("Are you want to delete selected site[%1]?").arg(one.name),QMessageBox::Ok|QMessageBox::Cancel)==QMessageBox::Ok){
+            SiteStorage db;
+            db.del(one.id);
+            model->itemRemoved(i);
+            if(one.id==d->current.id){
+                //clear data
+                this->onNewSite();
+            }
+        }
+    }
+}
+
+void NewProjectTwoWidget::onSave(){
+    NewProjectWindow* window = (NewProjectWindow*)parentWidget()->parentWidget();
+    long long id = window->currentProjectId();
+    if(d->panels.length()==0){
+        //Toast
+    }else{
+        //SiteRecord record;
+        //d->current
+        foreach(auto one,d->panels){
+            if(!one->validateFormData(d->current)){
+                return ;
+            }
+        }
+
+        QString name = ui->name->text();
+        if(name.isEmpty()){
+            QMessageBox::information(this,tr("Warning"),tr("Name required"));
+            return ;
+        }
+        int typeIndex = ui->type->currentIndex();
+        if(typeIndex<0){
+            QMessageBox::information(this,tr("Warning"),tr("Type required"));
+            return ;
+        }
+        int groupIndex = ui->group->currentIndex();
+        if(groupIndex<0){
+            QMessageBox::information(this,tr("Warning"),tr("Group required"));
+            return ;
+        }
+
+        d->current.name = name;
+        d->current.type = ((SiteTypeListModel*)ui->type->model())->dataIndex(typeIndex).name;
+        d->current.groupid = ((SiteGroupListModel*)ui->group->model())->dataIndex(groupIndex).id;
+        d->current.status = ui->status->isChecked()?1:0;
+        SiteStorage siteStorage;
+        auto model = static_cast<SiteListModel*>(ui->listView->model());
+        if(d->current.id>0){
+            //update
+            siteStorage.update(d->current);
+
+            int index = model->index(d->current);
+            //update item
+            if(index>-1)
+                model->updateItem(d->current);
+                //ui->listView->setSelection(QList<int>{index});
+
+            wToast::showText(tr("Save successful"));
+        }else{
+            //insert
+            d->current.pid = id;
+            d->current.datetime = QDateTime::currentDateTime().toSecsSinceEpoch();
+            long long ret = siteStorage.insert(d->current);
+            if(ret>0){
+                //append ok
+                d->current.id = ret;
+                //append item
+                model->appendItem(d->current);
+                int index = model->count() - 1;
+                ui->listView->setSelection(QList<int>{index});
+                wToast::showText(tr("Save successful"));
+            }else{
+                //failed
+                wToast::showText(tr("Save failed"));
+            }
+        }
+    }
+}
+
+void NewProjectTwoWidget::showSiteContextMenu(const QPoint &pos){
+    int row = ui->listView->findItem(pos);
+    if(row>=0){
+        QMenu contextMenu(this);
+        contextMenu.addAction(tr("Edit"),[this,row](){
+            this->onSiteItemClicked(row);
+        });
+        contextMenu.addAction(tr("Delete"),[this,row](){
+            this->onDeleteSite(row);
+        });
+        contextMenu.exec(QCursor::pos());
+
+    }
 }
 
 void NewProjectTwoWidget::paintEvent(QPaintEvent *e){

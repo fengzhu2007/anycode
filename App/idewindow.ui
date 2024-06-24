@@ -116,6 +116,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionNew_Project"/>
+   <addaction name="actionOpen_Project"/>
   </widget>
   <action name="actionNew_Project">
    <property name="icon">
@@ -124,6 +125,9 @@
    </property>
    <property name="text">
     <string>Project</string>
+   </property>
+   <property name="toolTip">
+    <string>New Project</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+N</string>
@@ -136,6 +140,9 @@
    </property>
    <property name="text">
     <string>File</string>
+   </property>
+   <property name="toolTip">
+    <string>New File</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -167,6 +174,9 @@
    <property name="text">
     <string>Project</string>
    </property>
+   <property name="toolTip">
+    <string>Open Project</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+Alt+O</string>
    </property>
@@ -179,6 +189,9 @@
    <property name="text">
     <string>Folder</string>
    </property>
+   <property name="toolTip">
+    <string>Open Folder</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+O</string>
    </property>
@@ -190,6 +203,9 @@
    </property>
    <property name="text">
     <string>File</string>
+   </property>
+   <property name="toolTip">
+    <string>Open File</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>

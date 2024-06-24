@@ -30,7 +30,11 @@ public:
     ~SiteListModel();
     virtual int count() override;
     virtual ListViewItem* item(int i)  override;
+    virtual void itemRemoved(int i) override;
     void setDataSource(QList<SiteRecord> list);
+    int index(const SiteRecord& record);
+    void updateItem(const SiteRecord& record);
+    void appendItem(const SiteRecord& record);
     SiteRecord itemAt(int i);
 private:
     SiteListModelPrivate* d;

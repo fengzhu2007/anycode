@@ -111,5 +111,7 @@
         <file>Resource/icons/ExpandAll_16x.svg</file>
         <file>Resource/icons/Search_16x.svg</file>
         <file>Resource/icons/CustomActionEditor_16x.svg</file>
+        <file>Resource/icons/SearchFolderClosed_16x.svg</file>
+        <file>Resource/images/nodata.svg</file>
     </qresource>
 </RCC>

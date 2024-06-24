@@ -34,8 +34,13 @@ public:
     virtual ListViewItem* item(int i);
     ListViewItem* at(int i);
     void addWidget(ListViewItem* widget);
-    ListViewItem* takeAt(int i);
-    void dataChanged();
+    virtual ListViewItem* takeAt(int i);
+    virtual void dataChanged();
+    virtual void itemChanged(int i);
+    virtual void itemRemoved(int i);
+    virtual QWidget* emptyWidget();
+    ListView* listView();
+
 private:
     ListViewModelPrivate* d;
 

@@ -71,12 +71,10 @@ int SiteListModel::count(){
 }
 
 ListViewItem* SiteListModel::item(int i){
-    //qDebug()<<"item:"<<d->listview->widget();
     SiteItemWidget* w = (SiteItemWidget*)ListViewModel::item(i);
     if(w==nullptr){
         w = new SiteItemWidget(d->listview->widget());
         ListViewModel::addWidget(w);
-        //w->setMinimumHeight(60);
     }
     SiteRecord one = d->list.at(i);
     w->setText(one.name);
@@ -95,9 +93,40 @@ ListViewItem* SiteListModel::item(int i){
     return w;
 }
 
+void SiteListModel::itemRemoved(int i){
+    d->list.takeAt(i);
+    ListViewModel::itemRemoved(i);
+}
+
 void SiteListModel::setDataSource(QList<SiteRecord> list){
     d->list = list;
     this->dataChanged();
+}
+
+int SiteListModel::index(const SiteRecord& record){
+    int size = d->list.size();
+    for(int i=0;i<size;i++){
+        if(d->list.at(i).id==record.id){
+            return i;
+        }
+    }
+    return -1;
+}
+
+void SiteListModel::updateItem(const SiteRecord& record){
+    int size = d->list.size();
+    for(int i=0;i<size;i++){
+        if(d->list.at(i).id==record.id){
+            d->list[i] = record;
+            this->itemChanged(i);
+            break;
+        }
+    }
+}
+
+void SiteListModel::appendItem(const SiteRecord& record){
+    d->list.append(record);
+    this->itemChanged(d->list.size() - 1);
 }
 
 SiteRecord SiteListModel::itemAt(int i){

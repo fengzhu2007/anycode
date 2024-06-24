@@ -8,6 +8,7 @@ class NewProjectOneWidget;
 }
 
 namespace ady{
+class NewProjectOneWidgetPrivate;
 class NewProjectOneWidget : public QWidget
 {
     Q_OBJECT
@@ -20,11 +21,13 @@ public:
 public slots:
     void onNext();
     void onSave();
+    void onSelectFolder();
 
 protected:
     virtual void paintEvent(QPaintEvent *e) override;
 private:
     Ui::NewProjectOneWidget *ui;
+    NewProjectOneWidgetPrivate* d;
 };
 }
 #endif // NEW_PROJECT_ONE_WIDGET_H

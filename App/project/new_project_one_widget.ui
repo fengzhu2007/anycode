@@ -106,6 +106,10 @@
          <property name="text">
           <string/>
          </property>
+         <property name="icon">
+          <iconset resource="../r.qrc">
+           <normaloff>:/Resource/icons/SearchFolderClosed_16x.svg</normaloff>:/Resource/icons/SearchFolderClosed_16x.svg</iconset>
+         </property>
         </widget>
        </item>
       </layout>
@@ -136,7 +140,11 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QComboBox" name="cvs"/>
+        <widget class="QComboBox" name="cvs">
+         <property name="frame">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QLineEdit" name="cvs_url"/>
@@ -175,6 +183,9 @@
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <property name="spacing">
+        <number>6</number>
+       </property>
        <item>
         <widget class="QPushButton" name="previous">
          <property name="text">
@@ -185,7 +196,7 @@
        <item>
         <widget class="QPushButton" name="save">
          <property name="text">
-          <string>Next</string>
+          <string>Save</string>
          </property>
         </widget>
        </item>
@@ -195,6 +206,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../r.qrc"/>
+ </resources>
  <connections/>
 </ui>
