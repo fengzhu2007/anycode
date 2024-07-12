@@ -1,7 +1,7 @@
 #include "Task.h"
 #include "TaskPoolModel.h"
 #include "TaskThread.h"
-#include "utils.h"
+#include "common/utils.h"
 #include <QMutexLocker>
 #include <QFileInfo>
 #include <QString>
@@ -167,6 +167,8 @@ namespace ady {
             return m_childItems;
         }else if(status==TaskStatus::Transfer){
             return m_transferringItems;
+        }else{
+            return {};
         }
     }
 
@@ -233,6 +235,8 @@ namespace ady {
             return m_failedItems.isEmpty()==true?nullptr:m_childItems.takeFirst();
         }else if(status==Transfer){
             return m_transferringItems.isEmpty()==true?nullptr:m_childItems.takeFirst();
+        }else{
+            return nullptr;
         }
     }
 

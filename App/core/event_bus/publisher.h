@@ -13,6 +13,8 @@ public:
     static Publisher* getInstance();
     static void destory();
     void post(Event* e);
+    void post(const QString& id);
+    void post(const QString&id,void* data);
     void reg(Subscriber* subscriber);
     void unReg(Subscriber* subscriber);
 

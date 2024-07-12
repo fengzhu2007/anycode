@@ -4,7 +4,7 @@
 #include "storage/ProjectStorage.h"
 #include "storage/SiteStorage.h"
 #include "project_manage_model.h"
-#include "components/MessageDialog.h"
+#include "components/message_dialog.h"
 #include <QMenu>
 #include <QCursor>
 #include <QDebug>

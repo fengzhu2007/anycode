@@ -7,7 +7,7 @@
 #include "ManagerWindow.h"
 #include "ManagerTreeModel.h"
 #include "ManagerTreeItem.h"
-#include "components/MessageDialog.h"
+#include "components/message_dialog.h"
 #include <QDateTime>
 
 #include <QDebug>

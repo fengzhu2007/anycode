@@ -1,7 +1,7 @@
 #include "ManageDialog.h"
 #include "ui_ManageDialog.h"
 #include "FavoriteItemModel.h"
-#include "components/MessageDialog.h"
+#include "components/message_dialog.h"
 #include <QMenu>
 #include <QItemSelectionModel>
 namespace ady {

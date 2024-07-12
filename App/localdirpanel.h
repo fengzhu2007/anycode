@@ -7,7 +7,7 @@
 #include "storage/SiteStorage.h"
 #include "storage/ProjectStorage.h"
 #include "storage/GroupStorage.h"
-#include "cvs/Commit.h"
+#include "cvs/commit.h"
 namespace Ui {
 class LocalDirPanel;
 }

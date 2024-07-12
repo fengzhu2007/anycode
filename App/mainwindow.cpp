@@ -12,7 +12,7 @@
 #include "storage/DatabaseHelper.h"
 #include "transfer/TaskPoolModel.h"
 #include "interface/Panel.h"
-#include "components/MessageDialog.h"
+#include "components/message_dialog.h"
 #include "view/StatusBarView.h"
 #include "localdirpanel.h"
 #include "AddonLoader.h"
@@ -29,7 +29,7 @@
 #include <QDesktopServices>
 
 
-#include "cvs/svn/SvnRepository.h"
+#include "cvs/svn/svn_repository.h"
 
 //#include "core/des.h"
 namespace ady {

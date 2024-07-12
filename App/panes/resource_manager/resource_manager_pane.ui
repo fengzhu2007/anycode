@@ -92,6 +92,9 @@
    </item>
    <item>
     <widget class="QTreeView" name="treeView">
+     <property name="editTriggers">
+      <set>QAbstractItemView::EditKeyPressed</set>
+     </property>
      <attribute name="headerVisible">
       <bool>false</bool>
      </attribute>

@@ -1,4 +1,5 @@
 #include "resource_manage_icon_provider.h"
+#include "resource_manager_model_item.h"
 
 
 namespace ady{
@@ -24,20 +25,15 @@ void ResourceManageIconProvider::destory(){
 }
 
 QIcon ResourceManageIconProvider::icon(ResourceManagerModelItem* item){
-
-    return provider->icon(QFileIconProvider::File);
-
-    /*return m_iconProvider->icon(QFileIconProvider::Network);
-}else{
-    if(task->type==0){
-       //file
-       return m_iconProvider->icon(QFileInfo(item->dataName()));
-    }else if(task->type==1){
-       //dir
-       return m_iconProvider->icon(QFileIconProvider::Folder);
-    }else{
-       return m_iconProvider->icon(QFileIconProvider::File);
-    }*/
+    switch(item->type()){
+    case ResourceManagerModelItem::Project:
+        //return provider->icon(QFileIconProvider::Network);
+       return QIcon(":/Resource/icons/DocumentsFolder_16x.svg");
+    case ResourceManagerModelItem::Folder:
+        return provider->icon(QFileIconProvider::Folder);
+    default:
+        return provider->icon(QFileInfo(item->path()));
+    }
 }
 
 ResourceManageIconProvider::ResourceManageIconProvider()

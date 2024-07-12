@@ -2,19 +2,19 @@
 #include "ui_localdirpanel.h"
 #include "local/FileItemModel.h"
 #include "components/DirComboBox.h"
-#include "components/MessageDialog.h"
+#include "components/message_dialog.h"
 #include "common.h"
 #include "interface/Panel.h"
 #include "interface/NewFileDialog.h"
 #include "transfer/Task.h"
 #include "transfer/TaskPoolModel.h"
 #include "mainwindow.h"
-#include "utils.h"
-#include "cvs/CommitModel.h"
-#include "cvs/DiffFileModel.h"
-#include "cvs/Branch.h"
-#include "cvs/git/GitRepository.h"
-#include "cvs/svn/SvnRepository.h"
+#include "common/utils.h"
+#include "cvs/commit_model.h"
+#include "cvs/diff_file_model.h"
+#include "cvs/branch.h"
+#include "cvs/git/git_repository.h"
+#include "cvs/svn/svn_repository.h"
 #include "zip/ZipArchive.h"
 #include "storage/CommitStorage.h"
 #include "storage/FavoriteStorage.h"
@@ -371,7 +371,7 @@ void LocalDirPanel::onActUploadTo()
                     }
                 }
             }
-            qDebug()<<"item size:"<<items.size();
+            //qDebug()<<"item size:"<<items.size();
         }else{
             QModelIndexList lists = ui->treeView->selectionModel()->selectedRows();
             for(auto one:lists){

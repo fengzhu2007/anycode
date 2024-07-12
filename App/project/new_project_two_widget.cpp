@@ -9,7 +9,7 @@
 #include "SiteTypeListModel.h"
 #include "AddonLoader.h"
 #include "interface/FormPanel.h"
-#include "components/MessageDialog.h"
+#include "components/message_dialog.h"
 #include "w_toast.h"
 #include <QStyleOption>
 #include <QPainter>

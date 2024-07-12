@@ -76,18 +76,18 @@ add_library(App SHARED
         components/DirComboBox.cpp
         components/DirMappingView.cpp
         components/IconWidget.cpp
-        components/MessageDialog.cpp
+        components/message_dialog.cpp
         components/Notification.cpp
         components/TreeView.cpp
         core/des.cpp
-        cvs/Branch.cpp
-        cvs/Commit.cpp
-        cvs/CommitModel.cpp
-        cvs/DiffFile.cpp
-        cvs/DiffFileModel.cpp
-        cvs/Repository.cpp
-        cvs/git/GitRepository.cpp
-        cvs/svn/SvnRepository.cpp
+        cvs/branch.h cvs/branch.cpp
+        cvs/commit.h cvs/commit.cpp
+        cvs/commit_model.h cvs/commit_model.cpp
+        cvs/diff_file.h cvs/diff_file.cpp
+        cvs/diff_file_model.h cvs/diff_file_model.cpp
+        cvs/repository.h cvs/repository.cpp
+        cvs/git/git_repository.h cvs/git/git_repository.cpp
+        cvs/svn/svn_repository.h cvs/svn/svn_repository.cpp
         interface/FormPanel.cpp
         interface/NewFileDialog.cpp
         interface/NotificationImpl.cpp
@@ -137,7 +137,7 @@ add_library(App SHARED
         transfer/Task.cpp
         transfer/TaskPoolModel.cpp
         transfer/TaskThread.cpp
-        utils.cpp
+        common/utils.cpp common/utils.h
         view/StatusBarView.cpp
         zip/ZipArchive.cpp
         zip/minizip/ioapi.c
@@ -165,7 +165,26 @@ add_library(App SHARED
         components/listview/listview_model.h components/listview/listview_model.cpp
         project/site_list_model.h project/site_list_model.cpp
         project/project_select_model.h project/project_select_model.cpp
-
+        panes/resource_manager/resource_manager_tree_item_delegate.h panes/resource_manager/resource_manager_tree_item_delegate.cpp
+        panes/code_editor/code_editor_pane.h panes/code_editor/code_editor_pane.cpp
+        panes/code_editor/code_editor.h panes/code_editor/code_editor.cpp
+        panes/code_editor/language/php_high_lighter.h panes/code_editor/language/php_high_lighter.cpp
+        core/backend_thread.h core/backend_thread.cpp
+        panes/resource_manager/resource_manage_read_folder_task.h panes/resource_manager/resource_manage_read_folder_task.cpp
+        panes/code_editor/code_high_lighter.h panes/code_editor/code_high_lighter.cpp
+        panes/code_editor/auto_completion_view.h panes/code_editor/auto_completion_view.cpp
+        panes/code_editor/language.h panes/code_editor/language.cpp
+        panes/code_editor/language/php_language.h panes/code_editor/language/php_language.cpp
+        panes/code_editor/language_manager.h panes/code_editor/language_manager.cpp
+        panes/code_editor/language/js_language.h panes/code_editor/language/js_language.cpp
+        panes/code_editor/language/html_language.h panes/code_editor/language/html_language.cpp
+        panes/code_editor/language/css_language.h panes/code_editor/language/css_language.cpp
+        panes/code_editor/code_editor_manager.h panes/code_editor/code_editor_manager.cpp
+        panes/code_editor/code_editor_read_file_task.h panes/code_editor/code_editor_read_file_task.cpp
+        panes/version_control/version_control_pane.h panes/version_control/version_control_pane.cpp
+        panes/version_control/version_control_pane.ui
+        panes/version_control/version_control_query_commit_task.h panes/version_control/version_control_query_commit_task.cpp
+        panes/version_control/version_control_query_diff_task.h panes/version_control/version_control_query_diff_task.cpp
 
 )
 

@@ -1,7 +1,9 @@
 #include "resource_manager_model_item.h"
 #include "resource_manager_model.h"
+#include "storage/ProjectStorage.h"
 #include <QFileIconProvider>
 #include <QList>
+#include <QDebug>
 
 static QFileIconProvider* iconProvider = new QFileIconProvider;
 
@@ -11,8 +13,10 @@ class ResourceManagerModelItemPrivate{
 public:
     ResourceManagerModelItem* parent;
     QList<ResourceManagerModelItem*> children;
+    bool expanded=false;
     ResourceManagerModelItem::Type type;
     QString title;
+    QString path;
     void* data;
 };
 
@@ -43,12 +47,9 @@ ResourceManagerModelItem::ResourceManagerModelItem(Type type,const QString& titl
 
 ResourceManagerModelItem::~ResourceManagerModelItem(){
     if(d->type==Project){
-
-    }else if(d->type==Folder){
-
-    }else if(d->type==File){
-
+        delete (static_cast<ProjectRecord*>(d->data));
     }
+    qDeleteAll(d->children);
     delete d;
 }
 
@@ -58,6 +59,37 @@ ResourceManagerModelItem* ResourceManagerModelItem::childAt(int row){
 
 ResourceManagerModelItem* ResourceManagerModelItem::parent(){
     return d->parent;
+}
+
+ResourceManagerModelItem* ResourceManagerModelItem::takeAt(int row){
+    if(row>=0 && row<this->childrenCount()){
+        return d->children.takeAt(row);
+    }
+    return nullptr;
+}
+
+ResourceManagerModelItem* ResourceManagerModelItem::findChild(const QString& path){
+    foreach(auto one,d->children){
+        const QString oPath = one->path();
+        if(oPath==path){
+            return one;
+        }else if(path.startsWith(oPath)){
+            Type type = one->type();
+            if(type==ResourceManagerModelItem::Folder || type==ResourceManagerModelItem::Project){
+                auto ret = one->findChild(path);
+                if(ret!=nullptr){
+                    return ret;
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
+QList<ResourceManagerModelItem*> ResourceManagerModelItem::takeAll(){
+    auto list = d->children;
+    d->children.clear();
+    return list;
 }
 
 int ResourceManagerModelItem::childrenCount(){
@@ -77,16 +109,87 @@ int ResourceManagerModelItem::row(){
     return i;
 }
 
+void ResourceManagerModelItem::setTitle(const QString& title){
+    d->title = title;
+}
+
+void ResourceManagerModelItem::setPath(const QString& path,bool recursive){
+    d->path = path;
+    if(d->type==Folder){
+        foreach(auto one,d->children){
+            if(path.endsWith("/")==false){
+                one->setPath(path+"/"+one->title(),recursive);
+            }else{
+                one->setPath(path + one->title(),recursive);
+            }
+        }
+    }
+}
+const QString ResourceManagerModelItem::path(){
+    return d->path;
+}
+
+const QString ResourceManagerModelItem::title(){
+    return d->title;
+}
+
 void ResourceManagerModelItem::setData(void* data){
     d->data = data;
 }
 
 QVariant ResourceManagerModelItem::data(int col){
     if(col==ResourceManagerModel::Name){
-        return QVariant("");
+        return QVariant(d->title);
     }else{
-        return QVariant("");
+        return QVariant();
     }
 }
 
+
+QIcon ResourceManagerModelItem::icon(int col){
+
+    return QIcon();
+}
+
+void ResourceManagerModelItem::setDataSource(QFileInfoList list){
+    qDeleteAll(d->children);
+    this->appendItems(list);
+}
+
+void ResourceManagerModelItem::appendItems(QFileInfoList list){
+    foreach(auto one , list){
+        Type type = one.isFile()?File:Folder;
+        auto item = new ResourceManagerModelItem(type,one.fileName(),this);
+        item->setPath(one.absoluteFilePath());
+        d->children.push_back(item);
+
+    }
+}
+
+void ResourceManagerModelItem::appendItem(QFileInfo one){
+    this->appendItems(QFileInfoList{one});
+}
+
+void ResourceManagerModelItem::appendItem(ResourceManagerModelItem* item){
+    d->children.push_back(item);
+}
+
+bool ResourceManagerModelItem::expanded(){
+    return d->expanded;
+}
+
+void ResourceManagerModelItem::setExpanded(bool expanded){
+    d->expanded = expanded;
+}
+
+ResourceManagerModelItem::Type ResourceManagerModelItem::type(){
+    return d->type;
+}
+
+void ResourceManagerModelItem::dump(const QString& prefix){
+    qDebug()<<prefix<<this<<d->path;
+    foreach(auto one,d->children){
+        one->dump(prefix+"--");
+    }
+}
 }

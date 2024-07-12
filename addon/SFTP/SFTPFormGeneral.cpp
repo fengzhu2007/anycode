@@ -1,6 +1,6 @@
 #include "SFTPFormGeneral.h"
 #include "ui_SFTPFormGeneral.h"
-#include "components/MessageDialog.h"
+#include "components/message_dialog.h"
 #include <QDebug>
 namespace ady{
 

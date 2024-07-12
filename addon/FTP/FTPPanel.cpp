@@ -11,7 +11,7 @@
 #include <QLocale>
 #include "interface/RemoteFileItemModel.h"
 #include "interface/NewFileDialog.h"
-#include "components/MessageDialog.h"
+#include "components/message_dialog.h"
 #include "components/Notification.h"
 #include "transfer/Task.h"
 #include "ChmodDialog.h"

@@ -13,7 +13,7 @@
 #include <QDateTime>
 #include "ProjectEditWidget.h"
 #include "SiteFrameworkWidget.h"
-#include "components/MessageDialog.h"
+#include "components/message_dialog.h"
 #include "open_project_window.h"
 
 #include <QDebug>

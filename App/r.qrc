@@ -113,5 +113,38 @@
         <file>Resource/icons/CustomActionEditor_16x.svg</file>
         <file>Resource/icons/SearchFolderClosed_16x.svg</file>
         <file>Resource/images/nodata.svg</file>
+        <file>Resource/icons/DocumentsFolder_16x.svg</file>
+        <file>Resource/icons/KeywordSnippet_16x.svg</file>
+        <file>Resource/icons/Class_16x.svg</file>
+        <file>Resource/icons/Method_16x.svg</file>
+        <file>Resource/icons/LocalVariable_16x.svg</file>
+        <file>Resource/icons/Constant_16x.svg</file>
+        <file>Resource/icons/IntelliSenseKeyword_16x.svg</file>
+        <file>Resource/icons/Field_16x.svg</file>
+        <file>Resource/icons/Save_16x.svg</file>
+        <file>Resource/icons/SaveAll_16x.svg</file>
+        <file>Resource/icons/SaveAs_16x.svg</file>
+        <file>Resource/icons/Redo_16x.svg</file>
+        <file>Resource/icons/Undo_16x.svg</file>
+        <file>Resource/icons/Copy_16x.svg</file>
+        <file>Resource/icons/Cut_16x.svg</file>
+        <file>Resource/icons/Paste_16x.svg</file>
+        <file>Resource/icons/Cancel_16x.svg</file>
+        <file>Resource/icons/SelectAll_16x.svg</file>
+        <file>Resource/icons/ImmediateWindow_16x.svg</file>
+        <file>Resource/icons/Backwards_16x.svg</file>
+        <file>Resource/icons/Forwards_16x.svg</file>
+        <file>Resource/icons/BatchCheckIn_16x.svg</file>
+        <file>Resource/icons/ZipFile_16x.svg</file>
+        <file>Resource/icons/Settings_16x.svg</file>
+        <file>Resource/icons/SolutionFolderSwitch_16x.svg</file>
+        <file>Resource/icons/RemoteServer_16x.svg</file>
+        <file>Resource/icons/Log_16x.svg</file>
+        <file>Resource/icons/Output_16x.svg</file>
+        <file>Resource/icons/Extension_16x.svg</file>
+        <file>Resource/icons/TransferJob_16x.svg</file>
+        <file>Resource/icons/StatusHelp_16x.svg</file>
+        <file>Resource/icons/ShowParentNodeOnly_16x.svg</file>
+        <file>Resource/icons/Tag_16x.svg</file>
     </qresource>
 </RCC>

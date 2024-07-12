@@ -36,9 +36,22 @@ Publisher::Publisher()
 
 void Publisher::post(Event* e){
     foreach(auto one,d->subscribers){
-        one->onReceive(e);
+        if(one->distributeCheck(e)){
+            one->onReceive(e);
+            if(e->isIgnore()){
+                break;
+            }
+        }
     }
-    //delete e;
+    delete e;
+}
+
+void Publisher::post(const QString& id){
+    this->post(new Event(id));
+}
+
+void Publisher::post(const QString&id,void* data){
+    this->post(new Event(id,data));
 }
 
 void Publisher::reg(Subscriber* subscriber){

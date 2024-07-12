@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VersionControlPane</class>
+ <widget class="QWidget" name="VersionControlPane">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>3</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QComboBox" name="comboBox"/>
+   </item>
+   <item>
+    <widget class="QToolBar" name="toolBar">
+     <property name="movable">
+      <bool>false</bool>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>16</width>
+       <height>16</height>
+      </size>
+     </property>
+     <addaction name="actionRefresh"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTreeView" name="commitListView">
+     <property name="rootIsDecorated">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolBar" name="toolBar2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="movable">
+      <bool>false</bool>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>16</width>
+       <height>16</height>
+      </size>
+     </property>
+     <addaction name="actionBackwards"/>
+     <addaction name="actionUpload"/>
+     <addaction name="actionPack_Zip"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTreeView" name="diffListView">
+     <property name="rootIsDecorated">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionRefresh">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Refresh_16x.svg</normaloff>:/Resource/icons/Refresh_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::TextHeuristicRole</enum>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionBackwards">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Backwards_16x.svg</normaloff>:/Resource/icons/Backwards_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Backwards</string>
+   </property>
+  </action>
+  <action name="actionUpload">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/BatchCheckIn_16x.svg</normaloff>:/Resource/icons/BatchCheckIn_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Upload</string>
+   </property>
+  </action>
+  <action name="actionPack_Zip">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/ZipFile_16x.svg</normaloff>:/Resource/icons/ZipFile_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Pack Zip</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../../r.qrc"/>
+ </resources>
+ <connections/>
+</ui>

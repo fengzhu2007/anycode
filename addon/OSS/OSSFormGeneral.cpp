@@ -1,6 +1,6 @@
 #include "OSSFormGeneral.h"
 #include "ui_OSSFormGeneral.h"
-#include "components/MessageDialog.h"
+#include "components/message_dialog.h"
 #include <QDebug>
 namespace ady{
 

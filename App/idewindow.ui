@@ -43,11 +43,31 @@
      <addaction name="separator"/>
      <addaction name="actionOpen_File"/>
     </widget>
+    <widget class="QMenu" name="menuRecent_Projects">
+     <property name="title">
+      <string>Recent Projects</string>
+     </property>
+     <addaction name="actionClear"/>
+    </widget>
+    <widget class="QMenu" name="menuRecent_Files">
+     <property name="title">
+      <string>Recent Files</string>
+     </property>
+     <addaction name="separator"/>
+     <addaction name="actionClear_Files"/>
+    </widget>
     <addaction name="menuNew_N"/>
     <addaction name="menuOpen_O"/>
     <addaction name="separator"/>
+    <addaction name="actionSave_S"/>
+    <addaction name="actionSave_As_A"/>
+    <addaction name="actionSave_All_L"/>
+    <addaction name="separator"/>
     <addaction name="actionClose_C"/>
     <addaction name="actionClose_Project"/>
+    <addaction name="separator"/>
+    <addaction name="menuRecent_Files"/>
+    <addaction name="menuRecent_Projects"/>
     <addaction name="separator"/>
     <addaction name="actionQuit_Q_tAlt_F4"/>
    </widget>
@@ -55,26 +75,55 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
+    <addaction name="actionUndo_U"/>
+    <addaction name="actionRedo"/>
+    <addaction name="separator"/>
+    <addaction name="actionCut_X"/>
+    <addaction name="actionCopy_C"/>
+    <addaction name="actionPaste_P"/>
+    <addaction name="actionDelete_D"/>
+    <addaction name="separator"/>
+    <addaction name="actionSelect_All"/>
+    <addaction name="separator"/>
+    <addaction name="actionGoto"/>
+    <addaction name="actionFind_Replace"/>
    </widget>
    <widget class="QMenu" name="menuView_V">
     <property name="title">
      <string>&amp;View</string>
     </property>
+    <addaction name="actionResource_Manage"/>
+    <addaction name="actionVersion_Control"/>
+    <addaction name="separator"/>
+    <addaction name="actionServer"/>
+    <addaction name="actionTerminal"/>
+    <addaction name="separator"/>
+    <addaction name="actionFile_Transfer"/>
+    <addaction name="actionLog"/>
    </widget>
    <widget class="QMenu" name="menuTool_T">
     <property name="title">
      <string>&amp;Tool</string>
     </property>
+    <addaction name="actionOptions"/>
    </widget>
    <widget class="QMenu" name="menuExtend_X">
     <property name="title">
-     <string>E&amp;xtend</string>
+     <string>E&amp;xtension</string>
     </property>
+    <addaction name="actionAddon_Manage"/>
    </widget>
    <widget class="QMenu" name="menuHelp_H">
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="actionView_Help_H"/>
+    <addaction name="actionHome"/>
+    <addaction name="actionDonate"/>
+    <addaction name="separator"/>
+    <addaction name="actionUpdate"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuFile_F"/>
    <addaction name="menuEdit_E"/>
@@ -115,6 +164,10 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionNew_File"/>
+   <addaction name="actionSave_S"/>
+   <addaction name="actionSave_All_L"/>
+   <addaction name="separator"/>
    <addaction name="actionNew_Project"/>
    <addaction name="actionOpen_Project"/>
   </widget>
@@ -156,14 +209,6 @@
   <action name="actionQuit_Q_tAlt_F4">
    <property name="iconText">
     <string>Quit(Q)	Alt+F4</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
-  </action>
-  <action name="actionClose_Project">
-   <property name="text">
-    <string>Close Project</string>
    </property>
   </action>
   <action name="actionOpen_Project">
@@ -209,6 +254,256 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave_S">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Save_16x.svg</normaloff>:/Resource/icons/Save_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Save(&amp;S)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSave_As_A">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/SaveAs_16x.svg</normaloff>:/Resource/icons/SaveAs_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Save As(&amp;A)</string>
+   </property>
+  </action>
+  <action name="actionSave_All_L">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/SaveAll_16x.svg</normaloff>:/Resource/icons/SaveAll_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Save All(&amp;L)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionUndo_U">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Undo_16x.svg</normaloff>:/Resource/icons/Undo_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Redo_16x.svg</normaloff>:/Resource/icons/Redo_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
+   </property>
+  </action>
+  <action name="actionCut_X">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Cut_16x.svg</normaloff>:/Resource/icons/Cut_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Cut(&amp;T)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionCopy_C">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Copy_16x.svg</normaloff>:/Resource/icons/Copy_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Copy(&amp;C)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPaste_P">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Paste_16x.svg</normaloff>:/Resource/icons/Paste_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Paste(&amp;P)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionDelete_D">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Cancel_16x.svg</normaloff>:/Resource/icons/Cancel_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Delete(&amp;D)</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
+  <action name="actionFind_Replace">
+   <property name="text">
+    <string>Find Replace(&amp;F)</string>
+   </property>
+  </action>
+  <action name="actionGoto">
+   <property name="text">
+    <string>Goto(&amp;G)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="actionSelect_All">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/SelectAll_16x.svg</normaloff>:/Resource/icons/SelectAll_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Select All(&amp;A)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionResource_Manage">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/SolutionFolderSwitch_16x.svg</normaloff>:/Resource/icons/SolutionFolderSwitch_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Resource Manager</string>
+   </property>
+  </action>
+  <action name="actionVersion_Control">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/ShowParentNodeOnly_16x.svg</normaloff>:/Resource/icons/ShowParentNodeOnly_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Version Control</string>
+   </property>
+  </action>
+  <action name="actionTerminal">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/ImmediateWindow_16x.svg</normaloff>:/Resource/icons/ImmediateWindow_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Terminal</string>
+   </property>
+  </action>
+  <action name="actionLog">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Log_16x.svg</normaloff>:/Resource/icons/Log_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Log</string>
+   </property>
+  </action>
+  <action name="actionFile_Transfer">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/TransferJob_16x.svg</normaloff>:/Resource/icons/TransferJob_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>File Transfer</string>
+   </property>
+  </action>
+  <action name="actionServer">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/RemoteServer_16x.svg</normaloff>:/Resource/icons/RemoteServer_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Server</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Settings_16x.svg</normaloff>:/Resource/icons/Settings_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Options(&amp;O)...</string>
+   </property>
+  </action>
+  <action name="actionView_Help_H">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/StatusHelp_16x.svg</normaloff>:/Resource/icons/StatusHelp_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>View Help(&amp;V)</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About...</string>
+   </property>
+  </action>
+  <action name="actionHome">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Home_16x.svg</normaloff>:/Resource/icons/Home_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Home</string>
+   </property>
+  </action>
+  <action name="actionAddon_Manage">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Extension_16x.svg</normaloff>:/Resource/icons/Extension_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Addon Manage</string>
+   </property>
+  </action>
+  <action name="actionDonate">
+   <property name="text">
+    <string>Donate</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="text">
+    <string>Clear Projects</string>
+   </property>
+  </action>
+  <action name="actionClear_Files">
+   <property name="text">
+    <string>Clear Files</string>
+   </property>
+  </action>
+  <action name="actionClose_Project">
+   <property name="text">
+    <string>Close Project</string>
+   </property>
+  </action>
+  <action name="actionUpdate">
+   <property name="text">
+    <string>Update</string>
    </property>
   </action>
  </widget>

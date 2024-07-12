@@ -10,9 +10,12 @@ class ANYENGINE_EXPORT Event
 public:
     Event(const QString& id);
     Event(const QString& id,void *data);
-    ~Event();
+    virtual ~Event();
+    void ignore();
+    bool isIgnore();
 
     const QString id();
+    void* data();
 
 
 private:

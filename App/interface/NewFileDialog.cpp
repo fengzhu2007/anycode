@@ -1,7 +1,7 @@
 #include "NewFileDialog.h"
 #include "ui_NewFileDialog.h"
-#include "utils.h"
-#include "components/MessageDialog.h"
+#include "common/utils.h"
+#include "components/message_dialog.h"
 #include <QFileInfo>
 #include <QDebug>
 namespace ady {

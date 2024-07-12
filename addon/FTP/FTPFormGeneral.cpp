@@ -1,6 +1,6 @@
 #include "FTPFormGeneral.h"
 #include "ui_FTPFormGeneral.h"
-#include "components/MessageDialog.h"
+#include "components/message_dialog.h"
 #include <QDebug>
 namespace ady{
 

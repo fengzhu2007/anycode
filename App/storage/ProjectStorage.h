@@ -17,7 +17,6 @@ namespace ady {
         QString cvs_url;
         QString cvs_username;
         QString cvs_password;
-
     };
 
     class ANYENGINE_EXPORT ProjectStorage : public Storage{

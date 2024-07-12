@@ -2,7 +2,7 @@
 #define COMMITSTORAGE_H
 #include "Storage.h"
 #include <QDateTime>
-#include "cvs/Commit.h"
+#include "cvs/commit.h"
 namespace ady {
     class DatabaseHelper;
     class ANYENGINE_EXPORT CommitRecord{

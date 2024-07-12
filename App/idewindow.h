@@ -2,6 +2,7 @@
 #define IDEWINDOW_H
 #include "global.h"
 #include "w_main_window.h"
+#include "core/event_bus/subscriber.h"
 
 namespace Ui {
 class IDEWindow;
@@ -10,20 +11,25 @@ class IDEWindow;
 namespace ady{
     class DockingPaneManager;
     class DockingPane;
-    class ANYENGINE_EXPORT IDEWindow : public wMainWindow
+    class ANYENGINE_EXPORT IDEWindow : public wMainWindow , public Subscriber
     {
         Q_OBJECT
 
     public:
         explicit IDEWindow(QWidget *parent = nullptr);
         ~IDEWindow();
+        virtual bool onReceive(Event* e) override;//event bus receive callback
 
     public slots:
         void onDump();
         void onPaneClosed(QString&id,QString&group,bool isClient);
         void onBeforePaneClose(DockingPane* pane,bool isClient);
-
         void onActionTriggered();
+        void onOpenFile(const QString& path);
+        void onOpenFolder(const QString& path);
+
+    protected:
+        //virtual void closeEvent(QCloseEvent *event) override;
 
     private:
         Ui::IDEWindow *ui;

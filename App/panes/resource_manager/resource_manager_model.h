@@ -2,9 +2,11 @@
 #define RESOURCEMANAGERMODEL_H
 #include "global.h"
 #include <QAbstractItemModel>
+#include <QFileInfo>
 
 
 namespace ady{
+class ProjectRecord;
 class ResourceManagerModelItem;
 class ResourceManagerModelPrivate;
 class ANYENGINE_EXPORT ResourceManagerModel : public QAbstractItemModel
@@ -15,19 +17,50 @@ public:
         Name=0,
         Max
     };
-    explicit ResourceManagerModel(QObject *parent = nullptr);
+    //explicit ResourceManagerModel(QObject *parent = nullptr);
+    static ResourceManagerModel* getInstance();
+    static void destory();
     ~ResourceManagerModel();
 
-    QVariant data(const QModelIndex &index, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-    QVariant headerData(int section, Qt::Orientation orientation,int role = Qt::DisplayRole) const override;
-    QModelIndex index(int row, int column,const QModelIndex &parent = QModelIndex()) const override;
-    QModelIndex parent(const QModelIndex &index) const override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    virtual QVariant data(const QModelIndex &index, int role) const override;
+    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+    virtual QVariant headerData(int section, Qt::Orientation orientation,int role = Qt::DisplayRole) const override;
+    virtual QModelIndex index(int row, int column,const QModelIndex &parent = QModelIndex()) const override;
+    virtual QModelIndex parent(const QModelIndex &index) const override;
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    virtual bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+
+    ResourceManagerModelItem* appendItem(ProjectRecord* project);
+    ResourceManagerModelItem* appendItem(const QString& folder);
+
+    //void removeItem(const QString& path);
+    //void updateItem(ResourceManagerModelItem* item);
+    //void refreshItem(ResourceManagerModelItem* item);
+
+    void removeItem(ResourceManagerModelItem* item);
+    void appendWatchDirectory(const QString& path);
+    void removeWatchDirectory(const QString& path);
+    QStringList takeWatchDirectory(const QString& path,bool include_children=true);
+
+    ResourceManagerModelItem* find(const QString& path);
+
+public slots:
+    void onUpdateChildren(QFileInfoList list,const QString& parent,bool refresh);
+    void appendItems(QFileInfoList list,ResourceManagerModelItem* parent);
+    void refreshItems(QFileInfoList list,ResourceManagerModelItem* parent);
+    void onDirectoryChanged(const QString &path);
+
+
+signals:
+    void updateChildren(QFileInfoList list,const QString& parent,bool refresh);
+private:
+    ResourceManagerModel();
 
 private:
     ResourceManagerModelPrivate* d;
+    static ResourceManagerModel* instance;
 };
 
 }

@@ -1,5 +1,5 @@
 #include "Panel.h"
-#include "utils.h"
+#include "common/utils.h"
 #include "transfer/Task.h"
 #include "components/Notification.h"
 #include <QFileInfo>

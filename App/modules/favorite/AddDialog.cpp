@@ -1,7 +1,7 @@
 #include "AddDialog.h"
 #include "Ui_AddDialog.h"
 #include "storage/FavoriteStorage.h"
-#include "components/MessageDialog.h"
+#include "components/message_dialog.h"
 namespace ady {
     FavoriteAddDialog::FavoriteAddDialog(QWidget* parent,long long id)
         :QDialog(parent),
