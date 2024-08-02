@@ -8,8 +8,8 @@
 #include <QDateTime>
 #include <QDebug>
 namespace ady {
-    SFTP::SFTP(CURL* curl)
-        :NetworkRequest(curl)
+    SFTP::SFTP(CURL* curl,long long id)
+        :NetworkRequest(curl,id)
     {
         this->connected = false;
         /*this->mlsd = false;
@@ -49,7 +49,7 @@ namespace ady {
         this->setOption(CURLOPT_CONNECTTIMEOUT,COMMAND_TIMEOUT);
         this->setOption(CURLOPT_USERNAME,this->username.toStdString().c_str());
         this->setOption(CURLOPT_PASSWORD,this->password.toStdString().c_str());
-        NetworkResponse* response = new SFTPResponse;
+        NetworkResponse* response = new SFTPResponse(this->id);
         int ret = this->access(response);
         if(ret==0){
             this->connected = true;
@@ -68,13 +68,13 @@ namespace ady {
         this->setOption(CURLOPT_TIMEOUT,COMMAND_TIMEOUT);
         response->debug();
         return response;*/
-        NetworkResponse* response = new SFTPResponse();
+        NetworkResponse* response = new SFTPResponse(this->id);
         response->errorCode = 0;
         return response;
     }
 
 
-    NetworkResponse* SFTP::sendSyncCommand(QString command)
+    NetworkResponse* SFTP::sendSyncCommand(const QString& command)
     {
         QMutexLocker locker(&mutex);
         return this->sendCommand(command);
@@ -86,7 +86,7 @@ namespace ady {
     }
 
 
-    NetworkResponse* SFTP::sendCommand(QString command)
+    NetworkResponse* SFTP::sendCommand(const QString& command)
     {
         struct curl_slist *headerlist = NULL;
         if(!command.isEmpty()){
@@ -96,7 +96,7 @@ namespace ady {
         this->setOption(CURLOPT_USERNAME,this->username.toStdString().c_str());
         this->setOption(CURLOPT_PASSWORD,this->password.toStdString().c_str());
         this->setOption(CURLOPT_POSTQUOTE,headerlist);
-        SFTPResponse* response = new SFTPResponse;
+        SFTPResponse* response = new SFTPResponse(this->id);
         response->setCommand(command);
         this->errorCode = this->access(response);
         this->header = response->header;;
@@ -110,7 +110,7 @@ namespace ady {
         return response;
     }
 
-    NetworkResponse* SFTP::listDir(QString dir,int page,int pageSize)
+    NetworkResponse* SFTP::listDir(const QString& dir,int page,int pageSize)
     {
         Q_UNUSED(page);
         Q_UNUSED(pageSize);
@@ -133,7 +133,7 @@ namespace ady {
 
     }
 
-    NetworkResponse* SFTP::tinyListDir(QString dir)
+    NetworkResponse* SFTP::tinyListDir(const QString& dir)
     {
         QMutexLocker locker(&mutex);
         QString host = "sftp://" + this->host + this->escape(dir);
@@ -157,7 +157,7 @@ namespace ady {
         QMutexLocker locker(&mutex);
         QString local = task->local;
         QString remote = task->remote;
-        NetworkResponse *response =  new SFTPResponse;
+        NetworkResponse *response =  new SFTPResponse(this->id);
         QFileInfo fi(local);
         if(fi.exists()){
             task->file = new QFile(local);
@@ -241,7 +241,7 @@ namespace ady {
         QMutexLocker locker(&mutex);
         QString local = task->local;
         QString remote = task->remote;
-        NetworkResponse *response =  new SFTPResponse;
+        NetworkResponse *response =  new SFTPResponse(this->id);
         QFileInfo fi(local);
         QDir d = fi.dir();
         bool status = true;
@@ -318,21 +318,21 @@ namespace ady {
             QString command = QString("chmod  %1 \"%2\"").arg(task->data[Task::MODE].toInt()).arg(task->remote);
             return this->sendCommand(command);
         }else{
-            NetworkResponse *response =  new SFTPResponse;
+            NetworkResponse *response =  new SFTPResponse(this->id);
             response->errorCode = -1;
             response->errorMsg = QObject::tr("Invalid file mode");
             return response;
         }
     }
 
-    NetworkResponse* SFTP::chmod(QString dst,int mode)
+    NetworkResponse* SFTP::chmod(const QString& dst,int mode)
     {
         QMutexLocker locker(&mutex);
         QString command = QString("chmod %1 \"%2\"").arg(mode).arg(dst);
         return this->sendCommand(command);
     }
 
-    NetworkResponse* SFTP::del(QString dst)
+    NetworkResponse* SFTP::del(const QString& dst)
     {
         QMutexLocker locker(&mutex);
         QString command = QString("rm \"%1\"").arg(dst);
@@ -386,7 +386,7 @@ namespace ady {
         this->setOption(CURLOPT_NOBODY,1L);
         this->setOption(CURLOPT_HEADER,1L);
         this->setOption(CURLOPT_POSTQUOTE,headerlist);
-        SFTPResponse* response = new SFTPResponse;
+        SFTPResponse* response = new SFTPResponse(this->id);
         response->setCommand(command);
         this->errorCode = this->access(response);
         this->header = response->header;;
@@ -414,7 +414,7 @@ namespace ady {
         return nullptr;
     }
 
-    NetworkResponse* SFTP::rename(QString src,QString dst)
+    NetworkResponse* SFTP::rename(const QString& src,const QString& dst)
     {
         QMutexLocker locker(&mutex);
         this->setOption(CURLOPT_NOBODY,1L);
@@ -435,7 +435,7 @@ namespace ady {
         m_uploadCommands = commands;
     }
 
-    NetworkResponse* SFTP::customeAccess(QString name,QMap<QString,QVariant> data)
+    NetworkResponse* SFTP::customeAccess(const QString& name,QMap<QString,QVariant> data)
     {
         //return this->errorCode;
         return nullptr;

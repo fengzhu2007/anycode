@@ -6,8 +6,8 @@
 namespace ady {
 
 
-    OSSResponse::OSSResponse()
-        :HttpResponse()
+    OSSResponse::OSSResponse(long long id)
+        :HttpResponse(id)
     {
 
     }

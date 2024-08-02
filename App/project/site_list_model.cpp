@@ -1,7 +1,7 @@
 #include "site_list_model.h"
 #include "components/listview/listview.h"
-#include "storage/AddonStorage.h"
-#include "storage/GroupStorage.h"
+#include "storage/addon_storage.h"
+#include "storage/group_storage.h"
 #include "w_tags.h"
 #include <QHBoxLayout>
 

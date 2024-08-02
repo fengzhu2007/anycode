@@ -28,6 +28,7 @@ public:
     std::vector<LogEntry*> logs(revnum_t from,unsigned int limit);
     std::vector<DiffSummary*> diff(revnum_t start,revnum_t end);
     std::vector<DiffSummary*> status();
+    std::pair<int,std::string> error() const;
 
 private:
     SvnppClientPrivate* pri;

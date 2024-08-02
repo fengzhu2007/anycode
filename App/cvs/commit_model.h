@@ -34,7 +34,7 @@ public:
         Max
     };
     CommitModel(QObject* parent=nullptr);
-    ~CommitModel();
+    virtual ~CommitModel();
 
     virtual QVariant data(const QModelIndex &index, int role) const override;
     virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
@@ -45,16 +45,12 @@ public:
     cvs::Commit getItem(int pos);
 
     void setList(QList<cvs::Commit> data);
-    cvs::Commit at(int row);
+    cvs::Commit at(int row) const;
     void setDataSource(QList<cvs::Commit> data);
     void appendList(QList<cvs::Commit> data);
     void updateFlags(QList<cvs::Commit> data);
-    //void updateFlags(int top,int bottom);
-    //void removeFlags(QList<cvs::Commit> data);
+    void clearAllFlags();
 
-    QList<cvs::Commit> compareRows();
-    int compareRow(int row);
-    void clearCompareRows();
 
 
 

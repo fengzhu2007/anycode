@@ -2,7 +2,7 @@
 #define FTPPARSE_H
 #include <QString>
 #include <QMap>
-#include "local/FileItem.h"
+#include "local/file_item.h"
 namespace ady {
     class FTPParse
     {

@@ -15,8 +15,8 @@
 #include "cvs/branch.h"
 #include "cvs/git/git_repository.h"
 #include "cvs/svn/svn_repository.h"
-#include "zip/ZipArchive.h"
-#include "storage/CommitStorage.h"
+#include "zip/zip_archive.h"
+#include "storage/commit_storage.h"
 #include "storage/FavoriteStorage.h"
 #include "modules/favorite/AddDialog.h"
 #include "modules/favorite/ManageDialog.h"
@@ -605,7 +605,7 @@ void LocalDirPanel::onActCVSRefresh()
     {
         ui->commitTreeView->verticalScrollBar()->setValue(0);
         CommitModel* model = (CommitModel*)ui->commitTreeView->model();
-        model->clearCompareRows();
+        //model->clearCompareRows();
         model->setList(QList<cvs::Commit>());
     }
 
@@ -663,7 +663,7 @@ void LocalDirPanel::onActDiffCommits(bool checked)
         ui->commitTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
         //reset compare selection row background color
         CommitModel* model = (CommitModel*)ui->commitTreeView->model();
-        model->clearCompareRows();
+        //model->clearCompareRows();
 
         {
             DiffFileModel* model = (DiffFileModel*)ui->deltaTreeView->model();
@@ -791,29 +791,7 @@ void LocalDirPanel::onMoreCommitLists(int i)
 
 void LocalDirPanel::onCommitItemClicked(const QModelIndex& index)
 {
-    if(ui->actionDiff_Commits->isChecked()){
-        int row = index.row();
-        CommitModel* model = (CommitModel*)ui->commitTreeView->model();
-        int size = model->compareRow(row);
-        DiffFileModel* diffModel = (DiffFileModel*)ui->deltaTreeView->model();
-        if(size==2){
-            QList<cvs::Commit> lists = model->compareRows();
-            if(lists.size()==2){
-                QString oid1 = lists[0].oid();
-                QString oid2 = lists[1].oid();
-                QtConcurrent::run([=]()
-                {
-                    diffModel->setList(m_repo->diffFileLists(oid1,oid2));
-                });
-                //QList<cvs::DiffFile> lists = m_repo->diffFileLists(oid1,oid2);
-                //diffModel->setList(lists);
-            }else{
-                diffModel->clear();
-            }
-        }else{
-            diffModel->clear();
-        }
-    }
+
 
 }
 
@@ -967,7 +945,6 @@ bool LocalDirPanel::openProjectDir(QString dir)
     QFileInfo fi(dir);
     if(fi.exists()){
         if(m_repo!=nullptr){
-            m_repo->destory();
             delete m_repo;
             m_repo = nullptr;
         }
@@ -1015,7 +992,7 @@ void LocalDirPanel::commitFlags(QList<cvs::Commit>& lists)
 void LocalDirPanel::initBranch()
 {
     m_branchComboBox->clear();
-    QList<cvs::Branch*> branches = m_repo->branchLists();
+    /*QList<cvs::Branch*> branches = m_repo->branchLists();
     int i = 0;
     for(auto branch:branches){
         m_branchComboBox->addItem(branch->name());
@@ -1023,7 +1000,7 @@ void LocalDirPanel::initBranch()
             m_branchComboBox->setCurrentIndex(i);
         }
         i++;
-    }
+    }*/
 }
 
 void LocalDirPanel::onActAddFavorite(){

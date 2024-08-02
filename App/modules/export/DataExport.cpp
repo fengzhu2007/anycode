@@ -6,9 +6,9 @@
 #include <QDateTime>
 #include <QDebug>
 
-#include "storage/ProjectStorage.h"
-#include "storage/GroupStorage.h"
-#include "storage/SiteStorage.h"
+#include "storage/project_storage.h"
+#include "storage/group_storage.h"
+#include "storage/site_storage.h"
 
 #include "core/des.h"
 

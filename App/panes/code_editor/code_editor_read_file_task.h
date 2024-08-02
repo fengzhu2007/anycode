@@ -8,8 +8,9 @@ class CodeEditorReadFileTask : public BackendThreadTask
 {
 public:
     CodeEditorReadFileTask(const QString& path);
-    ~CodeEditorReadFileTask();
+    virtual ~CodeEditorReadFileTask();
     QString path();
+    virtual bool exec();
 private:
     CodeEditorReadFileTaskPrivate* d;
 };

@@ -146,5 +146,22 @@
         <file>Resource/icons/StatusHelp_16x.svg</file>
         <file>Resource/icons/ShowParentNodeOnly_16x.svg</file>
         <file>Resource/icons/Tag_16x.svg</file>
+        <file>Resource/icons/CompareFolders_16x.svg</file>
+        <file>Resource/icons/flag_dev.svg</file>
+        <file>Resource/icons/flag_other.svg</file>
+        <file>Resource/icons/flag_prod.svg</file>
+        <file>Resource/icons/DeleteTranslation_16x.svg</file>
+        <file>Resource/icons/ConnectToRemoteServer_16x.svg</file>
+        <file>Resource/icons/Run_16x.svg</file>
+        <file>Resource/icons/Stop_16x.svg</file>
+        <file>Resource/icons/CopyLongTextToClipboard_16x.svg</file>
+        <file>Resource/icons/GetDocumentFormat_16x.svg</file>
+        <file>Resource/icons/TextIndent_16x.svg</file>
+        <file>Resource/icons/WordWrap_16x.svg</file>
+        <file>Resource/icons/CPPCommentCode_16x.svg</file>
+        <file>Resource/icons/DockTo_16x.svg</file>
+        <file>Resource/icons/Download_16x.svg</file>
+        <file>Resource/icons/DownloadFolder_16x.svg</file>
+        <file>Resource/icons/Ellipsis_16x.svg</file>
     </qresource>
 </RCC>

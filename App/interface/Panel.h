@@ -3,8 +3,8 @@
 #include "global.h"
 #include <QWidget>
 #include <QList>
-#include "storage/SiteStorage.h"
-#include "local/FileItem.h"
+#include "storage/site_storage.h"
+#include "local/file_item.h"
 #include "NotificationImpl.h"
 namespace ady {
     class NetworkRequest;

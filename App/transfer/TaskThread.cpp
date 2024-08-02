@@ -1,10 +1,10 @@
 #include "TaskThread.h"
 #include "TaskPoolModel.h"
 #include "Task.h"
-#include "network/NetworkManager.h"
-#include "network/NetworkResponse.h"
+#include "network/network_manager.h"
+#include "network/network_response.h"
 #include "transfer/TaskPoolModel.h"
-#include "local/FileItem.h"
+#include "local/file_item.h"
 #include <QDir>
 #include <QFileInfo>
 #include <QDebug>
@@ -126,7 +126,7 @@ namespace ady {
     QList<Task*> TaskThread::travelRemoteDir(Task* task)
     {
         QList<Task*> tasks;
-        NetworkRequest* request = NetworkManager::getInstance()->request(task->siteid);
+        auto request = NetworkManager::getInstance()->request(task->siteid);
         if(request!=nullptr){
             qDebug()<<"request result";
             NetworkResponse* response = request->tinyListDir(task->remote);

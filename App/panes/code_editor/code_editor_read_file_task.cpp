@@ -1,5 +1,5 @@
 #include "code_editor_read_file_task.h"
-
+#include "code_editor_manager.h"
 
 
 namespace ady{
@@ -24,4 +24,13 @@ QString CodeEditorReadFileTask::path(){
     return d->path;
 }
 
+bool CodeEditorReadFileTask::exec(){
+    auto instance = CodeEditorManager::getInstance();
+    if(instance!=nullptr){
+        instance->readFileLines(d->path);
+        return true;
+    }else{
+        return false;
+    }
+}
 }

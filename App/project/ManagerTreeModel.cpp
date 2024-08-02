@@ -1,8 +1,8 @@
 #include "ManagerTreeModel.h"
 #include "ManagerTreeItem.h"
-#include "storage/SiteStorage.h"
-#include "storage/GroupStorage.h"
-#include "storage/ProjectStorage.h"
+#include "storage/site_storage.h"
+#include "storage/group_storage.h"
+#include "storage/project_storage.h"
 #include <QDebug>
 namespace ady {
 

@@ -1,12 +1,13 @@
 #ifndef PUBLISHER_H
 #define PUBLISHER_H
+#include "global.h"
 #include <QObject>
 
 namespace ady{
 class Event;
 class PublisherPrivate;
 class Subscriber;
-class Publisher : public QObject
+class ANYENGINE_EXPORT Publisher : public QObject
 {
     Q_OBJECT
 public:

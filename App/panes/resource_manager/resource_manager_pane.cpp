@@ -6,8 +6,10 @@
 #include "resource_manage_read_folder_task.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
+#include "core/event_bus/type.h"
+#include "core/event_bus/event_data.h"
 #include "core/backend_thread.h"
-#include "storage/ProjectStorage.h"
+#include "storage/project_storage.h"
 #include "docking_pane_manager.h"
 #include "docking_pane_layout_item_info.h"
 #include "components/message_dialog.h"
@@ -21,11 +23,12 @@
 #include <QDir>
 #include <QUrl>
 #include <QMimeData>
+#include <QProcess>
 #include <QDebug>
 
 
 
-const QString mimeStr = "application/x-qt-windows-mime;value=\"Preferred DropEffect\"";
+const QString mime = "application/x-qt-windows-mime;value=\"Preferred DropEffect\"";
 
 namespace ady{
 
@@ -35,9 +38,6 @@ const QString ResourceManagerPane::PANE_ID = "ResourceManager";
 const QString ResourceManagerPane::PANE_GROUP = "ResourceManager";
 
 
-const QString ResourceManagerPane::M_OPEN_PROJECT = "Open_Message";
-const QString ResourceManagerPane::M_FILE_CHANGED = "File_Changed";
-const QString ResourceManagerPane::M_OPEN_EDITOR = "Open_Editor";
 
 
 class ResourceManagerPanePrivate {
@@ -57,6 +57,7 @@ public:
     QAction* actionRename;
     QAction* actionDelete;
     QAction* actionCopy_Path;
+    QAction* actionUpload;
 };
 
 ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
@@ -64,21 +65,22 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     ui(new Ui::ResourceManagerPane)
 {
     Subscriber::reg();
-    this->regMessageIds({M_OPEN_PROJECT,M_FILE_CHANGED});
+    this->regMessageIds({Type::M_OPEN_PROJECT,Type::M_FILE_CHANGED});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
+    widget->setObjectName("widget");
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     this->setWindowTitle(tr("Resource Manager"));
     this->setStyleSheet("QToolBar{border:0px;}"
                         "QTreeView{border:0;background-color:#f5f5f5}"
-                        ".ady--ResourceManagerPane>QWidget{background-color:#EEEEF2}");
+                        ".ady--ResourceManagerPane>#widget{background-color:#EEEEF2}");
 
     ui->treeView->setItemDelegate(new ResourceManagerTreeItemDelegate(ui->treeView));
     ui->treeView->setEditTriggers(QAbstractItemView::EditKeyPressed);
 
     //init view
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->treeView,&QTreeView::customContextMenuRequested, this, &ResourceManagerPane::showContextMenu);
+    connect(ui->treeView,&QTreeView::customContextMenuRequested, this, &ResourceManagerPane::onContextMenu);
     connect(ui->treeView,&QTreeView::expanded,this,&ResourceManagerPane::onTreeItemExpanded);
     connect(ui->treeView,&QTreeView::doubleClicked,this,&ResourceManagerPane::onTreeItemDClicked);
 
@@ -86,6 +88,8 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     d = new ResourceManagerPanePrivate;
     d->model = ResourceManagerModel::getInstance();
     ui->treeView->setModel(d->model);
+
+    connect(d->model,&ResourceManagerModel::insertReady,this,&ResourceManagerPane::onInsertReady);
 
     this->initView();
 }
@@ -112,6 +116,8 @@ void ResourceManagerPane::initView(){
     d->actionRename = new QAction(tr("Rename"),this);
     d->actionDelete = new QAction(QIcon(":/Resource/icons/Cancel_16x.svg"),tr("Delete"),this);
     d->actionCopy_Path = new QAction(tr("Copy Path"),this);
+    d->actionUpload = new QAction(QIcon(":/Resource/icons/BatchCheckIn_16x.svg"),tr("Upload"),this);
+
     d->actionCut->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_X));
     d->actionCopy->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_C));
     d->actionPaste->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_V));
@@ -131,7 +137,7 @@ void ResourceManagerPane::initView(){
     connect(d->actionDelete,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionCopy_Path,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionCut,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
-
+    connect(d->actionUpload,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
 
 
 }
@@ -145,28 +151,31 @@ QString ResourceManagerPane::group(){
 }
 
 bool ResourceManagerPane::onReceive(Event* e){
-    if(e->id()==M_OPEN_PROJECT){
+    if(e->id()==Type::M_OPEN_PROJECT){
         auto one = static_cast<ProjectRecord*>(e->data());
         auto project = new ProjectRecord();
         project->id = one->id;
         project->path = one->path;
         project->name = one->name;
+        qDebug()<<"pid:"<<one->id;
         auto item = d->model->appendItem(project);
         this->readFolder(item);
         item->setExpanded(true);
-        e->ignore();
         return true;
     }
     return false;
 }
 
-void ResourceManagerPane::readFolder(ResourceManagerModelItem* item){
+void ResourceManagerPane::readFolder(ResourceManagerModelItem* item,int action){
     auto thread = BackendThread::getInstance();
-    //FolderReader* thread = FolderReader::getInstance();
     if(!thread->isRunning()){
         thread->start();
     }
-    thread->appendTask(new ResourceManageReadFolderTask(d->model,item->path()));
+    auto task = new ResourceManageReadFolderTask(d->model,item->path());
+    if(action>-1){
+        task->setType(action);
+    }
+    thread->appendTask(task);
 }
 
 void ResourceManagerPane::onTreeItemExpanded(const QModelIndex& index){
@@ -187,18 +196,16 @@ void ResourceManagerPane::onTreeItemExpanded(const QModelIndex& index){
 }
 
 void ResourceManagerPane::onTreeItemDClicked(const QModelIndex& index){
-    //qDebug()<<"onTreeItemDClicked";
     if(index.isValid()){
         auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
         if(item->type()==ResourceManagerModelItem::File){
-            //qDebug()<<"onTreeItemDClicked File";
             QString path = item->path();
-            Publisher::getInstance()->post(M_OPEN_EDITOR,&path);
+            Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&path);
         }
     }
 }
 
-void ResourceManagerPane::showContextMenu(const QPoint& pos){
+void ResourceManagerPane::onContextMenu(const QPoint& pos){
     QMenu contextMenu(this);
     QModelIndexList list = ui->treeView->selectionModel()->selectedRows();
     QModelIndex index = ui->treeView->indexAt(pos);
@@ -209,13 +216,18 @@ void ResourceManagerPane::showContextMenu(const QPoint& pos){
     ResourceManagerModelItem::Type type = one->type();
     QClipboard *clipboard = QApplication::clipboard();
     const QMimeData *mimeData = clipboard->mimeData();
-    QByteArray ba = mimeData->data(mimeStr);
+    QByteArray ba = mimeData->data(mime);
     d->actionPaste->setEnabled(false);
     if(!ba.isEmpty()){
         char c = ba.at(0);
         if(c==5 || c==2){
             d->actionPaste->setEnabled(true);
         }
+    }
+    if(one->pid()>0){
+        d->actionUpload->setEnabled(true);
+    }else{
+        d->actionUpload->setEnabled(false);
     }
     if(type==ResourceManagerModelItem::Project){
         contextMenu.addAction(d->actionNew_File);
@@ -224,6 +236,8 @@ void ResourceManagerPane::showContextMenu(const QPoint& pos){
         contextMenu.addAction(d->actionOpen_Terminal);
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionPaste);
+        contextMenu.addSeparator();
+        contextMenu.addAction(d->actionUpload);
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionFind);
         contextMenu.addSeparator();
@@ -240,6 +254,8 @@ void ResourceManagerPane::showContextMenu(const QPoint& pos){
         contextMenu.addAction(d->actionCopy);
         contextMenu.addAction(d->actionPaste);
         contextMenu.addSeparator();
+        contextMenu.addAction(d->actionUpload);
+        contextMenu.addSeparator();
         contextMenu.addAction(d->actionFind);
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionRename);
@@ -253,6 +269,8 @@ void ResourceManagerPane::showContextMenu(const QPoint& pos){
         contextMenu.addAction(d->actionCut);
         contextMenu.addAction(d->actionCopy);
         contextMenu.addSeparator();
+        contextMenu.addAction(d->actionUpload);
+        contextMenu.addSeparator();
         contextMenu.addAction(d->actionRename);
         contextMenu.addAction(d->actionDelete);
         contextMenu.addSeparator();
@@ -263,42 +281,88 @@ void ResourceManagerPane::showContextMenu(const QPoint& pos){
     contextMenu.exec(QCursor::pos());
 }
 
+void ResourceManagerPane::onInsertReady(const QModelIndex& parent,bool isFile){
+    auto one = static_cast<ResourceManagerModelItem*>(parent.internalPointer());
+    ui->treeView->setExpanded(parent,true);
+    auto model = static_cast<ResourceManagerModel*>(ui->treeView->model());
+    QModelIndex index = model->insertItem(one,isFile?ResourceManagerModelItem::File:ResourceManagerModelItem::Folder);
+    ui->treeView->editIndex(index);
+}
+
 void ResourceManagerPane::onActionTriggered(){
     QObject* sender = this->sender();
     QModelIndexList list = ui->treeView->selectionModel()->selectedRows();
     if(list.size()<=0){
         return ;
     }
+    QModelIndex parent = list.at(0);
     auto one = static_cast<ResourceManagerModelItem*>(list.at(0).internalPointer());
     if(sender==d->actionNew_File){
-
+        if(one->expanded()){
+            this->onInsertReady(parent,true);
+        }else{
+            //add task
+            this->readFolder(one,BackendThreadTask::ReadFolderAndInsertFile);
+            one->setExpanded(true);
+        }
     }else if(sender==d->actionNew_Folder){
-
+        if(one->expanded()){
+            this->onInsertReady(parent,false);
+        }else{
+            //add task
+            this->readFolder(one,BackendThreadTask::ReadFolderAndInsertFolder);
+            one->setExpanded(true);
+        }
     }else if(sender==d->actionOpen_Folder){
         QDesktopServices::openUrl(QFileInfo(one->path()).absoluteDir().absolutePath());
     }else if(sender==d->actionOpen_File){
         QString path = one->path();
-        Publisher::getInstance()->post(M_OPEN_EDITOR,&path);
+        Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&path);
     }else if(sender==d->actionOpen_Terminal){
+
+        QProcess process;
+        QString directory = one->path();
+        if(one->type()==ResourceManagerModelItem::File){
+            QFileInfo fi(directory);
+            directory = fi.absoluteDir().absolutePath();
+        }
+
+#ifdef Q_OS_WIN
+        QStringList arguments;
+        arguments << "/c" << "start" << "cmd.exe" << "/K" << QString("cd /d %1").arg(directory);
+        QProcess::startDetached("cmd.exe", arguments);
+#elif defined(Q_OS_MAC)
+        QStringList arguments;
+        arguments << "-e" << QString("tell application \"Terminal\" to do script \"cd %1 && exec $SHELL\"").arg(directory);
+        QProcess::startDetached("osascript", arguments);
+#elif defined(Q_OS_LINUX)
+        QStringList arguments;
+        arguments << QString("--working-directory=%1").arg(directory);
+        QProcess::startDetached("gnome-terminal", arguments);
+#else
+        qWarning("Unsupported OS");
+#endif
+
+
 
     }else if(sender==d->actionCut){
         QMimeData *mimeData = new QMimeData;
         QList<QUrl> urls;
         urls.append(QUrl::fromLocalFile(one->path()));
         mimeData->setUrls(urls);
-        mimeData->setData(mimeStr, QByteArray("\x02\x00\x00\x00", 4));
+        mimeData->setData(mime, QByteArray("\x02\x00\x00\x00", 4));
         QApplication::clipboard()->setMimeData(mimeData);
     }else if(sender==d->actionCopy){
         QMimeData *mimeData = new QMimeData;
         QList<QUrl> urls;
         urls.append(QUrl::fromLocalFile(one->path()));
         mimeData->setUrls(urls);
-        mimeData->setData(mimeStr, QByteArray("\x05\x00\x00\x00", 4));
+        mimeData->setData(mime, QByteArray("\x05\x00\x00\x00", 4));
         QApplication::clipboard()->setMimeData(mimeData);
     }else if(sender==d->actionPaste){
         const QMimeData *mimeData = QApplication::clipboard()->mimeData();
         if(mimeData->hasUrls()){
-            QByteArray ba = mimeData->data(mimeStr);
+            QByteArray ba = mimeData->data(mime);
             //QFileInfo fi(one->path());
             QString path = one->path();
             if(!path.endsWith("/")){
@@ -376,19 +440,19 @@ void ResourceManagerPane::onActionTriggered(){
                             if(fi.isFile()){
                                 QFile file(one.toLocalFile());
                                 QPair<QString,QString> pair = {oPath,dest};
-                                instance->post(new Event(CodeEditorManager::M_WILL_RENAME_FILE,(void*)&oPath));
+                                instance->post(new Event(Type::M_WILL_RENAME_FILE,(void*)&oPath));
                                 if(!file.rename(dest)){
                                     pair.second = oPath;
                                 }
-                                instance->post(new Event(CodeEditorManager::M_RENAMED_FILE,(void*)&pair));
+                                instance->post(new Event(Type::M_RENAMED_FILE,(void*)&pair));
                             }else if(fi.isDir()){
-                                instance->post(new Event(CodeEditorManager::M_WILL_RENAME_FOLDER,(void*)&oPath));
+                                instance->post(new Event(Type::M_WILL_RENAME_FOLDER,(void*)&oPath));
                                 QDir dir(oPath);
                                 QPair<QString,QString> pair = {oPath,dest};
                                 if(!dir.rename(oPath,dest)){
                                     pair.second = oPath;
                                 }
-                                instance->post(new Event(CodeEditorManager::M_RENAMED_FOLDER,(void*)&pair));
+                                instance->post(new Event(Type::M_RENAMED_FOLDER,(void*)&pair));
                             }
                         }
                     }
@@ -399,7 +463,7 @@ void ResourceManagerPane::onActionTriggered(){
     }else if(sender==d->actionFind){
 
     }else if(sender==d->actionRename){
-        ui->treeView->edit(list.at(0));
+        ui->treeView->editIndex(list.at(0));
     }else if(sender==d->actionDelete){
         if(MessageDialog::confirm(this,tr("Delete Confirm"),tr("Are you sure you want to delete the '%1'?\nYou can restore this file from the Recycle Bin.").arg(one->title()),QMessageBox::Ok|QMessageBox::Cancel)==QMessageBox::Ok){
             auto instance = Publisher::getInstance();
@@ -407,23 +471,23 @@ void ResourceManagerPane::onActionTriggered(){
             QPair<QString,QString> pair = {path,path};
             ResourceManagerModelItem::Type type = one->type();
             if(type==ResourceManagerModelItem::File){
-                instance->post(new Event(CodeEditorManager::M_WILL_RENAME_FILE,(void*)&path));
+                instance->post(new Event(Type::M_WILL_RENAME_FILE,(void*)&path));
                 if(QFile::moveToTrash(one->path())){
-                    instance->post(new Event(CodeEditorManager::M_DELETE_FILE,(void*)&pair));
+                    instance->post(new Event(Type::M_DELETE_FILE,(void*)&pair));
                 }else{
-                    instance->post(new Event(CodeEditorManager::M_RENAMED_FILE,(void*)&pair));
+                    instance->post(new Event(Type::M_RENAMED_FILE,(void*)&pair));
                 }
             }else if(type==ResourceManagerModelItem::Folder){
                 //remove watch
                 QStringList list = d->model->takeWatchDirectory(path,true);
-                instance->post(new Event(CodeEditorManager::M_WILL_RENAME_FOLDER,(void*)&path));
+                instance->post(new Event(Type::M_WILL_RENAME_FOLDER,(void*)&path));
                 if(QFile::moveToTrash(one->path())){
-                    instance->post(new Event(CodeEditorManager::M_DELETE_FOLDER,(void*)&path));
+                    instance->post(new Event(Type::M_DELETE_FOLDER,(void*)&path));
                 }else{
                     foreach(auto one,list){
                         d->model->appendWatchDirectory(one);
                     }
-                    instance->post(new Event(CodeEditorManager::M_RENAMED_FOLDER,(void*)&pair));
+                    instance->post(new Event(Type::M_RENAMED_FOLDER,(void*)&pair));
                 }
             }
         }
@@ -433,6 +497,9 @@ void ResourceManagerPane::onActionTriggered(){
         }
     }else if(sender==d->actionCopy_Path){
         QApplication::clipboard()->setText(one->path());
+    }else if(sender==d->actionUpload){
+        UploadData data{one->pid(),one->type()==ResourceManagerModelItem::File,one->path(),{}};
+        Publisher::getInstance()->post(Type::M_UPLOAD,&data);
     }
 }
 

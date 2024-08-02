@@ -1,7 +1,7 @@
 #ifndef ADDONMODEL_H
 #define ADDONMODEL_H
 #include <QAbstractTableModel>
-#include "storage/AddonStorage.h"
+#include "storage/addon_storage.h"
 namespace ady {
 
     class AddonModel : public QAbstractListModel

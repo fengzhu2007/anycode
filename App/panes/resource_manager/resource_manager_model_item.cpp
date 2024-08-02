@@ -1,6 +1,6 @@
 #include "resource_manager_model_item.h"
 #include "resource_manager_model.h"
-#include "storage/ProjectStorage.h"
+#include "storage/project_storage.h"
 #include <QFileIconProvider>
 #include <QList>
 #include <QDebug>
@@ -15,6 +15,7 @@ public:
     QList<ResourceManagerModelItem*> children;
     bool expanded=false;
     ResourceManagerModelItem::Type type;
+    long long pid=0;
     QString title;
     QString path;
     void* data;
@@ -109,6 +110,18 @@ int ResourceManagerModelItem::row(){
     return i;
 }
 
+int ResourceManagerModelItem::firstFile(){
+    int i=0;
+    for(auto one:d->children){
+        if(one->type()==File){
+            break;
+        }else{
+            i += 1;
+        }
+    }
+    return i;
+}
+
 void ResourceManagerModelItem::setTitle(const QString& title){
     d->title = title;
 }
@@ -125,12 +138,25 @@ void ResourceManagerModelItem::setPath(const QString& path,bool recursive){
         }
     }
 }
+
+void ResourceManagerModelItem::setPid(long long pid){
+    d->pid = pid;
+}
+
 const QString ResourceManagerModelItem::path(){
     return d->path;
 }
 
 const QString ResourceManagerModelItem::title(){
     return d->title;
+}
+
+long long ResourceManagerModelItem::pid(){
+    if(d->type==Folder || d->type==File){
+        return d->parent->pid();
+    }else{
+        return d->pid;
+    }
 }
 
 void ResourceManagerModelItem::setData(void* data){
@@ -173,6 +199,11 @@ void ResourceManagerModelItem::appendItem(QFileInfo one){
 void ResourceManagerModelItem::appendItem(ResourceManagerModelItem* item){
     d->children.push_back(item);
 }
+
+void ResourceManagerModelItem::insertItem(int row,ResourceManagerModelItem* item){
+    d->children.insert(row,item);
+}
+
 
 bool ResourceManagerModelItem::expanded(){
     return d->expanded;

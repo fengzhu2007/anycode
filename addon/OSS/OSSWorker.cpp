@@ -1,7 +1,7 @@
 #include "OSSWorker.h"
 #include "OSSResponse.h"
 #include "oss.h"
-#include "network/NetworkManager.h"
+#include "network/network_manager.h"
 #include <QDebug>
 namespace ady {
 
@@ -63,7 +63,7 @@ namespace ady {
             if(task==nullptr){
                 break;
             }
-            OSS* oss = dynamic_cast<OSS*>(NetworkManager::getInstance()->request(m_siteid));
+            /*OSS* oss = dynamic_cast<OSS*>(NetworkManager::getInstance()->request(m_siteid));
             if(oss!=nullptr){
                 //qDebug()<<"OSSWorkerTask tid:"<<QThread::currentThreadId();
                 if(task->cmd==W_LINK){
@@ -103,7 +103,7 @@ namespace ady {
                 response->errorCode = -1;
                 response->errorMsg = tr("Invalid OSS connection");
                 emit taskFinished(W_ERROR,response);
-            }
+            }*/
             delete task;
         }
     }

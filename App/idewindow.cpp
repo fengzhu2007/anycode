@@ -10,15 +10,31 @@
 #include "panes/code_editor/code_editor_pane.h"
 #include "panes/code_editor/code_editor_manager.h"
 #include "panes/version_control/version_control_pane.h"
+#include "panes/server_manage/server_manage_pane.h"
+#include "panes/file_transfer/file_transfer_pane.h"
+#include "panes/find_replace/find_replace_dialog.h"
 
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
+#include "core/event_bus/type.h"
 #include "core/backend_thread.h"
-#include "storage/ProjectStorage.h"
+#include "storage/project_storage.h"
+
+/*#include "highlighter.h"
+#include "texteditorsettings.h"
+#include "core/editormanager.h"
+#include "core/actionmanager/actionmanager.h"
+#include "codeassist/codeassistant.h"
+#include "codeassist/documentcontentcompletion.h"
+#include "snippets/snippetprovider.h"*/
+
 #include "w_toast.h"
+#include "network/network_manager.h"
+
 #include <QLabel>
 #include <QCloseEvent>
 #include <QFileDialog>
+#include <QTextCodec>
 #include <QDebug>
 
 namespace ady{
@@ -28,7 +44,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
 {
     qRegisterMetaType<QFileInfoList>("QFileInfoList");
     Subscriber::reg();
-    this->regMessageIds({ResourceManagerPane::M_OPEN_EDITOR});
+    this->regMessageIds({Type::M_OPEN_EDITOR});
     ui->setupUi(this);
     this->resetupUi();
 
@@ -54,6 +70,17 @@ IDEWindow::IDEWindow(QWidget *parent) :
     connect(ui->actionClose_Project,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionQuit_Q_tAlt_F4,&QAction::triggered,this,&IDEWindow::close);
 
+    //Edit
+    connect(ui->actionUndo_U,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionRedo,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionCut_X,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionCopy_C,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionPaste_P,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionDelete_D,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionSelect_All,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionGoto,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionFind_Replace,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+
     //View
     connect(ui->actionResource_Manage,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionVersion_Control,&QAction::triggered,this,&IDEWindow::onActionTriggered);
@@ -69,8 +96,28 @@ IDEWindow::IDEWindow(QWidget *parent) :
     CodeEditorManager::getInstance()->open("D:/wamp/www/demo.php");
 
     //ProjectStorage projectStorage
-    ProjectRecord record = ProjectStorage().one(27);
-    Publisher::getInstance()->post(ResourceManagerPane::M_OPEN_PROJECT,(void*)&record);
+    //27 demo
+    //7 svn
+    //1 guzheng
+    ProjectRecord record = ProjectStorage().one(7);
+    Publisher::getInstance()->post(Type::M_OPEN_PROJECT,(void*)&record);
+
+    //auto widget = new QPlainTextEdit(m_dockingPaneManager->widget());
+    //m_dockingPaneManager->createPane("test","test","TEST",widget,DockingPaneManager::Center);
+
+    /*new TextEditor::TextEditorSettings();
+    new Core::ActionManager(this);
+    auto editor = new TextEditor::TextEditorWidget(m_dockingPaneManager->widget());
+    TextEditor::SnippetProvider::registerGroup(TextEditor::Constants::TEXT_SNIPPET_GROUP_ID,tr("Text", "SnippetProvider"));
+    static TextEditor::DocumentContentCompletionProvider basicSnippetProvider;
+    QSharedPointer<TextEditor::TextDocument> doc(new TextEditor::TextDocument(Core::Constants::K_DEFAULT_TEXT_EDITOR_ID));
+    QString error;
+    doc->setCodec(QTextCodec::codecForName("UTF-8"));
+    doc->open(&error,Utils::FilePath::fromString("D:/wamp/www/guzheng2018/phpcms/base.php"),Utils::FilePath::fromString("D:/wamp/www/guzheng2018/phpcms/base.php"));
+    editor->setTextDocument(doc);
+    editor->configureGenericHighlighter();
+    doc->setCompletionAssistProvider(&basicSnippetProvider);
+    m_dockingPaneManager->createPane("test","test","TEST",editor,DockingPaneManager::Center);*/
 }
 
 IDEWindow::~IDEWindow()
@@ -78,14 +125,16 @@ IDEWindow::~IDEWindow()
     wToastManager::destory();
     auto t = BackendThread::getInstance();
     t->stop()->quit();
-    t->wait();
+   // t->wait();
     CodeEditorManager::destory();
     Subscriber::unReg();
     delete ui;
+
+    NetworkManager::destory();
 }
 
 bool IDEWindow::onReceive(Event* e){
-    if(e->id()==ResourceManagerPane::M_OPEN_EDITOR){
+    if(e->id()==Type::M_OPEN_EDITOR){
         auto one = static_cast<QString*>(e->data());
         CodeEditorManager::getInstance()->open(m_dockingPaneManager,*one);
         e->ignore();
@@ -149,6 +198,11 @@ void IDEWindow::onActionTriggered(){
         }
     }else if(sender==ui->actionClose_Project){
 
+    }else if(sender==ui->actionFind_Replace){
+        //auto dialog = FindReplaceDialog::getInstance();
+        auto dialog = FindReplaceDialog::open(this);
+        connect(dialog,&FindReplaceDialog::search,this,&IDEWindow::onSearch);
+
     }else if(sender==ui->actionResource_Manage){
         auto pane = ResourceManagerPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
@@ -156,11 +210,13 @@ void IDEWindow::onActionTriggered(){
         auto pane = VersionControlPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
     }else if(sender==ui->actionServer){
-
+        auto pane = ServerManagePane::open(m_dockingPaneManager,true);
+        pane->activeToCurrent();
     }else if(sender==ui->actionTerminal){
 
     }else if(sender==ui->actionFile_Transfer){
-
+        auto pane = FileTransferPane::open(m_dockingPaneManager,true);
+        pane->activeToCurrent();
     }else if(sender==ui->actionLog){
 
     }
@@ -182,7 +238,23 @@ void IDEWindow::onOpenFolder(const QString& path){
     record.path = path;
     QFileInfo fi(path);
     record.name = fi.fileName();
-    Publisher::getInstance()->post(ResourceManagerPane::M_OPEN_PROJECT,(void*)&record);
+    Publisher::getInstance()->post(Type::M_OPEN_PROJECT,(void*)&record);
+}
+
+void IDEWindow::onSearch(const QString& text,int flags){
+    auto client = m_dockingPaneManager->workbench()->client();
+
+    auto pane = client->currentPane();
+    //qDebug()<<"pane:"<<pane;
+    if(pane!=nullptr){
+        QString name = pane->metaObject()->className();
+        if(name=="ady::CodeEditorPane"){
+            auto editor = static_cast<CodeEditorPane*>(pane)->editor();
+            //qDebug()<<"editor"<<editor;
+            //editor->finder()->
+            editor->findText(text,flags);
+        }
+    }
 }
 
 /*void IDEWindow::closeEvent(QCloseEvent *event){

@@ -1,11 +1,12 @@
 #include "resource_manager_model.h"
 #include "resource_manager_model_item.h"
 #include "resource_manage_icon_provider.h"
-#include "storage/ProjectStorage.h"
+#include "storage/project_storage.h"
 #include "core/backend_thread.h"
 #include "resource_manage_read_folder_task.h"
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/event.h"
+#include "core/event_bus/type.h"
 #include "panes/code_editor/code_editor_manager.h"
 #include <QDir>
 #include <QFileInfo>
@@ -39,8 +40,6 @@ void ResourceManagerModel::destory(){
         delete instance;
         instance = nullptr;
     }
-
-
 }
 
 
@@ -89,7 +88,31 @@ bool ResourceManagerModel::setData(const QModelIndex &index, const QVariant &val
         if(index.column() ==Name ){
             QString name = value.toString();
             ResourceManagerModelItem* item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
-            if(name!=item->title()){
+            const QString path = item->path();
+            if(path.isEmpty()){
+                //create file or folder
+                ResourceManagerModelItem::Type type = item->type();
+                const QString parentPath = item->parent()->path();
+                QFileInfo fi(parentPath,name);
+                if(type==ResourceManagerModelItem::File){
+                    QFile file(fi.absoluteFilePath());
+                    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+
+                        return false;
+                    }
+                    file.close();
+                }else if(type==ResourceManagerModelItem::Folder){
+                    if(!fi.absoluteDir().mkdir(name)){
+                        return false;
+                    }
+                }else{
+                    return false;
+                }
+                item->setPath(fi.absoluteFilePath());
+                item->setTitle(name);
+                return true;
+            }else if(name!=item->title()){
+                //rename
                 QString path = item->path();
                 QFileInfo fi(path);
                 if(fi.exists() && fi.fileName()!=name){
@@ -99,13 +122,13 @@ bool ResourceManagerModel::setData(const QModelIndex &index, const QVariant &val
                     auto instance = Publisher::getInstance();
                     QStringList list;
                     if(fi.isFile()){
-                        instance->post(new Event(CodeEditorManager::M_WILL_RENAME_FILE,(void*)&path));
+                        instance->post(new Event(Type::M_WILL_RENAME_FILE,(void*)&path));
                     }else if(fi.isDir()){
                         if(path.endsWith("/")==false){
                             path += "/";
                         }
                         list = this->takeWatchDirectory(path,true);
-                        instance->post(new Event(CodeEditorManager::M_WILL_RENAME_FOLDER,(void*)&path));
+                        instance->post(new Event(Type::M_WILL_RENAME_FOLDER,(void*)&path));
                     }
                     QString fileName = fi.path() + "/" + name;
                     QDir d(dirPath);
@@ -116,9 +139,9 @@ bool ResourceManagerModel::setData(const QModelIndex &index, const QVariant &val
                         item->setPath(fileName);
 
                         if(fi.isFile()){
-                            instance->post(new Event(CodeEditorManager::M_RENAMED_FILE,(void*)&pair));
+                            instance->post(new Event(Type::M_RENAMED_FILE,(void*)&pair));
                         }else if(fi.isDir()){
-                            instance->post(new Event(CodeEditorManager::M_RENAMED_FOLDER,(void*)&pair));
+                            instance->post(new Event(Type::M_RENAMED_FOLDER,(void*)&pair));
                             //refresh item
                             auto task = new ResourceManageReadFolderTask(this,path);
                             task->setType(BackendThreadTask::RefreshFolder);
@@ -127,9 +150,9 @@ bool ResourceManagerModel::setData(const QModelIndex &index, const QVariant &val
                     }else{
                         pair.second = path;
                         if(fi.isFile()){
-                            instance->post(new Event(CodeEditorManager::M_RENAMED_FILE,(void*)&pair));
+                            instance->post(new Event(Type::M_RENAMED_FILE,(void*)&pair));
                         }else if(fi.isDir()){
-                            instance->post(new Event(CodeEditorManager::M_RENAMED_FOLDER,(void*)&pair));
+                            instance->post(new Event(Type::M_RENAMED_FOLDER,(void*)&pair));
                         }
                     }
                     this->appendWatchDirectory(dirPath);
@@ -138,6 +161,7 @@ bool ResourceManagerModel::setData(const QModelIndex &index, const QVariant &val
                     return false;
                 }
             }
+
         }
     }
     return QAbstractItemModel::setData(index,value,role);
@@ -203,10 +227,10 @@ QModelIndex ResourceManagerModel::parent(const QModelIndex &index) const {
 }
 
 int ResourceManagerModel::rowCount(const QModelIndex &parent) const {
-    ResourceManagerModelItem *parentItem;
     if (parent.column() > 0){
         return 0;
     }
+    ResourceManagerModelItem *parentItem;
     if (!parent.isValid()){
         parentItem = d->root;
         return parentItem->childrenCount();
@@ -254,6 +278,7 @@ ResourceManagerModelItem* ResourceManagerModel::appendItem(ProjectRecord* projec
     auto item = new ResourceManagerModelItem(ResourceManagerModelItem::Project,project->name,d->root);
     item->setPath(project->path);
     item->setData(static_cast<void*>(project));
+    item->setPid(project->id);
     int position = d->root->childrenCount();
     beginInsertRows(QModelIndex(),position,position);
     d->root->appendItem(item);
@@ -272,14 +297,35 @@ ResourceManagerModelItem* ResourceManagerModel::appendItem(const QString& folder
     return this->appendItem(project);
 }
 
-void ResourceManagerModel::onUpdateChildren(QFileInfoList list,const QString& parent,bool refresh){
+QModelIndex ResourceManagerModel::insertItem(ResourceManagerModelItem* parent,int type){
+    int row = parent->firstFile();
+    auto item = new ResourceManagerModelItem(static_cast<ResourceManagerModelItem::Type>(type),{},parent);
+    //qDebug()<<"insertItem:"<<item->type();
+    QModelIndex parentIndex = createIndex(parent->row(),0,parent);
+    beginInsertRows(parentIndex,row,row);
+    parent->insertItem(row,item);
+    endInsertRows();
+    return createIndex(row,0,item);
+}
+
+void ResourceManagerModel::onUpdateChildren(QFileInfoList list,const QString& parent,int action){
     QMutexLocker locker(&(d->mutex));
     auto item = d->root->findChild(parent);
     if(item!=nullptr){
-        if(refresh){
-            this->refreshItems(list,item);
-        }else{
+        if(action==BackendThreadTask::ReadFolder){
             this->appendItems(list,item);
+        }else if(action==BackendThreadTask::RefreshFolder){
+            this->refreshItems(list,item);
+        }else if(action==BackendThreadTask::ReadFolderAndInsertFile){
+            this->appendItems(list,item);
+            //emit
+            QModelIndex parent = createIndex(item->row(),0,item);
+            emit insertReady(parent,true);
+        }else if(action==BackendThreadTask::ReadFolderAndInsertFolder){
+            this->appendItems(list,item);
+            //emit
+            QModelIndex parent = createIndex(item->row(),0,item);
+            emit insertReady(parent,false);
         }
     }
 }
@@ -367,6 +413,10 @@ QStringList ResourceManagerModel::takeWatchDirectory(const QString& path,bool in
 ResourceManagerModelItem* ResourceManagerModel::find(const QString& path){
     QMutexLocker locker(&(d->mutex));
     return d->root->findChild(path);
+}
+
+ResourceManagerModelItem* ResourceManagerModel::rootItem(){
+    return d->root;
 }
 
 void ResourceManagerModel::onDirectoryChanged(const QString &path){

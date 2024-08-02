@@ -5,7 +5,7 @@
 #include <QWaitCondition>
 #include <QMutex>
 #include <QVariant>
-#include "local/FileItem.h"
+#include "local/file_item.h"
 namespace ady {
     class COS;
     class NetworkResponse;

@@ -2,9 +2,9 @@
 #include "OSSPanel.h"
 #include "OSSFormGeneral.h"
 #include "OSSFormDirSetting.h"
-#include "network/NetworkManager.h"
+#include "network/network_manager.h"
 #include "oss.h"
-#include "storage/SiteStorage.h"
+#include "storage/site_storage.h"
 #include "OSSResponse.h"
 #include <QDebug>
 ady::Panel* getPanel(long long id,QWidget* parent,QString name)
@@ -42,12 +42,12 @@ int requestConnect(void* ptr)
 {
     ady::SiteRecord* record = (ady::SiteRecord*)ptr;
     if(record->type=="OSS"){
-        ady::OSS* oss = ady::NetworkManager::getInstance()->newRequest<ady::OSS>();
+        auto oss = ady::NetworkManager::getInstance()->newRequest<ady::OSS>();
         oss->setHost(record->host);
         oss->setPort(record->port);
         oss->setUsername(record->username);
         oss->setPassword(record->password);
-        oss->setDefaultDir(record->path);
+        //oss->setDefaultDir(record->path);
 
         ady::OSSResponse* response = (ady::OSSResponse*)oss->link();
         //response->debug();
@@ -68,4 +68,9 @@ int requestConnect(void* ptr)
     }else{
         return -1;//unknow network type
     }
+}
+
+ady::NetworkRequest* initRequest(long long id){
+    auto req = ady::NetworkManager::getInstance()->newRequest<ady::OSS>(id);
+    return req;
 }

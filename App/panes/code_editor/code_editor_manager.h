@@ -2,11 +2,13 @@
 #define CODEEDITORMANAGER_H
 
 #include "global.h"
-#include <QObject>
 #include "core/event_bus/subscriber.h"
+//#include "textdocument.h"
+#include <QMenu>
 namespace ady{
 class DockingPaneManager;
 class CodeEditorPane;
+class CodeEditorView;
 class CodeEditorManagerPrivate;
 class ANYENGINE_EXPORT CodeEditorManager : public QObject,public Subscriber
 {
@@ -30,20 +32,17 @@ public:
 
     virtual bool onReceive(Event*) override;
 
+    void editorContextMenu(CodeEditorView* editor,QMenu* contextMenu);
+    void tabContextMenu(CodeEditorPane* pane,QMenu* contextMenu);
+
 public slots:
     void onFileChanged(const QString &path);
+    void onEditorActionTrigger(bool checked=false);
+    void onTabActionTrigger();
 
 private:
     CodeEditorManager(DockingPaneManager* docking_manager);
 
-public:
-    static const QString M_WILL_RENAME_FILE;
-    static const QString M_WILL_RENAME_FOLDER ;
-    static const QString M_RENAMED_FILE;
-    static const QString M_RENAMED_FOLDER;
-    static const QString M_RELOAD_FILE;
-    static const QString M_DELETE_FILE;
-    static const QString M_DELETE_FOLDER;
 
 private:
     static CodeEditorManager* instance;

@@ -1,6 +1,6 @@
 #include "FTPPanel.h"
 #include "ui_FTPPanelUi.h"
-#include "network/NetworkManager.h"
+#include "network/network_manager.h"
 #include "ftp.h"
 #include "FTPResponse.h"
 #include <QThread>
@@ -119,11 +119,12 @@ void FTPPanel::init(SiteRecord record)
 
 NetworkRequest* FTPPanel::request()
 {
-    NetworkRequest* req = NetworkManager::getInstance()->request(this->getId());
+    /*NetworkRequest* req = NetworkManager::getInstance()->request(this->getId());
     if(req==nullptr){
         req = NetworkManager::getInstance()->newRequest<FTP>(this->getId());
     }
-    return req;
+    return req;*/
+    return nullptr;
 }
 
 void FTPPanel::deleteFiles(QList<FileItem>items)

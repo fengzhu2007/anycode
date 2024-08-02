@@ -26,6 +26,7 @@ public:
     svn_client_ctx_t *ctx;
     bool online;
     apr_hash_t *changelists;
+    std::pair<int,std::string> error;
 
 public:
     SvnppClientPrivate(){
@@ -53,8 +54,7 @@ public:
             SVNPP_ERR(svn_config__get_default_config(&cfg_hash, pool));
             SVNPP_ERR(svn_client_create_context2(&ctx, cfg_hash, pool));
         }
-
-
+        error.first = 0;
     }
 
     ~SvnppClientPrivate(){
@@ -107,10 +107,18 @@ int SvnppClient::init(std::string path)
     APR_ARRAY_PUSH(revision_ranges,svn_opt_revision_range_t *) = range;
 
     svn_client_info_receiver2_t receiver = print_info;
-    qDebug()<<"init";
+    //qDebug()<<"init";
     svn_error_t* err = svn_client_info4(path.c_str(),&peg_revision, &(range->start),svn_depth_empty,TRUE /* fetch_excluded */,TRUE /* fetch_actual_only */,FALSE,changelists1,receiver, this->info(),pri->ctx, subpool);
 
     svn_pool_destroy(subpool);
+
+    if(err!=nullptr){
+        pri->error.first = err->apr_err;
+        pri->error.second = err->message;
+    }else{
+        pri->error.first = 0;
+        pri->error.second.clear();
+    }
 
     return err!=nullptr?err->apr_err:0;
 }
@@ -151,7 +159,16 @@ std::vector<LogEntry*> SvnppClient::logs(revnum_t from,unsigned int limit)
     }
     range->end.kind = svn_opt_revision_unspecified;
     APR_ARRAY_PUSH(revision_ranges,svn_opt_revision_range_t *) = range;
-    SVNPP_ERR(svn_client_log5(targets, &peg_revision,revision_ranges,limit,FALSE,TRUE,TRUE,NULL,svn_log_entry_receiver,&lists,pri->ctx,pri->pool));
+    svn_error_t* err = (svn_client_log5(targets, &peg_revision,revision_ranges,limit,FALSE,TRUE,TRUE,NULL,svn_log_entry_receiver,&lists,pri->ctx,pri->pool));
+
+    if(err!=nullptr){
+        pri->error.first = err->apr_err;
+        pri->error.second = err->message;
+    }else{
+        pri->error.first = 0;
+        pri->error.second.clear();
+    }
+
     return lists;
 }
 
@@ -201,10 +218,11 @@ std::vector<DiffSummary*> SvnppClient::diff(revnum_t start,revnum_t end)
     changelists = apr_hash_make(pri->pool);
     SVNPP_ERR(svn_hash_keys(&(changelists1), changelists, pri->pool));
 
+    svn_error_t* err=nullptr ;
 
     if(start==0 && end==0){
 
-          SVNPP_ERR(svn_client_diff_summarize2(
+          err = (svn_client_diff_summarize2(
                         info->path().c_str(),
                         &start_revision,
                         info->path().c_str(),
@@ -215,10 +233,10 @@ std::vector<DiffSummary*> SvnppClient::diff(revnum_t start,revnum_t end)
                         func, &b,
                         pri->ctx, iterpool));
 
-          qDebug()<<"target:"<<target<<";size:"<<b.lists.size()<<";pp:"<<info->path().c_str();
+          //qDebug()<<"target:"<<target<<";size:"<<b.lists.size()<<";pp:"<<info->path().c_str();
     }else{
         peg_revision.kind = svn_opt_revision_head;
-        SVNPP_ERR(svn_client_diff_summarize_peg2(
+        err = (svn_client_diff_summarize_peg2(
                                         info->url().c_str(),
                                         &peg_revision,
                                         &start_revision,
@@ -229,13 +247,18 @@ std::vector<DiffSummary*> SvnppClient::diff(revnum_t start,revnum_t end)
                                         func, &b,
                                         pri->ctx, iterpool));
 
-        qDebug()<<"url target:"<<target<<";size:"<<b.lists.size()<<";pp:"<<info->url().c_str()<<";start:"<<start_revision.value.number;
+        //qDebug()<<"url target:"<<target<<";size:"<<b.lists.size()<<";pp:"<<info->url().c_str()<<";start:"<<start_revision.value.number;
     }
-
-
 
     svn_pool_destroy(iterpool);
 
+    if(err!=nullptr){
+        pri->error.first = err->apr_err;
+        pri->error.second = err->message;
+    }else{
+        pri->error.first = 0;
+        pri->error.second.clear();
+    }
     return b.lists;
 }
 
@@ -262,7 +285,7 @@ std::vector<DiffSummary*> SvnppClient::status()
     svn_pool_clear(iterpool);
 
     rev.kind = svn_opt_revision_head;
-    svn_error_t* error = svn_client_status6(&repos_rev, pri->ctx, info->path().c_str(), &rev,
+    svn_error_t* err = svn_client_status6(&repos_rev, pri->ctx, info->path().c_str(), &rev,
                                                  svn_depth_unknown,
                                                  FALSE,
                                                  TRUE,
@@ -275,13 +298,24 @@ std::vector<DiffSummary*> SvnppClient::status()
                                                  iterpool);
 
     svn_pool_destroy(iterpool);
-    qDebug()<<"svn status";
+    /*qDebug()<<"svn status";
     qDebug()<<"path:"<<target;
-    if(error!=NULL){
-        qDebug()<<"error:"<<error->apr_err<<";msg:"<<error->message;
+    if(err!=NULL){
+        qDebug()<<"error:"<<err->apr_err<<";msg:"<<err->message;
+    }*/
+    if(err!=nullptr){
+        pri->error.first = err->apr_err;
+        pri->error.second = err->message;
+    }else{
+        pri->error.first = 0;
+        pri->error.second.clear();
     }
 
-    return b.lists;
+    return {};
+}
+
+std::pair<int,std::string> SvnppClient::error() const{
+    return pri->error;
 }
 
 

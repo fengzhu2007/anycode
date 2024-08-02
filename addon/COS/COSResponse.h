@@ -1,13 +1,13 @@
 #ifndef COSRESPONSE_H
 #define COSRESPONSE_H
-#include "network/http/HttpResponse.h"
+#include "network/http/http_response.h"
 #include <QMap>
 namespace ady {
     class COSResponse : public HttpResponse
     {
     public:
 
-        COSResponse();
+        explicit COSResponse(long long id=0);
         virtual QList<FileItem> parseList() override;
         //virtual void parse() override;
         virtual bool status() override;

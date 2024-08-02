@@ -9,11 +9,11 @@
 #include <QFile>
 #include <QCoreApplication>
 #include "CommonStorage.h"
-#include "AddonStorage.h"
-#include "SiteStorage.h"
-#include "ProjectStorage.h"
-#include "CommitStorage.h"
-#include "GroupStorage.h"
+#include "addon_storage.h"
+#include "site_storage.h"
+#include "project_storage.h"
+#include "commit_storage.h"
+#include "group_storage.h"
 #include "FavoriteStorage.h"
 
 #include <QDebug>

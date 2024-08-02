@@ -1,7 +1,7 @@
 #include "new_project_one_widget.h"
 #include "ui_new_project_one_widget.h"
 #include "new_project_window.h"
-#include "storage/ProjectStorage.h"
+#include "storage/project_storage.h"
 #include "w_toast.h"
 #include <QFileDialog>
 #include <QDir>

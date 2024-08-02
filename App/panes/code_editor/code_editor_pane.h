@@ -2,6 +2,7 @@
 #define CODEEDITORPANE_H
 #include "global.h"
 #include "docking_pane.h"
+#include "code_editor_view.h"
 //#include "core/event_bus/subscriber.h"
 
 namespace ady{
@@ -14,7 +15,7 @@ class ANYENGINE_EXPORT CodeEditorPane : public DockingPane
     Q_OBJECT
 public:
     explicit CodeEditorPane(QWidget *parent = nullptr);
-    ~CodeEditorPane();
+    virtual ~CodeEditorPane();
     virtual QString id() override;
     virtual QString group() override;
     virtual QString description() override;
@@ -27,7 +28,8 @@ public:
     bool writeFile(const QString& path);
     QString path();
     bool isModified() const;
-    CodeEditor* editor();
+    //CodeEditor* editor();
+    CodeEditorView* editor();
 
 public slots:
     void onModificationChanged(bool changed);

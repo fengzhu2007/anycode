@@ -2,7 +2,7 @@
 #define FORMPANEL_H
 #include "global.h"
 #include <QWidget>
-#include "storage/SiteStorage.h"
+#include "storage/site_storage.h"
 namespace ady {
     class ANYENGINE_EXPORT FormPanel : public QWidget
     {

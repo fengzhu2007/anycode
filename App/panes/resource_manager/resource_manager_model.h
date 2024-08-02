@@ -17,6 +17,12 @@ public:
         Name=0,
         Max
     };
+    enum Action{
+        None=0,
+        Refresh,
+        Insert
+    };
+
     //explicit ResourceManagerModel(QObject *parent = nullptr);
     static ResourceManagerModel* getInstance();
     static void destory();
@@ -34,6 +40,7 @@ public:
 
     ResourceManagerModelItem* appendItem(ProjectRecord* project);
     ResourceManagerModelItem* appendItem(const QString& folder);
+    QModelIndex insertItem(ResourceManagerModelItem* parent,int type);
 
     //void removeItem(const QString& path);
     //void updateItem(ResourceManagerModelItem* item);
@@ -45,16 +52,19 @@ public:
     QStringList takeWatchDirectory(const QString& path,bool include_children=true);
 
     ResourceManagerModelItem* find(const QString& path);
+    ResourceManagerModelItem* rootItem();
+
 
 public slots:
-    void onUpdateChildren(QFileInfoList list,const QString& parent,bool refresh);
+    void onUpdateChildren(QFileInfoList list,const QString& parent,int action);
     void appendItems(QFileInfoList list,ResourceManagerModelItem* parent);
     void refreshItems(QFileInfoList list,ResourceManagerModelItem* parent);
     void onDirectoryChanged(const QString &path);
 
 
 signals:
-    void updateChildren(QFileInfoList list,const QString& parent,bool refresh);
+    void updateChildren(QFileInfoList list,const QString& parent,int action);
+    void insertReady(const QModelIndex& parent,bool isFile);
 private:
     ResourceManagerModel();
 

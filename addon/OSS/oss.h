@@ -1,8 +1,8 @@
 #ifndef OSS_H
 #define OSS_H
 #include "OSS_global.h"
-#include "network/NetworkRequest.h"
-#include "network/http/HttpClient.h"
+#include "network/network_request.h"
+#include "network/http/http_client.h"
 
 
 
@@ -32,31 +32,29 @@ public:
 
 
 
-    OSS(CURL* curl);
+    OSS(CURL* curl,long long id=0);
 
     //virtual int access(NetworkResponse* response,bool body=true) override;
     virtual NetworkResponse* link() override;
     virtual NetworkResponse* unlink() override;
-    virtual NetworkResponse* listDir(QString dir,int page=1,int pageSize=1000) override;
-    virtual NetworkResponse* tinyListDir(QString dir) override;
+    virtual NetworkResponse* listDir(const QString& dir,int page=1,int pageSize=1000) override;
+    virtual NetworkResponse* tinyListDir(const QString& dir) override;
     virtual NetworkResponse* upload(Task* task) override;
     virtual NetworkResponse* download(Task* task) override;
     virtual NetworkResponse* del(Task* task) override;
-    //virtual NetworkResponse* chmod(Task* task) override;
+    virtual NetworkResponse* del(const QString& dst) override;
 
-
-    NetworkResponse* chDir(const QString &dir);
-    NetworkResponse* mkDir(const QString &dir);
-    NetworkResponse* rmDir(const QString &dir);
-    NetworkResponse* rename(QString src,QString dst);
-    NetworkResponse* del(QString bucket,QString dst);
+    //virtual NetworkResponse* chDir(const QString &dir) override;
+    virtual NetworkResponse* mkDir(const QString &dir) override;
+    virtual NetworkResponse* rmDir(const QString &dir) override;
+    NetworkResponse* del(const QString& bucket,const QString& dst);
 
 
 
-    virtual NetworkResponse* customeAccess(QString name,QMap<QString,QVariant> data) override;
+    virtual NetworkResponse* customeAccess(const QString& name,QMap<QString,QVariant> data) override;
 
 
-    inline void setDefaultDir(QString dir){m_defaultDir = dir;}
+    inline void setDefaultDir(const QString& dir){m_defaultDir = dir;}
 
 
 protected:

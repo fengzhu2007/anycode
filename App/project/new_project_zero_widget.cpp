@@ -1,8 +1,8 @@
 #include "new_project_zero_widget.h"
 #include "ui_new_project_zero_widget.h"
 #include "new_project_window.h"
-#include "storage/ProjectStorage.h"
-#include "storage/SiteStorage.h"
+#include "storage/project_storage.h"
+#include "storage/site_storage.h"
 #include "project_manage_model.h"
 #include "components/message_dialog.h"
 #include <QMenu>

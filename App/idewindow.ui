@@ -365,6 +365,9 @@
    <property name="text">
     <string>Find Replace(&amp;F)</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
   </action>
   <action name="actionGoto">
    <property name="text">

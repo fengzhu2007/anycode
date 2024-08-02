@@ -80,8 +80,8 @@
 
 
 namespace ady {
-    COSResponse::COSResponse()
-        :HttpResponse()
+    COSResponse::COSResponse(long long id)
+        :HttpResponse(id)
     {
 
     }

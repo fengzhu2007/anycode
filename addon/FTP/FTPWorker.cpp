@@ -1,7 +1,7 @@
 #include "FTPWorker.h"
 #include "FTPResponse.h"
 #include "ftp.h"
-#include "network/NetworkManager.h"
+#include "network/network_manager.h"
 #include <QDebug>
 namespace ady {
 
@@ -64,7 +64,7 @@ namespace ady {
             if(task==nullptr){
                 break;
             }
-            FTP* ftp = dynamic_cast<FTP*>(NetworkManager::getInstance()->request(m_siteid));
+            /*FTP* ftp = dynamic_cast<FTP*>(NetworkManager::getInstance()->request(m_siteid));
             if(ftp!=nullptr){
                 //qDebug()<<"FTPWorkerTask tid:"<<QThread::currentThreadId();
                 if(task->cmd==W_LINK){
@@ -120,7 +120,7 @@ namespace ady {
                 response->errorCode = -1;
                 response->errorMsg = tr("Invalid FTP connection");
                 emit taskFinished(W_ERROR,response);
-            }
+            }*/
             delete task;
         }
     }

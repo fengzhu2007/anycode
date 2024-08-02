@@ -2,7 +2,7 @@
 #define PROJECTLISTMODEL_H
 #include <QAbstractListModel>
 #include <QList>
-#include "storage/ProjectStorage.h"
+#include "storage/project_storage.h"
 namespace ady {
     class ProjectListModel : public QAbstractListModel
     {

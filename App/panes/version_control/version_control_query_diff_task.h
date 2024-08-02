@@ -10,9 +10,9 @@ class VersionControlQueryDiffTaskPrivate;
 class VersionControlQueryDiffTask : public BackendThreadTask
 {
 public:
-    VersionControlQueryDiffTask(cvs::Repository* repo,const QString& oid1={},const QString& oid2={});
-    ~VersionControlQueryDiffTask();
-    cvs::Repository* repository();
+    VersionControlQueryDiffTask(std::shared_ptr<cvs::Repository>& repo,const QString& oid1={},const QString& oid2={});
+    virtual ~VersionControlQueryDiffTask();
+    virtual bool exec() override;
     QPair<QString,QString> oid();
 private:
     VersionControlQueryDiffTaskPrivate* d;

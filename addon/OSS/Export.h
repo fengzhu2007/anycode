@@ -3,7 +3,7 @@
 #include "OSS_global.h"
 #include "interface/Panel.h"
 #include "interface/FormPanel.h"
-#include "network/NetworkRequest.h"
+#include "network/network_request.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,6 +14,7 @@ OSS_EXPORT size_t getFormPanelSize(QString);
 OSS_EXPORT ady::FormPanel* getFormPanel(QWidget* parent,QString,size_t n);
 OSS_EXPORT ady::NetworkRequest* getRequest(QString name);
 OSS_EXPORT int requestConnect(void* ptr);
+OSS_EXPORT ady::NetworkRequest* initRequest(long long id);
 
 #ifdef __cplusplus
 }

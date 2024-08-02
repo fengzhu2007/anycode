@@ -2,9 +2,9 @@
 #include "SFTPPanel.h"
 #include "SFTPFormGeneral.h"
 #include "SFTPFormDirSetting.h"
-#include "network/NetworkManager.h"
+#include "network/network_manager.h"
 #include "sftp.h"
-#include "storage/SiteStorage.h"
+#include "storage/site_storage.h"
 #include "SFTPResponse.h"
 
 #include <QDebug>
@@ -43,7 +43,7 @@ int requestConnect(void* ptr)
 {
     ady::SiteRecord* record = (ady::SiteRecord*)ptr;
     if(record->type=="SFTP"){
-        ady::SFTP* sftp = ady::NetworkManager::getInstance()->newRequest<ady::SFTP>();
+        auto sftp = ady::NetworkManager::getInstance()->newRequest<ady::SFTP>();
         sftp->setHost(record->host);
         sftp->setPort(record->port);
         sftp->setUsername(record->username);
@@ -82,4 +82,9 @@ int requestConnect(void* ptr)
     }else{
         return -1;//unknow network type
     }
+}
+
+ady::NetworkRequest* initRequest(long long id){
+    auto req = ady::NetworkManager::getInstance()->newRequest<ady::SFTP>(id);
+    return req;
 }

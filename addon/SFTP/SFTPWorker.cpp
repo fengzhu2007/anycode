@@ -1,7 +1,7 @@
 #include "SFTPWorker.h"
 #include "SFTPResponse.h"
 #include "sftp.h"
-#include "network/NetworkManager.h"
+#include "network/network_manager.h"
 #include <QDebug>
 namespace ady {
 
@@ -64,7 +64,7 @@ namespace ady {
             if(task==nullptr){
                 break;
             }
-            SFTP* sftp = dynamic_cast<SFTP*>(NetworkManager::getInstance()->request(m_siteid));
+            /*SFTP* sftp = dynamic_cast<SFTP*>(NetworkManager::getInstance()->request(m_siteid));
             if(sftp!=nullptr){
                 //qDebug()<<"SFTPWorkerTask tid:"<<QThread::currentThreadId();
                 if(task->cmd==W_LINK){
@@ -73,9 +73,7 @@ namespace ady {
                     emit taskFinished(W_CHDIR,sftp->listDir(task->data.toString()));
                 }else if(task->cmd==W_UNLINK){
                     emit taskFinished(W_UNLINK,sftp->unlink());
-                }/*else if(task->cmd==W_PASV){
-                    emit taskFinished(W_PASV,sftp->setPassive(task->data.toBool()));
-                }*/else if(task->cmd==W_RENAME){
+                }else if(task->cmd==W_RENAME){
                     QMap<QString,QVariant> data = task->data.toMap();
                     QString src = data["source"].toString();
                     QString dst = data["dst"].toString();
@@ -120,7 +118,7 @@ namespace ady {
                 response->errorCode = -1;
                 response->errorMsg = tr("Invalid SFTP connection");
                 emit taskFinished(W_ERROR,response);
-            }
+            }*/
             delete task;
         }
     }

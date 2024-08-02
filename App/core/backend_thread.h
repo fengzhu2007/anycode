@@ -11,12 +11,17 @@ public:
         ReadFolder=0,
         ReadFile,
         RefreshFolder,
+        ReadFolderAndInsertFile,
+        ReadFolderAndInsertFolder,
         QueryCommit,
-        QueryDiff
+        QueryDiff,
+
+        Custome
     };
     BackendThreadTask(int type);
     BackendThreadTask(int type,void* data);
     virtual ~BackendThreadTask();
+    virtual bool exec()=0;
     int type();
     void* data();
     void setType(int type);
@@ -38,7 +43,7 @@ class BackendThreadPrivate;
         ~BackendThread();
 
         void appendTask(BackendThreadTask* task);
-        void appendTask(BackendThreadTask::Type,void* data);
+        //void appendTask(BackendThreadTask::Type,void* data);
         virtual void run() override;
 
     private:
@@ -46,10 +51,10 @@ class BackendThreadPrivate;
         BackendThreadTask* takeFirst();
 
         //do task
-        void doReadFolder(bool refresh=false);
+        /*void doReadFolder(bool refresh=false);
         void doReadFile();
         void doQueryCommit();
-        void doQueryDiff();
+        void doQueryDiff();*/
 
     private:
         BackendThreadPrivate* d;

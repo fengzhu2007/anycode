@@ -51,7 +51,7 @@ namespace ady {
 #endif
     }
 
-    const char* Utils::toUTF8(QString str)
+    const char* Utils::toUTF8(const QString& str)
     {
 #ifdef Q_OS_WIN32
         return str.toUtf8().constData();
@@ -63,7 +63,7 @@ namespace ady {
 #endif
     }
 
-    void Utils::deleteFile(QString path)
+    void Utils::deleteFile(const QString& path)
     {
         QFileInfo fi(path);
         if(fi.exists()){
@@ -84,7 +84,7 @@ namespace ady {
         }
     }
 
-    bool Utils::isFilename(QString name)
+    bool Utils::isFilename(const QString& name)
     {
         QRegularExpression re("^[^/\\\\:\\*\\?\\<\\>\\|\"]{1,255}$");
         return re.match(name).hasMatch();

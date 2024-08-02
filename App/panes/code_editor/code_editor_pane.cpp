@@ -1,8 +1,17 @@
 #include "code_editor_pane.h"
-#include "code_editor.h"
+//#include "code_editor.h"
 #include "code_editor_manager.h"
 #include "docking_pane_container.h"
 #include "docking_pane_container_tabbar.h"
+
+
+#include "core/coreconstants.h"
+#include "textdocument.h"
+#include "codeassist/documentcontentcompletion.h"
+#include "textindenter.h"
+#include "cppqtstyleindenter.h"
+#include "javaindenter.h"
+
 #include <QFileInfo>
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
@@ -13,6 +22,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QDesktopServices>
+#include <QTextCodec>
 #include <QDebug>
 
 namespace ady{
@@ -23,7 +33,7 @@ int CodeEditorPane::SN = 0;
 
 class CodeEditorPanePrivate{
 public:
-    CodeEditor* editor;
+    CodeEditorView* editor;
     int id;
 };
 
@@ -33,7 +43,7 @@ CodeEditorPane::CodeEditorPane(QWidget *parent)
     //Subscriber::reg();
     d = new CodeEditorPanePrivate;
     d->id = CodeEditorPane::SN;
-    d->editor = new CodeEditor(this);
+    d->editor = new CodeEditorView(this);
     this->setCenterWidget(d->editor);
     CodeEditorManager::getInstance()->append(this);
     CodeEditorPane::SN += 1;
@@ -43,10 +53,13 @@ CodeEditorPane::CodeEditorPane(QWidget *parent)
 
 CodeEditorPane::~CodeEditorPane(){
     //Subscriber::unReg();
+    //qDebug()<<"CodeEditorPane::~CodeEditorPane";
+    qDebug()<<"CodeEditorPane::~CodeEditorPane"<<this;
     auto manager = CodeEditorManager::getInstance();
     if(manager!=nullptr){
         manager->remove(this);
     }
+    //disconnect(d->editor,&QPlainTextEdit::modificationChanged,this,&CodeEditorPane::onModificationChanged);
     delete d;
 }
 
@@ -59,11 +72,11 @@ QString CodeEditorPane::group(){
 }
 
 QString CodeEditorPane::description(){
-    return d->editor->path();
+    return this->path();
 }
 
 void CodeEditorPane::activation(){
-    d->editor->init();
+    //d->editor->init();
 }
 
 void CodeEditorPane::save(bool rename){
@@ -84,7 +97,7 @@ void CodeEditorPane::save(bool rename){
     //save
     auto instance = CodeEditorManager::getInstance();
     instance->removeWatchFile(this->path());
-    if(d->editor->writeFile(path)){
+    if(this->writeFile(path)){
         //rename tab title
         this->setToolTip(path);
         if(tabRename){
@@ -106,58 +119,13 @@ void CodeEditorPane::save(bool rename){
 }
 
 void CodeEditorPane::contextMenu(const QPoint& pos){
-    QMenu contextMenu(this);
-    contextMenu.addAction(QIcon(":/Resource/icons/Save_16x.svg"),tr("Save(&S)"),this,[this](){
-            this->save(false);
-    },QKeySequence(Qt::CTRL + Qt::Key_S));
-    contextMenu.addAction(tr("Close(&C)"),this,[this](){
-            //this->close();
-            auto container = this->container();
-            container->closePane(this);
-    },QKeySequence(Qt::CTRL + Qt::Key_F4));
-    contextMenu.addAction(tr("Close Other(&A)"),this,[this](){
-        auto container = this->container();
-        //int i = container->current();
-        int index = container->indexOf(this);
-        int count  = container->paneCount();
-        int pos = 0;
-        for(int i=0;i<count;i++){
-            if(i==index){
-                pos += 1;
-            }else{
-                if(!container->closePane(pos)){
-                    pos += 1;
-                }
-            }
-        }
-    });
-    contextMenu.addAction(tr("Close All(&L)"),this,[this](){
-        auto container = this->container();
-        int count  = container->paneCount();
-        int pos = 0;
-        for(int i=0;i<count;i++){
-            if(!container->closePane(pos)){
-                pos += 1;
-            }
-        }
-    });
-    contextMenu.addSeparator();
-    contextMenu.addAction(QIcon(":/Resource/icons/Copy_16x.svg"),tr("Copy Path(&U)"),this,[this](){
-        QApplication::clipboard()->setText(d->editor->path());
-    });
-    contextMenu.addAction(tr("Open Folder(&O)"),this,[this](){
-        QDesktopServices::openUrl(QFileInfo(d->editor->path()).absoluteDir().absolutePath());
-    });
-    contextMenu.addSeparator();
-    contextMenu.addAction(tr("Float Tab(&F)"),this,[this](){
-        auto container = this->container();
-        int index = container->indexOf(this);
-        if(index>=0)
-            container->floatPane(index);
-    });
-    /*contextMenu.addAction(tr("Fixed Tab(&P)"),this,[this](){
-        auto container = this->container();
-    });*/
+    QMenu contextMenu;
+    auto instance = CodeEditorManager::getInstance();
+    if(instance!=nullptr){
+        instance->tabContextMenu(this,&contextMenu);
+    }else{
+        return ;
+    }
     contextMenu.exec(QCursor::pos());
 }
 
@@ -182,23 +150,38 @@ void CodeEditorPane::rename(const QString& name){
 }
 
 bool CodeEditorPane::readFile(const QString& path){
-    this->setToolTip(path);
-    return d->editor->readFile(path);
+    auto doc = d->editor->textDocumentPtr();
+    if(!doc){
+        doc = QSharedPointer<TextEditor::TextDocument>(new TextEditor::TextDocument(Core::Constants::K_DEFAULT_TEXT_EDITOR_ID));
+        d->editor->setTextDocument(doc);
+        static TextEditor::DocumentContentCompletionProvider basicSnippetProvider;
+        doc->setCompletionAssistProvider(&basicSnippetProvider);
+        //auto indenter = new TextEditor::TextIndenter(doc->document());
+        auto indenter = new Android::Internal::JavaIndenter(doc->document());
+        doc->setIndenter(indenter);
+    }
+    doc->setCodec(QTextCodec::codecForName("UTF-8"));
+    QString error;
+    auto ret = doc->open(&error,Utils::FilePath::fromString(path),Utils::FilePath::fromString(path));
+    return true;
 }
 
 bool CodeEditorPane::writeFile(const QString& path){
-    return d->editor->writeFile(path);
+    QString error;
+    auto ret = d->editor->textDocument()->save(&error,Utils::FilePath::fromString(path),false);
+    return true;
+    //return d->editor->writeFile(path);
 }
 
 QString CodeEditorPane::path(){
-    return d->editor->path();
+    return d->editor->textDocument()->filePath().path();
 }
 
 bool CodeEditorPane::isModified() const{
     return d->editor->document()->isModified();
 }
 
-CodeEditor* CodeEditorPane::editor(){
+CodeEditorView* CodeEditorPane::editor(){
     return d->editor;
 }
 

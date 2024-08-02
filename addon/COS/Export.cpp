@@ -2,9 +2,10 @@
 #include "COSPanel.h"
 #include "COSFormGeneral.h"
 #include "COSFormDirSetting.h"
-#include "network/NetworkManager.h"
+#include "network/network_manager.h"
+#include "network/network_request.h"
 #include "cos.h"
-#include "storage/SiteStorage.h"
+#include "storage/site_storage.h"
 #include "COSResponse.h"
 
 #include <QDebug>
@@ -43,7 +44,7 @@ int requestConnect(void* ptr)
 {
     ady::SiteRecord* record = (ady::SiteRecord*)ptr;
     if(record->type=="COS"){
-        ady::COS* cos = ady::NetworkManager::getInstance()->newRequest<ady::COS>();
+        auto cos = ady::NetworkManager::getInstance()->newRequest<ady::COS>();
         cos->setHost(record->host);
         cos->setPort(record->port);
         cos->setUsername(record->username);
@@ -77,4 +78,8 @@ int requestConnect(void* ptr)
     }else{
         return -1;//unknow network type
     }
+}
+
+ady::NetworkRequest* initRequest(long long id){
+    return ady::NetworkManager::getInstance()->newRequest<ady::COS>(id);
 }

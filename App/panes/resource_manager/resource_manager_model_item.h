@@ -27,10 +27,13 @@ public:
     QList<ResourceManagerModelItem*> takeAll();
     int childrenCount();
     int row();
+    int firstFile();
     void setTitle(const QString& title);
     void setPath(const QString& path,bool recursive=false);
+    void setPid(long long pid);
     const QString path();
     const QString title();
+    long long pid();
     void setData(void* data);
     QVariant data(int col);
     QIcon icon(int col);
@@ -38,9 +41,11 @@ public:
     void appendItems(QFileInfoList list);
     void appendItem(QFileInfo one);
     void appendItem(ResourceManagerModelItem* item);
+    void insertItem(int row,ResourceManagerModelItem* item);
     bool expanded();
     void setExpanded(bool expanded);
     Type type();
+
     void dump(const QString& prefix={});
 
 

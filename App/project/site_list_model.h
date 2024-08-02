@@ -2,7 +2,7 @@
 #define SITELISTMODEL_H
 #include "global.h"
 #include "components/listview/listview_model.h"
-#include "storage/SiteStorage.h"
+#include "storage/site_storage.h"
 #include <QFrame>
 #include <QStringList>
 

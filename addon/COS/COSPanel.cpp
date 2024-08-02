@@ -1,6 +1,6 @@
 #include "COSPanel.h"
 #include "ui_COSPanelUi.h"
-#include "network/NetworkManager.h"
+#include "network/network_manager.h"
 #include "cos.h"
 #include "COSResponse.h"
 #include <QThread>
@@ -121,11 +121,12 @@ void COSPanel::init(SiteRecord record)
 
 NetworkRequest* COSPanel::request()
 {
-    NetworkRequest* req = NetworkManager::getInstance()->request(this->getId());
+    /*NetworkRequest* req = NetworkManager::getInstance()->request(this->getId());
     if(req==nullptr){
         req = NetworkManager::getInstance()->newRequest<COS>(this->getId());
     }
-    return req;
+    return req;*/
+    return nullptr;
 }
 
 void COSPanel::deleteFiles(QList<FileItem>items)

@@ -9,8 +9,8 @@
 #include <QTimeZone>
 #include <QDebug>
 namespace ady {
-    FTP::FTP(CURL* curl)
-        :NetworkRequest(curl)
+    FTP::FTP(CURL* curl,long long id)
+        :NetworkRequest(curl,id)
     {
         this->connected = false;
         this->mlsd = false;
@@ -51,7 +51,7 @@ namespace ady {
         this->setOption(CURLOPT_CONNECTTIMEOUT,COMMAND_TIMEOUT);
         this->setOption(CURLOPT_USERNAME,this->username.toStdString().c_str());
         this->setOption(CURLOPT_PASSWORD,this->password.toStdString().c_str());
-        NetworkResponse* response = new FTPResponse;
+        NetworkResponse* response = new FTPResponse(this->id);
         int ret = this->access(response);
         if(ret==0){
             this->connected = true;
@@ -72,7 +72,7 @@ namespace ady {
     }
 
 
-    NetworkResponse* FTP::sendSyncCommand(QString command,bool pre_utf8)
+    NetworkResponse* FTP::sendSyncCommand(const QString& command,bool pre_utf8)
     {
         QMutexLocker locker(&mutex);
         return this->sendCommand(command,pre_utf8);
@@ -137,7 +137,7 @@ namespace ady {
     }
 
 
-    NetworkResponse* FTP::sendCommand(QString command,bool pre_utf8)
+    NetworkResponse* FTP::sendCommand(const QString& command,bool pre_utf8)
     {
         //qDebug()<<"exec command:"<<command;
         struct curl_slist *precmdlist = NULL;
@@ -150,7 +150,7 @@ namespace ady {
         this->setOption(CURLOPT_USERNAME,this->username.toStdString().c_str());
         this->setOption(CURLOPT_PASSWORD,this->password.toStdString().c_str());
         this->setOption(CURLOPT_CUSTOMREQUEST,command.toStdString().c_str());
-        FTPResponse* response = new FTPResponse;
+        FTPResponse* response = new FTPResponse(this->id);
         response->setCommand(command);
         this->errorCode = this->access(response);
         this->header = response->header;;
@@ -165,7 +165,7 @@ namespace ady {
         return response;
     }
 
-    NetworkResponse* FTP::listDir(QString dir,int page,int pageSize)
+    NetworkResponse* FTP::listDir(const QString& dir,int page,int pageSize)
     {
         Q_UNUSED(page);
         Q_UNUSED(pageSize);
@@ -188,7 +188,7 @@ namespace ady {
 
     }
 
-    NetworkResponse* FTP::tinyListDir(QString dir)
+    NetworkResponse* FTP::tinyListDir(const QString& dir)
     {
         QMutexLocker locker(&mutex);
         QString command = "LIST "+dir/*+" -al"*/;//windows error
@@ -204,7 +204,7 @@ namespace ady {
         QMutexLocker locker(&mutex);
         QString local = task->local;
         QString remote = task->remote;
-        NetworkResponse *response =  new FTPResponse;
+        NetworkResponse *response =  new FTPResponse(this->id);
         QFileInfo fi(local);
         if(fi.exists()){
             task->file = new QFile(local);
@@ -309,7 +309,7 @@ namespace ady {
         QMutexLocker locker(&mutex);
         QString local = task->local;
         QString remote = task->remote;
-        NetworkResponse *response =  new FTPResponse;
+        NetworkResponse *response =  new FTPResponse(this->id);
         QFileInfo fi(local);
         QDir d = fi.dir();
         bool status = true;
@@ -392,26 +392,20 @@ namespace ady {
             QString command = QString("SITE CHMOD %1 %2").arg(task->data[Task::MODE].toInt()).arg(task->remote);
             return this->sendCommand(command);
         }else{
-            NetworkResponse *response =  new FTPResponse;
+            NetworkResponse *response =  new FTPResponse(this->id);
             response->errorCode = -1;
             response->errorMsg = QObject::tr("Invalid file mode");
             return response;
         }
     }
 
-    NetworkResponse* FTP::chmod(QString dst,int mode)
+    NetworkResponse* FTP::chmod(const QString& dst,int mode)
     {
         QMutexLocker locker(&mutex);
         QString command = QString("SITE CHMOD %1 %2").arg(mode).arg(dst);
         return this->sendCommand(command);
     }
 
-    NetworkResponse* FTP::del(QString dst)
-    {
-        QMutexLocker locker(&mutex);
-        QString command = QString("DELE %1").arg(dst);
-        return this->sendCommand(command);
-    }
 
     NetworkResponse* FTP::setAscii()
     {
@@ -443,6 +437,14 @@ namespace ady {
         return this->sendSyncCommand(command);
     }
 
+    NetworkResponse* FTP::del(const QString& path){
+        QMutexLocker locker(&mutex);
+        QString command = QString("DELE %1").arg(path);
+        return this->sendCommand(command);
+    }
+
+
+
     NetworkResponse* FTP::mkDir(const QString &dir)
     {
         QString command = "MKD "+dir;
@@ -461,7 +463,7 @@ namespace ady {
         return nullptr;
     }
 
-    NetworkResponse* FTP::rename(QString src,QString dst)
+    NetworkResponse* FTP::rename(const QString& src,const QString& dst)
     {
         QMutexLocker locker(&mutex);
         QString command = QString("RNFR %1").arg(src);
@@ -474,7 +476,7 @@ namespace ady {
         return response;
     }
 
-    NetworkResponse* FTP::customeAccess(QString name,QMap<QString,QVariant> data)
+    NetworkResponse* FTP::customeAccess(const QString& name,QMap<QString,QVariant> data)
     {
         //return this->errorCode;
         return nullptr;

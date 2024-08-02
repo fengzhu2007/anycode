@@ -1,6 +1,6 @@
 #include "SFTPPanel.h"
 #include "ui_SFTPPanelUi.h"
-#include "network/NetworkManager.h"
+#include "network/network_manager.h"
 #include "sftp.h"
 #include "SFTPResponse.h"
 #include <QThread>
@@ -120,11 +120,12 @@ void SFTPPanel::init(SiteRecord record)
 
 NetworkRequest* SFTPPanel::request()
 {
-    NetworkRequest* req = NetworkManager::getInstance()->request(this->getId());
+    /*NetworkRequest* req = NetworkManager::getInstance()->request(this->getId());
     if(req==nullptr){
         req = NetworkManager::getInstance()->newRequest<SFTP>(this->getId());
     }
-    return req;
+    return req;*/
+    return nullptr;
 }
 
 void SFTPPanel::deleteFiles(QList<FileItem>items)

@@ -2,7 +2,7 @@
 #define SITEGROUPLISTMODEL_H
 #include <QAbstractListModel>
 #include <QList>
-#include "storage/GroupStorage.h"
+#include "storage/group_storage.h"
 namespace ady {
     class SiteGroupListModel : public QAbstractListModel
     {

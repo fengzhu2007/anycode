@@ -2,6 +2,7 @@
 #define CVS_DIFFFILE_H
 #include "global.h"
 #include <QString>
+#include <QDateTime>
 namespace ady {
 namespace cvs {
     class ANYENGINE_EXPORT DiffFile
@@ -22,7 +23,7 @@ namespace cvs {
             m_filesize = filesize;
         }
 
-        inline void setFiletime(QString filetime){
+        inline void setFiletime(QDateTime filetime){
             m_filetime = filetime;
         }
 
@@ -30,13 +31,14 @@ namespace cvs {
             return m_filesize;
         }
 
-        inline QString filetime() const {return m_filetime;}
+        inline QDateTime filetime() const {return m_filetime;}
 
     private:
         QString m_path;
         Status m_status;
         long long m_filesize = -1 ;
-        QString m_filetime;
+        //QString m_filetime;
+        QDateTime m_filetime;
 
 
     };

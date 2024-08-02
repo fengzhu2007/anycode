@@ -1,14 +1,8 @@
 #include "backend_thread.h"
-#include "panes/resource_manager/resource_manager_model.h"
-#include "panes/resource_manager/resource_manager_model_item.h"
-#include "panes/resource_manager/resource_manage_read_folder_task.h"
-#include "panes/code_editor/code_editor_read_file_task.h"
-#include "panes/code_editor/code_editor_manager.h"
 
-#include "panes/version_control/version_control_query_commit_task.h"
-#include "panes/version_control/version_control_query_diff_task.h"
-#include "panes/version_control/version_control_pane.h"
-#include "cvs/repository.h"
+
+
+
 #include <QMutex>
 #include <QMutexLocker>
 #include <QWaitCondition>
@@ -41,6 +35,7 @@ BackendThreadTask::BackendThreadTask(int type,void* data){
 BackendThreadTask::~BackendThreadTask(){
     delete d;
 }
+
 
 int BackendThreadTask::type(){
     return d->type;
@@ -97,15 +92,16 @@ void BackendThread::appendTask(BackendThreadTask* task){
     d->condition.wakeOne();
 }
 
-void BackendThread::appendTask(BackendThreadTask::Type type,void* data){
+/*void BackendThread::appendTask(BackendThreadTask::Type type,void* data){
     this->appendTask(new BackendThreadTask(type,data));
-}
+}*/
 
 void BackendThread::run(){
     while(d->stopped==false){
         d->current = takeFirst();
         if(d->current!=nullptr){
-            switch(d->current->type()){
+            bool ret = d->current->exec();
+            /*switch(d->current->type()){
             case BackendThreadTask::ReadFolder:
                 this->doReadFolder();
                 goto break_switch;
@@ -121,9 +117,8 @@ void BackendThread::run(){
             case BackendThreadTask::QueryDiff:
                 this->doQueryDiff();
                 goto break_switch;
-
             }
-break_switch:
+break_switch:*/
             delete d->current;
             d->current = nullptr;
         }
@@ -143,7 +138,7 @@ BackendThreadTask* BackendThread::takeFirst(){
 }
 
 //do task
-void BackendThread::doReadFolder(bool refresh){
+/*void BackendThread::doReadFolder(bool refresh){
     auto task = static_cast<ResourceManageReadFolderTask*>(d->current);
     auto model = task->model();
     auto path = task->path();
@@ -191,7 +186,7 @@ void BackendThread::doQueryDiff(){
         delete list;
         repo->unUsed();
     }
-}
+}*/
 
 
 }

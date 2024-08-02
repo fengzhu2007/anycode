@@ -2,8 +2,8 @@
 #define COS_H
 
 #include "COS_global.h"
-#include "network/NetworkRequest.h"
-#include "network/http/HttpClient.h"
+#include "network/network_request.h"
+#include "network/http/http_client.h"
 #include <QStringList>
 namespace ady {
 
@@ -27,25 +27,23 @@ public:
     constexpr const static char PREFIX[] = "prefix";
     constexpr const static char ACCEPT_ENCODING[] = "Accept-Encoding";
 
-    COS(CURL* curl);
+    COS(CURL* curl,long long id=0);
 
 
     virtual NetworkResponse* link() override;
     virtual NetworkResponse* unlink() override;
-    virtual NetworkResponse* listDir(QString dir,int page=1,int pageSize=1000) override;
-    virtual NetworkResponse* tinyListDir(QString dir) override;
+    virtual NetworkResponse* listDir(const QString& dir,int page=1,int pageSize=1000) override;
+    virtual NetworkResponse* tinyListDir(const QString& dir) override;
     virtual NetworkResponse* upload(Task* task) override;
     virtual NetworkResponse* download(Task* task) override;
     virtual NetworkResponse* del(Task* task) override;
+    virtual NetworkResponse* del(const QString &dst) override;
 
+    virtual NetworkResponse* mkDir(const QString &dir) override;
+    virtual NetworkResponse* rmDir(const QString &dir) override;
+    NetworkResponse* del(const QString& bucket,const QString& dst);
 
-    NetworkResponse* chDir(const QString &dir);
-    NetworkResponse* mkDir(const QString &dir);
-    NetworkResponse* rmDir(const QString &dir);
-    NetworkResponse* rename(QString src,QString dst);
-    NetworkResponse* del(QString bucket,QString dst);
-
-    virtual NetworkResponse* customeAccess(QString name,QMap<QString,QVariant> data) override;
+    virtual NetworkResponse* customeAccess(const QString& name,QMap<QString,QVariant> data) override;
 
 
     inline void setDefaultDir(QString dir){m_defaultDir = dir;}

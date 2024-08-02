@@ -30,8 +30,8 @@ constexpr const  char OSS::MARKER[] ;
 constexpr const  char OSS::MAXKEYS[] ;
 constexpr const  char OSS::PREFIX[] ;
 constexpr const  char OSS::ACCEPT_ENCODING[] ;
-OSS::OSS(CURL* curl)
-    :HttpClient(curl)
+OSS::OSS(CURL* curl,long long id)
+    :HttpClient(curl,id)
 {
     this->connected = false;
     this->setOption(CURLOPT_TIMEOUT,COMMAND_TIMEOUT);
@@ -88,7 +88,7 @@ NetworkResponse* OSS::link()
     this->addHeader(lists);
     this->setOption(CURLOPT_NOBODY,1);
     QString url = "http://"+options[HOST]+"/"+options[OBJECT];
-    OSSResponse* response = new  OSSResponse();
+    OSSResponse* response = new  OSSResponse(this->id);
     this->get(url,response);
     this->setOption(CURLOPT_NOBODY,0);
     return response;
@@ -105,7 +105,7 @@ NetworkResponse* OSS::unlink()
 
 
 
-NetworkResponse* OSS::listDir(QString dir,int page,int pageSize)
+NetworkResponse* OSS::listDir(const QString& dir,int page,int pageSize)
 {
     Q_UNUSED(page);
     //Q_UNUSED(pageSize);
@@ -143,14 +143,14 @@ NetworkResponse* OSS::listDir(QString dir,int page,int pageSize)
     //qDebug()<<"lists:"<<lists;
     this->addHeader(lists);
     QString url = "http://"+options[HOST]+"/"+options[OBJECT];
-    OSSResponse* response = new  OSSResponse();
+    OSSResponse* response = new  OSSResponse(this->id);
     this->get(url,response);
     //response->debug();
     return response;
 
 }
 
-NetworkResponse* OSS::tinyListDir(QString dir)
+NetworkResponse* OSS::tinyListDir(const QString& dir)
 {
     QMutexLocker locker(&mutex);
     m_bucket = this->host.left(this->host.indexOf("."));
@@ -186,7 +186,7 @@ NetworkResponse* OSS::tinyListDir(QString dir)
     //qDebug()<<"lists:"<<lists;
     this->addHeader(lists);
     QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
-    OSSResponse* response = new  OSSResponse();
+    OSSResponse* response = new  OSSResponse(this->id);
     this->get(url,response);
     //response->debug();
     return response;
@@ -229,7 +229,7 @@ NetworkResponse* OSS::upload(Task* task)
             this->addHeader(lists);
             //qDebug()<<"header:"<<lists;
             QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
-            OSSResponse* response = new  OSSResponse();
+            OSSResponse* response = new  OSSResponse(this->id);
             this->setOption(CURLOPT_URL,url.toStdString().c_str());
             this->setOption(CURLOPT_POST,0);
             this->setOption(CURLOPT_HTTPPOST,nullptr);
@@ -332,7 +332,7 @@ NetworkResponse* OSS::download(Task* task)
             this->addHeader(lists);
 
             QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
-            OSSResponse* response = new  OSSResponse();
+            OSSResponse* response = new  OSSResponse(this->id);
 
 
             this->setOption(CURLOPT_URL,url.toStdString().c_str());
@@ -401,10 +401,12 @@ NetworkResponse* OSS::del(Task* task)
     }
 }
 
+NetworkResponse* OSS::del(const QString& dst){
+    return this->del({},dst);
+}
 
 
-
-NetworkResponse* OSS::del(QString bucket,QString dst)
+NetworkResponse* OSS::del(const QString& bucket,const QString& dst)
 {
     QMutexLocker locker(&mutex);
     HttpParams options;
@@ -437,7 +439,7 @@ NetworkResponse* OSS::del(QString bucket,QString dst)
         this->setOption(CURLOPT_HTTPHEADER,chunk);
     }
 
-    OSSResponse* response = new  OSSResponse();
+    OSSResponse* response = new  OSSResponse(this->id);
 
     //curl_easy_setopt(this->curl, CURLOPT_HEADERDATA, (void *)&response->header);
     //curl_easy_setopt(this->curl, CURLOPT_WRITEDATA, (void *)&response->body);
@@ -460,12 +462,6 @@ NetworkResponse* OSS::del(QString bucket,QString dst)
 }
 
 
-
-NetworkResponse* OSS::chDir(const QString &dir)
-{
-    Q_UNUSED(dir);
-    return nullptr;
-}
 
 NetworkResponse* OSS::mkDir(const QString &dir)
 {
@@ -495,7 +491,7 @@ NetworkResponse* OSS::mkDir(const QString &dir)
     this->addHeader(lists);
     QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
     qDebug()<<"url:"<<url;
-    OSSResponse* response = new  OSSResponse();
+    OSSResponse* response = new  OSSResponse(this->id);
     this->setOption(CURLOPT_URL,url.toStdString().c_str());
     this->setOption(CURLOPT_POST,0);
     this->setOption(CURLOPT_HTTPPOST,nullptr);
@@ -530,13 +526,8 @@ NetworkResponse* OSS::rmDir(const QString &dir)
 }
 
 
-NetworkResponse* OSS::rename(QString src,QString dst)
-{
-    QMutexLocker locker(&mutex);
-    return nullptr;
-}
 
-NetworkResponse* OSS::customeAccess(QString name,QMap<QString,QVariant> data)
+NetworkResponse* OSS::customeAccess(const QString& name,QMap<QString,QVariant> data)
 {
     //return this->errorCode;
     return nullptr;

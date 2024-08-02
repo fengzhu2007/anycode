@@ -2,7 +2,7 @@
 #define PROJECTEDITWIDGET_H
 #include "global.h"
 #include <QWidget>
-#include "storage/ProjectStorage.h"
+#include "storage/project_storage.h"
 
 
 namespace Ui {

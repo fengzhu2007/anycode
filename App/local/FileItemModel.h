@@ -1,7 +1,7 @@
 #ifndef FILEITEMMODEL_H
 #define FILEITEMMODEL_H
 #include "../global.h"
-#include "FileItem.h"
+#include "file_item.h"
 #include <QAbstractTableModel>
 #include <QList>
 #include <QFileIconProvider>

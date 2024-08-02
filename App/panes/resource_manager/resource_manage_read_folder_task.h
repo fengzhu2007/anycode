@@ -9,7 +9,8 @@ class ResourceManageReadFolderTask : public BackendThreadTask
 {
 public:
     ResourceManageReadFolderTask(ResourceManagerModel* model,const QString& path);
-    ~ResourceManageReadFolderTask();
+    virtual ~ResourceManageReadFolderTask();
+    virtual bool exec() override;
     ResourceManagerModel* model();
     QString path();
 private:

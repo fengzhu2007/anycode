@@ -11,7 +11,7 @@ int diff_output(const git_diff_delta *d, const git_diff_hunk *h, const git_diff_
 
     QList<ady::cvs::DiffFile>* payload = (QList<ady::cvs::DiffFile>*)p;
     ady::cvs::DiffFile::Status status = ady::cvs::DiffFile::Normal;
-    qDebug()<<"name:"<<QString::fromUtf8(d->new_file.path)<<"status:"<<d->status;
+    //qDebug()<<"name:"<<QString::fromUtf8(d->new_file.path)<<"status:"<<d->status;
     if(d->status==GIT_DELTA_ADDED){
         status = ady::cvs::DiffFile::Addition;
     }else if(d->status==GIT_DELTA_DELETED){
@@ -33,108 +33,129 @@ int diff_output(const git_diff_delta *d, const git_diff_hunk *h, const git_diff_
 
 namespace ady {
 namespace cvs {
+
+class GitRepositoryPrivate{
+public:
+    git_repository* repo;
+    git_revwalk* revwalk;
+    QString path;
+};
+
+
+
 GitRepository::GitRepository()
     :Repository()
 {
-    m_repo = nullptr;
-    m_revwalk = nullptr;
+    d = new GitRepositoryPrivate;
+    d->repo = nullptr;
+    d->revwalk = nullptr;
     git_libgit2_init();
 
 }
 
 GitRepository::~GitRepository()
 {
-
+    this->freeRevwalk();
+    if(d->repo!=nullptr)
+        git_repository_free(d->repo);
+    git_libgit2_shutdown();
+    delete d;
 }
 
-void GitRepository::init(QString path)
+void GitRepository::init(const QString& path)
 {
-    if(m_repo==nullptr){
-        m_path = path;
+    if(d->repo==nullptr){
+        d->path = path;
         //git_libgit2_init();
         /*int result = git_repository_init(&m_repo, path.toLocal8Bit(), 0);
         if(result!=0){
             qDebug()<<"init result 1:"<<result;
         }*/
-        int result = git_repository_open_ext(&m_repo, m_path.toLocal8Bit(), 0, NULL);
+        int result = git_repository_open_ext(&d->repo, d->path.toLocal8Bit(), 0, NULL);
         if(result!=0){
             qDebug()<<"init result 2:"<<result;
         }
     }
 }
 
-void GitRepository::destory()
-{
-    this->freeRevwalk();
-    if(m_repo!=nullptr)
-        git_repository_free(this->m_repo);
-    git_libgit2_shutdown();
+QString GitRepository::path(){
+    return d->path;
 }
 
-QList<Branch*> GitRepository::branchLists()
-{
-    m_branchLists.clear();
-    if(m_repo!=nullptr && m_branchLists.size()==0){
+
+QList<Branch> GitRepository::branchLists(){
+    QList<Branch> list;
+    if(d->repo!=nullptr){
         git_branch_iterator* branch_iterator = nullptr;
         git_reference* tmp_branch = nullptr;
         git_branch_t branch_type;
-        git_branch_iterator_new(&branch_iterator, m_repo, GIT_BRANCH_LOCAL);
+        git_branch_iterator_new(&branch_iterator, d->repo, GIT_BRANCH_LOCAL);
         while (GIT_ITEROVER != git_branch_next(&tmp_branch, &branch_type, branch_iterator))
         {
             const char* branch_name;
             git_branch_name(&branch_name, tmp_branch);
             bool is_head = git_branch_is_head(tmp_branch);
-            Branch* branch = new Branch(QString::fromUtf8(branch_name),is_head);
-            m_branchLists.push_back(branch);
+            list.push_back(Branch{QString::fromUtf8(branch_name),is_head});
         }
     }
-    return Repository::branchLists();
+    return list;
 }
 
-bool GitRepository::switchBranch(const QString& name)
-{
-    if(m_repo==nullptr){
-        return false;
+const QString GitRepository::headBranch(){
+    QString head;
+    if(d->repo!=nullptr){
+        git_branch_iterator* branch_iterator = nullptr;
+        git_reference* tmp_branch = nullptr;
+        git_branch_t branch_type;
+        git_branch_iterator_new(&branch_iterator, d->repo, GIT_BRANCH_LOCAL);
+        while (GIT_ITEROVER != git_branch_next(&tmp_branch, &branch_type, branch_iterator))
+        {
+            const char* branch_name;
+            git_branch_name(&branch_name, tmp_branch);
+            bool is_head = git_branch_is_head(tmp_branch);
+            if(is_head){
+                head = QString::fromUtf8(branch_name);
+            }
+        }
     }
-    git_reference* lookup_branch = nullptr;
-    int result = git_branch_lookup(&lookup_branch,m_repo, name.toStdString().c_str()/* "dev"*/, GIT_BRANCH_LOCAL);
-    result = git_repository_set_head(m_repo, git_reference_name(lookup_branch));
-    return (result == 0);
+    return head;
 }
+
+
 
 void GitRepository::freeRevwalk()
 {
-    if(m_revwalk!=nullptr){
-        git_revwalk_free(m_revwalk);
-        m_revwalk = nullptr;
+    if(d->revwalk!=nullptr){
+        git_revwalk_free(d->revwalk);
+        d->revwalk = nullptr;
     }
 }
 
 QList<Commit> GitRepository::commitLists(int num)
 {
     QList<Commit> lists;
-    if(m_repo==nullptr){
+    if(d->repo==nullptr){
         return lists;
     }
     unsigned i = 0;
     int result = 0;
     git_oid oid;
     git_commit *commit = nullptr;
-    if(m_revwalk==nullptr){
-        result = git_revwalk_new(&m_revwalk, this->m_repo);
+    if(d->revwalk==nullptr){
+        result = git_revwalk_new(&d->revwalk, d->repo);
         if(result==0){
-            result = git_revwalk_sorting(m_revwalk, GIT_SORT_TIME);
-            result = git_revwalk_push_head(m_revwalk);
+            result = git_revwalk_sorting(d->revwalk, GIT_SORT_TIME);
+            result = git_revwalk_push_head(d->revwalk);
         }else{
             return lists;
         }
     }
-    for (; !git_revwalk_next(&oid, m_revwalk); git_commit_free(commit)) {
+    for (; !git_revwalk_next(&oid, d->revwalk); git_commit_free(commit)) {
         if (i++ >= num) {
             break;
         }
         Commit item;
-        result = git_commit_lookup(&commit, this->m_repo, &oid);
+        result = git_commit_lookup(&commit, d->repo, &oid);
         if(result!=0){
             break;
         }
@@ -162,28 +183,28 @@ QList<Commit> GitRepository::commitLists(int num)
 
 QList<Commit>* GitRepository::queryCommit(int num){
     auto list = new QList<Commit>;
-    if(m_repo==nullptr){
+    if(d->repo==nullptr){
         return list;
     }
     unsigned i = 0;
     int result = 0;
     git_oid oid;
     git_commit *commit = nullptr;
-    if(m_revwalk==nullptr){
-        result = git_revwalk_new(&m_revwalk, this->m_repo);
+    if(d->revwalk==nullptr){
+        result = git_revwalk_new(&d->revwalk, d->repo);
         if(result==0){
-              result = git_revwalk_sorting(m_revwalk, GIT_SORT_TIME);
-              result = git_revwalk_push_head(m_revwalk);
+              result = git_revwalk_sorting(d->revwalk, GIT_SORT_TIME);
+              result = git_revwalk_push_head(d->revwalk);
         }else{
               return list;
         }
     }
-    for (; !git_revwalk_next(&oid, m_revwalk); git_commit_free(commit)) {
+    for (; !git_revwalk_next(&oid, d->revwalk); git_commit_free(commit)) {
         if (i++ >= num) {
               break;
         }
         Commit item;
-        result = git_commit_lookup(&commit, this->m_repo, &oid);
+        result = git_commit_lookup(&commit, d->repo, &oid);
         if(result!=0){
               break;
         }
@@ -227,7 +248,7 @@ QList<DiffFile> GitRepository::diffFileLists(QString oid1,QString oid2)
     }else{
         result = git_oid_fromstr(&oid, oid1.toStdString().c_str());
         if(result==0){
-            result = git_commit_lookup(&commit, this->m_repo, &oid);
+            result = git_commit_lookup(&commit, d->repo, &oid);
             if(result==0){
                 result = git_commit_tree(&a, commit);
                 if(result!=0){
@@ -242,13 +263,13 @@ QList<DiffFile> GitRepository::diffFileLists(QString oid1,QString oid2)
         if(oid2.isEmpty()){
             //current commit diff
             int parents = (int)git_commit_parentcount(commit);
-            qDebug()<<"parents num:"<<parents;
+            //qDebug()<<"parents num:"<<parents;
             if (parents == 1) {
                 git_commit_parent(&parent, commit, 0);
                 //git_tree *a = nullptr;
                 git_commit_tree(&b, parent);
                 git_commit_free(parent);
-                git_diff_tree_to_tree(&diff, this->m_repo, b, a, &diffopts);
+                git_diff_tree_to_tree(&diff, d->repo, b, a, &diffopts);
                 git_diff_print(diff, GIT_DIFF_FORMAT_NAME_STATUS, diff_output, &lists);
                 git_tree_free(b);
             }else{
@@ -257,7 +278,7 @@ QList<DiffFile> GitRepository::diffFileLists(QString oid1,QString oid2)
                     //git_tree *a = nullptr;
                     git_commit_tree(&b, parent);
                     git_commit_free(parent);
-                    git_diff_tree_to_tree(&diff, this->m_repo, b, a, &diffopts);
+                    git_diff_tree_to_tree(&diff, d->repo, b, a, &diffopts);
                     git_diff_print(diff, GIT_DIFF_FORMAT_NAME_STATUS, diff_output, &lists);
                     git_tree_free(b);
                 }
@@ -266,12 +287,12 @@ QList<DiffFile> GitRepository::diffFileLists(QString oid1,QString oid2)
             //diff oid1 and oid2
             result = git_oid_fromstr(&oid, oid2.toStdString().c_str());
             if(result==0){
-                result = git_commit_lookup(&commit, this->m_repo, &oid);
+                result = git_commit_lookup(&commit, d->repo, &oid);
                 if(result==0){
                     result = git_commit_tree(&b, commit);
                     if(result==0){
 
-                        git_diff_tree_to_tree(&diff, this->m_repo, b, a, &diffopts);
+                        git_diff_tree_to_tree(&diff, d->repo, b, a, &diffopts);
                         git_diff_print(diff, GIT_DIFF_FORMAT_NAME_STATUS, diff_output, &lists);
                         git_tree_free(b);
 
@@ -314,7 +335,7 @@ QList<DiffFile>* GitRepository::queryDiff(QString oid1,QString oid2){
     }else{
         result = git_oid_fromstr(&oid, oid1.toStdString().c_str());
         if(result==0){
-            result = git_commit_lookup(&commit, this->m_repo, &oid);
+            result = git_commit_lookup(&commit, d->repo, &oid);
             if(result==0){
                 result = git_commit_tree(&a, commit);
                 if(result!=0){
@@ -329,13 +350,13 @@ QList<DiffFile>* GitRepository::queryDiff(QString oid1,QString oid2){
         if(oid2.isEmpty()){
             //current commit diff
             int parents = (int)git_commit_parentcount(commit);
-            qDebug()<<"parents num:"<<parents;
+            //qDebug()<<"parents num:"<<parents;
             if (parents == 1) {
                 git_commit_parent(&parent, commit, 0);
                 //git_tree *a = nullptr;
                 git_commit_tree(&b, parent);
                 git_commit_free(parent);
-                git_diff_tree_to_tree(&diff, this->m_repo, b, a, &diffopts);
+                git_diff_tree_to_tree(&diff, d->repo, b, a, &diffopts);
                 git_diff_print(diff, GIT_DIFF_FORMAT_NAME_STATUS, diff_output, list);
                 git_tree_free(b);
             }else{
@@ -344,7 +365,7 @@ QList<DiffFile>* GitRepository::queryDiff(QString oid1,QString oid2){
                     //git_tree *a = nullptr;
                     git_commit_tree(&b, parent);
                     git_commit_free(parent);
-                    git_diff_tree_to_tree(&diff, this->m_repo, b, a, &diffopts);
+                    git_diff_tree_to_tree(&diff, d->repo, b, a, &diffopts);
                     git_diff_print(diff, GIT_DIFF_FORMAT_NAME_STATUS, diff_output, list);
                     git_tree_free(b);
                 }
@@ -353,12 +374,12 @@ QList<DiffFile>* GitRepository::queryDiff(QString oid1,QString oid2){
             //diff oid1 and oid2
             result = git_oid_fromstr(&oid, oid2.toStdString().c_str());
             if(result==0){
-                result = git_commit_lookup(&commit, this->m_repo, &oid);
+                result = git_commit_lookup(&commit, d->repo, &oid);
                 if(result==0){
                     result = git_commit_tree(&b, commit);
                     if(result==0){
 
-                        git_diff_tree_to_tree(&diff, this->m_repo, b, a, &diffopts);
+                        git_diff_tree_to_tree(&diff, d->repo, b, a, &diffopts);
                         git_diff_print(diff, GIT_DIFF_FORMAT_NAME_STATUS, diff_output, list);
                         git_tree_free(b);
 
@@ -390,7 +411,7 @@ QList<DiffFile>* GitRepository::statusLists(){
     auto list = new QList<DiffFile>;
     git_status_list *status;
     git_status_options options;
-    if (git_repository_is_bare(m_repo)!=0){
+    if (git_repository_is_bare(d->repo)!=0){
         //qDebug()<<"Cannot report status on bare repository;"<< git_repository_path(m_repo);
         return list;
     }
@@ -404,7 +425,7 @@ QList<DiffFile>* GitRepository::statusLists(){
     options.flags = GIT_STATUS_OPT_INCLUDE_UNTRACKED  | GIT_STATUS_OPT_SORT_CASE_SENSITIVELY ;
     //options.pathspec.strings  = pathspec;
     //options.pathspec.count = 1;
-    int ret = git_status_list_new(&status,this->m_repo,NULL);
+    int ret = git_status_list_new(&status,d->repo,NULL);
     size_t i, maxi;
     const git_status_entry *s;
     if(ret!=0){
@@ -476,15 +497,19 @@ QList<DiffFile>* GitRepository::statusLists(){
     return list;
 }
 
+Error GitRepository::error() const {
+    return {0,{}};
+}
+
 
 void GitRepository::formatDiffLists(QList<DiffFile>& lists)
 {
     QList<DiffFile>::iterator iter = lists.begin();
     while(iter!=lists.end()){
-        QFileInfo fi(m_path + "/"+(*iter).path());
+        QFileInfo fi(d->path + "/"+(*iter).path());
         if(fi.exists()){
             (*iter).setFilesize(fi.size());
-            (*iter).setFiletime(fi.fileTime(QFile::FileTime::FileModificationTime).toString("yyyy-MM-dd HH:mm"));
+            (*iter).setFiletime(fi.fileTime(QFile::FileTime::FileModificationTime));
         }
         iter++;
     }

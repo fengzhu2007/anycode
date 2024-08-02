@@ -18,6 +18,7 @@ include_directories(SYSTEM "../3party/bin/x64/include")
 include_directories(SYSTEM "../libsvnpp/include")
 include_directories(SYSTEM "../dockingpane/src")
 include_directories(SYSTEM "../wRect/src")
+include_directories(SYSTEM "../texteditor")
 
 
 find_library(CRYPTO_LIB libcrypto PATHS "../3party/bin/x64/lib")
@@ -72,7 +73,7 @@ add_library(App SHARED
         ${FORMS_HEADERS}
         ${RESOURCE_ADDED}
         ${SOURCES}
-        AddonLoader.cpp
+        addon_loader.h addon_loader.cpp
         components/DirComboBox.cpp
         components/DirMappingView.cpp
         components/IconWidget.cpp
@@ -86,6 +87,7 @@ add_library(App SHARED
         cvs/diff_file.h cvs/diff_file.cpp
         cvs/diff_file_model.h cvs/diff_file_model.cpp
         cvs/repository.h cvs/repository.cpp
+        cvs/error.h cvs/error.cpp
         cvs/git/git_repository.h cvs/git/git_repository.cpp
         cvs/svn/svn_repository.h cvs/svn/svn_repository.cpp
         interface/FormPanel.cpp
@@ -93,7 +95,7 @@ add_library(App SHARED
         interface/NotificationImpl.cpp
         interface/Panel.cpp
         interface/RemoteFileItemModel.cpp
-        local/FileItem.cpp
+        local/file_item.h local/file_item.cpp
         local/FileItemModel.cpp
         localdirpanel.cpp
         mainwindow.cpp
@@ -108,12 +110,12 @@ add_library(App SHARED
         modules/import/DataImport.cpp
         modules/log/Log.cpp
         modules/log/LogViewer.cpp
-        network/NetworkListen.cpp
-        network/NetworkManager.cpp
-        network/NetworkRequest.cpp
-        network/NetworkResponse.cpp
-        network/http/HttpClient.cpp
-        network/http/HttpResponse.cpp
+        network/network_listen.h network/network_listen.cpp
+        network/network_manager.h network/network_manager.cpp
+        network/network_request.h network/network_request.cpp
+        network/network_response.h network/network_response.cpp
+        network/http/http_client.h network/http/http_client.cpp
+        network/http/http_response.h network/http/http_response.cpp
         project/ManagerTreeItem.cpp
         project/ManagerTreeModel.cpp
         project/ManagerWindow.cpp
@@ -124,22 +126,22 @@ add_library(App SHARED
         project/SiteGroupListModel.cpp
         project/SiteTypeListModel.cpp
         project/SplitterHandleWidget.cpp
-        storage/AddonStorage.cpp
-        storage/CommitStorage.cpp
+        storage/addon_storage.h storage/addon_storage.cpp
+        storage/commit_storage.h storage/commit_storage.cpp
         storage/CommonStorage.cpp
         storage/DatabaseHelper.cpp
         storage/FavoriteStorage.cpp
-        storage/GroupStorage.cpp
-        storage/ProjectStorage.cpp
+        storage/group_storage.h storage/group_storage.cpp
+        storage/project_storage.h storage/project_storage.cpp
         storage/SiteSetting.cpp
-        storage/SiteStorage.cpp
+        storage/site_storage.h storage/site_storage.cpp
         storage/Storage.cpp
         transfer/Task.cpp
         transfer/TaskPoolModel.cpp
         transfer/TaskThread.cpp
         common/utils.cpp common/utils.h
         view/StatusBarView.cpp
-        zip/ZipArchive.cpp
+        zip/zip_archive.h zip/zip_archive.cpp
         zip/minizip/ioapi.c
         zip/minizip/mztools.c
         zip/minizip/unzip.c
@@ -167,7 +169,6 @@ add_library(App SHARED
         project/project_select_model.h project/project_select_model.cpp
         panes/resource_manager/resource_manager_tree_item_delegate.h panes/resource_manager/resource_manager_tree_item_delegate.cpp
         panes/code_editor/code_editor_pane.h panes/code_editor/code_editor_pane.cpp
-        panes/code_editor/code_editor.h panes/code_editor/code_editor.cpp
         panes/code_editor/language/php_high_lighter.h panes/code_editor/language/php_high_lighter.cpp
         core/backend_thread.h core/backend_thread.cpp
         panes/resource_manager/resource_manage_read_folder_task.h panes/resource_manager/resource_manage_read_folder_task.cpp
@@ -185,6 +186,23 @@ add_library(App SHARED
         panes/version_control/version_control_pane.ui
         panes/version_control/version_control_query_commit_task.h panes/version_control/version_control_query_commit_task.cpp
         panes/version_control/version_control_query_diff_task.h panes/version_control/version_control_query_diff_task.cpp
+        panes/resource_manager/resource_manage_tree_view.h panes/resource_manager/resource_manage_tree_view.cpp
+        core/event_bus/type.h core/event_bus/type.cpp
+        core/event_bus/event_data.h
+        panes/server_manage/server_manage_pane.h panes/server_manage/server_manage_pane.cpp panes/server_manage/server_manage_pane.ui
+        panes/file_transfer/file_transfer_pane.h panes/file_transfer/file_transfer_pane.cpp panes/file_transfer/file_transfer_pane.ui
+        panes/file_transfer/file_transfer_model.h panes/file_transfer/file_transfer_model.cpp
+        panes/code_editor/code_editor_view.h panes/code_editor/code_editor_view.cpp
+        panes/server_manage/server_manage_model.h panes/server_manage/server_manage_model.cpp
+        panes/server_manage/server_request_thread.h panes/server_manage/server_request_thread.cpp
+        panes/server_manage/new_folder_dialog.h panes/server_manage/new_folder_dialog.cpp
+        panes/server_manage/new_folder_dialog.ui
+        panes/find_replace/find_replace_dialog.h panes/find_replace/find_replace_dialog.cpp panes/find_replace/find_replace_dialog.ui
+        panes/find_replace/find_replace_pane.h panes/find_replace/find_replace_pane.cpp panes/find_replace/find_replace_pane.ui
+        panes/find_replace/find_widget.h panes/find_replace/find_widget.cpp panes/find_replace/find_widget.ui
+        panes/find_replace/replace_widget.h panes/find_replace/replace_widget.cpp panes/find_replace/replace_widget.ui
+
+
 
 )
 
@@ -192,7 +210,7 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} libsvnpp dockingpane wRect)
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} libsvnpp dockingpane wRect texteditor)
 
 target_compile_definitions(App PRIVATE APP_LIBRARY)
 

@@ -1,6 +1,6 @@
 #include "OSSPanel.h"
 #include "ui_OSSPanelUi.h"
-#include "network/NetworkManager.h"
+#include "network/network_manager.h"
 #include "oss.h"
 #include "OSSResponse.h"
 #include <QThread>
@@ -122,11 +122,12 @@ void OSSPanel::init(SiteRecord record)
 
 NetworkRequest* OSSPanel::request()
 {
-    NetworkRequest* req = NetworkManager::getInstance()->request(this->getId());
+    /*NetworkRequest* req = NetworkManager::getInstance()->request(this->getId());
     if(req==nullptr){
         req = NetworkManager::getInstance()->newRequest<OSS>(this->getId());
     }
-    return req;
+    return req;*/
+    return nullptr;
 }
 
 void OSSPanel::deleteFiles(QList<FileItem>items)

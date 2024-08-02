@@ -2,7 +2,7 @@
 #define OSSPANEL_H
 #include "OSS_global.h"
 #include "interface/Panel.h"
-#include "storage/SiteStorage.h"
+#include "storage/site_storage.h"
 #include <QMutex>
 #include <QMimeData>
 #include <QLineEdit>

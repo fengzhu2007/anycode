@@ -2,8 +2,8 @@
 #include "FTPParse.h"
 #include <QDebug>
 namespace ady {
-    FTPResponse::FTPResponse()
-        :NetworkResponse()
+    FTPResponse::FTPResponse(long long id)
+        :NetworkResponse(id)
     {
 
     }
@@ -14,7 +14,7 @@ namespace ady {
         if(this->command.toUpper().left(4)=="MLSD"){
             mlsd = true;
         }
-        qDebug()<<"body:"<<this->body;
+        //qDebug()<<"body:"<<this->body;
         //qDebug()<<"command:"<<mlsd;
 #ifdef Q_OS_MAC
         QStringList lines = this->body.split("\n");
@@ -22,7 +22,6 @@ namespace ady {
 #else
       QStringList lines = this->body.split("\r\n");
 #endif
-
         QStringList::iterator iter = lines.begin();
         QList<FileItem> lists;
         QString dir = this->params["dir"].toString();

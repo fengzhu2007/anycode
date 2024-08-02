@@ -48,6 +48,9 @@
    </item>
    <item>
     <widget class="QTreeView" name="commitListView">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
      <property name="rootIsDecorated">
       <bool>false</bool>
      </property>
@@ -77,12 +80,17 @@
       </size>
      </property>
      <addaction name="actionBackwards"/>
+     <addaction name="actionCompare_Commits"/>
+     <addaction name="separator"/>
      <addaction name="actionUpload"/>
      <addaction name="actionPack_Zip"/>
     </widget>
    </item>
    <item>
     <widget class="QTreeView" name="diffListView">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
      <property name="rootIsDecorated">
       <bool>false</bool>
      </property>
@@ -129,6 +137,89 @@
    </property>
    <property name="text">
     <string>Pack Zip</string>
+   </property>
+  </action>
+  <action name="actionCompare_Commits">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/CompareFolders_16x.svg</normaloff>:/Resource/icons/CompareFolders_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Compare Commits</string>
+   </property>
+  </action>
+  <action name="actionMark_as_Dev">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/flag_dev.svg</normaloff>:/Resource/icons/flag_dev.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Mark as Dev</string>
+   </property>
+  </action>
+  <action name="actionMark_as_Prod">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/flag_prod.svg</normaloff>:/Resource/icons/flag_prod.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Mark as Prod</string>
+   </property>
+  </action>
+  <action name="actionMark_as_Other">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/flag_other.svg</normaloff>:/Resource/icons/flag_other.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Mark as Other</string>
+   </property>
+  </action>
+  <action name="actionClear_Flags">
+   <property name="text">
+    <string>Clear Flags</string>
+   </property>
+  </action>
+  <action name="actionClear_All_Flags">
+   <property name="text">
+    <string>Clear All Flags</string>
+   </property>
+  </action>
+  <action name="actionSynchronous_Deletion">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/DeleteTranslation_16x.svg</normaloff>:/Resource/icons/DeleteTranslation_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Synchronous Deletion</string>
+   </property>
+  </action>
+  <action name="actionPack_Selection_To_Zip">
+   <property name="text">
+    <string>Pack Selection To Zip</string>
+   </property>
+  </action>
+  <action name="actionOpen_File">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/OpenFile_16x.svg</normaloff>:/Resource/icons/OpenFile_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Open File</string>
+   </property>
+  </action>
+  <action name="actionOpen_Folder">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/OpenFolder_16x.svg</normaloff>:/Resource/icons/OpenFolder_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Open Folder</string>
+   </property>
+  </action>
+  <action name="actionCopy_Path">
+   <property name="text">
+    <string>Copy Path</string>
    </property>
   </action>
  </widget>

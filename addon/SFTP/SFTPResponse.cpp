@@ -2,8 +2,8 @@
 #include "SFTPParse.h"
 #include <QDebug>
 namespace ady {
-    SFTPResponse::SFTPResponse()
-        :NetworkResponse()
+    SFTPResponse::SFTPResponse(long long id)
+        :NetworkResponse(id)
     {
 
     }

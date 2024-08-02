@@ -2,9 +2,9 @@
 #include "FTPPanel.h"
 #include "FTPFormGeneral.h"
 #include "FTPFormDirSetting.h"
-#include "network/NetworkManager.h"
+#include "network/network_manager.h"
 #include "ftp.h"
-#include "storage/SiteStorage.h"
+#include "storage/site_storage.h"
 #include "FTPResponse.h"
 
 #include <QDebug>
@@ -43,7 +43,7 @@ int requestConnect(void* ptr)
 {
     ady::SiteRecord* record = (ady::SiteRecord*)ptr;
     if(record->type=="FTP"){
-        ady::FTP* ftp = ady::NetworkManager::getInstance()->newRequest<ady::FTP>();
+        auto ftp = ady::NetworkManager::getInstance()->newRequest<ady::FTP>();
         ftp->setHost(record->host);
         ftp->setPort(record->port);
         ftp->setUsername(record->username);
@@ -77,4 +77,8 @@ int requestConnect(void* ptr)
     }else{
         return -1;//unknow network type
     }
+}
+
+ady::NetworkRequest* initRequest(long long id){
+    return ady::NetworkManager::getInstance()->newRequest<ady::FTP>(id);
 }

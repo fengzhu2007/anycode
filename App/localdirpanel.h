@@ -3,10 +3,10 @@
 
 #include <QWidget>
 #include <QComboBox>
-#include "local/FileItem.h"
-#include "storage/SiteStorage.h"
-#include "storage/ProjectStorage.h"
-#include "storage/GroupStorage.h"
+#include "local/file_item.h"
+#include "storage/site_storage.h"
+#include "storage/project_storage.h"
+#include "storage/group_storage.h"
 #include "cvs/commit.h"
 namespace Ui {
 class LocalDirPanel;

@@ -2,7 +2,7 @@
 #define SITEFRAMEWORKWIDGET_H
 #include "global.h"
 #include <QWidget>
-#include "storage/SiteStorage.h"
+#include "storage/site_storage.h"
 namespace Ui {
 class SiteFrameworkWidgetUI;
 }

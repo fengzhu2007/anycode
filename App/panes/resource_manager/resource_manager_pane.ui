@@ -91,7 +91,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="treeView">
+    <widget class="ady::ResourceManageTreeView" name="treeView">
      <property name="editTriggers">
       <set>QAbstractItemView::EditKeyPressed</set>
      </property>
@@ -138,6 +138,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ady::ResourceManageTreeView</class>
+   <extends>QTreeView</extends>
+   <header>panes/resource_manager/resource_manage_tree_view.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../r.qrc"/>
  </resources>

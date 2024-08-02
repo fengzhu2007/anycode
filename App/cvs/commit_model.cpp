@@ -1,6 +1,8 @@
 #include "commit_model.h"
 #include <QColor>
 #include <QApplication>
+#include <QPainter>
+#include <QTreeView>
 #include <QDebug>
 namespace ady {
 
@@ -9,10 +11,9 @@ namespace ady {
 
 class CommitItemDelegatePrivate{
 public:
-    QPixmap devIcon;
-    QPixmap prodIcon;
-    QPixmap otherIcon;
-    int boxWidth =20;
+    QColor dev;
+    QColor prod;
+    QColor other;
 };
 
 
@@ -21,9 +22,10 @@ CommitItemDelegate::CommitItemDelegate(QObject* parent)
     :QStyledItemDelegate(parent)
 {
     d = new CommitItemDelegatePrivate;
-    d->devIcon.load(QString::fromUtf8(":/img/Resource/flag_dev.svg"));
-    d->prodIcon.load(QString::fromUtf8(":/img/Resource/flag_prod.svg"));
-    d->otherIcon.load(QString::fromUtf8(":/img/Resource/flag_other.svg"));
+    d->dev = QColor("#fa8c16");
+    d->prod = QColor("#52c41a");
+    d->other = QColor("#1890ff");
+
 }
 
 CommitItemDelegate::~CommitItemDelegate(){
@@ -32,24 +34,54 @@ CommitItemDelegate::~CommitItemDelegate(){
 
 void CommitItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    /*int col = index.column();
-    if(col == CommitModel::Flags){
-        QStyle* style =  QApplication::style();
-        int value = index.data().toInt();
+    QStyleOptionViewItem opt = option;
+    initStyleOption(&opt, index);
+    int col = index.column();
+    if(col==CommitModel::DateTime){
+        int row = index.row();
+        auto model = static_cast<CommitModel*>(static_cast<QTreeView*>(parent())->model());
+        auto one = model->at(row);
+        const int value = one.flag();
+        int start = 0;
+        int x = option.rect.x() + 1;
+        int y = option.rect.y() + 1 ;
+        int w = (option.rect.height() - 2) / 3;
+        int h = w;
+        int num = 0;
         if((value & cvs::Commit::Dev)==cvs::Commit::Dev){
-            QRect rc(option.rect.x(),option.rect.y(),d->boxWidth,option.rect.height());
-            style->drawItemPixmap(painter,rc,Qt::AlignCenter,d->devIcon);
+            num += 1;
         }
         if((value & cvs::Commit::Prod)==cvs::Commit::Prod){
-            QRect rc(option.rect.x() + d->boxWidth,option.rect.y(),d->boxWidth,option.rect.height());
-            style->drawItemPixmap(painter,rc,Qt::AlignCenter,d->prodIcon);
+            num += 1;
         }
         if((value & cvs::Commit::Other)==cvs::Commit::Other){
-            QRect rc(option.rect.x() + d->boxWidth * 2,option.rect.y(),d->boxWidth,option.rect.height());
-            style->drawItemPixmap(painter,rc,Qt::AlignCenter,d->otherIcon);
+            num += 1;
         }
-    }*/
-    QStyledItemDelegate::paint(painter, option, index);
+        opt.rect.setX(x + w + 1);
+        if(num>0){
+            y += (3 - num) * h/2;
+            painter->setRenderHint(QPainter::Antialiasing);
+            if((value & cvs::Commit::Dev)==cvs::Commit::Dev){
+                painter->setBrush(d->dev);
+                painter->setPen(d->dev);
+                painter->drawEllipse(x,y + start,w,h);
+                start += h;
+            }
+            if((value & cvs::Commit::Prod)==cvs::Commit::Prod){
+                painter->setBrush(d->prod);
+                painter->setPen(d->prod);
+                painter->drawEllipse(x,y + start,w,h);
+                start += h;
+            }
+            if((value & cvs::Commit::Other)==cvs::Commit::Other){
+                painter->setBrush(d->other);
+                painter->setPen(d->other);
+                painter->drawEllipse(x,y + start,w,h);
+                start += h;
+            }
+        }
+    }
+    QStyledItemDelegate::paint(painter, opt, index);
 }
 
 
@@ -99,18 +131,13 @@ QVariant CommitModel::data(const QModelIndex &index, int role) const
         }
     }else if(role == Qt::ToolTipRole){
         const auto &item = d->data.at(index.row());
-        return tr("ID:%1\nDate:%2\nAuthor:%3\nMessage:%4").arg(item.oid()).arg(item.time().toString("yyyy-MM-dd HH:mm")).arg(item.author()).arg(item.content());
+        return tr("Commit ID:%1\nDate:%2\nAuthor:%3\nMessage:%4").arg(item.oid()).arg(item.time().toString("yyyy-MM-dd HH:mm")).arg(item.author()).arg(item.content());
     }else if(role == Qt::BackgroundRole){
         int row = index.row();
         if(d->comapreRows.contains(row)){
             return QColor(255,229,143);
         }
-    }/*else if(role == Qt::ForegroundRole){
-        int column = index.column();
-        if(column==Flags){
-            return QColor::fromRgb(0,0,0,0);
-        }
-    }*/
+    }
     return QVariant();
 }
 
@@ -165,7 +192,7 @@ void CommitModel::setList(QList<cvs::Commit> data)
     endResetModel();
 }
 
-cvs::Commit CommitModel::at(int row){
+cvs::Commit CommitModel::at(int row) const{
     return d->data.at(row);
 }
 
@@ -177,6 +204,9 @@ void CommitModel::setDataSource(QList<cvs::Commit> data){
 
 void CommitModel::appendList(QList<cvs::Commit> data)
 {
+    if(data.size()==0){
+        return ;
+    }
     int count = rowCount();
     beginInsertRows(QModelIndex(), count, count+data.size()-1);
     d->data<<data;
@@ -217,47 +247,14 @@ void CommitModel::appendList(QList<cvs::Commit> data)
     }
  }
 
-
-
-QList<cvs::Commit> CommitModel::compareRows()
-{
-    std::sort(d->comapreRows.begin(),d->comapreRows.end());
-    QList<cvs::Commit> lists;
-    int rowCount = this->rowCount();
-    for(auto row:d->comapreRows){
-        if(row>=0 && row<rowCount){
-            lists.push_back(getItem(row));
-        }
-    }
-    return lists;
-}
-
-int CommitModel::compareRow(int row)
-{
-    int size = d->comapreRows.size();
-    if(size==2){
-        d->comapreRows.clear();
-    }
-    if(d->comapreRows.contains(row)==false){
-        d->comapreRows.push_back(row);
-        //QModelIndex leftTop = createIndex(row,Flags);
-        //QModelIndex rightBottom = createIndex(row,Content);
-        //emit dataChanged(leftTop,rightBottom,QVector<int>(Qt::BackgroundRole));
-    }
-    return d->comapreRows.size();
-}
-
-void CommitModel::clearCompareRows()
-{
-    QList<int>::iterator iter = d->comapreRows.begin();
-    while(iter!=d->comapreRows.end()){
-        int row = (*iter);
-        //QModelIndex leftTop = createIndex(row,Flags);
-        //QModelIndex rightBottom = createIndex(row,Content);
-        //d->comapreRows.erase(iter);
-        //emit dataChanged(leftTop,rightBottom,QVector<int>(Qt::BackgroundRole));
+ void CommitModel::clearAllFlags(){
+    auto iter = d->data.begin();
+    while(iter!=d->data.end()){
+        (*iter).setFlagValue(0);
         iter++;
     }
-}
+ }
+
+
 
 }

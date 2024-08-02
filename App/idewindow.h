@@ -27,6 +27,8 @@ namespace ady{
         void onActionTriggered();
         void onOpenFile(const QString& path);
         void onOpenFolder(const QString& path);
+        void onSearch(const QString& text,int flags,bool hightlight=true);
+        void onSearchCancel();
 
     protected:
         //virtual void closeEvent(QCloseEvent *event) override;

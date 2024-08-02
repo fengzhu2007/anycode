@@ -35,8 +35,8 @@ constexpr const  char COS::MAXKEYS[] ;
 constexpr const  char COS::PREFIX[] ;
 constexpr const  char COS::ACCEPT_ENCODING[] ;
 
-COS::COS(CURL* curl)
-    :HttpClient(curl)
+COS::COS(CURL* curl,long long id)
+    :HttpClient(curl,id)
 {
     this->connected = false;
     this->setOption(CURLOPT_TIMEOUT,COMMAND_TIMEOUT);
@@ -103,7 +103,7 @@ NetworkResponse* COS::link()
     QString url = "http://"+headers[HOST]+"/";
     url = this->fixUrl(url,params);
    //qDebug()<<"url:"<<url;
-    COSResponse* response = new  COSResponse();
+    COSResponse* response = new  COSResponse(this->id);
     this->get(url,response);
     this->setOption(CURLOPT_NOBODY,0);
     return response;
@@ -116,7 +116,7 @@ NetworkResponse* COS::unlink()
     return nullptr;
 }
 
-NetworkResponse* COS::listDir(QString dir,int page,int pageSize)
+NetworkResponse* COS::listDir(const QString& dir,int page,int pageSize)
 {
     Q_UNUSED(page);
     //Q_UNUSED(pageSize);
@@ -162,7 +162,7 @@ NetworkResponse* COS::listDir(QString dir,int page,int pageSize)
         QString url = "http://"+headers[HOST]+"/";
         url = this->fixUrl(url,params);
         //qDebug()<<"url:"<<url;
-        COSResponse* res = new  COSResponse();
+        COSResponse* res = new  COSResponse(this->id);
         this->get(url,res);
         res->debug();
         if(res->status()){
@@ -186,7 +186,7 @@ NetworkResponse* COS::listDir(QString dir,int page,int pageSize)
 
 }
 
-NetworkResponse* COS::tinyListDir(QString dir)
+NetworkResponse* COS::tinyListDir(const QString& dir)
 {
 
     QMutexLocker locker(&mutex);
@@ -230,7 +230,7 @@ NetworkResponse* COS::tinyListDir(QString dir)
         this->addHeader(lists);
         QString url = "http://"+headers[HOST]+"/";
         url = this->fixUrl(url,params);
-        COSResponse* res = new  COSResponse();
+        COSResponse* res = new  COSResponse(this->id);
         this->get(url,res);
         if(res->status()){
             response->setStatus(true);
@@ -289,7 +289,7 @@ NetworkResponse* COS::upload(Task* task)
             this->addHeader(lists);
             //qDebug()<<"header:"<<lists;
             QString url = "http://"+headers[HOST]+this->escape(remote);
-            COSResponse* response = new  COSResponse();
+            COSResponse* response = new  COSResponse(this->id);
             this->setOption(CURLOPT_URL,url.toStdString().c_str());
             this->setOption(CURLOPT_POST,0);
             this->setOption(CURLOPT_HTTPPOST,nullptr);
@@ -392,7 +392,7 @@ NetworkResponse* COS::download(Task* task)
 
             QString url = "http://"+headers[HOST]+this->escape(remote);
             qDebug()<<"url:"<<url;
-            COSResponse* response = new  COSResponse();
+            COSResponse* response = new  COSResponse(this->id);
 
 
             this->setOption(CURLOPT_URL,url.toStdString().c_str());
@@ -461,20 +461,22 @@ NetworkResponse* COS::del(Task* task)
     }
 }
 
+NetworkResponse* COS::del(const QString &dst){
+    return this->del({},dst);
+}
 
-
-
-NetworkResponse* COS::del(QString bucket,QString dst)
+NetworkResponse* COS::del(const QString& bucket,const QString& dst)
 {
     QMutexLocker locker(&mutex);
     HttpParams headers;
     HttpParams params;
-    if(dst.startsWith("/")){
-        dst = dst.mid(1);
+    QString path = dst;
+    if(path.startsWith("/")){
+        path = dst.mid(1);
     }
     QStringList arr = this->host.split(".");
     headers[HOST] = this->host;
-    QString Authorization = this->signHeaders("DELETE","/"+dst,headers,params);
+    QString Authorization = this->signHeaders("DELETE","/"+path,headers,params);
     headers[AUTHORIZATION] = Authorization;
 
     QStringList lists;
@@ -494,7 +496,7 @@ NetworkResponse* COS::del(QString bucket,QString dst)
         this->setOption(CURLOPT_HTTPHEADER,chunk);
     }
 
-    COSResponse* response = new  COSResponse();
+    COSResponse* response = new  COSResponse(this->id);
 
     //curl_easy_setopt(this->curl, CURLOPT_HEADERDATA, (void *)&response->header);
     //curl_easy_setopt(this->curl, CURLOPT_WRITEDATA, (void *)&response->body);
@@ -517,12 +519,6 @@ NetworkResponse* COS::del(QString bucket,QString dst)
 }
 
 
-
-NetworkResponse* COS::chDir(const QString &dir)
-{
-    Q_UNUSED(dir);
-    return nullptr;
-}
 
 NetworkResponse* COS::mkDir(const QString &dir)
 {
@@ -555,7 +551,7 @@ NetworkResponse* COS::mkDir(const QString &dir)
     this->addHeader(lists);
     QString url = "http://"+headers[HOST]+this->escape(object);
     //qDebug()<<"url:"<<url;
-    COSResponse* response = new  COSResponse();
+    COSResponse* response = new  COSResponse(this->id);
     this->setOption(CURLOPT_URL,url.toStdString().c_str());
     this->setOption(CURLOPT_POST,0);
     this->setOption(CURLOPT_HTTPPOST,nullptr);
@@ -590,13 +586,9 @@ NetworkResponse* COS::rmDir(const QString &dir)
 }
 
 
-NetworkResponse* COS::rename(QString src,QString dst)
-{
-    QMutexLocker locker(&mutex);
-    return nullptr;
-}
 
-NetworkResponse* COS::customeAccess(QString name,QMap<QString,QVariant> data)
+
+NetworkResponse* COS::customeAccess(const QString& name,QMap<QString,QVariant> data)
 {
     //return this->errorCode;
     return nullptr;

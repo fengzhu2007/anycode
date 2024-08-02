@@ -23,25 +23,22 @@ public:
     virtual QString id() override;
     virtual QString group() override;
     virtual bool onReceive(Event* e) override;//event bus receive callback
-    void readFolder(ResourceManagerModelItem* item);
+    void readFolder(ResourceManagerModelItem* item,int action=-1);
 
     static ResourceManagerPane* open(DockingPaneManager* dockingManager,bool active=false);
 
 public slots:
     void onTreeItemExpanded(const QModelIndex& index);
     void onTreeItemDClicked(const QModelIndex& index);
-    void showContextMenu(const QPoint& pos);
+    void onContextMenu(const QPoint& pos);
+    void onInsertReady(const QModelIndex& ,bool isFile);
     void onActionTriggered();
+
 
 private:
     ResourceManagerPane(QWidget *parent = nullptr);
 
 public:
-    //event message list id
-    static const QString M_OPEN_PROJECT;
-    static const QString M_FILE_CHANGED;
-    static const QString M_OPEN_EDITOR;
-
     static const QString PANE_ID;
     static const QString PANE_GROUP;
 

@@ -32,7 +32,15 @@ QIcon ResourceManageIconProvider::icon(ResourceManagerModelItem* item){
     case ResourceManagerModelItem::Folder:
         return provider->icon(QFileIconProvider::Folder);
     default:
-        return provider->icon(QFileInfo(item->path()));
+    {
+        const QString path = item->path();
+        if(path.isEmpty()){
+            return provider->icon(QFileIconProvider::File);
+        }else{
+            return provider->icon(QFileInfo(item->path()));
+        }
+    }
+
     }
 }
 

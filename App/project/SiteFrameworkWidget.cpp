@@ -2,7 +2,7 @@
 #include "ui_SiteFrameworkWidget.h"
 #include "SiteGroupListModel.h"
 #include "SiteTypeListModel.h"
-#include "../AddonLoader.h"
+#include "../addon_loader.h"
 #include "interface/FormPanel.h"
 #include "ManagerWindow.h"
 #include "ManagerTreeModel.h"

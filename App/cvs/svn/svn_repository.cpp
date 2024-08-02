@@ -13,44 +13,65 @@ using namespace ac::svn;
 
 namespace ady {
 namespace cvs {
+class SvnRepositoryPrivate{
+public:
+    ac::svn::SvnppClient* client;
+    revnum_t rev = -1;
+    Error error;
+
+};
+
    SvnRepository::SvnRepository()
        :Repository()
    {
-        mClient = nullptr;
+        d = new SvnRepositoryPrivate;
+        d->client = nullptr;
    }
 
    SvnRepository::~SvnRepository()
    {
+        if(d->client!=nullptr){
+            delete d->client;
+        }
+        delete d;
+   }
 
+   void SvnRepository::init(const QString& path)
+   {
+        d->client = new SvnppClient(path.toStdString());
+        ac::svn::Info* info = d->client->info();
+        //std::pair<int,std::string> error = d->client->error();
+        this->parseError(d->client->error());
+   }
+
+   QString SvnRepository::path(){
+        if(d->client!=nullptr){
+            return QString::fromUtf8(d->client->info()->path().c_str());
+        }else{
+            return QString();
+        }
    }
 
 
-   void SvnRepository::init(QString path)
-   {
-        mClient = new SvnppClient(path.toStdString());
-        ac::svn::Info* info = mClient->info();
-        qDebug()<<info->toString().c_str();
-        //qDebug()<<QString(info->toString());
 
+   QList<Branch> SvnRepository::branchLists(){
+       return {};
    }
 
-   void SvnRepository::destory()
-   {
-       if(mClient!=nullptr){
-           delete mClient;
-       }
+   const QString SvnRepository::headBranch(){
+       return {};
    }
 
    void SvnRepository::freeRevwalk(){
-        mCurrentRev = -1;
+       d->rev = -1;
    }
 
    QList<Commit> SvnRepository::commitLists(int num)
    {
        QList<Commit> commits;
-       if(mClient!=nullptr){
-           mClient->setOnline(true);
-           std::vector<LogEntry*> lists = mClient->logs(mCurrentRev,num);
+       if(d->client!=nullptr){
+           d->client->setOnline(true);
+           std::vector<LogEntry*> lists = d->client->logs(d->rev,num);
            for(auto item:lists){
                Commit commit;
                commit.setOid(QString("%1").arg(item->revision()));
@@ -58,18 +79,19 @@ namespace cvs {
                commit.setContent(QString::fromUtf8(item->message().c_str()).replace("\n"," "));
                commit.setTime(QDateTime::fromString(QString::fromUtf8(item->date().c_str()),Qt::ISODate));
                commits.push_back(commit);
-               mCurrentRev = item->revision();
+               d->rev = item->revision();
            }
            qDeleteAll(lists);
+           this->parseError(d->client->error());
        }
        return commits;
    }
 
    QList<Commit>* SvnRepository::queryCommit(int num){
        auto list = new QList<Commit>;
-       if(mClient!=nullptr){
-           mClient->setOnline(true);
-           std::vector<LogEntry*> lists = mClient->logs(mCurrentRev,num);
+       if(d->client!=nullptr){
+           d->client->setOnline(true);
+           std::vector<LogEntry*> lists = d->client->logs(d->rev,num);
            for(auto item:lists){
                Commit commit;
                commit.setOid(QString("%1").arg(item->revision()));
@@ -77,9 +99,10 @@ namespace cvs {
                commit.setContent(QString::fromUtf8(item->message().c_str()).replace("\n"," "));
                commit.setTime(QDateTime::fromString(QString::fromUtf8(item->date().c_str()),Qt::ISODate));
                list->push_back(commit);
-               mCurrentRev = item->revision();
+               d->rev = item->revision();
            }
            qDeleteAll(lists);
+           this->parseError(d->client->error());
        }
        return list;
    }
@@ -99,14 +122,14 @@ namespace cvs {
                 start = end - 1;
            }
         }
-       mClient->setOnline(true);
+       d->client->setOnline(true);
 
        std::vector<ac::svn::DiffSummary*> lists;
        // qDebug()<<"start,end:"<<start<<";"<<end;
         if(start==0 && end==0){
-            lists = mClient->status();
+            lists = d->client->status();
        }else{
-            lists = mClient->diff(start,end);
+            lists = d->client->diff(start,end);
         }
 
        for(auto item:lists){
@@ -123,10 +146,9 @@ namespace cvs {
            DiffFile diffFile(path,status);
            difffiles.push_back(diffFile);
        }
-
         qDeleteAll(lists);
 
-
+        this->parseError(d->client->error());
         this->formatDiffLists(difffiles);
         return difffiles;
    }
@@ -141,12 +163,12 @@ namespace cvs {
                start = end - 1;
            }
         }
-        mClient->setOnline(true);
+        d->client->setOnline(true);
         std::vector<ac::svn::DiffSummary*> lists;
         if(start==0 && end==0){
-           lists = mClient->status();
+           lists = d->client->status();
         }else{
-           lists = mClient->diff(start,end);
+           lists = d->client->diff(start,end);
         }
         for(auto item:lists){
            DiffFile::Status status = DiffFile::Normal;
@@ -162,7 +184,7 @@ namespace cvs {
            DiffFile diffFile(path,status);
            list->push_back(diffFile);
         }
-
+        this->parseError(d->client->error());
         qDeleteAll(lists);
         this->formatDiffLists(*list);
         return list;
@@ -176,18 +198,27 @@ namespace cvs {
        return list;
    }
 
+   Error SvnRepository::error() const{
+       return d->error;
+   }
+
    void SvnRepository::formatDiffLists(QList<DiffFile>& lists)
    {
-       QString path = QString::fromUtf8(mClient->info()->path().c_str());
+       QString path = QString::fromUtf8(d->client->info()->path().c_str());
        QList<DiffFile>::iterator iter = lists.begin();
        while(iter!=lists.end()){
            QFileInfo fi(path + "/"+(*iter).path());
            if(fi.exists()){
                (*iter).setFilesize(fi.size());
-               (*iter).setFiletime(fi.fileTime(QFile::FileTime::FileModificationTime).toString("yyyy-MM-dd HH:mm"));
+               (*iter).setFiletime(fi.fileTime(QFile::FileTime::FileModificationTime));
            }
            iter++;
        }
+   }
+
+   void SvnRepository::parseError(const std::pair<int,std::string>& error){
+       d->error.code = error.first;
+       d->error.message = QString::fromUtf8(error.second.c_str());
    }
 
 }

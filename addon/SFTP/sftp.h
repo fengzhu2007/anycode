@@ -2,7 +2,7 @@
 #define SFTP_H
 
 #include "SFTP_global.h"
-#include "network/NetworkRequest.h"
+#include "network/network_request.h"
 #include <QStringList>
 namespace ady {
 
@@ -13,15 +13,15 @@ public:
     const int UNLINK_TIMEOUT = 2;
 
 
-    SFTP(CURL* curl);
+    SFTP(CURL* curl,long long id=0);
 
-    NetworkResponse* sendSyncCommand(QString command);
+    NetworkResponse* sendSyncCommand(const QString& command);
 
     virtual int access(NetworkResponse* response,bool body=true) override;
     virtual NetworkResponse* link() override;
     virtual NetworkResponse* unlink() override;
-    virtual NetworkResponse* listDir(QString dir,int page=1,int pageSize=1000) override;
-    virtual NetworkResponse* tinyListDir(QString dir) override;
+    virtual NetworkResponse* listDir(const QString& dir,int page=1,int pageSize=1000) override;
+    virtual NetworkResponse* tinyListDir(const QString& dir) override;
     virtual NetworkResponse* upload(Task* task) override;
     virtual NetworkResponse* download(Task* task) override;
     virtual NetworkResponse* del(Task* task) override;
@@ -32,23 +32,23 @@ public:
     //NetworkResponse* setBinary();
     //NetworkResponse* setPassive(bool pasv);
     //NetworkResponse* chDir(const QString &dir);
-    NetworkResponse* mkDir(const QString &dir);
-    NetworkResponse* rmDir(const QString &dir);
+    virtual NetworkResponse* mkDir(const QString &dir) override;
+    virtual NetworkResponse* rmDir(const QString &dir) override;
     NetworkResponse* pwd();
-    NetworkResponse* rename(QString src,QString dst);
-    NetworkResponse* chmod(QString dst,int mode);
-    NetworkResponse* del(QString dst);
+    virtual NetworkResponse* rename(const QString& src,const QString& dst) override;
+    virtual NetworkResponse* chmod(const QString& dst,int mode) override;
+    virtual NetworkResponse* del(const QString& dst) override;
 
 
     void setUploadCommands(QStringList commands);
 
 
 
-    virtual NetworkResponse* customeAccess(QString name,QMap<QString,QVariant> data) override;
+    virtual NetworkResponse* customeAccess(const QString& name,QMap<QString,QVariant> data) override;
 
 protected:
     void initEnv();
-    NetworkResponse* sendCommand(QString command);
+    NetworkResponse* sendCommand(const QString& command);
     QString fixedCommandPath(QString &command,const QString &path);
 
 

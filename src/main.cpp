@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     //ady::MainWindow w;
     ady::IDEWindow w;
     //w.setLocale(QLocale::Chinese);
-    w.showMaximized();
+    //w.showMaximized();
     w.show();
     return a.exec();
 }

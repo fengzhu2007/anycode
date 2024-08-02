@@ -1,7 +1,7 @@
 #include "COSWorker.h"
 #include "COSResponse.h"
 #include "cos.h"
-#include "network/NetworkManager.h"
+#include "network/network_manager.h"
 #include <QDebug>
 namespace ady {
 
@@ -62,7 +62,7 @@ namespace ady {
             if(task==nullptr){
                 break;
             }
-            COS* cos = dynamic_cast<COS*>(NetworkManager::getInstance()->request(m_siteid));
+            /*COS* cos = dynamic_cast<COS*>(NetworkManager::getInstance()->request(m_siteid));
             if(cos!=nullptr){
                 if(task->cmd==W_LINK){
                     emit taskFinished(W_LINK,cos->link());
@@ -96,7 +96,7 @@ namespace ady {
                 response->errorCode = -1;
                 response->errorMsg = tr("Invalid COS connection");
                 emit taskFinished(W_ERROR,response);
-            }
+            }*/
             delete task;
         }
     }

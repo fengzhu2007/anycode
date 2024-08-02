@@ -2,7 +2,7 @@
 #define SITETYPELISTMODEL_H
 #include <QAbstractListModel>
 #include <QList>
-#include "storage/AddonStorage.h"
+#include "storage/addon_storage.h"
 namespace ady {
     class SiteTypeListModel : public QAbstractListModel
     {

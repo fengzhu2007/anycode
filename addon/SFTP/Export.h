@@ -3,7 +3,7 @@
 #include "SFTP_global.h"
 #include "interface/Panel.h"
 #include "interface/FormPanel.h"
-#include "network/NetworkRequest.h"
+#include "network/network_request.h"
 
 
 #ifdef __cplusplus
@@ -15,6 +15,7 @@ SFTP_EXPORT size_t getFormPanelSize(QString);
 SFTP_EXPORT ady::FormPanel* getFormPanel(QWidget* parent,QString,size_t n);
 SFTP_EXPORT ady::NetworkRequest* getRequest(QString name);
 SFTP_EXPORT int requestConnect(void* ptr);
+SFTP_EXPORT ady::NetworkRequest* initRequest(long long id);
 
 #ifdef __cplusplus
 }

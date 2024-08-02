@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ServerManagePane</class>
+ <widget class="QWidget" name="ServerManagePane">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>3</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QToolBar" name="toolBar">
+     <property name="movable">
+      <bool>false</bool>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>16</width>
+       <height>16</height>
+      </size>
+     </property>
+     <addaction name="actionRefresh"/>
+     <addaction name="actionDelete"/>
+     <addaction name="separator"/>
+     <addaction name="actionConnect_Server"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTreeView" name="treeView">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+     <property name="headerHidden">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionRefresh">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Refresh_16x.svg</normaloff>:/Resource/icons/Refresh_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Cancel_16x.svg</normaloff>:/Resource/icons/Cancel_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionConnect_Server">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/ConnectToRemoteServer_16x.svg</normaloff>:/Resource/icons/ConnectToRemoteServer_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Connect Server</string>
+   </property>
+  </action>
+  <action name="actionDock_To_Client">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/DockTo_16x.svg</normaloff>:/Resource/icons/DockTo_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Dock To Client</string>
+   </property>
+  </action>
+  <action name="actionDownload">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Download_16x.svg</normaloff>:/Resource/icons/Download_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Download</string>
+   </property>
+  </action>
+  <action name="actionDownload_To">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/DownloadFolder_16x.svg</normaloff>:/Resource/icons/DownloadFolder_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Download To</string>
+   </property>
+  </action>
+  <action name="actionRename">
+   <property name="text">
+    <string>Rename</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/OpenFile_16x.svg</normaloff>:/Resource/icons/OpenFile_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionNew_Folder">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/NewFileCollection_16x.svg</normaloff>:/Resource/icons/NewFileCollection_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>New Folder</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../../r.qrc"/>
+ </resources>
+ <connections/>
+</ui>
