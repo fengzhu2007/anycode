@@ -84,6 +84,9 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     connect(ui->treeView,&QTreeView::expanded,this,&ResourceManagerPane::onTreeItemExpanded);
     connect(ui->treeView,&QTreeView::doubleClicked,this,&ResourceManagerPane::onTreeItemDClicked);
 
+    connect(ui->actionExpand,&QAction::triggered,this,&ResourceManagerPane::onTopActionTriggered);
+    connect(ui->actionCollapse,&QAction::triggered,this,&ResourceManagerPane::onTopActionTriggered);
+
 
     d = new ResourceManagerPanePrivate;
     d->model = ResourceManagerModel::getInstance();
@@ -199,8 +202,9 @@ void ResourceManagerPane::onTreeItemDClicked(const QModelIndex& index){
     if(index.isValid()){
         auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
         if(item->type()==ResourceManagerModelItem::File){
-            QString path = item->path();
-            Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&path);
+            //QString path = item->path();
+            auto data = OpenEditorData{item->path(),0,0};
+            Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&data);
         }
     }
 }
@@ -316,8 +320,9 @@ void ResourceManagerPane::onActionTriggered(){
     }else if(sender==d->actionOpen_Folder){
         QDesktopServices::openUrl(QFileInfo(one->path()).absoluteDir().absolutePath());
     }else if(sender==d->actionOpen_File){
-        QString path = one->path();
-        Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&path);
+        //QString path = one->path();
+        auto data = OpenEditorData{one->path(),0,0};
+        Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&data);
     }else if(sender==d->actionOpen_Terminal){
 
         QProcess process;
@@ -461,7 +466,8 @@ void ResourceManagerPane::onActionTriggered(){
         }
 
     }else if(sender==d->actionFind){
-
+        OpenFindData data{0,{},one->path()};
+        Publisher::getInstance()->post(Type::M_OPEN_FIND,&data);
     }else if(sender==d->actionRename){
         ui->treeView->editIndex(list.at(0));
     }else if(sender==d->actionDelete){
@@ -500,6 +506,15 @@ void ResourceManagerPane::onActionTriggered(){
     }else if(sender==d->actionUpload){
         UploadData data{one->pid(),one->type()==ResourceManagerModelItem::File,one->path(),{}};
         Publisher::getInstance()->post(Type::M_UPLOAD,&data);
+    }
+}
+
+void ResourceManagerPane::onTopActionTriggered(){
+    auto sender = static_cast<QAction*>(this->sender());
+    if(sender==ui->actionCollapse){
+        ui->treeView->collapseAll();
+    }else if(sender==ui->actionExpand){
+        ui->treeView->expandAll();
     }
 }
 

@@ -29,6 +29,12 @@ public:
     static const QString M_QUERY_DIFF;
 
     static const QString M_DOWNLOAD;
+
+    static const QString M_FIND;
+
+    static const QString M_OPEN_FIND;
+
+    static const QString M_GOTO;
 };
 }
 

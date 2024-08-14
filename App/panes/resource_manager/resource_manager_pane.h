@@ -33,6 +33,7 @@ public slots:
     void onContextMenu(const QPoint& pos);
     void onInsertReady(const QModelIndex& ,bool isFile);
     void onActionTriggered();
+    void onTopActionTriggered();
 
 
 private:

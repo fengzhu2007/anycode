@@ -169,17 +169,17 @@ add_library(App SHARED
         project/project_select_model.h project/project_select_model.cpp
         panes/resource_manager/resource_manager_tree_item_delegate.h panes/resource_manager/resource_manager_tree_item_delegate.cpp
         panes/code_editor/code_editor_pane.h panes/code_editor/code_editor_pane.cpp
-        panes/code_editor/language/php_high_lighter.h panes/code_editor/language/php_high_lighter.cpp
+
         core/backend_thread.h core/backend_thread.cpp
         panes/resource_manager/resource_manage_read_folder_task.h panes/resource_manager/resource_manage_read_folder_task.cpp
-        panes/code_editor/code_high_lighter.h panes/code_editor/code_high_lighter.cpp
-        panes/code_editor/auto_completion_view.h panes/code_editor/auto_completion_view.cpp
-        panes/code_editor/language.h panes/code_editor/language.cpp
-        panes/code_editor/language/php_language.h panes/code_editor/language/php_language.cpp
-        panes/code_editor/language_manager.h panes/code_editor/language_manager.cpp
-        panes/code_editor/language/js_language.h panes/code_editor/language/js_language.cpp
-        panes/code_editor/language/html_language.h panes/code_editor/language/html_language.cpp
-        panes/code_editor/language/css_language.h panes/code_editor/language/css_language.cpp
+
+
+
+
+
+
+
+
         panes/code_editor/code_editor_manager.h panes/code_editor/code_editor_manager.cpp
         panes/code_editor/code_editor_read_file_task.h panes/code_editor/code_editor_read_file_task.cpp
         panes/version_control/version_control_pane.h panes/version_control/version_control_pane.cpp
@@ -201,6 +201,12 @@ add_library(App SHARED
         panes/find_replace/find_replace_pane.h panes/find_replace/find_replace_pane.cpp panes/find_replace/find_replace_pane.ui
         panes/find_replace/find_widget.h panes/find_replace/find_widget.cpp panes/find_replace/find_widget.ui
         panes/find_replace/replace_widget.h panes/find_replace/replace_widget.cpp panes/find_replace/replace_widget.ui
+        panes/find_replace/find_replace_progress.h panes/find_replace/find_replace_progress.cpp
+        panes/find_replace/search_result_model.h panes/find_replace/search_result_model.cpp
+        panes/find_replace/search_scope_model.h panes/find_replace/search_scope_model.cpp
+        panes/code_editor/goto_line_dialog.h panes/code_editor/goto_line_dialog.cpp panes/code_editor/gotolinedialog.ui
+        panes/find_replace/replace_all_progress_dialog.h panes/find_replace/replace_all_progress_dialog.cpp panes/find_replace/replace_all_progress_dialog.ui
+
 
 
 
@@ -210,7 +216,7 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} libsvnpp dockingpane wRect texteditor)
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB}  libsvnpp dockingpane wRect texteditor)
 
 target_compile_definitions(App PRIVATE APP_LIBRARY)
 

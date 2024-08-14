@@ -14,6 +14,17 @@ struct ANYENGINE_EXPORT UploadData{
     QList<QPair<long long,QString>> dest;
 };
 
+struct ANYENGINE_EXPORT OpenFindData{
+    int mode;
+    QString text;
+    QString scope;
+};
+
+struct ANYENGINE_EXPORT OpenEditorData{
+    QString path;
+    int line=0;
+    int column=0;
+};
 
 }
 #endif // EVENT_DATA_H

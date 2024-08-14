@@ -20,8 +20,10 @@ public:
     static void destory();
     CodeEditorPane* get(const QString& path);
     QList<CodeEditorPane*> getAll(const QString& prefix);
-    CodeEditorPane* open(DockingPaneManager* dockingManager,const QString& path);
+    CodeEditorPane* open(DockingPaneManager* dockingManager,const QString& path,int line=0,int column=0);
     CodeEditorPane* open(const QString& path);
+
+
     void append(CodeEditorPane* pane);
     void remove(CodeEditorPane* pane);
     bool readFileLines(const QString&path);

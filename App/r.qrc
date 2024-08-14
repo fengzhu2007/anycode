@@ -115,12 +115,6 @@
         <file>Resource/images/nodata.svg</file>
         <file>Resource/icons/DocumentsFolder_16x.svg</file>
         <file>Resource/icons/KeywordSnippet_16x.svg</file>
-        <file>Resource/icons/Class_16x.svg</file>
-        <file>Resource/icons/Method_16x.svg</file>
-        <file>Resource/icons/LocalVariable_16x.svg</file>
-        <file>Resource/icons/Constant_16x.svg</file>
-        <file>Resource/icons/IntelliSenseKeyword_16x.svg</file>
-        <file>Resource/icons/Field_16x.svg</file>
         <file>Resource/icons/Save_16x.svg</file>
         <file>Resource/icons/SaveAll_16x.svg</file>
         <file>Resource/icons/SaveAs_16x.svg</file>
@@ -163,5 +157,8 @@
         <file>Resource/icons/Download_16x.svg</file>
         <file>Resource/icons/DownloadFolder_16x.svg</file>
         <file>Resource/icons/Ellipsis_16x.svg</file>
+        <file>Resource/icons/Lock_16x.svg</file>
+        <file>Resource/icons/CleanData_16x.svg</file>
+        <file>Resource/icons/FormatSelection_16x.svg</file>
     </qresource>
 </RCC>

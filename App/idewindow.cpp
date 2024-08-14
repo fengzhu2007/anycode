@@ -9,14 +9,17 @@
 #include "panes/resource_manager/resource_manager_pane.h"
 #include "panes/code_editor/code_editor_pane.h"
 #include "panes/code_editor/code_editor_manager.h"
+#include "panes/code_editor/goto_line_dialog.h"
 #include "panes/version_control/version_control_pane.h"
 #include "panes/server_manage/server_manage_pane.h"
 #include "panes/file_transfer/file_transfer_pane.h"
 #include "panes/find_replace/find_replace_dialog.h"
+#include "panes/find_replace/find_replace_pane.h"
 
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/type.h"
+#include "core/event_bus/event_data.h"
 #include "core/backend_thread.h"
 #include "storage/project_storage.h"
 
@@ -44,7 +47,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
 {
     qRegisterMetaType<QFileInfoList>("QFileInfoList");
     Subscriber::reg();
-    this->regMessageIds({Type::M_OPEN_EDITOR});
+    this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO});
     ui->setupUi(this);
     this->resetupUi();
 
@@ -99,7 +102,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
     //27 demo
     //7 svn
     //1 guzheng
-    ProjectRecord record = ProjectStorage().one(7);
+    ProjectRecord record = ProjectStorage().one(27);
     Publisher::getInstance()->post(Type::M_OPEN_PROJECT,(void*)&record);
 
     //auto widget = new QPlainTextEdit(m_dockingPaneManager->widget());
@@ -135,10 +138,21 @@ IDEWindow::~IDEWindow()
 
 bool IDEWindow::onReceive(Event* e){
     if(e->id()==Type::M_OPEN_EDITOR){
-        auto one = static_cast<QString*>(e->data());
-        CodeEditorManager::getInstance()->open(m_dockingPaneManager,*one);
+        auto one = static_cast<OpenEditorData*>(e->data());
+        CodeEditorManager::getInstance()->open(m_dockingPaneManager,one->path,one->line,one->column);
         e->ignore();
         return true;
+    }else if(e->id()==Type::M_OPEN_FIND){
+        auto one = static_cast<OpenFindData*>(e->data());
+        this->onOpenFindAndReplace(one->mode,one->text,one->scope);
+        return true;
+    }else if(e->id()==Type::M_GOTO){
+        auto lineNo = static_cast<int*>(e->data());
+        auto pane = this->currentEditorPane();
+        if(pane!=nullptr){
+            pane->editor()->gotoLine(*lineNo);
+            pane->editor()->setFocus();
+        }
     }
     return false;
 }
@@ -198,11 +212,16 @@ void IDEWindow::onActionTriggered(){
         }
     }else if(sender==ui->actionClose_Project){
 
+    }else if(sender==ui->actionGoto){
+        auto pane = this->currentEditorPane();
+        if(pane!=nullptr){
+            auto editor = pane->editor();
+            auto cursor = editor->textCursor();
+            int cur = cursor.blockNumber() + 1;
+            GotoLineDialog::open(this,cur,editor->document()->lineCount());
+        }
     }else if(sender==ui->actionFind_Replace){
-        //auto dialog = FindReplaceDialog::getInstance();
-        auto dialog = FindReplaceDialog::open(this);
-        connect(dialog,&FindReplaceDialog::search,this,&IDEWindow::onSearch);
-
+        this->onOpenFindAndReplace(0,{},{});
     }else if(sender==ui->actionResource_Manage){
         auto pane = ResourceManagerPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
@@ -220,14 +239,6 @@ void IDEWindow::onActionTriggered(){
     }else if(sender==ui->actionLog){
 
     }
-
-
-
-
-
-
-
-
 }
 
 void IDEWindow::onOpenFile(const QString& path){
@@ -241,20 +252,73 @@ void IDEWindow::onOpenFolder(const QString& path){
     Publisher::getInstance()->post(Type::M_OPEN_PROJECT,(void*)&record);
 }
 
-void IDEWindow::onSearch(const QString& text,int flags){
-    auto client = m_dockingPaneManager->workbench()->client();
+void IDEWindow::onSearch(const QString& text,int flags,bool hightlight){
+    auto pane = this->currentEditorPane();
+    if(pane!=nullptr){
+        auto editor = pane->editor();
+        editor->findText(text,flags,hightlight);
+    }
+}
 
+void IDEWindow::onSearchAll(const QString& text,const QString& scope,int flags,const QString& filter,const QString& exclusion){
+    auto pane = FindReplacePane::open(m_dockingPaneManager,true);
+    pane->activeToCurrent();
+    pane->runSearch(text,scope,flags,filter,exclusion);
+}
+
+void IDEWindow::onReplaceAll(const QString& before,const QString& after,const QString& scope,int flags,const QString& filter,const QString& exclusion){
+    auto pane = FindReplacePane::open(m_dockingPaneManager,true);
+    pane->activeToCurrent();
+    pane->runReplace(before,after,scope,flags,filter,exclusion);
+}
+
+void IDEWindow::onReplace(const QString& before,const QString& after,int flags,bool hightlight){
+    auto pane = this->currentEditorPane();
+    if(pane!=nullptr){
+        auto editor = pane->editor();
+        editor->replaceText(before,after,flags,hightlight);
+    }
+}
+
+void IDEWindow::onSearchCancel(){
+    auto pane = this->currentEditorPane();
+    if(pane!=nullptr){
+        auto editor = pane->editor();
+        editor->clearHighlights();
+    }
+}
+
+void IDEWindow::onOpenFindAndReplace(int mode,const QString& text,const QString& scope){
+    auto dialog = FindReplaceDialog::getInstance();
+    if(dialog==nullptr){
+        dialog = FindReplaceDialog::open(this);
+        connect(dialog,&FindReplaceDialog::search,this,&IDEWindow::onSearch);
+        connect(dialog,&FindReplaceDialog::searchAll,this,&IDEWindow::onSearchAll);
+        connect(dialog,&FindReplaceDialog::cancelSearch,this,&IDEWindow::onSearchCancel);
+        connect(dialog,&FindReplaceDialog::replace,this,&IDEWindow::onReplace);
+        connect(dialog,&FindReplaceDialog::replaceAll,this,&IDEWindow::onReplaceAll);
+    }else{
+        dialog->show();
+    }
+    dialog->setMode(mode);//find
+    if(!text.isEmpty()){
+        dialog->setFindText(text);
+    }
+    if(!scope.isEmpty()){
+        dialog->setSearchScope(scope);
+    }
+}
+
+CodeEditorPane* IDEWindow::currentEditorPane(){
+    auto client = m_dockingPaneManager->workbench()->client();
     auto pane = client->currentPane();
-    //qDebug()<<"pane:"<<pane;
     if(pane!=nullptr){
         QString name = pane->metaObject()->className();
         if(name=="ady::CodeEditorPane"){
-            auto editor = static_cast<CodeEditorPane*>(pane)->editor();
-            //qDebug()<<"editor"<<editor;
-            //editor->finder()->
-            editor->findText(text,flags);
+            return static_cast<CodeEditorPane*>(pane);
         }
     }
+    return nullptr;
 }
 
 /*void IDEWindow::closeEvent(QCloseEvent *event){

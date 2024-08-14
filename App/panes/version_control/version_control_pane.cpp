@@ -17,6 +17,7 @@
 #include "storage/commit_storage.h"
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/type.h"
+#include "core/event_bus/event_data.h"
 #include <memory>
 #include <QComboBox>
 #include <QLabel>
@@ -377,6 +378,7 @@ void VersionControlPane::onActionTriggered(){
             auto item = model->at(one.row());
             const QString project_dir = d->repo->path();
             QString path = project_dir + "/" + item.path();
+            auto data = OpenEditorData{path,0,0};
             Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&path);
         }
     }else if(sender==ui->actionOpen_Folder){

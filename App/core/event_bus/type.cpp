@@ -19,6 +19,12 @@ const QString Type::M_QUERY_DIFF = "QueryDiff";
 
 const QString Type::M_DOWNLOAD = "Download";
 
+const QString Type::M_FIND = "Find";
+
+const QString Type::M_OPEN_FIND = "OpenFind";
+
+const QString Type::M_GOTO = "Goto";
+
 Type::Type()
 {
 

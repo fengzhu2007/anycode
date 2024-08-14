@@ -8,9 +8,9 @@
 
 
 #include "texteditorsettings.h"
-#include "core/actionmanager/actionmanager.h"
+//#include "core/actionmanager/actionmanager.h"
 #include "codeassist/documentcontentcompletion.h"
-#include "snippets/snippetprovider.h"
+//#include "snippets/snippetprovider.h"
 #include "displaysettings.h"
 
 
@@ -39,7 +39,7 @@ public:
     DockingPaneManager* docking_manager;
     QFileSystemWatcher *watcher;
     TextEditor::TextEditorSettings* settings;
-    Core::ActionManager* action_manager;
+    //Core::ActionManager* action_manager;
     //QSharedPointer<TextEditor::TextDocument> doc;
     //std::unique_ptr<TextEditor::TextEditorActionHandler> m_textEditorActionHandler;
     TextEditor::DocumentContentCompletionProvider provider;
@@ -173,7 +173,7 @@ QList<CodeEditorPane*> CodeEditorManager::getAll(const QString& prefix){
     return list;
 }
 
-CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const QString& path){
+CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const QString& path,int line,int column){
     auto pane = this->get(path);
     if(pane==nullptr){
         pane = new CodeEditorPane();
@@ -186,10 +186,13 @@ CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const
             pane->readFile(path);
         }
         dockingManager->createPane(pane,DockingPaneManager::Center,true);
+        //pane->editor()->gotoLine(1);
     }else{
         //set pane to current
         pane->activeToCurrent();
     }
+    pane->editor()->gotoLine(line,column);
+    pane->editor()->setFocus();
     return pane;
 }
 
@@ -363,9 +366,9 @@ void CodeEditorManager::onEditorActionTrigger(bool checked){
     }else if(sender==d->cutAction){
         d->editor->cut();
     }else if(sender==d->indentAction){
-        d->editor->indent();
+        d->editor->autoIndent();
     }else if(sender==d->autoFormatAction){
-        //d->editor->unCommentSelection();
+        d->editor->autoFormat();
     }else if(sender==d->addOrRemoveCommentAction){
         d->editor->unCommentSelection();
     }else if(sender==d->pasteAction){
@@ -438,6 +441,7 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
         d->textWrappingAction = new QAction(QIcon(":/Resource/icons/WordWrap_16x.svg"),tr("Enable Text &Wrapping"),this);
         d->visualizeWhitespaceAction = new QAction(tr("Visualize Whitespace"),this);
         d->indentAction = new QAction(QIcon(":/Resource/icons/TextIndent_16x.svg"),tr("Indent Selection"),this);
+        d->autoFormatAction = new QAction(QIcon(":/Resource/icons/FormatSelection_16x.svg"),tr("Auto Format"),this);
         d->addOrRemoveCommentAction = new QAction(QIcon(":/Resource/icons/CPPCommentCode_16x.svg"),tr("Add/Remove Comment"),this);
 
         d->visualizeWhitespaceAction->setCheckable(true);
@@ -450,6 +454,7 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
         d->cutAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_X));
         d->pasteAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
         d->selectAllAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_A));
+        d->autoFormatAction->setShortcut(QKeySequence(Qt::CTRL + Qt::ALT + Qt::Key_F));
 
         connect(d->undoAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
         connect(d->redoAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
@@ -461,6 +466,7 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
         connect(d->textWrappingAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
         connect(d->visualizeWhitespaceAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
         connect(d->indentAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
+        connect(d->autoFormatAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
         connect(d->addOrRemoveCommentAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
     }
 
@@ -488,6 +494,8 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
     contextMenu->addAction(d->selectAllAction);
     contextMenu->addSeparator();
     contextMenu->addAction(d->indentAction);
+    contextMenu->addAction(d->autoFormatAction);
+    contextMenu->addSeparator();
     contextMenu->addAction(d->addOrRemoveCommentAction);
 }
 

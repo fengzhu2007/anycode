@@ -8,9 +8,6 @@
 #include "core/coreconstants.h"
 #include "textdocument.h"
 #include "codeassist/documentcontentcompletion.h"
-#include "textindenter.h"
-#include "cppqtstyleindenter.h"
-#include "javaindenter.h"
 
 #include <QFileInfo>
 #include <QPlainTextEdit>
@@ -77,6 +74,7 @@ QString CodeEditorPane::description(){
 
 void CodeEditorPane::activation(){
     //d->editor->init();
+    d->editor->setFocus();
 }
 
 void CodeEditorPane::save(bool rename){
@@ -151,7 +149,7 @@ void CodeEditorPane::rename(const QString& name){
 
 bool CodeEditorPane::readFile(const QString& path){
     auto doc = d->editor->textDocumentPtr();
-    if(!doc){
+    /*if(!doc){
         doc = QSharedPointer<TextEditor::TextDocument>(new TextEditor::TextDocument(Core::Constants::K_DEFAULT_TEXT_EDITOR_ID));
         d->editor->setTextDocument(doc);
         static TextEditor::DocumentContentCompletionProvider basicSnippetProvider;
@@ -159,7 +157,7 @@ bool CodeEditorPane::readFile(const QString& path){
         //auto indenter = new TextEditor::TextIndenter(doc->document());
         auto indenter = new Android::Internal::JavaIndenter(doc->document());
         doc->setIndenter(indenter);
-    }
+    }*/
     doc->setCodec(QTextCodec::codecForName("UTF-8"));
     QString error;
     auto ret = doc->open(&error,Utils::FilePath::fromString(path),Utils::FilePath::fromString(path));

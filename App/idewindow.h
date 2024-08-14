@@ -9,6 +9,7 @@ class IDEWindow;
 }
 
 namespace ady{
+class CodeEditorPane;
     class DockingPaneManager;
     class DockingPane;
     class ANYENGINE_EXPORT IDEWindow : public wMainWindow , public Subscriber
@@ -28,10 +29,21 @@ namespace ady{
         void onOpenFile(const QString& path);
         void onOpenFolder(const QString& path);
         void onSearch(const QString& text,int flags,bool hightlight=true);
+        void onSearchAll(const QString& text,const QString& scope,int flags,const QString& filter,const QString& exclusion);
+        void onReplaceAll(const QString& before,const QString& after,const QString& scope,int flags,const QString& filter,const QString& exclusion);
+        void onReplace(const QString& before,const QString& after,int flags,bool hightlight=true);
         void onSearchCancel();
+
+
 
     protected:
         //virtual void closeEvent(QCloseEvent *event) override;
+
+    private:
+        void onOpenFindAndReplace(int mode,const QString& text,const QString& scope);
+
+    private:
+        CodeEditorPane* currentEditorPane();
 
     private:
         Ui::IDEWindow *ui;

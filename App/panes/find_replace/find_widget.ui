@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>434</width>
+    <width>446</width>
     <height>300</height>
    </rect>
   </property>
@@ -19,6 +19,9 @@
    </property>
    <item>
     <widget class="QComboBox" name="find">
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
      <property name="editable">
       <bool>true</bool>
      </property>
