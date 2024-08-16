@@ -6,6 +6,7 @@
 #include "codeassist/documentcontentcompletion.h"
 //#include "codeassist/keywordscompletionassist.h"
 #include "qmljsindenter.h"
+#include "languages/python/pythonindenter.h"
 #include "qmljsautocompleter.h"
 #include <QScrollBar>
 #include <QTimer>
@@ -33,7 +34,8 @@ CodeEditorView::CodeEditorView(QWidget* parent)
     doc->setCompletionAssistProvider(d->provider);
     //doc->completionAssistProvider();
     //auto indenter = new TextEditor::TextIndenter(doc->document());
-    auto indenter = new QmlJSEditor::Internal::Indenter(doc->document());
+    auto indenter = QmlJSEditor::createQmlJsIndenter(doc->document());
+    //auto indenter = Python::createPythonIndenter(doc->document());
     doc->setIndenter(indenter);
 }
 
