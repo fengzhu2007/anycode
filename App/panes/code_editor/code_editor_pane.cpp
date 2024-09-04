@@ -3,11 +3,9 @@
 #include "code_editor_manager.h"
 #include "docking_pane_container.h"
 #include "docking_pane_container_tabbar.h"
+#include "panes/resource_manager/resource_manager_model.h"
 
-
-#include "core/coreconstants.h"
 #include "textdocument.h"
-#include "codeassist/documentcontentcompletion.h"
 
 #include <QFileInfo>
 #include <QPlainTextEdit>
@@ -95,11 +93,15 @@ void CodeEditorPane::save(bool rename){
     //save
     auto instance = CodeEditorManager::getInstance();
     instance->removeWatchFile(this->path());
+    QFileInfo fi(path);
+    auto m = ResourceManagerModel::getInstance();
+    auto list = m->takeWatchDirectory(fi.dir().absolutePath(),false);
+
     if(this->writeFile(path)){
         //rename tab title
         this->setToolTip(path);
         if(tabRename){
-            QFileInfo fi(path);
+
             auto container = this->container();
             if(container!=nullptr){
                 int i = container->indexOf(this);
@@ -111,6 +113,9 @@ void CodeEditorPane::save(bool rename){
             }
         }
         d->editor->document()->setModified(false);
+    }
+    if(!list.isEmpty()){
+        m->appendWatchDirectory(list.at(0));
     }
     instance->appendWatchFile(path);
 

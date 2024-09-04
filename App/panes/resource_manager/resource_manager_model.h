@@ -54,6 +54,8 @@ public:
     ResourceManagerModelItem* find(const QString& path);
     ResourceManagerModelItem* rootItem();
 
+    //bool takeWatchDir(const QString& dir);
+
 
 public slots:
     void onUpdateChildren(QFileInfoList list,const QString& parent,int action);

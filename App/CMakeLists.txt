@@ -19,6 +19,7 @@ include_directories(SYSTEM "../libsvnpp/include")
 include_directories(SYSTEM "../dockingpane/src")
 include_directories(SYSTEM "../wRect/src")
 include_directories(SYSTEM "../texteditor")
+include_directories(SYSTEM "../3party/qscintilla/src")
 
 
 find_library(CRYPTO_LIB libcrypto PATHS "../3party/bin/x64/lib")
@@ -27,6 +28,7 @@ find_library(CURL_LIB libcurl_imp PATHS "../3party/bin/x64/lib")
 find_library(SSH2_LIB libssh2 PATHS "../3party/bin/x64/lib")
 find_library(Z_LIB zlib PATHS "../3party/bin/x64/lib")
 find_library(GIT2_LIB git2 PATHS "../3party/bin/x64/lib")
+find_library(QCINTILLA_LIB qscintilla2_qt5 PATHS "../3party/qscintilla")
 
 
 set(FORMS
@@ -210,13 +212,14 @@ add_library(App SHARED
 
 
 
+
 )
 
 
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB}  libsvnpp dockingpane wRect texteditor)
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} ${QCINTILLA_LIB} libsvnpp dockingpane wRect texteditor)
 
 target_compile_definitions(App PRIVATE APP_LIBRARY)
 

@@ -218,7 +218,7 @@ void IDEWindow::onActionTriggered(){
             auto editor = pane->editor();
             auto cursor = editor->textCursor();
             int cur = cursor.blockNumber() + 1;
-            GotoLineDialog::open(this,cur,editor->document()->lineCount());
+            //GotoLineDialog::open(this,cur,editor->document()->lineCount());
         }
     }else if(sender==ui->actionFind_Replace){
         this->onOpenFindAndReplace(0,{},{});
