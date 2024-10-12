@@ -82,6 +82,7 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeView,&QTreeView::customContextMenuRequested, this, &ResourceManagerPane::onContextMenu);
     connect(ui->treeView,&QTreeView::expanded,this,&ResourceManagerPane::onTreeItemExpanded);
+    connect(ui->treeView,&QTreeView::collapsed,this,&ResourceManagerPane::onTreeItemCollapsed);
     connect(ui->treeView,&QTreeView::doubleClicked,this,&ResourceManagerPane::onTreeItemDClicked);
 
     connect(ui->actionExpand,&QAction::triggered,this,&ResourceManagerPane::onTopActionTriggered);
@@ -160,7 +161,7 @@ bool ResourceManagerPane::onReceive(Event* e){
         project->id = one->id;
         project->path = one->path;
         project->name = one->name;
-        qDebug()<<"pid:"<<one->id;
+        //qDebug()<<"pid:"<<one->id;
         auto item = d->model->appendItem(project);
         this->readFolder(item);
         item->setExpanded(true);
@@ -190,13 +191,24 @@ void ResourceManagerPane::onTreeItemExpanded(const QModelIndex& index){
                     //add to read thread
                     this->readFolder(item);
                     item->setExpanded(true);
+
                     d->model->appendWatchDirectory(item->path());
                 }
             }
-
+            item->setState(ResourceManagerModelItem::Expand);
         }
     }
 }
+
+void ResourceManagerPane::onTreeItemCollapsed(const QModelIndex& index){
+    if(index.isValid()){
+        auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
+        if(item!=nullptr){
+            item->setState(ResourceManagerModelItem::Collapse);
+        }
+    }
+}
+
 
 void ResourceManagerPane::onTreeItemDClicked(const QModelIndex& index){
     if(index.isValid()){

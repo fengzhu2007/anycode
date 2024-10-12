@@ -20,7 +20,9 @@ include_directories(SYSTEM "../dockingpane/src")
 include_directories(SYSTEM "../wRect/src")
 include_directories(SYSTEM "../texteditor")
 include_directories(SYSTEM "../3party/qscintilla/src")
-
+#include_directories(SYSTEM "../3party/scintilla/qt/ScintillaEditBase")
+#include_directories(SYSTEM "../3party/scintilla/include")
+#include_directories(SYSTEM "../3party/scintilla/src")
 
 find_library(CRYPTO_LIB libcrypto PATHS "../3party/bin/x64/lib")
 find_library(SSL_LIB libssl PATHS "../3party/bin/x64/lib")
@@ -28,7 +30,7 @@ find_library(CURL_LIB libcurl_imp PATHS "../3party/bin/x64/lib")
 find_library(SSH2_LIB libssh2 PATHS "../3party/bin/x64/lib")
 find_library(Z_LIB zlib PATHS "../3party/bin/x64/lib")
 find_library(GIT2_LIB git2 PATHS "../3party/bin/x64/lib")
-find_library(QCINTILLA_LIB qscintilla2_qt5 PATHS "../3party/qscintilla")
+#find_library(QCINTILLA_LIB qscintilla2_qt5 PATHS "../3party/qscintilla")
 
 
 set(FORMS
@@ -208,6 +210,7 @@ add_library(App SHARED
         panes/find_replace/search_scope_model.h panes/find_replace/search_scope_model.cpp
         panes/code_editor/goto_line_dialog.h panes/code_editor/goto_line_dialog.cpp panes/code_editor/gotolinedialog.ui
         panes/find_replace/replace_all_progress_dialog.h panes/find_replace/replace_all_progress_dialog.cpp panes/find_replace/replace_all_progress_dialog.ui
+        core/ide_settings.h core/ide_settings.cpp
 
 
 
@@ -219,7 +222,7 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} ${QCINTILLA_LIB} libsvnpp dockingpane wRect texteditor)
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor)
 
 target_compile_definitions(App PRIVATE APP_LIBRARY)
 

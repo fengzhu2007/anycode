@@ -14,6 +14,7 @@ public:
     ResourceManagerModelItem* parent;
     QList<ResourceManagerModelItem*> children;
     bool expanded=false;
+    ResourceManagerModelItem::State state=ResourceManagerModelItem::Collapse;
     ResourceManagerModelItem::Type type;
     long long pid=0;
     QString title;
@@ -213,6 +214,13 @@ void ResourceManagerModelItem::setExpanded(bool expanded){
     d->expanded = expanded;
 }
 
+ResourceManagerModelItem::State ResourceManagerModelItem::state(){
+    return d->state;
+}
+
+void ResourceManagerModelItem::setState(State state){
+    d->state = state;
+}
 ResourceManagerModelItem::Type ResourceManagerModelItem::type(){
     return d->type;
 }

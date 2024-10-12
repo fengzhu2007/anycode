@@ -13,6 +13,8 @@
 #include <QFileSystemWatcher>
 #include <QMutex>
 #include <QMutexLocker>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QDebug>
 namespace ady{
 
@@ -417,6 +419,39 @@ ResourceManagerModelItem* ResourceManagerModel::find(const QString& path){
 
 ResourceManagerModelItem* ResourceManagerModel::rootItem(){
     return d->root;
+}
+
+QJsonArray ResourceManagerModel::toJson(){
+    QJsonArray projects;
+    //find all projects
+    int count = d->root->childrenCount();
+    for(int i=0;i<count;i++){
+        auto child = d->root->childAt(i);
+        QJsonArray list;
+        qDebug()<<"path:"<<child->path()<<child->state();
+        if(child->state() == ResourceManagerModelItem::Expand){
+            list << child->path();
+            this->findAllExpend(child,list);
+        }
+        QJsonObject pro = {
+            {"id",child->pid()},
+            {"path",child->path()},
+            {"opened",list}
+        };
+        projects<<pro;
+    }
+    return projects;
+}
+
+void ResourceManagerModel::findAllExpend(ResourceManagerModelItem* item,QJsonArray& list){
+    int count = item->childrenCount();
+    for(int i=0;i<count;i++){
+        auto child = item->childAt(i);
+        if(child->state() == ResourceManagerModelItem::Expand){
+            list << child->path();
+            this->findAllExpend(child,list);
+        }
+    }
 }
 
 void ResourceManagerModel::onDirectoryChanged(const QString &path){

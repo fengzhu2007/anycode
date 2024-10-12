@@ -1,7 +1,7 @@
 #ifndef CODEEDITORVIEW_H
 #define CODEEDITORVIEW_H
 
-#define Scintilla
+//#define Scintilla
 
 #include "global.h"
 #ifndef Scintilla
@@ -59,6 +59,7 @@ public:
 protected:
     virtual void contextMenuEvent(QContextMenuEvent *e) override;
     virtual void showEvent(QShowEvent *e) override;
+    virtual void resizeEvent(QResizeEvent * e) override;
 
 private:
     CodeEditorViewPrivate* d;

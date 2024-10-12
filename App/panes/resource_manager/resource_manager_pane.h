@@ -29,6 +29,8 @@ public:
 
 public slots:
     void onTreeItemExpanded(const QModelIndex& index);
+    void onTreeItemCollapsed(const QModelIndex& index);
+
     void onTreeItemDClicked(const QModelIndex& index);
     void onContextMenu(const QPoint& pos);
     void onInsertReady(const QModelIndex& ,bool isFile);

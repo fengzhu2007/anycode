@@ -3,6 +3,7 @@
 #include "global.h"
 #include <QAbstractItemModel>
 #include <QFileInfo>
+#include <QJsonArray>
 
 
 namespace ady{
@@ -55,7 +56,7 @@ public:
     ResourceManagerModelItem* rootItem();
 
     //bool takeWatchDir(const QString& dir);
-
+    QJsonArray toJson();
 
 public slots:
     void onUpdateChildren(QFileInfoList list,const QString& parent,int action);
@@ -69,6 +70,7 @@ signals:
     void insertReady(const QModelIndex& parent,bool isFile);
 private:
     ResourceManagerModel();
+    void findAllExpend(ResourceManagerModelItem* item,QJsonArray& list);
 
 private:
     ResourceManagerModelPrivate* d;

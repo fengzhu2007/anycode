@@ -16,6 +16,11 @@ public:
         Folder,
         File
     };
+    enum State {
+        Collapse=0,
+        Expand
+    };
+
     explicit ResourceManagerModelItem(Type type=Solution);
     ResourceManagerModelItem(Type type,const QString& title);
     ResourceManagerModelItem(Type type,const QString& title,ResourceManagerModelItem* parent);
@@ -44,7 +49,10 @@ public:
     void insertItem(int row,ResourceManagerModelItem* item);
     bool expanded();
     void setExpanded(bool expanded);
+    State state();
+    void setState(State state);
     Type type();
+
 
     void dump(const QString& prefix={});
 

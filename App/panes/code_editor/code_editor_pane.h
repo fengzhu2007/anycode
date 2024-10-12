@@ -22,6 +22,7 @@ public:
     virtual void activation() override;
     virtual void save(bool rename) override;
     virtual void contextMenu(const QPoint& pos) override;
+    virtual QJsonObject toJson() override;
     //virtual bool onReceive(Event* e) override;//event bus receive callback
     void rename(const QString& name);
     bool readFile(const QString& path);

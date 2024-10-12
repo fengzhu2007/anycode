@@ -41,9 +41,11 @@ class CodeEditorPane;
 
     private:
         void onOpenFindAndReplace(int mode,const QString& text,const QString& scope);
+        void forTest();
 
     private:
         CodeEditorPane* currentEditorPane();
+        void restoreFromSettings();
 
     private:
         Ui::IDEWindow *ui;

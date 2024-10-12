@@ -30,6 +30,7 @@ class CodeEditorPanePrivate{
 public:
     CodeEditorView* editor;
     int id;
+    QString mineType;
 };
 
 CodeEditorPane::CodeEditorPane(QWidget *parent)
@@ -49,7 +50,7 @@ CodeEditorPane::CodeEditorPane(QWidget *parent)
 CodeEditorPane::~CodeEditorPane(){
     //Subscriber::unReg();
     //qDebug()<<"CodeEditorPane::~CodeEditorPane";
-    qDebug()<<"CodeEditorPane::~CodeEditorPane"<<this;
+    //qDebug()<<"CodeEditorPane::~CodeEditorPane"<<this;
     auto manager = CodeEditorManager::getInstance();
     if(manager!=nullptr){
         manager->remove(this);
@@ -99,7 +100,7 @@ void CodeEditorPane::save(bool rename){
 
     if(this->writeFile(path)){
         //rename tab title
-        this->setToolTip(path);
+        //this->setToolTip(path);
         if(tabRename){
 
             auto container = this->container();
@@ -130,6 +131,19 @@ void CodeEditorPane::contextMenu(const QPoint& pos){
         return ;
     }
     contextMenu.exec(QCursor::pos());
+}
+
+QJsonObject CodeEditorPane::toJson(){
+    QJsonObject data = {
+        {"path",this->path()},
+        {"mineType",d->mineType},
+        {"line",d->editor->textCursor().block().blockNumber()+1}
+    };
+    return {
+        {"id",this->id()},
+        {"group",this->group()},
+        {"data",data}
+    };
 }
 
 /*bool CodeEditorPane::onReceive(Event* e){

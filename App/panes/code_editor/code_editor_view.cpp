@@ -5,12 +5,17 @@
 #include "core/coreconstants.h"
 #include "codeassist/documentcontentcompletion.h"
 //#include "codeassist/keywordscompletionassist.h"
-#include "languages/cstyle/cstyleindenter.h"
-#include "languages/cstyle/cstyleautocomplete.h"
+//#include "languages/cstyle/cstyleindenter.h"
+//#include "languages/cstyle/cstyleautocomplete.h"
 //#include "languages/python/pythonindenter.h"
+#include "languages/html/htmlindenter.h"
+#include "languages/html/htmlautocompleter.h"
+
 #include <QScrollBar>
 #include <QTimer>
 #include <QDebug>
+
+
 namespace ady{
 
 
@@ -41,8 +46,9 @@ CodeEditorView::CodeEditorView(QWidget* parent)
     //auto indenter = new TextEditor::TextIndenter(doc->document());
     //auto indenter = TextEditor::createCStyleIndenter(doc->document());
     //auto indenter = Python::createPythonIndenter(doc->document());
-    //doc->setIndenter(indenter);
-    this->setAutoCompleter(new CStyle::AutoCompleter);
+    auto indenter = Html::createIndenter(doc->document());
+    doc->setIndenter(indenter);
+    this->setAutoCompleter(new Html::AutoCompleter);
 }
 
 CodeEditorView::~CodeEditorView(){
@@ -95,6 +101,54 @@ CodeEditorView::CodeEditorView(QWidget* parent)
 
     d = new CodeEditorViewPrivate;
 
+    this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    QsciLexerCPP *lexer = new QsciLexerCPP;
+    this->setLexer(lexer);
+
+
+    /****************line no style start*******************/
+    //this->setCaretLineVisible(false);
+    this->setMarginType(0, QsciScintilla::NumberMargin);
+    this->setMarginWidth(0, 50);
+    this->setMarginWidth(10, "00000");
+    this->setMarginsForegroundColor(Qt::black);
+    this->setMarginsBackgroundColor(Qt::lightGray);
+
+    QFont font;
+    font.setFamily("Courier");
+    font.setPointSize(10);
+    this->setMarginsFont(font);
+    /****************line no style end*******************/
+
+
+    /****************code fold start*******************/
+    this->setFolding(QsciScintilla::BoxedTreeFoldStyle);
+    this->setMarginType(2, QsciScintilla::SymbolMargin);
+    this->setMarginWidth(2, 12);
+    this->setMarginSensitivity(2, true);
+    this->setFoldMarginColors(Qt::lightGray,Qt::lightGray);
+    /****************code fold end*******************/
+    this->setMarginType(1, QsciScintilla::TextMargin);
+
+
+    this->setAutoCompletionSource(QsciScintilla::AcsAll);
+    this->setAutoCompletionThreshold(2);
+
+    this->setAutoIndent(true);
+    this->setTabWidth(4);
+    this->setIndentationGuides(true);
+
+    this->setBraceMatching(QsciScintilla::SloppyBraceMatch);
+
+    this->setWrapMode(QsciScintilla::WrapNone);
+    this->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    this->setScrollWidth(5);
+    this->setScrollWidthTracking(true);
+
+    //this->setWrapMode(QsciScintilla::WrapWord);
+
 }
 
 CodeEditorView::~CodeEditorView(){
@@ -114,8 +168,14 @@ void CodeEditorView::showEvent(QShowEvent *e){
     QsciScintilla::showEvent(e);
 }
 
+void CodeEditorView::resizeEvent(QResizeEvent * e){
+     QsciScintilla::resizeEvent(e);
+     qDebug()<<"maximumViewportSize:"<<maximumViewportSize();
+}
+
 void CodeEditorView::rename(const QString& name){
     //this->textDocument()->setFilePath(Utils::FilePath::fromString(name));
+     //d->path = name;
 }
 
 void CodeEditorView::gotoLine(int line){
@@ -142,3 +202,4 @@ void CodeEditorView::clearHighlights(){
 
 
 }
+

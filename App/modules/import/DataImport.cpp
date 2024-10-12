@@ -265,7 +265,7 @@ int DataImport::importData(){
     Q_FOREACH(DataImportProject p,this->data){
         p.project.datetime = QDateTime::currentDateTime().toSecsSinceEpoch();
         long long pid = projectStorage.insert(p.project);
-        qDebug()<<"pid:"<<pid;
+        //qDebug()<<"pid:"<<pid;
         if(pid>0){
             Q_FOREACH(DataImportGroup g,p.groups){
                 long long gid = g.group.id;
@@ -273,7 +273,7 @@ int DataImport::importData(){
                     g.group.pid = pid;
                     gid = groupStorage.insert(g.group);
                 }
-                qDebug()<<"gid:"<<gid;
+                //qDebug()<<"gid:"<<gid;
                 if(gid>0){
                     Q_FOREACH(SiteRecord r,g.sites){
                         r.pid = pid;

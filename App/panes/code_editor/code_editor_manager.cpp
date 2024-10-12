@@ -330,7 +330,8 @@ bool CodeEditorManager::onReceive(Event* e){
 void CodeEditorManager::onFileChanged(const QString &path){
     auto pane = this->get(path);
     if(pane!=nullptr){
-        QFileInfo fi(path);
+        //to fix
+        /*QFileInfo fi(path);
         if(!fi.exists()){
             //delete
             if(MessageDialog::confirm(d->docking_manager->widget(),tr("The file \"%1\" is no longer there. \nDo you want to keep it?").arg(path))==QMessageBox::No){
@@ -349,7 +350,7 @@ void CodeEditorManager::onFileChanged(const QString &path){
                 }
                 pane->readFile(path);
             }
-        }
+        }*/
     }
 }
 

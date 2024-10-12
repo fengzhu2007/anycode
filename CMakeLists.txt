@@ -16,6 +16,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 # 添加 DependencyProject 子目录
 add_subdirectory(texteditor)
+#add_subdirectory(3party/qscintilla/src)
 add_subdirectory(dockingpane)
 add_subdirectory(wRect)
 

@@ -7,6 +7,7 @@
 #include "project/open_project_window.h"
 #include "project/new_project_window.h"
 #include "panes/resource_manager/resource_manager_pane.h"
+#include "panes/resource_manager/resource_manager_model.h"
 #include "panes/code_editor/code_editor_pane.h"
 #include "panes/code_editor/code_editor_manager.h"
 #include "panes/code_editor/goto_line_dialog.h"
@@ -21,6 +22,7 @@
 #include "core/event_bus/type.h"
 #include "core/event_bus/event_data.h"
 #include "core/backend_thread.h"
+#include "core/ide_settings.h"
 #include "storage/project_storage.h"
 
 /*#include "highlighter.h"
@@ -31,8 +33,12 @@
 #include "codeassist/documentcontentcompletion.h"
 #include "snippets/snippetprovider.h"*/
 
+#include "languages/html/htmlscanner.h";
+
+
 #include "w_toast.h"
 #include "network/network_manager.h"
+
 
 #include <QLabel>
 #include <QCloseEvent>
@@ -93,10 +99,16 @@ IDEWindow::IDEWindow(QWidget *parent) :
     connect(ui->actionLog,&QAction::triggered,this,&IDEWindow::onActionTriggered);
 
 
+
+
     wToastManager::init(this);
     BackendThread::init()->start();
     CodeEditorManager::init(m_dockingPaneManager);
-    CodeEditorManager::getInstance()->open("D:/wamp/www/demo.php");
+
+
+
+
+    this->restoreFromSettings();
 
     //ProjectStorage projectStorage
     //27 demo
@@ -121,10 +133,24 @@ IDEWindow::IDEWindow(QWidget *parent) :
     editor->configureGenericHighlighter();
     doc->setCompletionAssistProvider(&basicSnippetProvider);
     m_dockingPaneManager->createPane("test","test","TEST",editor,DockingPaneManager::Center);*/
+
+
+    this->forTest();
 }
 
 IDEWindow::~IDEWindow()
 {
+
+    //save setting
+    auto dockpanes = m_dockingPaneManager->layoutSerialize();
+    auto projects = ResourceManagerModel::getInstance()->toJson();
+    auto settings = IDESettings::getInstance(this);
+    settings->setDockpanes(dockpanes);
+    settings->setProjects(projects);
+    settings->saveToFile();
+    IDESettings::destory();
+
+
     wToastManager::destory();
     auto t = BackendThread::getInstance();
     t->stop()->quit();
@@ -319,6 +345,39 @@ CodeEditorPane* IDEWindow::currentEditorPane(){
         }
     }
     return nullptr;
+}
+
+void IDEWindow::restoreFromSettings(){
+    auto settings = IDESettings::getInstance(this);
+    settings->readFromFile();
+    if(settings->isMaximized()){
+        this->showMaximized();
+    }else{
+        this->resize(settings->width(),settings->height());
+    }
+}
+
+void IDEWindow::forTest(){
+    //Css::Scanner scanner;
+    Html::Scanner scanner;
+    const QString filename = "D:/wamp/www/test/index.html";
+    CodeEditorManager::getInstance()->open(filename);
+    /*QFile fi(filename);
+    if(fi.open(QIODevice::ReadOnly)){
+        int state = Css::Scanner::Normal;
+        while (!fi.atEnd()) {
+           const QString text = fi.readLine();
+            int from = 0;
+            auto list = scanner(from,text,state);
+            qDebug()<<"size:"<<list.size();
+            Html::Scanner::dump(text,list);
+            state = scanner.state();
+            //break;
+        }
+        fi.close();
+    }else{
+        qDebug()<<"file not opened";
+    }*/
 }
 
 /*void IDEWindow::closeEvent(QCloseEvent *event){
