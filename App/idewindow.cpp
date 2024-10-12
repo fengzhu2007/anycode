@@ -4,6 +4,7 @@
 #include "docking_workbench.h"
 #include "docking_pane.h"
 #include "docking_pane_client.h"
+#include "docking_pane_layout_item_info.h"
 #include "project/open_project_window.h"
 #include "project/new_project_window.h"
 #include "panes/resource_manager/resource_manager_pane.h"
@@ -16,6 +17,8 @@
 #include "panes/file_transfer/file_transfer_pane.h"
 #include "panes/find_replace/find_replace_dialog.h"
 #include "panes/find_replace/find_replace_pane.h"
+
+#include "panes/loader.h"
 
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
@@ -63,7 +66,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
     m_dockingPaneManager->workbench()->setContentsMargins(0,0,0,6);
     this->setCentralWidget(w);
 
-    ResourceManagerPane::open(m_dockingPaneManager);
+
 
     connect(m_dockingPaneManager->workbench(),&DockingWorkbench::beforePaneClose,this,&IDEWindow::onBeforePaneClose);
     connect(m_dockingPaneManager->workbench(),&DockingWorkbench::paneClosed,this,&IDEWindow::onPaneClosed);
@@ -106,16 +109,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
     CodeEditorManager::init(m_dockingPaneManager);
 
 
-
-
     this->restoreFromSettings();
-
-    //ProjectStorage projectStorage
-    //27 demo
-    //7 svn
-    //1 guzheng
-    ProjectRecord record = ProjectStorage().one(27);
-    Publisher::getInstance()->post(Type::M_OPEN_PROJECT,(void*)&record);
 
     //auto widget = new QPlainTextEdit(m_dockingPaneManager->widget());
     //m_dockingPaneManager->createPane("test","test","TEST",widget,DockingPaneManager::Center);
@@ -142,7 +136,7 @@ IDEWindow::~IDEWindow()
 {
 
     //save setting
-    auto dockpanes = m_dockingPaneManager->layoutSerialize();
+    auto dockpanes = m_dockingPaneManager->toJson();
     auto projects = ResourceManagerModel::getInstance()->toJson();
     auto settings = IDESettings::getInstance(this);
     settings->setDockpanes(dockpanes);
@@ -251,6 +245,15 @@ void IDEWindow::onActionTriggered(){
     }else if(sender==ui->actionResource_Manage){
         auto pane = ResourceManagerPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
+        auto model = ResourceManagerModel::getInstance();
+        //qDebug()<<"count:"<<model->rowCount();
+        if(model->rowCount()==0){
+            //first open
+            this->restoreProjects();
+        }
+
+
+
     }else if(sender==ui->actionVersion_Control){
         auto pane = VersionControlPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
@@ -349,19 +352,206 @@ CodeEditorPane* IDEWindow::currentEditorPane(){
 
 void IDEWindow::restoreFromSettings(){
     auto settings = IDESettings::getInstance(this);
-    settings->readFromFile();
-    if(settings->isMaximized()){
-        this->showMaximized();
+    if(settings->readFromFile()){
+        if(settings->isMaximized()){
+            this->showMaximized();
+        }else{
+            this->resize(settings->width(),settings->height());
+        }
+        this->restoreDockpanes();
+        this->restoreProjects();
     }else{
-        this->resize(settings->width(),settings->height());
+        //start up by default
+        this->showMaximized();
+        ResourceManagerPane::open(m_dockingPaneManager);
     }
+
+}
+
+void IDEWindow::restoreDockpanes(){
+    auto settings = IDESettings::getInstance(this);
+    QJsonObject dockpanes = settings->dockpanes();
+    QJsonValue innerV = dockpanes.take("inner");
+    if(innerV.isObject()){
+        QJsonObject inner = innerV.toObject();
+        int orientation = inner.take("orientation").toInt(1);
+        QJsonValue listV = inner.take("list");
+        if(listV.isArray()){
+            QJsonArray list = listV.toArray();
+            this->restoreDockContainers(list,orientation,nullptr);
+        }
+    }
+
+}
+
+void IDEWindow::restoreDockContainers(QJsonArray& list,int orientation,DockingPaneContainer* relation){
+    DockingPaneContainer* previous = relation;
+    for(auto one:list){
+        if(one.isObject()){
+            QJsonObject containerJson = one.toObject();
+            DockingPaneContainer* container = nullptr;
+            if(!containerJson.contains("children")){
+                int active = containerJson.take("active").toInt(0);
+                int client = containerJson.take("client").toInt(0);
+                float stretch = static_cast<float>(containerJson.take("stretch").toDouble(0));
+                qDebug()<<"stretch:"<<stretch;
+                QJsonValue tabsV = containerJson.take("tabs");
+                if(tabsV.isArray()){
+                    QJsonArray tabs = tabsV.toArray();
+                    for(auto tabV:tabs){
+                        if(tabV.isObject()){
+                            QJsonObject tab = tabV.toObject();
+                            const QString group = tab.take("group").toString();
+                            const QJsonValue dataV = tab.take("data");
+                            QJsonObject data;
+                            if(dataV.isObject()){
+                                data = dataV.toObject();
+                            }
+                            auto pane = PaneLoader::init(m_dockingPaneManager,group,data);
+                            //qDebug()<<"PaneLoader init pane:"<<pane<<pane->id();
+                            if(pane!=nullptr){
+                                if(client>0){
+                                    //int client_index = client - 1;
+                                    if(client==1){
+                                        auto info = m_dockingPaneManager->createPane(pane,DockingPaneManager::Center);
+                                        container = m_dockingPaneManager->workbench()->client();
+                                        info->setStretch(stretch);
+                                    }else{
+                                        auto cli = m_dockingPaneManager->workbench()->client(client - 1);
+                                        if(cli!=nullptr){
+                                            auto info = m_dockingPaneManager->createPane(pane,cli,DockingPaneManager::Center);
+                                            info->setStretch(stretch);
+                                            container = cli;
+                                        }else{
+                                            if(container!=nullptr){
+                                                m_dockingPaneManager->createPane(pane,container,DockingPaneManager::Center);
+                                            }else{
+                                                DockingPaneLayoutItemInfo* info=nullptr;
+                                                auto pre = m_dockingPaneManager->workbench()->client(client - 2);
+                                                if(pre==nullptr){
+                                                    m_dockingPaneManager->createPane(pane,DockingPaneManager::Center);
+                                                }else{
+                                                    if(orientation==DockingPaneLayoutItemInfo::Vertical){
+                                                        info = m_dockingPaneManager->createPane(pane,pre,DockingPaneManager::C_Bottom);
+                                                    }else{
+                                                        info = m_dockingPaneManager->createPane(pane,pre,DockingPaneManager::C_Right);
+                                                    }
+                                                }
+                                                if(info!=nullptr){
+                                                    container = info->container();
+                                                    info->setStretch(stretch);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    if(container!=nullptr){
+                                        m_dockingPaneManager->createPane(pane,container,DockingPaneManager::Center);
+                                    }else if(previous!=nullptr){
+
+                                        auto info = m_dockingPaneManager->createPane(pane,
+                                                                                         previous,
+                                                          orientation==DockingPaneLayoutItemInfo::Vertical?DockingPaneManager::Bottom:DockingPaneManager::Right);
+
+                                        if(info!=nullptr){
+                                            container = info->container();
+                                            info->setStretch(stretch);
+                                        }
+                                    }else{
+                                        auto info = m_dockingPaneManager->createPane(pane,
+                                                          orientation==DockingPaneLayoutItemInfo::Vertical?DockingPaneManager::Top:DockingPaneManager::Left);
+
+                                        if(info!=nullptr){
+                                            container = info->container();
+                                            info->setStretch(stretch);
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                    if(container!=nullptr){
+                        if(active>=0 && active<container->paneCount()){
+                            container->setPane(active);
+                        }else{
+                            container->setPane(0);
+                        }
+                        previous = container;
+                    }else{
+                        previous = relation;
+                    }
+                }
+            }else{
+                QJsonValue childrenV = containerJson.take("children");
+                if(childrenV.isArray()){
+                    auto children = childrenV.toArray();
+                    if(children.size()>1){
+                        //init children
+                        if(orientation==DockingPaneLayoutItemInfo::Vertical){
+                            this->restoreDockContainers(children,DockingPaneLayoutItemInfo::Horizontal,container);
+                        }else if(orientation == DockingPaneLayoutItemInfo::Horizontal){
+                            this->restoreDockContainers(children,DockingPaneLayoutItemInfo::Vertical,container);
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+void IDEWindow::restoreProjects(){
+
+    //ProjectStorage projectStorage
+    //27 demo
+    //7 svn
+    //1 guzheng
+
+
+    auto settings = IDESettings::getInstance(this);
+    QJsonArray projects = settings->projects();
+    //qDebug()<<"restoreProjects"<<projects;
+    for(auto one:projects){
+        if(one.isObject()){
+
+            Publisher::getInstance()->post(Type::M_OPEN_PROJECT,one);
+
+
+            /*QJsonObject project = one.toObject();
+            ProjectRecord record;
+            long long id = 0;
+            {
+                auto value = project.find("id");
+                if(value!=project.end()){
+                    id = value->toInt(0);
+                }
+            }
+            if(id>0){
+                record = projectStorage.one(id);
+            }
+            if(record.id==0){
+                //find path
+                auto value = project.find("path");
+                if(value!=project.end()){
+                    record.path = value->toString();
+                }
+            }
+            if(record.path.isEmpty()==false){
+                Publisher::getInstance()->post(Type::M_OPEN_PROJECT,(void*)&record);
+            }*/
+        }
+    }
+
+    //ProjectRecord record = ProjectStorage().one(27);
+
 }
 
 void IDEWindow::forTest(){
     //Css::Scanner scanner;
     Html::Scanner scanner;
     const QString filename = "D:/wamp/www/test/index.html";
-    CodeEditorManager::getInstance()->open(filename);
+    //CodeEditorManager::getInstance()->open(filename);
     /*QFile fi(filename);
     if(fi.open(QIODevice::ReadOnly)){
         int state = Css::Scanner::Normal;

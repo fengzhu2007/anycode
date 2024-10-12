@@ -9,7 +9,8 @@ class IDEWindow;
 }
 
 namespace ady{
-class CodeEditorPane;
+    class CodeEditorPane;
+    class DockingPaneContainer;
     class DockingPaneManager;
     class DockingPane;
     class ANYENGINE_EXPORT IDEWindow : public wMainWindow , public Subscriber
@@ -46,6 +47,9 @@ class CodeEditorPane;
     private:
         CodeEditorPane* currentEditorPane();
         void restoreFromSettings();
+        void restoreDockpanes();
+        void restoreDockContainers(QJsonArray& list,int orientation,DockingPaneContainer* relation);
+        void restoreProjects();
 
     private:
         Ui::IDEWindow *ui;

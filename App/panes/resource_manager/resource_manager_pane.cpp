@@ -60,6 +60,7 @@ public:
     QAction* actionUpload;
 };
 
+
 ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     DockingPane(parent),
     ui(new Ui::ResourceManagerPane)
@@ -94,6 +95,7 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     ui->treeView->setModel(d->model);
 
     connect(d->model,&ResourceManagerModel::insertReady,this,&ResourceManagerPane::onInsertReady);
+    connect(d->model,&ResourceManagerModel::itemsChanged,this,&ResourceManagerPane::onItemsChanged);
 
     this->initView();
 }
@@ -155,14 +157,69 @@ QString ResourceManagerPane::group(){
 }
 
 bool ResourceManagerPane::onReceive(Event* e){
+    QStringList opendlist;
     if(e->id()==Type::M_OPEN_PROJECT){
-        auto one = static_cast<ProjectRecord*>(e->data());
         auto project = new ProjectRecord();
-        project->id = one->id;
-        project->path = one->path;
-        project->name = one->name;
-        //qDebug()<<"pid:"<<one->id;
+
+        if(e->isJsonData()){
+            if(e->jsonData().isObject()){
+                long long id = 0;
+                QJsonObject proj = e->jsonData().toObject();
+                {
+                    auto val = proj.find("opened");
+                    if(val!=proj.end()){
+                        QJsonArray arr = val->toArray();
+                        for(auto one:arr){
+                            if(one.isString()){
+                                opendlist<<one.toString();
+                            }
+                        }
+                    }
+                }
+
+                {
+                    auto val = proj.find("id");
+                    if(val!=proj.end()){
+                        id = val->toInt(0);
+                        if(id>0){
+                            ProjectStorage projectStorage;
+                            auto one = projectStorage.one(id);
+                            if(one.id>0){
+                                project->id = one.id;
+                                project->path = one.path;
+                                project->name = one.name;
+                                goto result;
+                            }
+                        }
+                    }
+                }
+
+                {
+                    auto val = proj.find("path");
+                    if(val!=proj.end()){
+                        const QString path = val->toString();
+                        if(!path.isEmpty()){
+                            project->path = path;
+                            QFileInfo fi(path);
+                            project->name = fi.fileName();
+                            goto result;
+                        }
+                    }
+                }
+            }
+            return false;
+        }else{
+            auto one = static_cast<ProjectRecord*>(e->data());
+            project->id = one->id;
+            project->path = one->path;
+            project->name = one->name;
+        }
+
+        result:
         auto item = d->model->appendItem(project);
+        if(opendlist.length()>0){
+            item->setOpenList(opendlist);
+        }
         this->readFolder(item);
         item->setExpanded(true);
         return true;
@@ -303,6 +360,35 @@ void ResourceManagerPane::onInsertReady(const QModelIndex& parent,bool isFile){
     auto model = static_cast<ResourceManagerModel*>(ui->treeView->model());
     QModelIndex index = model->insertItem(one,isFile?ResourceManagerModelItem::File:ResourceManagerModelItem::Folder);
     ui->treeView->editIndex(index);
+}
+
+void ResourceManagerPane::onItemsChanged(){
+    auto item = d->model->rootItem();
+    int count = item->childrenCount();
+    for(int i=0;i<count;i++){
+        auto proj = item->childAt(i);
+        auto list = proj->openList();
+        if(list.size()>0){
+            const QString path = list.at(0);
+            if(proj->path() ==  path){
+                QModelIndex index = d->model->toIndex(proj);
+                ui->treeView->expand(index);
+                proj->removeOpenList(path);
+                list = proj->openList();
+            }
+            if(list.size()>0)
+            {
+                const QString path = list.at(0);
+                auto child = proj->findChild(path);
+                if(child!=nullptr){
+                    QModelIndex index = d->model->toIndex(child);
+                    ui->treeView->expand(index);
+                }
+                proj->removeOpenList(path);
+            }
+            return ;
+        }
+    }
 }
 
 void ResourceManagerPane::onActionTriggered(){
@@ -539,5 +625,13 @@ ResourceManagerPane* ResourceManagerPane::open(DockingPaneManager* dockingManage
     return instance;
 }
 
+ResourceManagerPane* ResourceManagerPane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
+    if(instance==nullptr){
+        instance = new ResourceManagerPane(dockingManager->widget());
+        return instance;
+    }else{
+        return nullptr;
+    }
+}
 
 }

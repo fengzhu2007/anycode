@@ -42,6 +42,7 @@ public:
     ResourceManagerModelItem* appendItem(ProjectRecord* project);
     ResourceManagerModelItem* appendItem(const QString& folder);
     QModelIndex insertItem(ResourceManagerModelItem* parent,int type);
+    QModelIndex toIndex(ResourceManagerModelItem* item);
 
     //void removeItem(const QString& path);
     //void updateItem(ResourceManagerModelItem* item);
@@ -68,6 +69,7 @@ public slots:
 signals:
     void updateChildren(QFileInfoList list,const QString& parent,int action);
     void insertReady(const QModelIndex& parent,bool isFile);
+    void itemsChanged();
 private:
     ResourceManagerModel();
     void findAllExpend(ResourceManagerModelItem* item,QJsonArray& list);

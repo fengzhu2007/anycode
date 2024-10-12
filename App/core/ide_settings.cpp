@@ -17,7 +17,7 @@ dockpanes:{
             orientation:0,1,2,
             list:[
                 {
-                    position:0,
+                    client:0,
                     active:0,
                     tabs:[
                         {id:xxx,group:xxx,position:1,data:{}},
@@ -25,7 +25,7 @@ dockpanes:{
                 },
                 {children:[
                         {
-                            position:0,
+                            client:0,
                             active:0,
                             tabs:[
                                 {id:xxx,group:xxx,position:1,data:{}},
@@ -34,7 +34,7 @@ dockpanes:{
 
                         },
                         {
-                            position:1,
+                            client:1,
                             active:1,
                             tabs:[
                                 {id:xxx,group:xxx,position:1,data:{}},
@@ -44,7 +44,7 @@ dockpanes:{
                         },
                     ]
                 },
-                {id:xxx,group:xxx,position:1,data:{}},
+                {id:xxx,group:xxx,client:1,data:{}},
             ]
         },
     float:[
@@ -161,7 +161,7 @@ bool IDESettings::readFromFile(const QString& filename){
         }
 
         {
-            auto v = data.take("dockpanes");
+            auto v = data.take("projects");
             if(v.isArray()){
                 d->projects = v.toArray();
             }

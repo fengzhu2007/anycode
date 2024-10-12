@@ -212,6 +212,14 @@ FindReplacePane* FindReplacePane::open(DockingPaneManager* dockingManager,bool a
     return instance;
 }
 
+FindReplacePane* FindReplacePane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
+    if(instance==nullptr){
+        instance = new FindReplacePane(dockingManager->widget());
+        return instance;
+    }
+    return nullptr;
+}
+
 void FindReplacePane::resizeEvent(QResizeEvent *event){
     DockingPane::resizeEvent(event);
 }

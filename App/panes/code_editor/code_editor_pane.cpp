@@ -202,6 +202,33 @@ CodeEditorView* CodeEditorPane::editor(){
     return d->editor;
 }
 
+CodeEditorPane* CodeEditorPane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
+    auto pane = new CodeEditorPane();
+    auto value = data.find("path");
+    if(value!=data.end()){
+        const QString path = value->toString();
+        if(!path.isEmpty()){
+            QFileInfo fi(path);
+            pane->setWindowTitle(fi.fileName());
+            pane->readFile(path);
+            auto instance = CodeEditorManager::getInstance();
+            instance->appendWatchFile(path);
+
+            {
+                auto value = data.find("line");
+                if(value!=data.end()){
+                    int line = value->toInt(1);
+                    pane->editor()->gotoLine(line,0);
+                }
+            }
+
+            return pane;
+        }
+    }
+    pane->setWindowTitle(QObject::tr("New File"));
+    return pane;
+}
+
 void CodeEditorPane::onModificationChanged(bool changed){
     auto container = this->container();
     if(container!=nullptr){

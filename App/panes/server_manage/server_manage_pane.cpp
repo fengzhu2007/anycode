@@ -383,4 +383,12 @@ ServerManagePane* ServerManagePane::open(DockingPaneManager* dockingManager,bool
     return instance;
 
 }
+
+ServerManagePane* ServerManagePane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
+    if(instance==nullptr){
+        instance = new ServerManagePane(dockingManager->widget());
+        return instance;
+    }
+    return nullptr;
+}
 }

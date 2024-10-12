@@ -113,5 +113,12 @@ FileTransferPane* FileTransferPane::open(DockingPaneManager* dockingManager,bool
     return instance;
 }
 
+FileTransferPane* FileTransferPane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
+    if(instance==nullptr){
+        instance = new FileTransferPane(dockingManager->widget());
+        return instance;
+    }
+    return nullptr;
+}
 
 }

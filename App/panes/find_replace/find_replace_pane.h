@@ -28,6 +28,7 @@ public:
 
 
     static FindReplacePane* open(DockingPaneManager* dockingManager,bool active=false);
+    static FindReplacePane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 public slots:
     void stop();
     void onSearchEnd();

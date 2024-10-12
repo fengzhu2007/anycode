@@ -20,6 +20,7 @@ public:
     QString title;
     QString path;
     void* data;
+    QStringList opendlist;
 };
 
 
@@ -223,6 +224,18 @@ void ResourceManagerModelItem::setState(State state){
 }
 ResourceManagerModelItem::Type ResourceManagerModelItem::type(){
     return d->type;
+}
+
+void ResourceManagerModelItem::setOpenList(const QStringList& list){
+    d->opendlist = list;
+}
+
+QStringList& ResourceManagerModelItem::openList(){
+    return d->opendlist;
+}
+
+void ResourceManagerModelItem::removeOpenList(const QString& path){
+    d->opendlist.removeOne(path);
 }
 
 void ResourceManagerModelItem::dump(const QString& prefix){

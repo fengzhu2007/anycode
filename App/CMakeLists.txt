@@ -211,6 +211,7 @@ add_library(App SHARED
         panes/code_editor/goto_line_dialog.h panes/code_editor/goto_line_dialog.cpp panes/code_editor/gotolinedialog.ui
         panes/find_replace/replace_all_progress_dialog.h panes/find_replace/replace_all_progress_dialog.cpp panes/find_replace/replace_all_progress_dialog.ui
         core/ide_settings.h core/ide_settings.cpp
+        panes/loader.h panes/loader.cpp
 
 
 

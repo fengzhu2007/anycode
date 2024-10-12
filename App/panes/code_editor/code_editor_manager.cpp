@@ -176,7 +176,9 @@ QList<CodeEditorPane*> CodeEditorManager::getAll(const QString& prefix){
 CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const QString& path,int line,int column){
     auto pane = this->get(path);
     if(pane==nullptr){
-        pane = new CodeEditorPane();
+        const QJsonObject data = {{"path",path},{"line",line}};
+        pane = CodeEditorPane::make(dockingManager,data);
+        /*pane = new CodeEditorPane();
         if(path.isEmpty()){
             pane->setWindowTitle(QObject::tr("New File"));
         }else{
@@ -184,7 +186,7 @@ CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const
             QFileInfo fi(path);
             pane->setWindowTitle(fi.fileName());
             pane->readFile(path);
-        }
+        }*/
         dockingManager->createPane(pane,DockingPaneManager::Center,true);
         //pane->editor()->gotoLine(1);
     }else{

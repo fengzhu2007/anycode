@@ -24,6 +24,8 @@ public:
     CodeEditorPane* open(const QString& path);
 
 
+
+
     void append(CodeEditorPane* pane);
     void remove(CodeEditorPane* pane);
     bool readFileLines(const QString&path);

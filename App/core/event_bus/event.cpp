@@ -7,6 +7,7 @@ public:
     QString id;
     void *data;
     bool ignore=false;
+    QJsonValue jsonData ;
 };
 
 Event::Event(const QString& id)
@@ -22,6 +23,13 @@ Event::Event(const QString& id,void *data){
     d->data = data;
 }
 
+Event::Event(const QString& id,QJsonValueRef& data){
+    d = new EventPrivate;
+    d->id = id;
+    d->data = nullptr;
+    d->jsonData = data;
+}
+
 Event::~Event(){
     delete d;
 }
@@ -33,6 +41,15 @@ void Event::ignore(){
 
 bool Event::isIgnore(){
     return d->ignore;
+}
+
+
+bool Event::isJsonData(){
+    return !(d->jsonData.isUndefined() || d->jsonData.isNull());
+}
+
+QJsonValue Event::jsonData(){
+    return d->jsonData;
 }
 
 const QString Event::id(){

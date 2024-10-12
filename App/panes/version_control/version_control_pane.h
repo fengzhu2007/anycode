@@ -32,6 +32,8 @@ public:
     static VersionControlPane* open(DockingPaneManager* dockingManager,bool active=false);
     static VersionControlPane* getInstance(){return instance;}
 
+    static VersionControlPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
+
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
 

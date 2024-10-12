@@ -52,7 +52,9 @@ public:
     State state();
     void setState(State state);
     Type type();
-
+    void setOpenList(const QStringList& list);
+    QStringList& openList();
+    void removeOpenList(const QString& path);
 
     void dump(const QString& prefix={});
 

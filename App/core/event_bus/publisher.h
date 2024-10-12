@@ -2,7 +2,7 @@
 #define PUBLISHER_H
 #include "global.h"
 #include <QObject>
-
+#include <QJsonValue>
 namespace ady{
 class Event;
 class PublisherPrivate;
@@ -16,6 +16,7 @@ public:
     void post(Event* e);
     void post(const QString& id);
     void post(const QString&id,void* data);
+    void post(const QString&id,QJsonValueRef& data);
     void reg(Subscriber* subscriber);
     void unReg(Subscriber* subscriber);
 

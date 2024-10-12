@@ -6,7 +6,7 @@
 //#include "core/event_bus/subscriber.h"
 
 namespace ady{
-
+class DockingPaneManager;
 class CodeEditor;
 class LineNumberArea;
 class CodeEditorPanePrivate;
@@ -31,6 +31,8 @@ public:
     bool isModified() const;
     //CodeEditor* editor();
     CodeEditorView* editor();
+
+    static CodeEditorPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 
 public slots:
     void onModificationChanged(bool changed);

@@ -552,5 +552,14 @@ VersionControlPane* VersionControlPane::open(DockingPaneManager* dockingManager,
     return instance;
 }
 
+VersionControlPane* VersionControlPane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
+    if(instance==nullptr){
+        instance = new VersionControlPane(dockingManager->widget());
+        return instance;
+    }else{
+        return nullptr;
+    }
+}
+
 
 }

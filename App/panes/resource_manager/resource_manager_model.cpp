@@ -310,12 +310,17 @@ QModelIndex ResourceManagerModel::insertItem(ResourceManagerModelItem* parent,in
     return createIndex(row,0,item);
 }
 
+QModelIndex ResourceManagerModel::toIndex(ResourceManagerModelItem* item){
+    return createIndex(item->row(),0,item);
+}
+
 void ResourceManagerModel::onUpdateChildren(QFileInfoList list,const QString& parent,int action){
     QMutexLocker locker(&(d->mutex));
     auto item = d->root->findChild(parent);
     if(item!=nullptr){
         if(action==BackendThreadTask::ReadFolder){
             this->appendItems(list,item);
+
         }else if(action==BackendThreadTask::RefreshFolder){
             this->refreshItems(list,item);
         }else if(action==BackendThreadTask::ReadFolderAndInsertFile){
@@ -330,6 +335,17 @@ void ResourceManagerModel::onUpdateChildren(QFileInfoList list,const QString& pa
             emit insertReady(parent,false);
         }
     }
+    //remove openlist
+    /*int count = d->root->childrenCount();
+    for(int i=0;i<count;i++){
+        auto proj = d->root->childAt(i);
+        const QString path = proj->path();
+        proj->removeOpenList(parent);
+    }*/
+    if(list.size()>0){
+        emit itemsChanged();
+    }
+
 }
 
 void ResourceManagerModel::appendItems(QFileInfoList list,ResourceManagerModelItem* parent){

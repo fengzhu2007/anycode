@@ -28,6 +28,7 @@ public:
     void addThread(ServerRequestThread* thread);
 
     static ServerManagePane* open(DockingPaneManager* dockingManager,bool active=false);
+    static ServerManagePane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 public slots:
     void onContextMenu(const QPoint& pos);
     void connectServer(long long id,const QString& path);

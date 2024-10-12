@@ -26,6 +26,7 @@ public:
     void readFolder(ResourceManagerModelItem* item,int action=-1);
 
     static ResourceManagerPane* open(DockingPaneManager* dockingManager,bool active=false);
+    static ResourceManagerPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 
 public slots:
     void onTreeItemExpanded(const QModelIndex& index);
@@ -34,6 +35,7 @@ public slots:
     void onTreeItemDClicked(const QModelIndex& index);
     void onContextMenu(const QPoint& pos);
     void onInsertReady(const QModelIndex& ,bool isFile);
+    void onItemsChanged();
     void onActionTriggered();
     void onTopActionTriggered();
 
