@@ -82,12 +82,31 @@ bool FileTransferPane::onReceive(Event* e) {
     }else if(id==Type::M_DOWNLOAD){
 
     }else if(id==Type::M_OPEN_PROJECT){
-        auto one = static_cast<ProjectRecord*>(e->data());
-
-        if(one->id>0){
-            auto model = static_cast<FileTransferModel*>(ui->treeView->model());
-            model->openProject(one->id,one->name);
+        long long id=0;
+        QString name;
+        if(e->isJsonData()){
+            QJsonObject proj = e->jsonData().toObject();
+            {
+                auto val = proj.find("id");
+                if(val!=proj.end()){
+                    id = val->toInt(0);
+                    if(id>0){
+                        ProjectStorage projectStorage;
+                        auto record = projectStorage.one(id);
+                        auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+                        model->openProject(record.id,record.name);
+                    }
+                }
+            }
+        }else{
+            auto one = static_cast<ProjectRecord*>(e->data());
+            if(one!=nullptr && one->id>0){
+                auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+                model->openProject(one->id,one->name);
+            }
         }
+
+
         return true;
     }
     return false;

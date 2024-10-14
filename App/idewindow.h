@@ -10,8 +10,9 @@ class IDEWindow;
 
 namespace ady{
     class CodeEditorPane;
-    class DockingPaneContainer;
+    class DockingPaneLayoutItemInfo;
     class DockingPaneManager;
+    class DockingPaneContainer;
     class DockingPane;
     class ANYENGINE_EXPORT IDEWindow : public wMainWindow , public Subscriber
     {
@@ -48,7 +49,8 @@ namespace ady{
         CodeEditorPane* currentEditorPane();
         void restoreFromSettings();
         void restoreDockpanes();
-        void restoreDockContainers(QJsonArray& list,int orientation,DockingPaneContainer* relation);
+        DockingPaneLayoutItemInfo* restoreDockContainers(QJsonArray& list,int orientation,DockingPaneLayoutItemInfo* parentInfo);
+        DockingPaneLayoutItemInfo* restoreDockTabs(QJsonArray& tabs,DockingPaneLayoutItemInfo* parentInfo,int orientation,int client=0);
         void restoreProjects();
 
     private:
