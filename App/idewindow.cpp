@@ -404,8 +404,6 @@ DockingPaneLayoutItemInfo* IDEWindow::restoreDockContainers(QJsonArray& list,int
                 if(container!=nullptr){
                     if(active>=0 && active<container->paneCount()){
                         container->setPane(active);
-                    }else{
-                        container->setPane(0);
                     }
                 }
                 info = ret;
@@ -440,6 +438,9 @@ DockingPaneLayoutItemInfo* IDEWindow::restoreDockTabs(QJsonArray& tabs,DockingPa
 
     DockingPaneLayoutItemInfo* info = nullptr;
     DockingPaneContainer* container = nullptr;
+    if(client>0 && tabs.size()==0){
+        return m_dockingPaneManager->workbench()->client()->itemInfo();
+    }
     for(auto tabV:tabs){
         if(tabV.isObject()){
             QJsonObject tab = tabV.toObject();

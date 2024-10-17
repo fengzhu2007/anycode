@@ -212,6 +212,8 @@ add_library(App SHARED
         panes/find_replace/replace_all_progress_dialog.h panes/find_replace/replace_all_progress_dialog.cpp panes/find_replace/replace_all_progress_dialog.ui
         core/ide_settings.h core/ide_settings.cpp
         panes/loader.h panes/loader.cpp
+        panes/startup/startup_pane.h panes/startup/startup_pane.cpp
+        panes/startup/startup_pane.ui
 
 
 

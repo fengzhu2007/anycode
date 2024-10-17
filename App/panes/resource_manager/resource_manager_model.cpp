@@ -335,17 +335,7 @@ void ResourceManagerModel::onUpdateChildren(QFileInfoList list,const QString& pa
             emit insertReady(parent,false);
         }
     }
-    //remove openlist
-    /*int count = d->root->childrenCount();
-    for(int i=0;i<count;i++){
-        auto proj = d->root->childAt(i);
-        const QString path = proj->path();
-        proj->removeOpenList(parent);
-    }*/
-    if(list.size()>0){
-        emit itemsChanged();
-    }
-
+    emit itemsChanged();
 }
 
 void ResourceManagerModel::appendItems(QFileInfoList list,ResourceManagerModelItem* parent){

@@ -3,7 +3,7 @@ namespace ady{
 
 
     COSListObjectResponse::COSListObjectResponse()
-        :COSResponse(){
+        :COSResponse(0){
 
     }
 
