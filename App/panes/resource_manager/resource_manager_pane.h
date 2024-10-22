@@ -3,7 +3,7 @@
 #include "global.h"
 #include "docking_pane.h"
 #include "core/event_bus/subscriber.h"
-
+#include <QMenu>
 namespace Ui {
 class ResourceManagerPane;
 }
@@ -38,10 +38,14 @@ public slots:
     void onItemsChanged();
     void onActionTriggered();
     void onTopActionTriggered();
+    void onUploadToSite();
+    void onUploadToGroup();
+
 
 
 private:
     ResourceManagerPane(QWidget *parent = nullptr);
+    QMenu* attchUploadMenu(QMenu* parent,long long id);
 
 public:
     static const QString PANE_ID;

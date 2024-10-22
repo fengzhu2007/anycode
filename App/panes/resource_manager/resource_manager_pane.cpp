@@ -10,6 +10,7 @@
 #include "core/event_bus/event_data.h"
 #include "core/backend_thread.h"
 #include "storage/project_storage.h"
+#include "storage/site_storage.h"
 #include "docking_pane_manager.h"
 #include "docking_pane_layout_item_info.h"
 #include "components/message_dialog.h"
@@ -58,6 +59,9 @@ public:
     QAction* actionDelete;
     QAction* actionCopy_Path;
     QAction* actionUpload;
+
+    //QList<SiteRecord> sites;
+    QMap<long long ,SiteRecord> sites;
 };
 
 
@@ -217,6 +221,16 @@ bool ResourceManagerPane::onReceive(Event* e){
 
         result:
         auto item = d->model->appendItem(project);
+        if(project->id>0){
+            //find all sites
+            SiteStorage siteStorage;
+            auto list = siteStorage.list(project->id,1);//status==1 all sites
+            for(auto one:list){
+                if(!d->sites.contains(one.id)){
+                    d->sites.insert(one.id,one);
+                }
+            }
+        }
         if(opendlist.length()>0){
             item->setOpenList(opendlist);
         }
@@ -297,11 +311,11 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
             d->actionPaste->setEnabled(true);
         }
     }
-    if(one->pid()>0){
+    /*if(one->pid()>0){
         d->actionUpload->setEnabled(true);
     }else{
         d->actionUpload->setEnabled(false);
-    }
+    }*/
     if(type==ResourceManagerModelItem::Project){
         contextMenu.addAction(d->actionNew_File);
         contextMenu.addAction(d->actionNew_Folder);
@@ -310,7 +324,13 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionPaste);
         contextMenu.addSeparator();
-        contextMenu.addAction(d->actionUpload);
+        //contextMenu.addAction(d->actionUpload);
+        if(one->pid()>0){
+            auto uploadM = this->attchUploadMenu(&contextMenu,one->pid());
+            if(uploadM!=nullptr){
+                contextMenu.addMenu(uploadM);
+            }
+        }
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionFind);
         contextMenu.addSeparator();
@@ -327,7 +347,13 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
         contextMenu.addAction(d->actionCopy);
         contextMenu.addAction(d->actionPaste);
         contextMenu.addSeparator();
-        contextMenu.addAction(d->actionUpload);
+        //contextMenu.addAction(d->actionUpload);
+        if(one->pid()>0){
+            auto uploadM = this->attchUploadMenu(&contextMenu,one->pid());
+            if(uploadM!=nullptr){
+                contextMenu.addMenu(uploadM);
+            }
+        }
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionFind);
         contextMenu.addSeparator();
@@ -342,7 +368,13 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
         contextMenu.addAction(d->actionCut);
         contextMenu.addAction(d->actionCopy);
         contextMenu.addSeparator();
-        contextMenu.addAction(d->actionUpload);
+        //contextMenu.addAction(d->actionUpload);
+        if(one->pid()>0){
+            auto uploadM = this->attchUploadMenu(&contextMenu,one->pid());
+            if(uploadM!=nullptr){
+                contextMenu.addMenu(uploadM);
+            }
+        }
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionRename);
         contextMenu.addAction(d->actionDelete);
@@ -614,6 +646,32 @@ void ResourceManagerPane::onTopActionTriggered(){
     }else if(sender==ui->actionExpand){
         ui->treeView->expandAll();
     }
+}
+
+void ResourceManagerPane::onUploadToSite(){
+    auto sender = static_cast<QAction*>(this->sender());
+    auto data = sender->data();
+
+}
+
+void ResourceManagerPane::onUploadToGroup(){
+    auto sender = static_cast<QAction*>(this->sender());
+    auto data = sender->data();
+}
+
+QMenu* ResourceManagerPane::attchUploadMenu(QMenu* parent,long long id){
+    QMenu* uploadM = nullptr;
+    for(auto one:d->sites){
+        if(one.pid==id){
+            if(uploadM==nullptr){
+                uploadM = new QMenu(parent);
+                uploadM->setTitle(tr("Upload"));
+            }
+            auto action = uploadM->addAction(QIcon(":/Resource/icons/RemoteServer_16x.svg"),one.name,this,SLOT(onUploadToSite()));
+            action->setData(one.id);//site id
+        }
+    }
+    return uploadM;
 }
 
 ResourceManagerPane* ResourceManagerPane::open(DockingPaneManager* dockingManager,bool active){

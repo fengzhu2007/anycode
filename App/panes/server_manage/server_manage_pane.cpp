@@ -35,7 +35,7 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
     ui(new Ui::ServerManagePane)
 {
     Subscriber::reg();
-    this->regMessageIds({Type::M_UPLOAD});
+    this->regMessageIds({Type::M_UPLOAD,Type::M_OPEN_PROJECT});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -104,11 +104,31 @@ bool ServerManagePane::onReceive(Event* e) {
     }else if(id==Type::M_DOWNLOAD){
 
     }else if(id==Type::M_OPEN_PROJECT){
-        auto one = static_cast<ProjectRecord*>(e->data());
-        if(one->id>0){
-            auto model = static_cast<ServerManageModel*>(ui->treeView->model());
-            model->openProject(one->id,one->name);
+        if(e->isJsonData()){
+            if(e->jsonData().isObject()){
+                long long id = 0;
+                QJsonObject proj = e->jsonData().toObject();
+                auto val = proj.find("id");
+                if(val!=proj.end()){
+                    id = val->toInt(0);
+                    if(id>0){
+                        ProjectStorage projectStorage;
+                        auto one = projectStorage.one(id);
+                        if(one.id>0){
+                            auto model = static_cast<ServerManageModel*>(ui->treeView->model());
+                            model->openProject(one.id,one.name);
+                        }
+                    }
+                }
+            }
+        }else{
+            auto one = static_cast<ProjectRecord*>(e->data());
+            if(one->id>0){
+                auto model = static_cast<ServerManageModel*>(ui->treeView->model());
+                model->openProject(one->id,one->name);
+            }
         }
+
         return true;
     }
     return false;
@@ -286,10 +306,12 @@ void ServerManagePane::onActionTriggered(){
 
     if(sender==ui->actionRefresh){
         QModelIndex index = model->currentIndex();
-        auto item = static_cast<ServerManageModelItem*>(index.internalPointer());
-        long long sid = item->sid();
-        item->setLoading(true);
-        this->cdDir(sid,item->path(),true);
+        if(index.isValid()){
+            auto item = static_cast<ServerManageModelItem*>(index.internalPointer());
+            long long sid = item->sid();
+            item->setLoading(true);
+            this->cdDir(sid,item->path(),true);
+        }
     }else if(sender==ui->actionDock_To_Client){
 
     }else if(sender==ui->actionOpen){
