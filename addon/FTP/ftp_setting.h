@@ -9,7 +9,7 @@ namespace ady {
     class FTPSetting
     {
     public:
-        FTPSetting(SiteSetting& setting);
+        FTPSetting(const SiteSetting& setting);
         ~FTPSetting();
         QList<QPair<QString,QString>> dirSync();
         QList<QPair<QString,QString>> dirMapping();

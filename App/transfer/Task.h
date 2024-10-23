@@ -6,6 +6,7 @@
 #include <QVariant>
 #include <QFile>
 namespace ady {
+class FileTransferModelItem;
     class ANYENGINE_EXPORT Task {
     public:
 
@@ -15,6 +16,7 @@ namespace ady {
 
         Task();
         Task(long long siteid,QString local,QString remote);
+        Task(FileTransferModelItem* item);
     public:
         char cmd;
         char type;

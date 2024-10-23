@@ -58,7 +58,7 @@ public:
     QAction* actionRename;
     QAction* actionDelete;
     QAction* actionCopy_Path;
-    QAction* actionUpload;
+    //QAction* actionUpload;
 
     //QList<SiteRecord> sites;
     QMap<long long ,SiteRecord> sites;
@@ -126,7 +126,7 @@ void ResourceManagerPane::initView(){
     d->actionRename = new QAction(tr("Rename"),this);
     d->actionDelete = new QAction(QIcon(":/Resource/icons/Cancel_16x.svg"),tr("Delete"),this);
     d->actionCopy_Path = new QAction(tr("Copy Path"),this);
-    d->actionUpload = new QAction(QIcon(":/Resource/icons/BatchCheckIn_16x.svg"),tr("Upload"),this);
+    //d->actionUpload = new QAction(QIcon(":/Resource/icons/BatchCheckIn_16x.svg"),tr("Upload"),this);
 
     d->actionCut->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_X));
     d->actionCopy->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_C));
@@ -147,7 +147,7 @@ void ResourceManagerPane::initView(){
     connect(d->actionDelete,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionCopy_Path,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionCut,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
-    connect(d->actionUpload,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
+    //connect(d->actionUpload,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
 
 
 }
@@ -633,10 +633,10 @@ void ResourceManagerPane::onActionTriggered(){
         }
     }else if(sender==d->actionCopy_Path){
         QApplication::clipboard()->setText(one->path());
-    }else if(sender==d->actionUpload){
-        UploadData data{one->pid(),one->type()==ResourceManagerModelItem::File,one->path(),{}};
+    }/*else if(sender==d->actionUpload){
+        UploadData data{one->pid(),one-,one->type()==ResourceManagerModelItem::File,one->path(),{}};
         Publisher::getInstance()->post(Type::M_UPLOAD,&data);
-    }
+    }*/
 }
 
 void ResourceManagerPane::onTopActionTriggered(){
@@ -650,7 +650,22 @@ void ResourceManagerPane::onTopActionTriggered(){
 
 void ResourceManagerPane::onUploadToSite(){
     auto sender = static_cast<QAction*>(this->sender());
-    auto data = sender->data();
+    auto v = sender->data();
+    bool ok = false;
+    int siteid = v.toInt(&ok);
+    if(ok){
+        auto list = ui->treeView->selectionModel()->selectedRows();
+        if(list.size()>0){
+
+            auto index = list.at(0);
+            auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
+
+            UploadData data{item->pid(),siteid,item->type()==ResourceManagerModelItem::File,item->path()};//not set dest ,should match remote
+            Publisher::getInstance()->post(Type::M_UPLOAD,&data);
+
+        }
+
+    }
 
 }
 

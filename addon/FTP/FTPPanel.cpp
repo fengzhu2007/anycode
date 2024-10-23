@@ -16,7 +16,7 @@
 #include "transfer/Task.h"
 #include "ChmodDialog.h"
 #include "FTPWorker.h"
-#include "FTPSetting.h"
+#include "ftp_setting.h"
 #include "common.h"
 
 

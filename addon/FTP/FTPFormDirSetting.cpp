@@ -1,6 +1,6 @@
 #include "FTPFormDirSetting.h"
 #include "ui_FTPFormDirSetting.h"
-#include "FTPSettingKey.h"
+#include "ftp_setting_key.h"
 #include <QJsonArray>
 #include <QJsonObject>
 

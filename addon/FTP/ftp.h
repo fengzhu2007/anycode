@@ -5,7 +5,7 @@
 #include "network/network_request.h"
 #include <QStringList>
 namespace ady {
-
+class FTPSetting;
 class FTP_EXPORT FTP : public NetworkRequest
 {
 public:
@@ -14,9 +14,11 @@ public:
 
 
     FTP(CURL* curl,long long id=0);
+    virtual ~FTP();
 
     NetworkResponse* sendSyncCommand(const QString& command,bool pre_utf8=true);
 
+    virtual void init(const SiteRecord& info) override;
     virtual int access(NetworkResponse* response,bool body=true) override;
     virtual NetworkResponse* link() override;
     virtual NetworkResponse* unlink() override;
@@ -33,6 +35,8 @@ public:
     virtual NetworkResponse* rename(const QString& src,const QString& dst) override;
     virtual NetworkResponse* chmod(const QString& dst,int mode) override;
 
+    virtual QString matchToPath(const QString& from,bool local) override;
+
 
     NetworkResponse* setAscii();
     NetworkResponse* setBinary();
@@ -40,10 +44,6 @@ public:
     NetworkResponse* chDir(const QString &dir);
 
     NetworkResponse* pwd();
-
-
-
-
 
 
     virtual NetworkResponse* customeAccess(const QString& name,QMap<QString,QVariant> data) override;
@@ -60,6 +60,17 @@ private:
     bool mfmt;
     bool utf8;
     bool window_nt;
+
+    FTPSetting* m_setting;
+    //QList<QPair<QString,QString>> m_dirSync;
+    QList<QPair<QString,QString>> m_dirMapping;
+    QString m_rootPath;
+
+
+    //QStringList m_filterDirs;
+    //QStringList m_filterExts;
+
+    //QList<QRegularExpression> m_allowextensions;
 
 
 };

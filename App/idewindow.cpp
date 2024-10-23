@@ -19,6 +19,8 @@
 #include "panes/find_replace/find_replace_dialog.h"
 #include "panes/find_replace/find_replace_pane.h"
 
+#include "panes/file_transfer/file_transfer_model.h"
+
 #include "panes/loader.h"
 
 #include "core/event_bus/event.h"
@@ -57,7 +59,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
 {
     qRegisterMetaType<QFileInfoList>("QFileInfoList");
     Subscriber::reg();
-    this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO});
+    this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO,Type::M_OPEN_FILE_TRANSFTER});
     ui->setupUi(this);
     this->resetupUi();
 
@@ -136,6 +138,14 @@ IDEWindow::IDEWindow(QWidget *parent) :
 IDEWindow::~IDEWindow()
 {
 
+    this->shutdown();
+
+    delete ui;
+
+    NetworkManager::destory();
+}
+
+void IDEWindow::shutdown(){
     //save setting
     auto dockpanes = m_dockingPaneManager->toJson();
     auto projects = ResourceManagerModel::getInstance()->toJson();
@@ -145,16 +155,18 @@ IDEWindow::~IDEWindow()
     settings->saveToFile();
     IDESettings::destory();
 
-
     wToastManager::destory();
     auto t = BackendThread::getInstance();
     t->stop()->quit();
-   // t->wait();
+    // t->wait();
     CodeEditorManager::destory();
     Subscriber::unReg();
-    delete ui;
 
-    NetworkManager::destory();
+
+    //destory file transfter model
+    FileTransferModel::destory();
+
+
 }
 
 bool IDEWindow::onReceive(Event* e){
@@ -174,6 +186,11 @@ bool IDEWindow::onReceive(Event* e){
             pane->editor()->gotoLine(*lineNo);
             pane->editor()->setFocus();
         }
+    }else if(e->id()==Type::M_OPEN_FILE_TRANSFTER){
+        //auto data = static_cast<UploadData*>(e->data());
+        auto pane = FileTransferPane::open(m_dockingPaneManager,true);
+        pane->activeToCurrent();
+
     }
     return false;
 }
@@ -338,6 +355,7 @@ void IDEWindow::onOpenFindAndReplace(int mode,const QString& text,const QString&
         dialog->setSearchScope(scope);
     }
 }
+
 
 CodeEditorPane* IDEWindow::currentEditorPane(){
     auto client = m_dockingPaneManager->workbench()->client();

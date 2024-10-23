@@ -79,10 +79,11 @@ public:
                 SiteStorage siteStorage;
                 SiteRecord record = siteStorage.one(id);
                 if(record.id>0){
-                    req->setHost(record.host);
+                    /*req->setHost(record.host);
                     req->setPort(record.port);
                     req->setUsername(record.username);
-                    req->setPassword(record.password);
+                    req->setPassword(record.password);*/
+                    req->init(record);
                 }
             }
             return req;

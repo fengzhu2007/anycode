@@ -2,6 +2,7 @@
 #include "FTPResponse.h"
 #include "transfer/Task.h"
 #include "common/utils.h"
+#include "ftp_setting.h"
 #include <QFileInfo>
 #include <QFile>
 #include <QDir>
@@ -18,6 +19,26 @@ namespace ady {
         this->utf8 = false;
         this->window_nt = false;
         this->setOption(CURLOPT_TIMEOUT,COMMAND_TIMEOUT);
+        this->m_setting = nullptr;
+    }
+
+    FTP::~FTP(){
+        if(m_setting!=nullptr){
+            delete m_setting;
+            m_setting = nullptr;
+        }
+    }
+
+    void FTP::init(const SiteRecord& info){
+        this->setHost(info.host);
+        this->setPort(info.port);
+        this->setUsername(info.username);
+        this->setPassword(info.password);
+        m_rootPath = info.path;
+        m_setting = new FTPSetting(info.data);
+        //m_dirSync = m_setting->dirSync();
+        m_dirMapping = m_setting->dirMapping();
+
     }
 
     int FTP::access(NetworkResponse* response,bool body)
@@ -404,6 +425,43 @@ namespace ady {
         QMutexLocker locker(&mutex);
         QString command = QString("SITE CHMOD %1 %2").arg(mode).arg(dst);
         return this->sendCommand(command);
+    }
+
+    QString FTP::matchToPath(const QString& from,bool local){
+        //from is relative path like: path1/path2/file.html
+        if(m_dirMapping.size()>0){
+            QString ret;
+            if(local){
+                //local to remote
+                for(auto one:m_dirMapping){
+                    const QString localPath = one.first;//like  path1/path2/
+                    const QString remotePath = one.second;//like path3/path4/
+                    if(from.startsWith(localPath)){
+                        ret = remotePath + from.mid(localPath.length());
+                        break;
+                    }
+                }
+                if(ret.isEmpty()){
+                    ret = from;
+                }
+            }else{
+                //remote to local
+                for(auto one:m_dirMapping){
+                    const QString localPath = one.first;//like  path1/path2/
+                    const QString remotePath = one.second;//like path3/path4/
+                    if(from.startsWith(remotePath)){
+                        ret = localPath + from.mid(localPath.length());
+                        break;
+                    }
+                }
+                if(ret.isEmpty()){
+                    ret = from;
+                }
+            }
+            return ret;//new relative path
+        }else{
+            return from;
+        }
     }
 
 

@@ -47,7 +47,7 @@ QJsonValue SiteSetting::operator[] (char* name)
     return this->get(name);
 }
 
-QJsonValue SiteSetting::get(const QString& name)
+QJsonValue SiteSetting::get(const QString& name) const
 {
     if(m_doc.isNull()){
         return QJsonValue();
@@ -94,7 +94,7 @@ void SiteSetting::set(QString name,QJsonObject value)
 QString SiteSetting::toJSON()
 {
     m_doc.setObject(m_object);
-    qDebug()<<"doc:"<<m_doc;
+    //qDebug()<<"doc:"<<m_doc;
     return m_doc.toJson();
 }
 

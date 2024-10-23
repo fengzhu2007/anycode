@@ -151,7 +151,7 @@ add_library(App SHARED
         zip/minizip/unzip.c
         zip/minizip/zip.c
         mainwindow.h
-        dockwindow.h dockwindow.cpp
+
         idewindow.h idewindow.cpp
         idewindow.ui
         panes/resource_manager/resource_manager_pane.h panes/resource_manager/resource_manager_pane.cpp panes/resource_manager/resource_manager_pane.ui
@@ -214,6 +214,7 @@ add_library(App SHARED
         panes/loader.h panes/loader.cpp
         panes/startup/startup_pane.h panes/startup/startup_pane.cpp
         panes/startup/startup_pane.ui
+        panes/file_transfer/job_thread.h panes/file_transfer/job_thread.cpp
 
 
 

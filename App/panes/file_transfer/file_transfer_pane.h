@@ -3,11 +3,12 @@
 #include "global.h"
 #include "docking_pane.h"
 #include "core/event_bus/subscriber.h"
-
+#include "core/event_bus/event_data.h"
 namespace Ui {
 class FileTransferPane;
 }
 namespace ady{
+
 class FileTransferPanePrivate;
 class ANYENGINE_EXPORT FileTransferPane : public DockingPane , public Subscriber
 {
@@ -20,6 +21,7 @@ public:
     virtual QString group() override;
     virtual bool onReceive(Event* e) override;//event bus receive callback
 
+    void addJob(UploadData* data);
     static FileTransferPane* open(DockingPaneManager* dockingManager,bool active=false);
 
     static FileTransferPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);

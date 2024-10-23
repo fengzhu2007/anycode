@@ -359,8 +359,6 @@ QVariant ServerManageModel::data(const QModelIndex &index, int role) const{
             }else if(type==ServerManageModelItem::Folder){
                 return d->provider->icon(QFileIconProvider::Folder);
             }else if(type==ServerManageModelItem::File){
-                //qDebug()<<"path:"<<item->path();
-                //return d->provider->icon(QFileInfo(item->name()));
                 return d->provider->icon(QFileIconProvider::File);
             }
         }else{

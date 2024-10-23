@@ -4,14 +4,16 @@
 #include "global.h"
 #include <QString>
 #include <QList>
+#include <QMap>
 #include <QPair>
 namespace ady{
 
 struct ANYENGINE_EXPORT UploadData{
     long long pid;
+    long long siteid;
     bool is_file;
     QString source;
-    QList<QPair<long long,QString>> dest;
+    QString dest;
 };
 
 struct ANYENGINE_EXPORT OpenFindData{
@@ -25,6 +27,8 @@ struct ANYENGINE_EXPORT OpenEditorData{
     int line=0;
     int column=0;
 };
+
+
 
 }
 #endif // EVENT_DATA_H

@@ -42,7 +42,7 @@ FileTransferPane::FileTransferPane(QWidget *parent) :
 
 
 
-    ui->treeView->setModel(new FileTransferModel(ui->treeView));
+    ui->treeView->setModel(FileTransferModel::getInstance());
     ui->treeView->setTextElideMode(Qt::ElideLeft);
     ui->treeView->setColumnWidth(FileTransferModel::Name,240);
     ui->treeView->setColumnWidth(FileTransferModel::FileSize,100);
@@ -78,7 +78,12 @@ QString FileTransferPane::group(){
 bool FileTransferPane::onReceive(Event* e) {
     const QString id = e->id();
     if(id==Type::M_UPLOAD){
-
+        auto data = static_cast<UploadData*>(e->data());
+        if(data!=nullptr){
+            auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+            model->addJob(data);
+        }
+        return true;
     }else if(id==Type::M_DOWNLOAD){
 
     }else if(id==Type::M_OPEN_PROJECT){
@@ -94,7 +99,8 @@ bool FileTransferPane::onReceive(Event* e) {
                         ProjectStorage projectStorage;
                         auto record = projectStorage.one(id);
                         auto model = static_cast<FileTransferModel*>(ui->treeView->model());
-                        model->openProject(record.id,record.name);
+                        model->openProject(record.id,record.name,record.path);
+                        ui->treeView->expandAll();
                     }
                 }
             }
@@ -102,15 +108,16 @@ bool FileTransferPane::onReceive(Event* e) {
             auto one = static_cast<ProjectRecord*>(e->data());
             if(one!=nullptr && one->id>0){
                 auto model = static_cast<FileTransferModel*>(ui->treeView->model());
-                model->openProject(one->id,one->name);
+                model->openProject(one->id,one->name,one->path);
+                ui->treeView->expandAll();
             }
         }
-
-
         return true;
     }
     return false;
 }
+
+
 
 void FileTransferPane::onContextMenu(const QPoint& pos){
     QMenu contextMenu(this);

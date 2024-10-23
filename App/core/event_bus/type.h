@@ -24,6 +24,7 @@ public:
 
 
     //version control event message list id
+    static const QString M_OPEN_FILE_TRANSFTER;
     static const QString M_UPLOAD;
     static const QString M_QUERY_COMMIT;
     static const QString M_QUERY_DIFF;

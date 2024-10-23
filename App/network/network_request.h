@@ -1,6 +1,7 @@
 #ifndef NETWORK_REQUEST_H
 #define NETWORK_REQUEST_H
 #include "global.h"
+#include "storage/site_storage.h"
 #include <curl/curl.h>
 #include <QString>
 #include <QVariant>
@@ -39,7 +40,7 @@ namespace ady {
         QString getErrorMsg();
 
 
-
+        virtual void init(const SiteRecord& info);
         virtual int access(NetworkResponse* response,bool body=true);
         virtual NetworkResponse* link();
         virtual NetworkResponse* linkTest();
@@ -59,7 +60,9 @@ namespace ady {
         virtual NetworkResponse* rmDir(const QString &dir)  ;
         virtual NetworkResponse* rename(const QString& src,const QString& dst) ;
         virtual NetworkResponse* chmod(const QString& dst,int mode) ;
-        virtual NetworkResponse* del(const QString& dst) ;
+        virtual NetworkResponse* del(const QString& dst);
+
+        virtual QString matchToPath(const QString& from,bool local);
 
 
 

@@ -2,7 +2,7 @@
 #include <QTranslator>
 #include <QDateTime>
 #include "mainwindow.h"
-#include "dockwindow.h"
+//#include "dockwindow.h"
 #include "idewindow.h"
 #include <QDebug>
 #ifdef Q_OS_WIN

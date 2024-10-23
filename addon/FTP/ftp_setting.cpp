@@ -1,10 +1,10 @@
-#include "FTPSetting.h"
-#include "FTPSettingKey.h"
+#include "ftp_setting.h"
+#include "ftp_setting_key.h"
 #include <QJsonArray>
 #include <QJsonObject>
 namespace ady {
 
-FTPSetting::FTPSetting(SiteSetting & setting){
+FTPSetting::FTPSetting(const SiteSetting & setting){
     {
         QJsonValue value = setting.get(FTP_LOCAL_DIR_SYNC);
         if(!value.isNull() && value.toArray().size()>0){

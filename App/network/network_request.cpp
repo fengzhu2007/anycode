@@ -65,6 +65,10 @@ namespace ady {
         this->setOption(CURLOPT_WRITEFUNCTION, network_response_body);
     }
 
+    void NetworkRequest::init(const SiteRecord& info){
+        Q_UNUSED(info);
+    }
+
     int NetworkRequest::access(NetworkResponse* response,bool body)
     {
         this->setHeaderHolder(&response->header);
@@ -165,6 +169,12 @@ namespace ady {
     NetworkResponse* NetworkRequest::del(const QString& dst){
         return nullptr;
     }
+
+    QString NetworkRequest::matchToPath(const QString& from,bool local){
+        Q_UNUSED(from);
+        Q_UNUSED(local);
+        return {};
+    }
 }
 
 
@@ -215,7 +225,7 @@ size_t network_read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 size_t network_write_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 {
     QFile* file = static_cast<QFile*>(stream);
-    qDebug()<<"write size:"<<size * nmemb;
+    //qDebug()<<"write size:"<<size * nmemb;
     return file->write((char *)ptr,size * nmemb);
 
     /*size_t written = fwrite(ptr, size, nmemb, (FILE*)stream);

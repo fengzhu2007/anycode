@@ -15,7 +15,7 @@ namespace ady{
         QJsonValue operator[] (const QString& name);
         QJsonValue operator[] (QString name);
         QJsonValue operator[] (char* name);
-        QJsonValue get(const QString& name);
+        QJsonValue get(const QString& name) const;
         void set(QString name,QJsonValue value);
         void set(QString name,int value);
         void set(QString name,QString value);

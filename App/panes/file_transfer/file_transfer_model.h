@@ -1,6 +1,7 @@
 #ifndef FILETRANSFERMODEL_H
 #define FILETRANSFERMODEL_H
 #include "global.h"
+#include "core/event_bus/event_data.h"
 #include <QAbstractItemModel>
 #include <QFile>
 namespace ady{
@@ -22,33 +23,57 @@ public:
         Solution=0,
         Project,
         Server,
-        Job
+        Job,//file
+        JobGroup,//folder
     };
     enum Mode{
         None=0,
         Upload,
         Download
     };
+    enum State{
+        Any=0,
+        Failed,
+        Doing,
+        Wait,
+    };
+
     FileTransferModelItem();
-    FileTransferModelItem(Type type,long long id,const QString& name,FileTransferModelItem* parent);//project site
-    FileTransferModelItem(Mode mode,const QString& src,const QString& dest,FileTransferModelItem* parent);//job
+    FileTransferModelItem(Type type,long long id,const QString& name,const QString& path,FileTransferModelItem* parent);//project site
+    FileTransferModelItem(Mode mode,bool is_file,const QString& src,const QString& dest,FileTransferModelItem* parent);//job
     ~FileTransferModelItem();
     int childrenCount();
     int row();
     void appendItems(QList<FileTransferModelItem*> items);
+    void insertItems(int position,QList<FileTransferModelItem*> items);
     void appendItem(FileTransferModelItem* item);
+
     FileTransferModelItem* parent();
     FileTransferModelItem* childAt(int i);
+    FileTransferModelItem* findByProjectId(long long id);
+    FileTransferModelItem* findBySiteId(long long id);
+    FileTransferModelItem* first(State state);
+
+
+    //remove
+    FileTransferModelItem* take(int position);
     FileTransferJob* data();
     Type type();
     Mode mode();
+    long long id();
     QString name() const;
     QString source() const;
     QString destination() const;
+    State state();
+    void setState(State state);
+
     unsigned long long filesize();
 
+public:
+    static int seq;
 private:
     FileTransferModelItemPrivate* d;
+
 };
 
 
@@ -74,7 +99,9 @@ public:
         Status,
         Max
     };
-    explicit FileTransferModel(QObject *parent = nullptr);
+    static FileTransferModel* getInstance();
+    static void destory();
+
     ~FileTransferModel();
 
     // Header:
@@ -93,10 +120,27 @@ public:
 
 
     void appendItem(FileTransferModelItem* parent,FileTransferModelItem* item);
+    void insertFrontItems(FileTransferModelItem* parent,QList<FileTransferModelItem*> items,FileTransferModelItem::State state);
+    void removeItem(FileTransferModelItem* item);
+    void removeItem(long long siteid,long long id);
 
-    void openProject(long long id,const QString name);
+    void openProject(long long id,const QString& name,const QString& path);
+
+    void addJob(UploadData* data);
+
+
+    void start(int num);
+
+    FileTransferModelItem* take(int siteid);
+
+
+    //void addJob(long long pid,long long sid,const QString source,const QString dest);
+private:
+    explicit FileTransferModel(QObject *parent = nullptr);
+    FileTransferModelItem* get(int siteid);
 
 private:
+    static FileTransferModel* instance;
     FileTransferModelPrivate* d;
 };
 }

@@ -43,6 +43,8 @@ namespace ady{
 
     private:
         void onOpenFindAndReplace(int mode,const QString& text,const QString& scope);
+
+        void shutdown();
         void forTest();
 
     private:

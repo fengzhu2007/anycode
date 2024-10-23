@@ -33,16 +33,18 @@ qt5_wrap_ui(FORMS_HEADERS ${FORMS})
 
 add_library(FTP SHARED
     ${FORMS_HEADERS}
-    ChmodDialog.cpp
-    Export.cpp
-    FTPFormDirSetting.cpp
-    FTPFormGeneral.cpp
-    FTPPanel.cpp
-    FTPParse.cpp
-    FTPResponse.cpp
-    FTPSetting.cpp
-    FTPWorker.cpp
-    ftp.cpp
+
+
+    ChmodDialog.h ChmodDialog.cpp
+    Export.h Export.cpp
+    FTPFormDirSetting.h FTPFormDirSetting.cpp
+    FTPFormGeneral.h FTPFormGeneral.cpp
+    FTPPanel.h FTPPanel.cpp
+    FTPParse.h FTPParse.cpp
+    FTPResponse.h FTPResponse.cpp
+    ftp_setting.h ftp_setting_key.h ftp_setting.cpp
+    FTPWorker.h FTPWorker.cpp
+    ftp.h ftp.cpp
 )
 
 target_link_libraries(FTP PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql App ${CRYPTO_LIB} ${SSL_LIB}  ${CURL_LIB})

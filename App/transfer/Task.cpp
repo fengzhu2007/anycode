@@ -1,4 +1,5 @@
 #include "Task.h"
+#include "panes/file_transfer/file_transfer_model.h"
 namespace ady {
     long long Task::seq = 1l;
 
@@ -8,7 +9,7 @@ namespace ady {
 
     Task::Task()
     {
-        this->id = Task::seq++;
+        this->id = FileTransferModelItem::seq++;
         this->siteid = 0l;
         this->filesize = 0l;
         this->readysize = 0l;
@@ -18,7 +19,6 @@ namespace ady {
         this->cmd = -1;//-1 unknow 0=upload 1=download 2=del 3=chmod
         this->status = 0;
         this->abort = false;
-
     }
 
     Task::Task(long long siteid,QString local,QString remote)
@@ -27,5 +27,19 @@ namespace ady {
         this->siteid = siteid;
         this->local = local;
         this->remote = remote;
+    }
+
+    Task::Task(FileTransferModelItem* item){
+        this->id = item->id();
+        this->siteid = item->parent()->id();
+        this->filesize = 0l;
+        this->readysize = 0l;
+        this->file = nullptr;
+        this->type = item->type()==FileTransferModelItem::Job?0:1;
+        this->cmd = item->mode()==FileTransferModelItem::Upload?0:1;
+        this->status = 0;
+        this->abort = false;
+        this->local = item->source();
+        this->remote = item->destination();
     }
 }
