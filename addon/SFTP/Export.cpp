@@ -1,11 +1,11 @@
-#include "Export.h"
-#include "SFTPPanel.h"
-#include "SFTPFormGeneral.h"
-#include "SFTPFormDirSetting.h"
+#include "export.h"
+#include "sftp_panel.h"
+#include "sftp_form_general.h"
+#include "sftp_form_dir_setting.h"
 #include "network/network_manager.h"
 #include "sftp.h"
 #include "storage/site_storage.h"
-#include "SFTPResponse.h"
+#include "sftp_response.h"
 
 #include <QDebug>
 ady::Panel* getPanel(long long id,QWidget* parent,QString name)

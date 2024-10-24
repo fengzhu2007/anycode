@@ -1,5 +1,6 @@
 #include "Task.h"
 #include "panes/file_transfer/file_transfer_model.h"
+#include <QDebug>
 namespace ady {
     long long Task::seq = 1l;
 
@@ -41,5 +42,9 @@ namespace ady {
         this->abort = false;
         this->local = item->source();
         this->remote = item->destination();
+    }
+
+    Task::~Task(){
+        qDebug()<<"task destory:"<<this->id;
     }
 }

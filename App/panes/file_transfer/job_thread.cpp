@@ -7,7 +7,7 @@
 #include <QDir>
 namespace ady{
 JobThread::JobThread(long long id,FileTransferModel *parent)
-    : QThread(parent),m_siteid(id)
+    : QThread(parent),m_siteid(id),m_task(nullptr)
 {
 
 }
@@ -17,17 +17,25 @@ void JobThread::run(){
     auto model = static_cast<FileTransferModel*>(this->parent());
     while(true){
         auto item = model->take(m_siteid);
+        if(this->isInterruptionRequested()){
+            break;
+        }
         if(item==nullptr){
             continue;
         }
-        Task* task = nullptr;
+        //Task* task = nullptr;
         if(item->type()==FileTransferModelItem::Job){
-            task = new Task(item);
-            int ret = NetworkManager::getInstance()->exec(task);
-
-
-
-
+            m_task = new Task(item);
+            int ret = NetworkManager::getInstance()->exec(m_task);
+            if(ret==0){
+                //ok
+                model->removeItem(m_task->siteid,m_task->id);//ok remove task
+            }else{
+                //error
+                model->setItemFailed(m_task->siteid,m_task->id,m_task->errorMsg);//ok remove task
+            }
+            delete m_task;
+            m_task = nullptr;
             //model->removeItem(item->parent()->id(),item->id());
         }else{
             QList<FileTransferModelItem*> list;
@@ -38,9 +46,6 @@ void JobThread::run(){
                 //download folder
                 list = this->listRemote(item);
             }
-
-
-
             model->removeItem(item->parent()->id(),item->id());
             model->insertFrontItems(item->parent(),list,FileTransferModelItem::Wait);
         }
@@ -48,6 +53,12 @@ void JobThread::run(){
     }
 }
 
+
+void JobThread::abort(){
+    if(m_task!=nullptr){
+        m_task->abort = true;
+    }
+}
 
 QList<FileTransferModelItem*> JobThread::listLocal(FileTransferModelItem* parent){
     QDir d(parent->source());

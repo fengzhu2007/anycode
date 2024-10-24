@@ -28,6 +28,7 @@ public:
     void appendItem(ServerManageModelItem* item);
     ServerManageModelItem* parent();
     ServerManageModelItem* childAt(int i);
+    ServerManageModelItem* take(int i);
     QList<ServerManageModelItem*> takeAll();
     Type type();
     QString name() const;
@@ -74,6 +75,9 @@ public:
     void appendItems(QList<FileItem> list,ServerManageModelItem* parent);
     void refreshItems(QList<FileItem> list,ServerManageModelItem* parent);
     void openProject(long long id,const QString name);
+
+    void removeItem(ServerManageModelItem* item);
+    void removeProject(long long id);
 
     ServerManageModelItem* find(const QString& path);
     ServerManageModelItem* find(long long id,bool project=false);//find server

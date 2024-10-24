@@ -1,7 +1,7 @@
 #ifndef COS_H
 #define COS_H
 
-#include "COS_global.h"
+#include "cos_global.h"
 #include "network/network_request.h"
 #include "network/http/http_client.h"
 #include <QStringList>

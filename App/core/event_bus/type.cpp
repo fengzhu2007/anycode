@@ -1,7 +1,9 @@
 #include "type.h"
 
 namespace ady{
-const QString Type::M_OPEN_PROJECT = "Open_Message";
+const QString Type::M_OPEN_PROJECT = "Open_Project";
+const QString Type::M_CLOSE_PROJECT = "Close_Project";//from menu
+const QString Type::M_CLOSE_PROJECT_NOTIFY = "Close_Project_Notify";//after project closed send
 const QString Type::M_FILE_CHANGED = "File_Changed";
 const QString Type::M_OPEN_EDITOR = "Open_Editor";
 

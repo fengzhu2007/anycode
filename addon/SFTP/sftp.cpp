@@ -1,5 +1,5 @@
 #include "sftp.h"
-#include "SFTPResponse.h"
+#include "sftp_response.h"
 #include "transfer/Task.h"
 #include "common/utils.h"
 #include <QFileInfo>

@@ -250,6 +250,17 @@ void IDEWindow::onActionTriggered(){
         }
     }else if(sender==ui->actionClose_Project){
 
+        /*auto model = ResourceManagerModel::getInstance();
+        if(model!=nullptr){
+
+        }*/
+        /*if(ResourceManagerPane::getInstance()==nullptr){
+
+        }*/
+        Publisher::getInstance()->post(Type::M_CLOSE_PROJECT);
+
+
+
     }else if(sender==ui->actionGoto){
         auto pane = this->currentEditorPane();
         if(pane!=nullptr){

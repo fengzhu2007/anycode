@@ -1,6 +1,6 @@
 #ifndef COSEXPORT_H
 #define COSEXPORT_H
-#include "COS_global.h"
+#include "cos_global.h"
 #include "interface/Panel.h"
 #include "interface/FormPanel.h"
 #include "network/network_request.h"

@@ -6,12 +6,6 @@
 #include <QFile>
 namespace ady{
 
-struct ANYENGINE_EXPORT FileTransferJob{
-public:
-    unsigned long long total;
-    unsigned long long ready;
-    QFile* file;
-};
 
 
 
@@ -56,8 +50,7 @@ public:
 
 
     //remove
-    FileTransferModelItem* take(int position);
-    FileTransferJob* data();
+    FileTransferModelItem* take(int i);
     Type type();
     Mode mode();
     long long id();
@@ -66,6 +59,10 @@ public:
     QString destination() const;
     State state();
     void setState(State state);
+    float progress();
+    void setProgress(float progress);
+    QString errorMsg();
+    void setErrorMsg(const QString& errormsg);
 
     unsigned long long filesize();
 
@@ -99,6 +96,11 @@ public:
         Status,
         Max
     };
+    enum State{
+        Stop=0,
+        Running,
+        Destory
+    };
     static FileTransferModel* getInstance();
     static void destory();
 
@@ -123,15 +125,27 @@ public:
     void insertFrontItems(FileTransferModelItem* parent,QList<FileTransferModelItem*> items,FileTransferModelItem::State state);
     void removeItem(FileTransferModelItem* item);
     void removeItem(long long siteid,long long id);
+    void removeProject(long long id);
+
 
     void openProject(long long id,const QString& name,const QString& path);
 
     void addJob(UploadData* data);
+    void progress(long long siteid,long long id,float progress);
+    void setItemFailed(long long siteid,long long id,const QString& msg);
+
 
 
     void start(int num);
+    void stop();
+    void finish();//finish all thread
+    void abortJob(long long siteid);
 
     FileTransferModelItem* take(int siteid);
+    FileTransferModelItem* rootItem();
+
+public slots:
+    void onThreadFinished();
 
 
     //void addJob(long long pid,long long sid,const QString source,const QString dest);

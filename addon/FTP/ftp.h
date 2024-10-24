@@ -1,7 +1,7 @@
 #ifndef FTP_H
 #define FTP_H
 
-#include "FTP_global.h"
+#include "ftp_global.h"
 #include "network/network_request.h"
 #include <QStringList>
 namespace ady {

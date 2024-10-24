@@ -28,7 +28,7 @@ namespace ady {
         template<class T>
         NetworkRequest* newRequest(long long id=0)
         {
-            auto req = new T(curl_easy_init());
+            auto req = new T(curl_easy_init(),id);
             if(id!=0){
                 //this->requests[id] = req;
                 this->requests.insert(id,req);

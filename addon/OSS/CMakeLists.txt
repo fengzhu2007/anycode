@@ -20,9 +20,9 @@ include_directories(SYSTEM "../../3party/bin/x64/include")
 include_directories(SYSTEM "../../3party/openssl/crypto")
 
 set(FORMS
-    OSSFormDirSetting.ui
-        OSSFormGeneral.ui
-        OSSPanelUi.ui
+    oss_form_dir_setting.ui
+        oss_form_general.ui
+        oss_panel.ui
 
 )
 
@@ -31,14 +31,14 @@ qt5_wrap_ui(FORMS_HEADERS ${FORMS})
 
 add_library(OSS SHARED
     ${FORMS_HEADERS}
-    Export.cpp
-    OSSFormDirSetting.cpp
-    OSSFormGeneral.cpp
-    OSSPanel.cpp
-    OSSResponse.cpp
-    OSSSetting.cpp
-    OSSWorker.cpp
-    oss.cpp
+    oss_global.h export.h export.cpp
+    oss_form_dir_setting.h oss_form_dir_setting.cpp
+    oss_form_general.h oss_form_general.cpp
+    oss_panel.h oss_panel.cpp
+    oss_response.h oss_response.cpp
+    oss_setting_key.h oss_setting.h oss_setting.cpp
+    oss_worker.h oss_worker.cpp
+    oss.h oss.cpp
 )
 
 target_link_libraries(OSS PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql App ${CRYPTO_LIB} ${SSL_LIB}  ${CURL_LIB})

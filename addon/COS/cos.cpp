@@ -5,8 +5,8 @@
 #include <QDateTime>
 #include <QMimeDatabase>
 #include <QCryptographicHash>
-#include "COSResponse.h"
-#include "COSListObjectResponse.h"
+#include "cos_response.h"
+#include "cos_list_object_response.h"
 #include "transfer/Task.h"
 #include <openssl/hmac.h>
 #include <openssl/opensslconf.h>

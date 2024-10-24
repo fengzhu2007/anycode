@@ -23,12 +23,13 @@ public:
     FileTransferModelItem::State state;
     long long id;
     long long filesize=-1l;
-    float status=-1;
+    float progress = 0;
+
     FileTransferModelItem* parent=nullptr;
-    FileTransferJob* data = nullptr;
     QString name;
     QString src;//local for download and upload
     QString dest;//remote for download and upload
+    QString errorMsg;
 
     QList<FileTransferModelItem*> children;
     //QList<std::shared_ptr<FileTransferModelItem>>children;
@@ -74,7 +75,7 @@ FileTransferModelItem::FileTransferModelItem(Mode mode,bool is_file,const QStrin
 }
 
 FileTransferModelItem::~FileTransferModelItem(){
-
+    qDeleteAll(d->children);
     delete d;
 }
 
@@ -122,7 +123,7 @@ FileTransferModelItem* FileTransferModelItem::childAt(int i){
 
 FileTransferModelItem* FileTransferModelItem::findByProjectId(long long id){
     for(auto one:d->children){
-        if(one->type()==Project && one->id()){
+        if(one->type()==Project && one->id() == id){
             return one;
         }
     }
@@ -130,8 +131,13 @@ FileTransferModelItem* FileTransferModelItem::findByProjectId(long long id){
 }
 FileTransferModelItem* FileTransferModelItem::findBySiteId(long long id){
     for(auto one:d->children){
-        if(one->type()==Server && one->id()){
+        if(one->type()==Server && one->id() == id){
             return one;
+        }else if(one->type()==Project){
+            auto item = one->findBySiteId(id);
+            if(item!=nullptr){
+                return item;
+            }
         }
     }
     return nullptr;
@@ -146,13 +152,10 @@ FileTransferModelItem* FileTransferModelItem::first(State state){
     return nullptr;
 }
 
-FileTransferModelItem* FileTransferModelItem::take(int position){
-    return d->children.takeAt(position);
+FileTransferModelItem* FileTransferModelItem::take(int i){
+    return d->children.takeAt(i);
 }
 
-FileTransferJob* FileTransferModelItem::data(){
-    return d->data;
-}
 
 FileTransferModelItem::Type FileTransferModelItem::type(){
     return d->type;
@@ -186,6 +189,22 @@ FileTransferModelItem::State FileTransferModelItem::state(){
 void FileTransferModelItem::setState(State state){
     d->state = state;
 }
+
+float FileTransferModelItem::progress(){
+    return d->progress;
+}
+
+void FileTransferModelItem::setProgress(float progress){
+    d->progress = progress;
+}
+
+QString FileTransferModelItem::errorMsg(){
+    return d->errorMsg;
+}
+
+void FileTransferModelItem::setErrorMsg(const QString& errormsg){
+    d->errorMsg = errormsg;
+}
 unsigned long long FileTransferModelItem::filesize(){
     return d->filesize;
 }
@@ -200,7 +219,6 @@ class FileTransferModelPrivate{
 public:
     FileTransferModelPrivate():projectIcon(QString::fromUtf8(":/Resource/icons/DocumentsFolder_16x.svg")),serverIcon(":/Resource/icons/RemoteServer_16x.svg"){}
     FileTransferModelItem* root = nullptr;
-
     QIcon projectIcon;
     QIcon serverIcon;
     QIcon downloadFolderIcon;
@@ -211,6 +229,7 @@ public:
     QWaitCondition cond;
     QList<JobThread*> threads;
     QFileIconProvider* provider;
+    FileTransferModel::State state;
 };
 
 
@@ -234,9 +253,7 @@ FileTransferModel::FileTransferModel(QObject *parent)
     d = new FileTransferModelPrivate;
     d->root = new FileTransferModelItem;
     d->provider = new QFileIconProvider();
-
     auto model = ResourceManagerModel::getInstance();
-
     if(model!=nullptr){
         auto root = model->rootItem();
         int count = root->childrenCount();
@@ -245,9 +262,12 @@ FileTransferModel::FileTransferModel(QObject *parent)
             this->openProject(one->pid(),one->title(),one->path());
         }
     }
+    qRegisterMetaType<QVector<int>>("QVector<int>");
 }
 
 FileTransferModel::~FileTransferModel(){
+    this->finish();//finish all thread
+
     delete d->provider;
     delete d->root;
     delete d;
@@ -341,7 +361,12 @@ QVariant FileTransferModel::data(const QModelIndex &index, int role) const
         }else if((type==FileTransferModelItem::Job || type==FileTransferModelItem::JobGroup) && col==Dest){
             return item->destination();
         }else if((type==FileTransferModelItem::Job || type==FileTransferModelItem::JobGroup) && col==Status){
-
+            FileTransferModelItem::State state = item->state();
+            if(state==FileTransferModelItem::Doing){
+                return QString::fromUtf8("%1\%").arg(qRound(item->progress() * 1000) / 10);
+            }else if(state==FileTransferModelItem::Failed){
+                return item->errorMsg();
+            }
         }
     }else if(role == Qt::DecorationRole){
         if(index.column() == Name){
@@ -460,10 +485,23 @@ void FileTransferModel::removeItem(long long siteid,long long id){
     }
 }
 
+void FileTransferModel::removeProject(long long id){
+    if(id==0){
+        return ;
+    }
+    int pTotal = d->root->childrenCount();
+    for(int i=0;i<pTotal;i++){
+         auto proj = d->root->childAt(i);
+        if(proj->id() == id){
+            return this->removeItem(proj);
+         }
+    }
+}
+
 void FileTransferModel::openProject(long long id,const QString& name,const QString& path){
     auto item = new FileTransferModelItem(FileTransferModelItem::Project,id,name,path,d->root);
     //find all site
-    qDebug()<<"openProject"<<path<<item;
+    //qDebug()<<"openProject"<<path<<item;
     if(id>0){
         SiteStorage db;
         QList<SiteRecord> list = db.list(id,1);
@@ -476,13 +514,14 @@ void FileTransferModel::openProject(long long id,const QString& name,const QStri
 }
 
 void FileTransferModel::addJob(UploadData* data){
+    QMutexLocker locker(&d->mutex);
     auto proj = d->root->findByProjectId(data->pid);
-    qDebug()<<"addJob"<<data->pid<<data->source<<proj;//pid is error
+    //qDebug()<<"addJob"<<data->pid<<data->source<<proj;//pid is error
     if(proj!=nullptr){
         auto site = proj->findBySiteId(data->siteid);
         if(site!=nullptr){
             //add file or folder
-            QMutexLocker locker(&d->mutex);
+
             auto index = createIndex(site->row(),0,site);//site modelindex (job parent modelindex)
             int position = site->childrenCount();
 
@@ -514,24 +553,113 @@ void FileTransferModel::addJob(UploadData* data){
             endInsertRows();
         }
     }
+    d->cond.wakeAll();
+}
+
+void FileTransferModel::progress(long long siteid,long long id,float progress){
+    QMutexLocker locker(&d->mutex);
+    auto site = d->root->findBySiteId(siteid);
+    if(site==nullptr){
+        return ;
+    }
+    int total = site->childrenCount();
+    //only search state of failed and doing
+    for(int i=0;i<total;i++){
+        auto one = site->childAt(i);
+        if(one->id()==id){
+            one->setProgress(progress);
+            QModelIndex index = createIndex(one->row(),FileTransferModel::Status,one);
+            emit dataChanged(index,index,QVector<int>(Qt::DisplayRole));
+            return ;
+        }else if(one->state()==FileTransferModelItem::Wait){
+            return ;
+        }
+    }
+}
+
+void FileTransferModel::setItemFailed(long long siteid,long long id,const QString& msg){
+    QMutexLocker locker(&d->mutex);
+    auto site = d->root->findBySiteId(siteid);
+    int jTotal = site->childrenCount();
+    for(int k=0;k<jTotal;k++){
+        auto one = site->childAt(k);
+        if(one->id()==id){
+            one->setState(FileTransferModelItem::Failed);
+            one->setErrorMsg(msg);
+            QModelIndex index = createIndex(one->row(),FileTransferModel::Status,one);
+            emit dataChanged(index,index,QVector<int>(Qt::DisplayRole));
+            return ;
+        }
+    }
+
 }
 
 void FileTransferModel::start(int num){
     QMutexLocker locker(&d->mutex);
-
+    d->state = Running;
+    QVector<long long> ids;
+    int pTotal = d->root->childrenCount();
+    for(int i=0;i<pTotal;i++){
+        auto proj = d->root->childAt(i);
+        int sTotal = proj->childrenCount();
+        for(int j=0;j<sTotal;j++){
+            ids << proj->childAt(j)->id();
+        }
+    }
+    int count = qMin(num,ids.size());
+    for(int i=0;i<count;i++){
+        auto thread = new JobThread(ids.at(i),this);
+        connect(thread, &JobThread::finished, this, &FileTransferModel::onThreadFinished);
+        thread->start();
+        d->threads << thread;
+    }
 }
 
+void FileTransferModel::stop(){
+    QMutexLocker locker(&d->mutex);
+    d->state = Stop;
+    for(auto one:d->threads){
+        one->abort();
+    }
+}
 
+void FileTransferModel::finish(){
+    QMutexLocker locker(&d->mutex);
+    d->state = Destory;//set destory state;
+    for(auto one:d->threads){
+        one->abort();
+        one->requestInterruption();
+        //one->terminate();
+       // one->wait();
+    }
+    d->cond.wakeAll();
+}
+
+void FileTransferModel::abortJob(long long siteid){
+    for(auto one:d->threads){
+        if(one->id()==siteid){
+            one->abort();
+        }
+    }
+}
 
 FileTransferModelItem* FileTransferModel::take(int siteid){
     QMutexLocker locker(&d->mutex);
-    if( d->root->childrenCount()==0 ){
+    if( d->root->childrenCount()==0 || d->state == FileTransferModel::Stop){
         d->cond.wait(&d->mutex,5*1000);
     }
     FileTransferModelItem *item = nullptr;
-    while((item=this->get(siteid))==nullptr){
+    while(d->state == FileTransferModel::Stop || (item=this->get(siteid))==nullptr){
         d->cond.wait(&d->mutex,5*1000);
+
+        if(d->state == FileTransferModel::Destory){
+            return nullptr;
+        }
     }
+    //set doing
+    item->setState(FileTransferModelItem::Doing);
+    QModelIndex index = createIndex(item->row(),FileTransferModel::Status,item);
+    emit dataChanged(index,index,QVector<int>(Qt::DisplayRole));
     return item;
 }
 
@@ -555,6 +683,16 @@ begin:
         }
     }
     return nullptr;
+}
+
+FileTransferModelItem* FileTransferModel::rootItem(){
+    return d->root;
+}
+
+void FileTransferModel::onThreadFinished(){
+    JobThread* thread = static_cast<JobThread*>(sender());
+    d->threads.removeOne(thread);
+    thread->deleteLater();
 }
 
 }

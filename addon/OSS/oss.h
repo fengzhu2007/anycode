@@ -1,6 +1,6 @@
 #ifndef OSS_H
 #define OSS_H
-#include "OSS_global.h"
+#include "oss_global.h"
 #include "network/network_request.h"
 #include "network/http/http_client.h"
 
@@ -8,7 +8,7 @@
 
 
 namespace ady {
-
+class OSSSetting;
 class OSS_EXPORT OSS : public HttpClient
 {
 public:
@@ -35,6 +35,7 @@ public:
     OSS(CURL* curl,long long id=0);
 
     //virtual int access(NetworkResponse* response,bool body=true) override;
+    virtual void init(const SiteRecord& info) override;
     virtual NetworkResponse* link() override;
     virtual NetworkResponse* unlink() override;
     virtual NetworkResponse* listDir(const QString& dir,int page=1,int pageSize=1000) override;
@@ -54,7 +55,7 @@ public:
     virtual NetworkResponse* customeAccess(const QString& name,QMap<QString,QVariant> data) override;
 
 
-    inline void setDefaultDir(const QString& dir){m_defaultDir = dir;}
+    inline void setDefaultDir(const QString& dir){m_rootPath = dir;}
 
 
 protected:
@@ -63,7 +64,10 @@ protected:
 
 private:
     QString m_bucket;
-    QString m_defaultDir;
+    QString m_rootPath;
+
+    OSSSetting* m_setting;
+    QList<QPair<QString,QString>> m_dirMapping;
 
 };
 }

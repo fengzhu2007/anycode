@@ -23,9 +23,9 @@ include_directories(SYSTEM "../../3party/openssl/crypto")
 
 
  set(FORMS
-        COSFormDirSetting.ui
-        COSFormGeneral.ui
-        COSPanelUi.ui
+        cos_form_dir_setting.ui
+        cos_form_general.ui
+        cos_panel.ui
  )
 
  qt5_wrap_ui(FORMS_HEADERS ${FORMS})
@@ -33,16 +33,16 @@ include_directories(SYSTEM "../../3party/openssl/crypto")
 
 add_library(COS SHARED
     ${FORMS_HEADERS}
-    COSListObjectResponse.cpp
-    Export.cpp
-    COSFormDirSetting.cpp
-    COSFormGeneral.cpp
-    COSPanel.cpp
-    COSParse.cpp
-    COSResponse.cpp
-    COSSetting.cpp
-    COSWorker.cpp
-    cos.cpp
+    cos_list_object_response.h cos_list_object_response.cpp
+    cos_global.h export.h export.cpp
+    cos_form_dir_setting.h cos_form_dir_setting.cpp
+    cos_form_general.h cos_form_general.cpp
+    cos_panel.h cos_panel.cpp
+    cos_parse.h cos_parse.cpp
+    cos_response.h cos_response.cpp
+    cos_setting_key.h cos_setting.h cos_setting.cpp
+    cos_worker.h cos_worker.cpp
+    cos.h cos.cpp
 )
 
 target_link_libraries(COS PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql App ${CRYPTO_LIB} ${SSL_LIB}  ${CURL_LIB} )

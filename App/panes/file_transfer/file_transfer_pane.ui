@@ -43,7 +43,11 @@
      <addaction name="actionRun"/>
      <addaction name="actionStop"/>
      <addaction name="separator"/>
-     <addaction name="actionDelete"/>
+     <addaction name="actionRetry"/>
+     <addaction name="actionRetry_All"/>
+     <addaction name="separator"/>
+     <addaction name="actionDelete_Failed"/>
+     <addaction name="actionDelete_All"/>
     </widget>
    </item>
    <item>
@@ -71,10 +75,49 @@
   <action name="actionDelete">
    <property name="icon">
     <iconset resource="../../r.qrc">
-     <normaloff>:/Resource/icons/Cancel_16x.svg</normaloff>:/Resource/icons/Cancel_16x.svg</iconset>
+     <normaloff>:/Resource/icons/DeleteAllRows_16x.svg</normaloff>:/Resource/icons/DeleteAllRows_16x.svg</iconset>
    </property>
    <property name="text">
     <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionRetry">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/CloudRefresh_16x.svg</normaloff>:/Resource/icons/CloudRefresh_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Retry</string>
+   </property>
+  </action>
+  <action name="actionRetry_All">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/CloudStagingRefresh_16x.svg</normaloff>:/Resource/icons/CloudStagingRefresh_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Retry All</string>
+   </property>
+  </action>
+  <action name="actionDelete_All">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Cancel_16x.svg</normaloff>:/Resource/icons/Cancel_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Delete All</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete All</string>
+   </property>
+  </action>
+  <action name="actionDelete_Failed">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/TestCoveredException_16x.svg</normaloff>:/Resource/icons/TestCoveredException_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Failed</string>
    </property>
   </action>
  </widget>

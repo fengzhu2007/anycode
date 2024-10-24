@@ -15,6 +15,7 @@ Subscriber::Subscriber()
 }
 
 Subscriber::~Subscriber(){
+    //qDebug()<<"11111111111111";
     delete d;
 }
 

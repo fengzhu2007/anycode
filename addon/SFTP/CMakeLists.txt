@@ -20,10 +20,10 @@ include_directories(SYSTEM "../../3party/bin/x64/include")
 
 
 set(FORMS
-    ChmodDialog.ui
-    SFTPFormDirSetting.ui
-    SFTPFormGeneral.ui
-    SFTPPanelUi.ui
+    chmod_dialog.ui
+    sftp_form_dir_setting.ui
+    sftp_form_general.ui
+    sftp_panel.ui
 )
 
 qt5_wrap_ui(FORMS_HEADERS ${FORMS})
@@ -32,16 +32,16 @@ qt5_wrap_ui(FORMS_HEADERS ${FORMS})
 add_library(SFTP SHARED
     ${FORMS_HEADERS}
     ${QM_FILES}
-    ChmodDialog.cpp
-    Export.cpp
-    SFTPFormDirSetting.cpp
-    SFTPFormGeneral.cpp
-    SFTPPanel.cpp
-    SFTPParse.cpp
-    SFTPResponse.cpp
-    SFTPSetting.cpp
-    SFTPWorker.cpp
-    sftp.cpp
+    chmod_dialog.h chmod_dialog.cpp
+    sftp_global.h export.h export.cpp
+    sftp_form_dir_setting.h sftp_form_dir_setting.cpp
+    sftp_form_general.h sftp_form_general.cpp
+    sftp_panel.h sftp_panel.cpp
+    sftp_parse.h sftp_parse.cpp
+    sftp_response.h sftp_response.cpp
+    sftp_setting_key.h sftp_setting.h sftp_setting.cpp
+    sftp_worker.h sftp_worker.cpp
+    sftp.h sftp.cpp
 )
 
 target_link_libraries(SFTP PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql App ${CRYPTO_LIB} ${SSL_LIB}  ${CURL_LIB})

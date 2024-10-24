@@ -2,7 +2,8 @@
 #include "network_response.h"
 #include <QString>
 #include "transfer/Task.h"
-#include "transfer/TaskPoolModel.h"
+//#include "transfer/TaskPoolModel.h"
+#include "panes/file_transfer/file_transfer_model.h"
 #include <QDebug>
 namespace ady {
     NetworkRequest::NetworkRequest(CURL *curl,long long id)
@@ -218,7 +219,9 @@ size_t network_read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
    //size_t retcode = fread(ptr, size, nmemb, task->file);
    //nread = (curl_off_t)retcode;
    task->readysize += nread;
-   ady::TaskPoolModel::getInstance()->progressTask(task);
+   float progress = task->readysize*1.0 / task->filesize;
+   //ady::TaskPoolModel::getInstance()->progressTask(task);
+   ady::FileTransferModel::getInstance()->progress(task->siteid,task->id,progress);
    return nread;
 }
 
@@ -240,6 +243,8 @@ int network_progress_callback(void *p,curl_off_t dltotal, curl_off_t dlnow,curl_
     }
     task->filesize = dltotal;
     task->readysize = dlnow;
-    ady::TaskPoolModel::getInstance()->progressTask(task);
+    float progress = task->readysize*1.0 / task->filesize;
+    ady::FileTransferModel::getInstance()->progress(task->siteid,task->id,progress);
+    //ady::TaskPoolModel::getInstance()->progressTask(task);
     return 0;
 }

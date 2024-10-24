@@ -35,7 +35,7 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
     ui(new Ui::ServerManagePane)
 {
     Subscriber::reg();
-    this->regMessageIds({Type::M_UPLOAD,Type::M_OPEN_PROJECT});
+    this->regMessageIds({Type::M_UPLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -75,6 +75,7 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
 
 ServerManagePane::~ServerManagePane()
 {
+    Subscriber::unReg();
     for(auto one:d->list){
         one->interrupt();
         one->quit();
@@ -104,32 +105,24 @@ bool ServerManagePane::onReceive(Event* e) {
     }else if(id==Type::M_DOWNLOAD){
 
     }else if(id==Type::M_OPEN_PROJECT){
-        if(e->isJsonData()){
-            if(e->jsonData().isObject()){
-                long long id = 0;
-                QJsonObject proj = e->jsonData().toObject();
-                auto val = proj.find("id");
-                if(val!=proj.end()){
-                    id = val->toInt(0);
-                    if(id>0){
-                        ProjectStorage projectStorage;
-                        auto one = projectStorage.one(id);
-                        if(one.id>0){
-                            auto model = static_cast<ServerManageModel*>(ui->treeView->model());
-                            model->openProject(one.id,one.name);
-                        }
-                    }
-                }
-            }
-        }else{
-            auto one = static_cast<ProjectRecord*>(e->data());
-            if(one->id>0){
+        auto proj = e->toJsonOf<ProjectRecord>().toObject();
+        long long id = proj.find("id")->toInt(0);
+        if(id>0){
+            ProjectStorage projectStorage;
+            auto one = projectStorage.one(id);
+            if(one.id>0){
                 auto model = static_cast<ServerManageModel*>(ui->treeView->model());
-                model->openProject(one->id,one->name);
+                model->openProject(one.id,one.name);
             }
         }
-
         return true;
+    }else if(id==Type::M_CLOSE_PROJECT_NOTIFY){
+        auto proj = e->toJsonOf<CloseProjectData>().toObject();
+        long long id = proj.find("id")->toInt(0);
+        if(id>0){
+            auto model = static_cast<ServerManageModel*>(ui->treeView->model());
+            model->removeProject(id);
+        }
     }
     return false;
 }
@@ -207,8 +200,9 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
             auto list = response->parseList();
             auto dir = response->params["dir"].toString();
             long long id = response->id;
+            qDebug()<<"link:"<<response->id;
             auto model = static_cast<ServerManageModel*>(ui->treeView->model());
-            auto item = model->find(id);
+            auto item = model->find(id,false);
             if(item!=nullptr){
                 item->setExpanded(true);
                 item->setLoading(false);
@@ -220,6 +214,7 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
             auto list = response->parseList();
             auto dir = response->params["dir"].toString();
             auto model = static_cast<ServerManageModel*>(ui->treeView->model());
+            qDebug()<<"list:"<<response->id;
             auto item = model->find(response->id,dir);
             if(item!=nullptr){
                 item->setExpanded(true);

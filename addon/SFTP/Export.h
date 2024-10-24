@@ -1,6 +1,6 @@
 #ifndef SFTPEXPORT_H
 #define SFTPEXPORT_H
-#include "SFTP_global.h"
+#include "sftp_global.h"
 #include "interface/Panel.h"
 #include "interface/FormPanel.h"
 #include "network/network_request.h"

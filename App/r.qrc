@@ -160,5 +160,9 @@
         <file>Resource/icons/Lock_16x.svg</file>
         <file>Resource/icons/CleanData_16x.svg</file>
         <file>Resource/icons/FormatSelection_16x.svg</file>
+        <file>Resource/icons/TestCoveredException_16x.svg</file>
+        <file>Resource/icons/DeleteAllRows_16x.svg</file>
+        <file>Resource/icons/CloudRefresh_16x.svg</file>
+        <file>Resource/icons/CloudStagingRefresh_16x.svg</file>
     </qresource>
 </RCC>

@@ -3,6 +3,7 @@
 #include <QString>
 #include <QList>
 #include <QSqlQuery>
+#include <QJsonObject>
 #include "Storage.h"
 #include "global.h"
 namespace ady {
@@ -17,6 +18,19 @@ namespace ady {
         QString cvs_url;
         QString cvs_username;
         QString cvs_password;
+        QJsonObject toJson(){
+            return {
+                {"id",id},
+                {"name",name},
+                {"path",path},
+                {"datetime",datetime},
+                {"updatetime",updatetime},
+                {"cvs",cvs},
+                {"cvs_url",cvs_url},
+                {"cvs_username",cvs_username},
+                {"cvs_password",cvs_password},
+            };
+        }
     };
 
     class ANYENGINE_EXPORT ProjectStorage : public Storage{

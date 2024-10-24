@@ -18,9 +18,21 @@ public:
     bool isJsonData();
     QJsonValue jsonData();
 
+    template<class T>
+    QJsonValue toJsonOf(){
+        if(!this->isJsonData()){
+            void *data = this->data();
+            if(data==nullptr){
+                return {};
+            }else{
+                return static_cast<T*>(data)->toJson();
+            }
+        }else{
+            return this->jsonData();
+        }
+    }
     const QString id();
     void* data();
-
 
 
 private:

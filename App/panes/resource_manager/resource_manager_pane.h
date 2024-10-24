@@ -25,6 +25,7 @@ public:
     virtual bool onReceive(Event* e) override;//event bus receive callback
     void readFolder(ResourceManagerModelItem* item,int action=-1);
 
+    static ResourceManagerPane* getInstance();
     static ResourceManagerPane* open(DockingPaneManager* dockingManager,bool active=false);
     static ResourceManagerPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 
@@ -46,6 +47,8 @@ public slots:
 private:
     ResourceManagerPane(QWidget *parent = nullptr);
     QMenu* attchUploadMenu(QMenu* parent,long long id);
+
+    void closeProject(ResourceManagerModelItem* item);
 
 public:
     static const QString PANE_ID;

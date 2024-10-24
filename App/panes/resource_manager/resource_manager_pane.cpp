@@ -15,6 +15,7 @@
 #include "docking_pane_layout_item_info.h"
 #include "components/message_dialog.h"
 #include "panes/code_editor/code_editor_manager.h"
+#include "network/network_manager.h"
 #include "common/utils.h"
 #include <QMenu>
 #include <QAction>
@@ -70,7 +71,7 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     ui(new Ui::ResourceManagerPane)
 {
     Subscriber::reg();
-    this->regMessageIds({Type::M_OPEN_PROJECT,Type::M_FILE_CHANGED});
+    this->regMessageIds({Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT,Type::M_FILE_CHANGED});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -161,65 +162,33 @@ QString ResourceManagerPane::group(){
 }
 
 bool ResourceManagerPane::onReceive(Event* e){
-    QStringList opendlist;
+
     if(e->id()==Type::M_OPEN_PROJECT){
+        auto proj = e->toJsonOf<ProjectRecord>().toObject();
+        long long id = proj.find("id")->toInt(0);
         auto project = new ProjectRecord();
-
-        if(e->isJsonData()){
-            if(e->jsonData().isObject()){
-                long long id = 0;
-                QJsonObject proj = e->jsonData().toObject();
-                {
-                    auto val = proj.find("opened");
-                    if(val!=proj.end()){
-                        QJsonArray arr = val->toArray();
-                        for(auto one:arr){
-                            if(one.isString()){
-                                opendlist<<one.toString();
-                            }
-                        }
-                    }
-                }
-
-                {
-                    auto val = proj.find("id");
-                    if(val!=proj.end()){
-                        id = val->toInt(0);
-                        if(id>0){
-                            ProjectStorage projectStorage;
-                            auto one = projectStorage.one(id);
-                            if(one.id>0){
-                                project->id = one.id;
-                                project->path = one.path;
-                                project->name = one.name;
-                                goto result;
-                            }
-                        }
-                    }
-                }
-
-                {
-                    auto val = proj.find("path");
-                    if(val!=proj.end()){
-                        const QString path = val->toString();
-                        if(!path.isEmpty()){
-                            project->path = path;
-                            QFileInfo fi(path);
-                            project->name = fi.fileName();
-                            goto result;
-                        }
-                    }
-                }
+        if(id>0){
+            ProjectStorage projectStorage;
+            auto one = projectStorage.one(id);
+            if(one.id>0){
+                project->id = one.id;
+                project->path = one.path;
+                project->name = one.name;
             }
+        }
+        if(project->id==0){
+            const QString path = proj.find("path")->toString();
+            if(!path.isEmpty()){
+                project->path = path;
+                QFileInfo fi(path);
+                project->name = fi.fileName();
+            }
+        }
+        if(project->id==0 || project->path.isEmpty()){
+            delete project;
             return false;
-        }else{
-            auto one = static_cast<ProjectRecord*>(e->data());
-            project->id = one->id;
-            project->path = one->path;
-            project->name = one->name;
         }
 
-        result:
         auto item = d->model->appendItem(project);
         if(project->id>0){
             //find all sites
@@ -231,12 +200,44 @@ bool ResourceManagerPane::onReceive(Event* e){
                 }
             }
         }
-        if(opendlist.length()>0){
-            item->setOpenList(opendlist);
+
+        auto arr = proj.find("opendlist")->toArray();
+        if(arr.size()>0){
+            QStringList opendlist;
+            for(auto one:arr){
+                if(one.toString().isEmpty()==false){
+                    opendlist << one.toString();
+                }
+            }
+            if(opendlist.length()>0){
+                item->setOpenList(opendlist);
+            }
         }
+
         this->readFolder(item);
         item->setExpanded(true);
         return true;
+
+
+    }else if(e->id()==Type::M_CLOSE_PROJECT){
+        auto proj = e->toJsonOf<CloseProjectData>().toObject();
+        if(proj.isEmpty()){
+            //from menu
+            //close selected or first
+            ResourceManagerModelItem* item = nullptr;
+            auto list = ui->treeView->selectionModel()->selectedRows();
+            if(list.size()==0){
+                auto root = d->model->rootItem();
+                if(root->childrenCount()>0){
+                    item = root->childAt(0);
+                }
+            }else{
+                item = static_cast<ResourceManagerModelItem*>(list.at(0).internalPointer());
+            }
+            if(item!=nullptr && item->type()==ResourceManagerModelItem::Project){
+                this->closeProject(item);
+            }
+        }
     }
     return false;
 }
@@ -628,15 +629,13 @@ void ResourceManagerPane::onActionTriggered(){
             }
         }
     }else if(sender==d->actionClose_Project){
-        if(MessageDialog::confirm(this,tr("Close Confirm"),tr("Are you sure you want to close '%1'?").arg(one->title()),QMessageBox::Ok|QMessageBox::Cancel)==QMessageBox::Ok){
+        /*if(MessageDialog::confirm(this,tr("Close Confirm"),tr("Are you sure you want to close '%1'?").arg(one->title()),QMessageBox::Ok|QMessageBox::Cancel)==QMessageBox::Ok){
             d->model->removeItem(one);
-        }
+        }*/
+        this->closeProject(one);
     }else if(sender==d->actionCopy_Path){
         QApplication::clipboard()->setText(one->path());
-    }/*else if(sender==d->actionUpload){
-        UploadData data{one->pid(),one-,one->type()==ResourceManagerModelItem::File,one->path(),{}};
-        Publisher::getInstance()->post(Type::M_UPLOAD,&data);
-    }*/
+    }
 }
 
 void ResourceManagerPane::onTopActionTriggered(){
@@ -687,6 +686,28 @@ QMenu* ResourceManagerPane::attchUploadMenu(QMenu* parent,long long id){
         }
     }
     return uploadM;
+}
+
+void ResourceManagerPane::closeProject(ResourceManagerModelItem* item){
+    if(MessageDialog::confirm(this,tr("Close Confirm"),tr("Are you sure you want to close '%1'?").arg(item->title()),QMessageBox::Ok|QMessageBox::Cancel)==QMessageBox::Ok){
+        long long id = item->pid();
+        const QString path = item->path();
+        d->model->removeItem(item);
+        CloseProjectData data{id,path};
+        Publisher::getInstance()->post(Type::M_CLOSE_PROJECT_NOTIFY,&data);
+
+        //remove network request
+        auto instance = NetworkManager::getInstance();
+        for(auto one:d->sites){
+            if(one.pid==id){
+                instance->remove(one.id);
+            }
+        }
+    }
+}
+
+ResourceManagerPane* ResourceManagerPane::getInstance(){
+    return instance;
 }
 
 ResourceManagerPane* ResourceManagerPane::open(DockingPaneManager* dockingManager,bool active){

@@ -81,7 +81,13 @@ QVariant ResourceManagerModel::data(const QModelIndex &index, int role) const {
             ResourceManagerModelItem* item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
             return item->data(index.column());
         }
+    }else if(role == Qt::ToolTipRole && index.column() == Name){
+        ResourceManagerModelItem* item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
+        if(item->type() == ResourceManagerModelItem::Project){
+            return item->path();
+        }
     }
+
     return QVariant();
 }
 

@@ -1,12 +1,12 @@
-#include "Export.h"
-#include "COSPanel.h"
-#include "COSFormGeneral.h"
-#include "COSFormDirSetting.h"
+#include "export.h"
+#include "cos_panel.h"
+#include "cos_form_general.h"
+#include "cos_form_dir_setting.h"
 #include "network/network_manager.h"
 #include "network/network_request.h"
 #include "cos.h"
 #include "storage/site_storage.h"
-#include "COSResponse.h"
+#include "cos_response.h"
 
 #include <QDebug>
 ady::Panel* getPanel(long long id,QWidget* parent,QString name)

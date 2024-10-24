@@ -10,6 +10,8 @@ public:
 public:
     //resource manage
     static const QString M_OPEN_PROJECT;
+    static const QString M_CLOSE_PROJECT;
+    static const QString M_CLOSE_PROJECT_NOTIFY;
     static const QString M_FILE_CHANGED;
     static const QString M_OPEN_EDITOR;
 

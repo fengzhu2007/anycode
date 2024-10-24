@@ -15,6 +15,7 @@ class FileTransferModelItem;
 
 
         Task();
+        ~Task();
         Task(long long siteid,QString local,QString remote);
         Task(FileTransferModelItem* item);
     public:

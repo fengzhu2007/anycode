@@ -143,6 +143,10 @@ ServerManageModelItem* ServerManageModelItem::childAt(int i){
     return d->children.at(i);
 }
 
+ServerManageModelItem* ServerManageModelItem::take(int i){
+    return d->children.takeAt(i);
+}
+
 QList<ServerManageModelItem*> ServerManageModelItem::takeAll(){
     auto list = d->children;
     d->children.clear();
@@ -199,16 +203,19 @@ void ServerManageModelItem::setLoading(bool state){
 ServerManageModelItem* ServerManageModelItem::findChild(long long id,bool project){
     if(project){
         for(auto one:d->children){
-            if(one->type()==ServerManageModelItem::Project && one->pid()){
+            if(one->type()==ServerManageModelItem::Project && one->pid() == id){
                 return one;
             }
         }
     }else{
         for(auto one:d->children){
-            if(one->type()==ServerManageModelItem::Server && one->sid()){
+            if(one->type()==ServerManageModelItem::Server && one->sid() == id){
                 return one;
             }else if(one->type()==ServerManageModelItem::Project){
-                return one->findChild(id,false);
+                auto item =  one->findChild(id,false);
+                if(item!=nullptr){
+                    return item;
+                }
             }
         }
     }
@@ -490,6 +497,34 @@ void ServerManageModel::openProject(long long id,const QString name){
         }
     }
     this->appendItem(d->root,item);
+}
+
+void ServerManageModel::removeItem(ServerManageModelItem* item){
+    //QMutexLocker locker(&d->mutex);
+    auto parent = item->parent();
+    int position = item->row();
+    QModelIndex parentIndex;
+    if(parent!=d->root){
+        parentIndex = createIndex(parent->row(),0,parent);
+    }
+    beginRemoveRows(parentIndex,position,position);
+    auto child = parent->take(position);
+    endRemoveRows();
+    //delete child;
+    delete child;
+}
+
+void ServerManageModel::removeProject(long long id){
+    if(id==0){
+        return ;
+    }
+    int pTotal = d->root->childrenCount();
+    for(int i=0;i<pTotal;i++){
+        auto proj = d->root->childAt(i);
+        if(proj->type()==ServerManageModelItem::Project && proj->pid() == id){
+            return this->removeItem(proj);
+        }
+    }
 }
 
 ServerManageModelItem* ServerManageModel::find(const QString& path){

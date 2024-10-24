@@ -1,7 +1,7 @@
 #ifndef SFTP_H
 #define SFTP_H
 
-#include "SFTP_global.h"
+#include "sftp_global.h"
 #include "network/network_request.h"
 #include <QStringList>
 namespace ady {

@@ -30,7 +30,7 @@ FileTransferPane::FileTransferPane(QWidget *parent) :
 {
     d = new FileTransferPanePrivate;
     Subscriber::reg();
-    this->regMessageIds({Type::M_UPLOAD,Type::M_DOWNLOAD,Type::M_OPEN_PROJECT});
+    this->regMessageIds({Type::M_UPLOAD,Type::M_DOWNLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -53,18 +53,24 @@ FileTransferPane::FileTransferPane(QWidget *parent) :
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeView,&QTreeView::customContextMenuRequested, this, &FileTransferPane::onContextMenu);
 
+    connect(ui->actionRun,&QAction::triggered,this,&FileTransferPane::onActionTriggered);
+    connect(ui->actionStop,&QAction::triggered,this,&FileTransferPane::onActionTriggered);
+    connect(ui->actionDelete,&QAction::triggered,this,&FileTransferPane::onActionTriggered);
+
     this->initView();
 }
 
 FileTransferPane::~FileTransferPane()
 {
+    Subscriber::unReg();
     delete ui;
     delete d;
     instance = nullptr;
 }
 
 void FileTransferPane::initView(){
-
+    ui->actionRun->setEnabled(true);
+    ui->actionStop->setEnabled(false);
 }
 
 QString FileTransferPane::id(){
@@ -87,32 +93,41 @@ bool FileTransferPane::onReceive(Event* e) {
     }else if(id==Type::M_DOWNLOAD){
 
     }else if(id==Type::M_OPEN_PROJECT){
-        long long id=0;
+        //long long id=0;
         QString name;
-        if(e->isJsonData()){
-            QJsonObject proj = e->jsonData().toObject();
-            {
-                auto val = proj.find("id");
-                if(val!=proj.end()){
-                    id = val->toInt(0);
-                    if(id>0){
-                        ProjectStorage projectStorage;
-                        auto record = projectStorage.one(id);
-                        auto model = static_cast<FileTransferModel*>(ui->treeView->model());
-                        model->openProject(record.id,record.name,record.path);
-                        ui->treeView->expandAll();
-                    }
-                }
-            }
-        }else{
-            auto one = static_cast<ProjectRecord*>(e->data());
-            if(one!=nullptr && one->id>0){
+        auto proj = e->toJsonOf<ProjectRecord>().toObject();
+        long long id = proj.find("id")->toInt(0);
+        if(id>0){
+            ProjectStorage projectStorage;
+            auto record = projectStorage.one(id);
+            if(record.id>0){
                 auto model = static_cast<FileTransferModel*>(ui->treeView->model());
-                model->openProject(one->id,one->name,one->path);
+                model->openProject(record.id,record.name,record.path);
                 ui->treeView->expandAll();
             }
         }
         return true;
+    }else if(id==Type::M_CLOSE_PROJECT_NOTIFY){
+        auto data = e->toJsonOf<CloseProjectData>().toObject();
+        long long id = data.find("id")->toInt();
+        if(id>0){
+            auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+            auto proj = model->rootItem()->findByProjectId(id);
+            QList<int> ids;
+            if(proj!=nullptr){
+                //find all site
+                int total = proj->childrenCount();
+                for(int i=0;i<total;i++){
+                    auto site = proj->childAt(i);
+                    ids<<site->id();
+
+                }
+            }
+            model->removeProject(id);
+            for(auto id:ids){
+                model->abortJob(id);
+            }
+        }
     }
     return false;
 }
@@ -128,6 +143,23 @@ void FileTransferPane::onContextMenu(const QPoint& pos){
     contextMenu.addSeparator();
     contextMenu.addAction(ui->actionDelete);
     contextMenu.exec(QCursor::pos());
+}
+
+void FileTransferPane::onActionTriggered(){
+    auto sender = static_cast<QAction*>(this->sender());
+    if(sender==ui->actionRun){
+        ui->actionRun->setEnabled(false);
+        ui->actionStop->setEnabled(true);
+        auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+        model->start(3);
+    }else if(sender==ui->actionStop){
+        ui->actionRun->setEnabled(true);
+        ui->actionStop->setEnabled(false);
+        auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+        model->stop();
+    }else if(sender==ui->actionDelete){
+        QModelIndexList list = ui->treeView->selectionModel()->selectedRows();
+    }
 }
 
 FileTransferPane* FileTransferPane::open(DockingPaneManager* dockingManager,bool active){

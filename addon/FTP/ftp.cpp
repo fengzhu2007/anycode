@@ -1,5 +1,5 @@
 #include "ftp.h"
-#include "FTPResponse.h"
+#include "ftp_response.h"
 #include "transfer/Task.h"
 #include "common/utils.h"
 #include "ftp_setting.h"

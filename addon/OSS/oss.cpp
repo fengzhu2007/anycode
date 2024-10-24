@@ -4,12 +4,12 @@
 #include <QDir>
 #include <QDateTime>
 #include <QMimeDatabase>
-#include "OSSResponse.h"
+#include "oss_response.h"
 #include "transfer/Task.h"
+#include "oss_setting.h"
 #include <openssl/hmac.h>
 #include <openssl/opensslconf.h>
 #include <locale.h>
-
 #ifdef Q_OS_WIN
 #include <hmac/hmac_local.h>
 #endif
@@ -57,11 +57,23 @@ OSS::OSS(CURL* curl,long long id)
     return (int)res;
 }*/
 
+void OSS::init(const SiteRecord& info){
+    this->setHost(info.host);
+    this->setPort(info.port);
+    this->setUsername(info.username);
+    this->setPassword(info.password);
+    m_rootPath = info.path;
+    m_setting = new OSSSetting(info.data);
+    //m_dirSync = m_setting->dirSync();
+    m_dirMapping = m_setting->dirMapping();
+
+}
+
 NetworkResponse* OSS::link()
 {
     QMutexLocker locker(&mutex);
     m_bucket = this->host.left(this->host.indexOf("."));
-    QString dst = this->m_defaultDir;
+    QString dst = this->m_rootPath;
     HttpParams options;
     options[BUCKET] = m_bucket;
     options[METHOD] = "GET";
@@ -70,7 +82,7 @@ NetworkResponse* OSS::link()
     QString host = this->host;
     options[HOST] = host;
     HttpParams headers = this->signHeaders(options);
-    QString prefix = this->m_defaultDir;
+    QString prefix = this->m_rootPath;
     if(prefix.startsWith("/")){
         prefix = prefix.mid(1);
     }
@@ -119,7 +131,7 @@ NetworkResponse* OSS::listDir(const QString& dir,int page,int pageSize)
     QString host = this->host;
     options[HOST] = host;
     HttpParams headers = this->signHeaders(options);
-    QString prefix = this->m_defaultDir;
+    QString prefix = this->m_rootPath;
     if(dir.isEmpty()==false){
         prefix = dir;
     }
@@ -162,7 +174,7 @@ NetworkResponse* OSS::tinyListDir(const QString& dir)
     QString host = this->host;
     options[HOST] = host;
     HttpParams headers = this->signHeaders(options);
-    QString prefix = this->m_defaultDir;
+    QString prefix = this->m_rootPath;
     if(dir.isEmpty()==false){
         prefix = dir;
     }

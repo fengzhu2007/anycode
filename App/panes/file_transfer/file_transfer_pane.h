@@ -27,6 +27,7 @@ public:
     static FileTransferPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 public slots:
     void onContextMenu(const QPoint& pos);
+    void onActionTriggered();
 
 private:
     FileTransferPane(QWidget *parent = nullptr);

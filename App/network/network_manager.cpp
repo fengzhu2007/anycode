@@ -15,7 +15,7 @@ public:
 
     NetworkManager::NetworkManager()
     {
-    d = new NetworkManagerPrivate;
+        d = new NetworkManagerPrivate;
         curl_global_init(CURL_GLOBAL_DEFAULT);
 
     }
