@@ -20,7 +20,6 @@ ServerRequestThread::ServerRequestThread(NetworkRequest* request,int command,voi
 }
 
 ServerRequestThread::~ServerRequestThread(){
-    qDebug()<<"ServerRequestThread::~ServerRequestThread";
     delete d;
 }
 

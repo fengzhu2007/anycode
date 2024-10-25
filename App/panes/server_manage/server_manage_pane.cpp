@@ -194,40 +194,47 @@ void ServerManagePane::deleteFiles(long long id,const QStringList& list){
 }
 
 void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,int result){
+    auto model = static_cast<ServerManageModel*>(ui->treeView->model());
     if(command==ServerRequestThread::Link){
+        long long id = response->id;
+        auto item = model->find(id,false);
         if(response->status()){
             //list default dir
             auto list = response->parseList();
             auto dir = response->params["dir"].toString();
-            long long id = response->id;
-            qDebug()<<"link:"<<response->id;
-            auto model = static_cast<ServerManageModel*>(ui->treeView->model());
-            auto item = model->find(id,false);
             if(item!=nullptr){
                 item->setExpanded(true);
                 item->setLoading(false);
                 model->appendItems(list,item);
             }
+        }else{
+            if(item!=nullptr){
+                item->setLoading(false);
+            }
+            wToast::showText(response->errorMsg);
         }
     }else if(command==ServerRequestThread::List){
+        auto dir = response->params["dir"].toString();
+        auto item = model->find(response->id,dir);
         if(response->status()){
             auto list = response->parseList();
-            auto dir = response->params["dir"].toString();
-            auto model = static_cast<ServerManageModel*>(ui->treeView->model());
-            qDebug()<<"list:"<<response->id;
-            auto item = model->find(response->id,dir);
             if(item!=nullptr){
                 item->setExpanded(true);
                 item->setLoading(false);
                 model->appendItems(list,item);
             }
+        }else{
+            if(item!=nullptr){
+                item->setLoading(false);
+            }
+            wToast::showText(response->errorMsg);
         }
     }else if(command==ServerRequestThread::Refresh || command==ServerRequestThread::NewFolder || command==ServerRequestThread::Delete){
+        auto item = model->find(response->id);
         if(response->status()){
             auto list = response->parseList();
             auto dir = response->params["dir"].toString();
-            auto model = static_cast<ServerManageModel*>(ui->treeView->model());
-            auto item = model->find(response->id);
+
             if(item!=nullptr){
                 if(item->path()!=dir){
                     item = item->findChild(dir);
@@ -239,27 +246,36 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
                     model->refreshItems(list,item);
                 }
             }
+        }else{
+            if(item!=nullptr){
+                item->setLoading(false);
+            }
+            wToast::showText(response->errorMsg);
         }
     }else if(command==ServerRequestThread::Rename){
-        if(response->status()){
-            auto list = response->parseList();
-            auto dir = response->params["dir"].toString();
-            auto model = static_cast<ServerManageModel*>(ui->treeView->model());
-            auto item = model->find(response->id);
-            if(item!=nullptr){
-                if(item->path()!=dir){
-                    item = item->findChild(dir);
-                }
-                if(item!=nullptr){
-                    //clear all children
-                    item->setExpanded(true);
-                    item->setLoading(false);
-                    model->refreshItems(list,item);
-                }
+        auto dir = response->params["dir"].toString();
+        auto item = model->find(response->id);
+        if(item!=nullptr){
+            if(item->path()!=dir){
+                item = item->findChild(dir);
             }
         }
-        if(result==ServerRequestThread::Unsppport){
-            wToast::showText(tr("This operation is not supported"));
+        if(response->status()){
+            auto list = response->parseList();
+            if(item!=nullptr){
+                //clear all children
+                item->setExpanded(true);
+                item->setLoading(false);
+                model->refreshItems(list,item);
+            }
+            if(result==ServerRequestThread::Unsppport){
+                wToast::showText(tr("This operation is not supported"));
+            }
+        }else{
+            if(item!=nullptr){
+                item->setLoading(false);
+            }
+            wToast::showText(response->errorMsg);
         }
     }
     //response->debug();

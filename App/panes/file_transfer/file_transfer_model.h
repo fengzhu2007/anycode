@@ -2,8 +2,10 @@
 #define FILETRANSFERMODEL_H
 #include "global.h"
 #include "core/event_bus/event_data.h"
+#include "local/file_item.h"
 #include <QAbstractItemModel>
 #include <QFile>
+#include <QFileInfo>
 namespace ady{
 
 
@@ -51,6 +53,7 @@ public:
 
     //remove
     FileTransferModelItem* take(int i);
+    QList<FileTransferModelItem*> take(int from,int end);
     Type type();
     Mode mode();
     long long id();
@@ -63,6 +66,8 @@ public:
     void setProgress(float progress);
     QString errorMsg();
     void setErrorMsg(const QString& errormsg);
+    bool matchedPath();
+    void setMatchedPath(bool matched);
 
     unsigned long long filesize();
 
@@ -122,10 +127,23 @@ public:
 
 
     void appendItem(FileTransferModelItem* parent,FileTransferModelItem* item);
-    void insertFrontItems(FileTransferModelItem* parent,QList<FileTransferModelItem*> items,FileTransferModelItem::State state);
+
+    void insertFrontAndRemove(long long siteid,long long id,QFileInfoList list,FileTransferModelItem::State state);
+    void insertFrontAndRemove(long long siteid,long long id,QList<FileItem> list,FileTransferModelItem::State state);
+
+
+
     void removeItem(FileTransferModelItem* item);
     void removeItem(long long siteid,long long id);
     void removeProject(long long id);
+
+    void removeAllItems(FileTransferModelItem::State=FileTransferModelItem::Any);
+    void removeItems(QModelIndexList list,FileTransferModelItem::State=FileTransferModelItem::Any);
+
+    void retryItems(QModelIndexList list);
+    void retryAllItems();
+
+
 
 
     void openProject(long long id,const QString& name,const QString& path);
@@ -144,14 +162,22 @@ public:
     FileTransferModelItem* take(int siteid);
     FileTransferModelItem* rootItem();
 
+signals:
+    void notifyProgress(long long siteid,long long id,float progress);
+
 public slots:
     void onThreadFinished();
+    void onUploadFolder(long long siteid,long long id,QFileInfoList list,int state);
+    void onDonwloadFolder(long long siteid,long long id,QList<FileItem> list,int state);
+    void onFinishTask(long long siteid,long long id);
+    void onErrorTask(long long siteid,long long id,const QString& errorMsg);
+    void onUpdateProgress(long long siteid,long long id,float progress);
 
-
-    //void addJob(long long pid,long long sid,const QString source,const QString dest);
 private:
     explicit FileTransferModel(QObject *parent = nullptr);
     FileTransferModelItem* get(int siteid);
+    void insertFrontItems(FileTransferModelItem* parent,QList<FileTransferModelItem*> items,FileTransferModelItem::State state);
+    void remoteItems(FileTransferModelItem* site,int from,int end);
 
 private:
     static FileTransferModel* instance;

@@ -8,6 +8,7 @@
 #include "core/event_bus/event_data.h"
 #include "storage/project_storage.h"
 #include "file_transfer_model.h"
+#include "components/message_dialog.h"
 
 #include <QMenu>
 
@@ -56,6 +57,10 @@ FileTransferPane::FileTransferPane(QWidget *parent) :
     connect(ui->actionRun,&QAction::triggered,this,&FileTransferPane::onActionTriggered);
     connect(ui->actionStop,&QAction::triggered,this,&FileTransferPane::onActionTriggered);
     connect(ui->actionDelete,&QAction::triggered,this,&FileTransferPane::onActionTriggered);
+    connect(ui->actionDelete_Failed,&QAction::triggered,this,&FileTransferPane::onActionTriggered);
+    connect(ui->actionDelete_All,&QAction::triggered,this,&FileTransferPane::onActionTriggered);
+    connect(ui->actionRetry,&QAction::triggered,this,&FileTransferPane::onActionTriggered);
+    connect(ui->actionRetry_All,&QAction::triggered,this,&FileTransferPane::onActionTriggered);
 
     this->initView();
 }
@@ -138,10 +143,15 @@ void FileTransferPane::onContextMenu(const QPoint& pos){
     QMenu contextMenu(this);
     contextMenu.addAction(ui->actionRun);
     contextMenu.addAction(ui->actionStop);
+    contextMenu.addSeparator();
 
-    //contextMenu.addSection(tr("Delete"));
+    contextMenu.addAction(ui->actionRetry);
+    contextMenu.addAction(ui->actionRetry_All);
+
     contextMenu.addSeparator();
     contextMenu.addAction(ui->actionDelete);
+    contextMenu.addAction(ui->actionDelete_Failed);
+    contextMenu.addAction(ui->actionDelete_All);
     contextMenu.exec(QCursor::pos());
 }
 
@@ -158,7 +168,33 @@ void FileTransferPane::onActionTriggered(){
         auto model = static_cast<FileTransferModel*>(ui->treeView->model());
         model->stop();
     }else if(sender==ui->actionDelete){
+        if(MessageDialog::confirm(this,tr("Are you want delete selected items?"))==QMessageBox::Yes){
+            QModelIndexList list = ui->treeView->selectionModel()->selectedRows();
+            auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+            model->removeItems(list);
+        }
+    }else if(sender==ui->actionDelete_Failed){
+        //delete failed job
+        if(MessageDialog::confirm(this,tr("Are you want delete failed items?"))==QMessageBox::Yes){
+            auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+            model->removeAllItems(FileTransferModelItem::Failed);
+        }
+
+    }else if(sender==ui->actionDelete_All){
+        //delete all jobs
+        if(MessageDialog::confirm(this,tr("Are you want delete all items?"))==QMessageBox::Yes){
+            auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+            model->removeAllItems();
+        }
+    }else if(sender==ui->actionRetry){
+        //retry select failed
         QModelIndexList list = ui->treeView->selectionModel()->selectedRows();
+        auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+        model->retryItems(list);
+    }else if(sender==ui->actionRetry_All){
+        //retry select all failed
+        auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+        model->retryAllItems();
     }
 }
 

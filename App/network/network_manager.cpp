@@ -121,6 +121,19 @@ public:
         auto request = this->request(task->siteid);
         NetworkResponse* response = nullptr;
         if(request!=nullptr){
+            if(request->isConnected()==false){
+                response = request->link();
+                int code = 0;
+                if(!response->status()){
+                    code = -3;
+                    task->errorMsg = response->errorMsg;
+                }
+                delete response;
+                response = nullptr;
+                if(code!=0){
+                    return code;
+                }
+            }
             if(task->cmd==0){
                 //upload
                 response = request->upload(task);

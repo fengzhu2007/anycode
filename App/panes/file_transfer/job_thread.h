@@ -3,6 +3,8 @@
 
 #include <QThread>
 #include <QList>
+#include <QFileInfo>
+#include "local/file_item.h"
 namespace ady{
 class FileTransferModelItem;
 class FileTransferModel;
@@ -17,9 +19,16 @@ public:
     inline long long id(){return m_siteid;}
     void abort();
 
+signals:
+    void finishTask(long long siteid,long long id);
+    void errorTask(long long siteid,long long id,const QString& errorMsg);
+    void uploadFolder(long long siteid,long long id,QFileInfoList list,int state);
+    void donwloadFolder(long long siteid,long long id,QList<FileItem> list,int state);
+
+
 private:
-    QList<FileTransferModelItem*> listRemote(FileTransferModelItem* parent);
-    QList<FileTransferModelItem*> listLocal(FileTransferModelItem* parent);
+    QFileInfoList listLocal(const QString& source);
+    QList<FileItem> listRemote(long long siteid,const QString& destination,QString* errorMsg);
 
 protected:
     long long m_siteid;

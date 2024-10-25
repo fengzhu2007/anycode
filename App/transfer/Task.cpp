@@ -45,6 +45,6 @@ namespace ady {
     }
 
     Task::~Task(){
-        qDebug()<<"task destory:"<<this->id;
+        //qDebug()<<"task destory:"<<this->id;
     }
 }
