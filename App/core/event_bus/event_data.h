@@ -27,6 +27,26 @@ struct ANYENGINE_EXPORT UploadData{
     }
 };
 
+struct ANYENGINE_EXPORT DownloadData{
+    long long pid;
+    long long siteid;
+    long long filesize;
+    bool is_file;
+    QString remote;
+    QString local;
+
+    QJsonObject toJson(){
+        return {
+                {"pid",pid},
+                {"siteid",siteid},
+                {"filesize",filesize},
+                {"is_file",is_file},
+                {"remote",remote},
+                {"local",local},
+                };
+    }
+};
+
 struct ANYENGINE_EXPORT OpenFindData{
     int mode;
     QString text;

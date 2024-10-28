@@ -1,7 +1,7 @@
 #ifndef OSS_FORM_GENERAL_H
 #define OSS_FORM_GENERAL_H
 #include "oss_global.h"
-#include "interface/FormPanel.h"
+#include "interface/form_panel.h"
 
 namespace Ui {
 class OSSFormGeneralUI;

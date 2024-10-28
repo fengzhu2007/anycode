@@ -164,5 +164,6 @@
         <file>Resource/icons/DeleteAllRows_16x.svg</file>
         <file>Resource/icons/CloudRefresh_16x.svg</file>
         <file>Resource/icons/CloudStagingRefresh_16x.svg</file>
+        <file>Resource/icons/PageLock_16x.svg</file>
     </qresource>
 </RCC>

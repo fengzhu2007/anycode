@@ -94,10 +94,10 @@ add_library(App SHARED
         cvs/error.h cvs/error.cpp
         cvs/git/git_repository.h cvs/git/git_repository.cpp
         cvs/svn/svn_repository.h cvs/svn/svn_repository.cpp
-        interface/FormPanel.cpp
+        interface/form_panel.h interface/form_panel.cpp
         interface/NewFileDialog.cpp
         interface/NotificationImpl.cpp
-        interface/Panel.cpp
+        interface/panel.cpp interface/panel.cpp
         interface/RemoteFileItemModel.cpp
         local/file_item.h local/file_item.cpp
         local/FileItemModel.cpp
@@ -215,6 +215,9 @@ add_library(App SHARED
         panes/startup/startup_pane.h panes/startup/startup_pane.cpp
         panes/startup/startup_pane.ui
         panes/file_transfer/job_thread.h panes/file_transfer/job_thread.cpp
+        panes/server_manage/server_client_pane.h panes/server_manage/server_client_pane.cpp
+        panes/server_manage/permission_dialog.ui panes/server_manage/permission_dialog.h panes/server_manage/permission_dialog.cpp
+
 
 
 

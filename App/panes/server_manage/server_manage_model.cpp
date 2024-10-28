@@ -63,6 +63,7 @@ public:
     ServerManageModelItem* parent=nullptr;
     QString name;
     QString path;
+    QString addonType;
     QList<ServerManageModelItem*> children;
     FileItem* data = nullptr;
 };
@@ -200,6 +201,10 @@ void ServerManageModelItem::setLoading(bool state){
     d->loading = state;
 }
 
+FileItem* ServerManageModelItem::data(){
+    return d->data;
+}
+
 ServerManageModelItem* ServerManageModelItem::findChild(long long id,bool project){
     if(project){
         for(auto one:d->children){
@@ -238,6 +243,14 @@ ServerManageModelItem* ServerManageModelItem::findChild(const QString& path){
         }
     }
     return nullptr;
+}
+
+void ServerManageModelItem::setAddonType(const QString& type){
+    d->addonType = type;
+}
+
+QString ServerManageModelItem::addonType(){
+    return d->addonType;
 }
 
 
@@ -489,7 +502,10 @@ void ServerManageModel::openProject(long long id,const QString name){
         QList<SiteRecord> list = db.list(id);
         for(auto one:list){
             auto server = new ServerManageModelItem(ServerManageModelItem::Server,one.id,one.name,one.path,item);
+            server->setAddonType(one.type);
             item->appendItem(server);
+
+            //one.type;
             //init request
             if(instance!=nullptr){
                 instance->initRequest(one.id,one.type);
@@ -546,6 +562,12 @@ ServerManageModelItem* ServerManageModel::find(long long id,const QString& path)
 
 ServerManageModelItem* ServerManageModel::rootItem(){
     return d->root;
+}
+
+
+void ServerManageModel::changeItem(ServerManageModelItem* item){
+    QModelIndex index = createIndex(item->row(),0,item);
+    emit dataChanged(index,index,QVector<int>{Qt::DisplayRole});
 }
 
 }

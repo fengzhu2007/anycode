@@ -4,6 +4,7 @@
 #include "docking_pane_container.h"
 #include "docking_pane_container_tabbar.h"
 #include "panes/resource_manager/resource_manager_model.h"
+#include "components/message_dialog.h"
 
 #include "textdocument.h"
 
@@ -18,6 +19,7 @@
 #include <QClipboard>
 #include <QDesktopServices>
 #include <QTextCodec>
+#include <QTimer>
 #include <QDebug>
 
 namespace ady{
@@ -30,7 +32,10 @@ class CodeEditorPanePrivate{
 public:
     CodeEditorView* editor;
     int id;
+    int state=CodeEditorPane::None;
+    bool modification=false;
     QString mineType;
+
 };
 
 CodeEditorPane::CodeEditorPane(QWidget *parent)
@@ -202,6 +207,49 @@ CodeEditorView* CodeEditorPane::editor(){
     return d->editor;
 }
 
+int CodeEditorPane::fileState(){
+    return d->state;
+}
+void CodeEditorPane::setFileState(int state){
+    d->state |= state;
+}
+
+void CodeEditorPane::invokeFileState(){
+    if((d->state & CodeEditorPane::Deleted)==CodeEditorPane::Deleted){
+        const QString path = this->path();
+        if(!QFileInfo::exists(path)){
+            if(MessageDialog::confirm(this,tr("The file \"%1\" is no longer there. \nDo you want to keep it?").arg(path))==QMessageBox::No){
+                //close pane
+                auto container = this->container();
+                if(container!=nullptr){
+                    container->closePane(this);
+                }
+                return ;
+            }
+        }
+        d->state &= (~CodeEditorPane::Deleted);
+    }else if((d->state & CodeEditorPane::Changed)==CodeEditorPane::Changed){
+        const QString path = this->path();
+        if(MessageDialog::confirm(this,tr("\"%1\" \nThis file has been modified by another program.\n Reload?").arg(path))==QMessageBox::Yes){
+            this->reload();
+        }
+        d->state &= (~CodeEditorPane::Changed);
+    }
+}
+
+bool CodeEditorPane::isModification(){
+    return d->modification;
+}
+
+void CodeEditorPane::reload(){
+    auto textDocument = d->editor->textDocument();
+    QString errorMsg;
+    textDocument->reload(&errorMsg);
+    if(!errorMsg.isEmpty()){
+        qDebug()<<"reload error:"<<errorMsg;
+    }
+}
+
 CodeEditorPane* CodeEditorPane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
     auto pane = new CodeEditorPane();
     auto value = data.find("path");
@@ -245,8 +293,18 @@ void CodeEditorPane::onModificationChanged(bool changed){
                     text = text.left(text.length() - 1);
                 }
             }
+            d->modification = changed;
             tabBar->setTabText(i,text);
         }
+    }
+}
+
+void CodeEditorPane::showEvent(QShowEvent* e){
+    DockingPane::showEvent(e);
+    if(d->state>0){
+        QTimer::singleShot(10,[this]{
+            this->invokeFileState();
+        });
     }
 }
 

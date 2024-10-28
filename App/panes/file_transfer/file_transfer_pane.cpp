@@ -89,14 +89,26 @@ QString FileTransferPane::group(){
 bool FileTransferPane::onReceive(Event* e) {
     const QString id = e->id();
     if(id==Type::M_UPLOAD){
-        auto data = static_cast<UploadData*>(e->data());
+
+        /*auto data = static_cast<UploadData*>(e->data());
         if(data!=nullptr){
             auto model = static_cast<FileTransferModel*>(ui->treeView->model());
             model->addJob(data);
+        }*/
+        auto data = e->toJsonOf<UploadData>().toObject();
+        if(data.isEmpty()==false){
+            auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+            model->addUploadJob(data);
         }
         return true;
     }else if(id==Type::M_DOWNLOAD){
-
+        //auto data = static_cast<DownloadData*>(e->data());
+        auto data = e->toJsonOf<DownloadData>().toObject();
+        if(data.isEmpty()==false){
+            auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+            model->addDownloadJob(data);
+        }
+        return true;
     }else if(id==Type::M_OPEN_PROJECT){
         //long long id=0;
         QString name;

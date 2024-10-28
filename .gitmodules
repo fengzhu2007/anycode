@@ -33,3 +33,6 @@
 [submodule "wRect"]
 	path = wRect
 	url = https://github.com/fengzhu2007/wRect.git
+[submodule "texteditor"]
+	path = texteditor
+	url = https://github.com/fengzhu2007/texteditor.git

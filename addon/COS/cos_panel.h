@@ -1,7 +1,7 @@
 #ifndef COSPANEL_H
 #define COSPANEL_H
 #include "COS_global.h"
-#include "interface/Panel.h"
+#include "interface/panel.h"
 #include "storage/site_storage.h"
 #include <QMutex>
 #include <QMimeData>

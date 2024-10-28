@@ -480,6 +480,9 @@ DockingPaneLayoutItemInfo* IDEWindow::restoreDockTabs(QJsonArray& tabs,DockingPa
                 data = dataV.toObject();
             }
             auto pane = PaneLoader::init(m_dockingPaneManager,group,data);
+            if(pane==nullptr){
+                continue;
+            }
 
             if(client>0){
                 if(client==1){

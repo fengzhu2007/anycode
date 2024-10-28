@@ -1,8 +1,8 @@
 #ifndef OSSEXPORT_H
 #define OSSEXPORT_H
 #include "oss_global.h"
-#include "interface/Panel.h"
-#include "interface/FormPanel.h"
+#include "interface/panel.h"
+#include "interface/form_panel.h"
 #include "network/network_request.h"
 
 #ifdef __cplusplus

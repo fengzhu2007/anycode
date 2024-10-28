@@ -1,7 +1,7 @@
 #ifndef SFTPPANEL_H
 #define SFTPPANEL_H
 #include "sftp_global.h"
-#include "interface/Panel.h"
+#include "interface/panel.h"
 #include "storage/site_storage.h"
 #include <QMutex>
 #include <QMimeData>

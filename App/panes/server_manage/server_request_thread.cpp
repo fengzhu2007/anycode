@@ -70,6 +70,8 @@ void ServerRequestThread::run(){
     }else if(d->cmd==Delete){
         auto list = static_cast<QStringList*>(d->data);
         QString parent;
+        int successTotal = 0;
+        int errorTotal = 0;
         for(auto one:*list){
              if(response!=nullptr){
                  delete response;
@@ -77,11 +79,19 @@ void ServerRequestThread::run(){
              QString path;
              if(one.endsWith("/")){
                  //folder
-                 response = d->req->rmDir(one);
+                 //read all sub files
+
+                 this->delFolder(one,&successTotal,&errorTotal);
                  path = one.left(one.size() - 1);
              }else{
                 //file
-                 response = d->req->del(one);
+                 //response = d->req->del(one);
+                 bool ret = this->delFile(one);
+                 if(ret){
+                     successTotal+=1;
+                 }else{
+                     errorTotal+=1;
+                 }
                  path = one;
              }
              path = path.left(path.lastIndexOf("/")+1);
@@ -91,6 +101,10 @@ void ServerRequestThread::run(){
              if(d->interrupt){
                  goto interrupt;
              }
+        }
+
+        if(errorTotal>0){
+             emit message(tr("%1 files and directories deleted successfully, %2 files and directories deleted failed.").arg(successTotal).arg(errorTotal),Failed);
         }
         delete list;
         if(!parent.isEmpty()){
@@ -112,12 +126,44 @@ interrupt:
     emit resultReady(response,d->cmd,result);
 }
 
-void ServerRequestThread::delFile(const QString& path){
-    d->req->del(path);
+bool ServerRequestThread::delFile(const QString& path){
+    auto response = d->req->del(path);
+    bool ret = false;
+    if(response->status()){
+        ret = true;
+    }
+    delete response;
+    return ret;
 }
 
-void ServerRequestThread::delFolder(const QString& path){
-
+void ServerRequestThread::delFolder(const QString& path,int* successTotal,int* errorTotal){
+    auto response = d->req->tinyListDir(path);
+    auto list = response->parseList();
+    delete response;
+    for(auto one:list){
+        if(d->interrupt){
+            return ;
+        }
+        if(one.type==FileItem::File){
+            bool ret = this->delFile(one.path);
+            if(ret){
+                 *successTotal += 1;
+            }else{
+                 *errorTotal += 1;
+            }
+        }else{
+            //folder
+            this->delFolder(one.path,successTotal,errorTotal);
+        }
+    }
+    response = d->req->rmDir(path);
+    if(response->status()){
+        *successTotal += 1;
+    }else{
+        *errorTotal += 1;
+    }
+    response->debug();
+    delete response;
 }
 
 }

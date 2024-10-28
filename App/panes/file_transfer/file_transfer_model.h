@@ -68,8 +68,8 @@ public:
     void setErrorMsg(const QString& errormsg);
     bool matchedPath();
     void setMatchedPath(bool matched);
-
-    unsigned long long filesize();
+    void setFilesize(long long filesize);
+    long long filesize();
 
 public:
     static int seq;
@@ -149,6 +149,8 @@ public:
     void openProject(long long id,const QString& name,const QString& path);
 
     void addJob(UploadData* data);
+    void addUploadJob(QJsonObject data);
+    void addDownloadJob(QJsonObject data);
     void progress(long long siteid,long long id,float progress);
     void setItemFailed(long long siteid,long long id,const QString& msg);
 

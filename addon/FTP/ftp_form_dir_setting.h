@@ -1,7 +1,7 @@
 #ifndef FTP_FORM_DIR_SETTING_H
 #define FTP_FORM_DIR_SETTING_H
 #include "ftp_global.h"
-#include "interface/FormPanel.h"
+#include "interface/form_panel.h"
 namespace Ui{
     class FTPFormDirSettingUi;
 }

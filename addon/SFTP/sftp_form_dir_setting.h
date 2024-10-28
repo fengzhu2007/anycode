@@ -1,7 +1,7 @@
 #ifndef SFTPFORMDIRSETTING_H
 #define SFTPFORMDIRSETTING_H
 #include "sftp_global.h"
-#include "interface/FormPanel.h"
+#include "interface/form_panel.h"
 namespace Ui{
     class SFTPFormDirSettingUi;
 }

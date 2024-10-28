@@ -33,8 +33,9 @@ def build_apr_util(source_dir, arch):
 
 
 if __name__ == "__main__":
-    for platform in ["win32","x64"]:
-        for library_prefix in ["zlib"]:
+    #for platform in ["win32","x64"]:
+    for platform in ["x64"]:
+        for library_prefix in ["zlib","apr","apr-util","libexpat","libssh2","libgit2"]:
             library = detect_library(library_prefix)
             build_library(library, platform)
             

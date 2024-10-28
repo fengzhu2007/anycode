@@ -39,8 +39,12 @@ public:
     long long pid();
     bool isLoading();
     void setLoading(bool state);
+    FileItem* data();
     ServerManageModelItem* findChild(long long id,bool project=false);
     ServerManageModelItem* findChild(const QString& path);
+
+    void setAddonType(const QString& type);
+    QString addonType();
 
 
 private:
@@ -83,6 +87,9 @@ public:
     ServerManageModelItem* find(long long id,bool project=false);//find server
     ServerManageModelItem* find(long long id,const QString& path);
     ServerManageModelItem* rootItem();
+
+    //void dataChanged();
+    void changeItem(ServerManageModelItem* item);
 
 signals:
     void rename(ServerManageModelItem* item,const QString& newName);

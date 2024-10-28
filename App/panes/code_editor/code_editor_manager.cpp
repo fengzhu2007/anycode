@@ -332,27 +332,40 @@ bool CodeEditorManager::onReceive(Event* e){
 void CodeEditorManager::onFileChanged(const QString &path){
     auto pane = this->get(path);
     if(pane!=nullptr){
+        //qDebug()<<"path:"<<path<<"state:"<<pane->isVisible();
         //to fix
-        /*QFileInfo fi(path);
+        QFileInfo fi(path);
         if(!fi.exists()){
             //delete
-            if(MessageDialog::confirm(d->docking_manager->widget(),tr("The file \"%1\" is no longer there. \nDo you want to keep it?").arg(path))==QMessageBox::No){
-                    //close pane
-                auto container = pane->container();
-                if(container!=nullptr){
-                    container->closePane(pane);
+            if(pane->isVisible()){
+                int state = pane->fileState();
+                if((state&CodeEditorPane::Deleted)==CodeEditorPane::Deleted){
+
+                    return ;
                 }
+                pane->setFileState(CodeEditorPane::Deleted);
+                pane->invokeFileState();
+            }else{
+                pane->setFileState(CodeEditorPane::Deleted);
             }
         }else{
-            //content update
-            if(MessageDialog::confirm(d->docking_manager->widget(),tr("\"%1\" \nThis file has been modified by another program.\n Reload?").arg(path))==QMessageBox::Yes){
-                auto container = pane->container();
-                if(container!=nullptr){
-                    container->setPane(container->indexOf(pane));
+            if(pane->isModification()==false){
+                //reload file
+                pane->reload();
+            }else{
+                if(pane->isVisible()){
+                    int state = pane->fileState();
+                    if((state&CodeEditorPane::Changed)==CodeEditorPane::Changed){
+
+                        return ;
+                    }
+                    pane->setFileState(CodeEditorPane::Changed);
+                    pane->invokeFileState();
+                }else{
+                    pane->setFileState(CodeEditorPane::Changed);
                 }
-                pane->readFile(path);
             }
-        }*/
+        }
     }
 }
 

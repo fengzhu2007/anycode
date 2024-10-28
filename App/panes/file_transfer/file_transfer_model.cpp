@@ -26,7 +26,6 @@ public:
     long long filesize=-1l;
     float progress = 0;
     bool matched;
-
     FileTransferModelItem* parent=nullptr;
     QString name;
     QString src;//local for download and upload
@@ -250,7 +249,11 @@ void FileTransferModelItem::setMatchedPath(bool matched){
     d->matched = matched;
 }
 
-unsigned long long FileTransferModelItem::filesize(){
+void FileTransferModelItem::setFilesize(long long filesize){
+    d->filesize = filesize;
+}
+
+long long FileTransferModelItem::filesize(){
     return d->filesize;
 }
 
@@ -402,14 +405,16 @@ QVariant FileTransferModel::data(const QModelIndex &index, int role) const
         FileTransferModelItem* item = static_cast<FileTransferModelItem*>(index.internalPointer());
         int col = index.column();
         FileTransferModelItem::Type type = item->type();
+        auto mode = item->mode();
         if(col==Name){
             return item->name();
         }else if(type==FileTransferModelItem::Job && col==FileSize){
             return Utils::readableFilesize(item->filesize());
         }else if((type==FileTransferModelItem::Job || type==FileTransferModelItem::JobGroup) && col==Src){
-            return item->source();
+            return mode==FileTransferModelItem::Upload?item->source():item->destination();
         }else if((type==FileTransferModelItem::Job || type==FileTransferModelItem::JobGroup) && col==Dest){
-            return item->destination();
+            //return item->destination();
+            return mode!=FileTransferModelItem::Upload?item->source():item->destination();
         }else if((type==FileTransferModelItem::Job || type==FileTransferModelItem::JobGroup) && col==Status){
             FileTransferModelItem::State state = item->state();
             if(state==FileTransferModelItem::Doing){
@@ -845,7 +850,9 @@ void FileTransferModel::openProject(long long id,const QString& name,const QStri
 }
 
 void FileTransferModel::addJob(UploadData* data){
-    QMutexLocker locker(&d->mutex);
+    auto json = data->toJson();
+    this->addUploadJob(json);
+    /*QMutexLocker locker(&d->mutex);
     auto proj = d->root->findByProjectId(data->pid);
     if(proj!=nullptr){
         auto site = proj->findBySiteId(data->siteid);
@@ -884,8 +891,108 @@ void FileTransferModel::addJob(UploadData* data){
             endInsertRows();
         }
     }
+    d->cond.wakeAll();*/
+}
+
+void FileTransferModel::addUploadJob(QJsonObject data){
+    QMutexLocker locker(&d->mutex);
+    long long pid = data.find("pid")->toInt(0);
+    long long siteid = data.find("siteid")->toInt();
+    if(pid!=0 && siteid!=0){
+        auto proj = d->root->findByProjectId(pid);
+        if(proj!=nullptr){
+            auto site = proj->findBySiteId(siteid);
+
+            auto index = createIndex(site->row(),0,site);//site modelindex (job parent modelindex)
+            int position = site->childrenCount();
+            QString source = data.find("source")->toString();//absolute path
+            QString destination = data.find("dest")->toString();//absolute path
+            bool is_file = data.find("is_file")->toBool(true);
+            bool matched = false;
+            if(destination.isEmpty()){
+                auto req = NetworkManager::getInstance()->request(siteid);
+                if(req!=nullptr){
+                    const QString projectPath = proj->source() + "/";
+                    const QString remotePath = site->destination();
+                    if(source.startsWith(projectPath)){
+                        QString rSource = source.mid(projectPath.length());
+                        QString rDest = req->matchToPath(rSource,true);
+                        if(rDest.isEmpty()){
+                            return ;
+                        }
+                        destination = remotePath + rDest;
+                    }else if(source==proj->source()){
+                        //upload project folder
+                        destination = remotePath;
+                    }else{
+                        return ;//not match project
+                    }
+                }else{
+                    return;
+                }
+                matched = true;
+            }
+            beginInsertRows(index,position,position);
+            auto item = new FileTransferModelItem(FileTransferModelItem::Upload,is_file,source,destination,site);
+            item->setMatchedPath(matched);
+            site->appendItem(item);
+            endInsertRows();
+
+        }
+    }
     d->cond.wakeAll();
 }
+void FileTransferModel::addDownloadJob(QJsonObject data){
+    QMutexLocker locker(&d->mutex);
+    long long pid = data.find("pid")->toInt(0);
+    long long siteid = data.find("siteid")->toInt();
+    if(pid!=0 && siteid!=0){
+        auto proj = d->root->findByProjectId(pid);
+        if(proj!=nullptr){
+            auto site = proj->findBySiteId(siteid);
+
+            auto index = createIndex(site->row(),0,site);//site modelindex (job parent modelindex)
+            int position = site->childrenCount();
+            QString remote = data.find("remote")->toString();//absolute path
+            QString local = data.find("local")->toString();//absolute path
+            bool is_file = data.find("is_file")->toBool(true);
+            long long filesize = data.find("filesize")->toInt();
+            bool matched = false;
+            if(local.isEmpty()){
+                auto req = NetworkManager::getInstance()->request(siteid);
+                if(req!=nullptr){
+                    const QString projectPath = proj->source() + "/";
+                    const QString remotePath = site->destination();//site remote path
+                    if(remote.startsWith(remotePath)){
+                        QString rRemote = remote.mid(remotePath.length());
+                        QString rLocal = req->matchToPath(rRemote,true);
+                        if(rLocal.isEmpty()){
+                            return ;
+                        }
+                        local = projectPath + rLocal;
+                    }else if(remote==site->destination()){
+                        //download to project folder
+                        local = projectPath;
+                    }else{
+                        return ;//not match project
+                    }
+                }else{
+                    return;
+                }
+                matched = true;
+            }
+            beginInsertRows(index,position,position);
+            auto item = new FileTransferModelItem(FileTransferModelItem::Download,is_file,local,remote,site);
+            item->setFilesize(filesize);
+            qDebug()<<"filesize:"<<filesize;
+            item->setMatchedPath(matched);
+            site->appendItem(item);
+            endInsertRows();
+        }
+    }
+    d->cond.wakeAll();
+}
+
 
 void FileTransferModel::progress(long long siteid,long long id,float progress){
     emit notifyProgress(siteid,id,progress);

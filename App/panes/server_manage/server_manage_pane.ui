@@ -134,6 +134,15 @@
     <string>New Folder</string>
    </property>
   </action>
+  <action name="actionPermissions">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/PageLock_16x.svg</normaloff>:/Resource/icons/PageLock_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Permissions</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../../r.qrc"/>

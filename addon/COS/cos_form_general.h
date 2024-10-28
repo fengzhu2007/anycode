@@ -1,7 +1,7 @@
 #ifndef COSFORMGENERAL_H
 #define COSFORMGENERAL_H
 #include "cos_global.h"
-#include "interface/FormPanel.h"
+#include "interface/form_panel.h"
 
 namespace Ui {
 class COSFormGeneralUI;

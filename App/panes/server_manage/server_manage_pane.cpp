@@ -1,6 +1,8 @@
 #include "server_manage_pane.h"
 #include "ui_server_manage_pane.h"
 #include "docking_pane_manager.h"
+#include "docking_pane_container.h"
+#include "docking_workbench.h""
 #include "docking_pane_layout_item_info.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
@@ -13,9 +15,11 @@
 #include "new_folder_dialog.h"
 #include "w_toast.h"
 #include "components/message_dialog.h"
-
+#include "addon_loader.h"
+#include "server_client_pane.h"
 #include <QMenu>
 #include <QThread>
+#include <QFileDialog>
 #include <QDebug>
 namespace ady{
 
@@ -62,9 +66,10 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
 
     connect(ui->actionRefresh,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
     connect(ui->actionDock_To_Client,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
-    connect(ui->actionOpen,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
+    //connect(ui->actionOpen,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
     connect(ui->actionDownload,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
     connect(ui->actionDownload_To,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
+    connect(ui->actionPermissions,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
     connect(ui->actionRename,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
     connect(ui->actionDelete,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
     connect(ui->actionNew_Folder,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
@@ -143,21 +148,25 @@ void ServerManagePane::onContextMenu(const QPoint& pos){
         ServerManageModelItem::Type type = item->type();
         if(type==ServerManageModelItem::Server || type==ServerManageModelItem::Folder){
             contextMenu.addAction(ui->actionRefresh);
-            contextMenu.addAction(ui->actionDock_To_Client);
+            //contextMenu.addAction(ui->actionDock_To_Client);
             contextMenu.addSeparator();
             contextMenu.addAction(ui->actionNew_Folder);
         }
         if(type==ServerManageModelItem::File){
-            contextMenu.addAction(ui->actionOpen);
+            //contextMenu.addAction(ui->actionOpen);
         }
+        contextMenu.addSeparator();
+        contextMenu.addAction(ui->actionDownload);
+        contextMenu.addAction(ui->actionDownload_To);
+        contextMenu.addSeparator();
+        if(type==ServerManageModelItem::File || type==ServerManageModelItem::Folder){
+            contextMenu.addAction(ui->actionPermissions);
+        }
+        contextMenu.addAction(ui->actionRename);
+        contextMenu.addAction(ui->actionDelete);
+        contextMenu.exec(QCursor::pos());
     }
-    contextMenu.addSeparator();
-    contextMenu.addAction(ui->actionDownload);
-    contextMenu.addAction(ui->actionDownload_To);
-    contextMenu.addSeparator();
-    contextMenu.addAction(ui->actionRename);
-    contextMenu.addAction(ui->actionDelete);
-    contextMenu.exec(QCursor::pos());
+
 }
 
 void ServerManagePane::connectServer(long long id,const QString& path){
@@ -188,6 +197,7 @@ void ServerManagePane::deleteFiles(long long id,const QStringList& list){
         auto thread = new ServerRequestThread(req,ServerRequestThread::Delete,new QStringList(list));
         connect(thread,&ServerRequestThread::finished,thread,&ServerRequestThread::deleteLater);
         connect(thread,&ServerRequestThread::resultReady, this, &ServerManagePane::onNetworkResponse);
+        connect(thread,&ServerRequestThread::message, this, &ServerManagePane::onMessage);
         this->addThread(thread);
         thread->start();
     }
@@ -246,6 +256,8 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
                     model->refreshItems(list,item);
                 }
             }
+
+
         }else{
             if(item!=nullptr){
                 item->setLoading(false);
@@ -284,6 +296,10 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
     }
 }
 
+void ServerManagePane::onMessage(const QString& message,int result){
+    wToast::showText(message);
+}
+
 void ServerManagePane::onTreeItemExpanded(const QModelIndex& index){
     auto item = static_cast<ServerManageModelItem*>(index.internalPointer());
     if(item!=nullptr){
@@ -294,6 +310,7 @@ void ServerManagePane::onTreeItemExpanded(const QModelIndex& index){
                 this->connectServer(item->sid(),item->path());
                 item->setExpanded(true);
                 item->setLoading(true);
+                static_cast<ServerManageModel*>(ui->treeView->model())->changeItem(item);
             }
         }else if(type==ServerManageModelItem::Folder){
             if(item->expanded()==false){
@@ -301,6 +318,7 @@ void ServerManagePane::onTreeItemExpanded(const QModelIndex& index){
                 this->cdDir(sid,item->path());
                 item->setExpanded(true);
                 item->setLoading(true);
+                static_cast<ServerManageModel*>(ui->treeView->model())->changeItem(item);
             }
         }
 
@@ -319,18 +337,102 @@ void ServerManagePane::onActionTriggered(){
         QModelIndex index = model->currentIndex();
         if(index.isValid()){
             auto item = static_cast<ServerManageModelItem*>(index.internalPointer());
-            long long sid = item->sid();
-            item->setLoading(true);
-            this->cdDir(sid,item->path(),true);
+            auto type = item->type();
+            if(type==ServerManageModelItem::Folder || type==ServerManageModelItem::Server){
+                long long sid = item->sid();
+                item->setLoading(true);
+                static_cast<ServerManageModel*>(ui->treeView->model())->changeItem(item);
+                this->cdDir(sid,item->path(),true);
+            }
         }
     }else if(sender==ui->actionDock_To_Client){
+        auto instance = AddonLoader::getInstance();
+        QModelIndex index = model->currentIndex();
+        if(index.isValid()){
+            auto item = static_cast<ServerManageModelItem*>(index.internalPointer());
+            if(instance->load(item->addonType())){
+                long long siteid = item->sid();
+                auto model = static_cast<ServerManageModel*>(ui->treeView->model());
+                auto site = model->find(siteid,false);
+                if(site!=nullptr){
+                    auto workbench = this->container()->workbench();
+                    auto pane = new ServerClientPane(workbench,item->sid());
+                    auto widget = instance->getPanel(siteid,pane,{});
+                    if(widget!=nullptr){
 
+                        pane->setCenterWidget(widget);
+                        pane->setWindowTitle(site->name());
+                        auto manager = workbench->manager();
+                        manager->createPane(pane,DockingPaneManager::Center,true);
+                        return ;
+                    }
+                    pane->close();
+                    pane->deleteLater();
+                }
+            }
+        }
     }else if(sender==ui->actionOpen){
 
     }else if(sender==ui->actionDownload){
-        QModelIndexList list = model->selectedRows();
-
+        QModelIndexList indexlist = model->selectedRows();
+        auto instance = Publisher::getInstance();
+        instance->post(Type::M_OPEN_FILE_TRANSFTER);//open file transfer
+        for(auto one:indexlist){
+            auto item = static_cast<ServerManageModelItem*>(one.internalPointer());
+            auto type = item->type();
+            if(type == ServerManageModelItem::File || type==ServerManageModelItem::Folder || type==ServerManageModelItem::Server){
+                //M_DOWNLOAD
+                auto d = item->data();
+                long long filesize = 0l;
+                if(d!=nullptr){
+                    filesize = d->size;
+                }
+                DownloadData data{item->pid(),item->sid(),filesize,type==ServerManageModelItem::File,item->path(),{}};
+                instance->post(Type::M_DOWNLOAD,&data);
+            }
+        }
     }else if(sender==ui->actionDownload_To){
+        QModelIndexList indexlist = model->selectedRows();
+        QList<DownloadData> list;
+        QStringList stringlist;
+        for(auto one:indexlist){
+            auto item = static_cast<ServerManageModelItem*>(one.internalPointer());
+            auto type = item->type();
+            if(type == ServerManageModelItem::File || type==ServerManageModelItem::Folder || type==ServerManageModelItem::Server){
+                stringlist << item->path();
+
+                auto d = item->data();
+                long long filesize = 0l;
+                if(d!=nullptr){
+                    filesize = d->size;
+                }
+                list.push_back({item->pid(),item->sid(),filesize,type==ServerManageModelItem::File,item->path(),{}});
+            }
+        }
+        if(stringlist.size()>0){
+            const QString local = QFileDialog::getExistingDirectory(this, tr("Select Download To Folder"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+            if(!local.isEmpty()){
+                if(MessageDialog::confirm(this,tr("Are you want to download \n\"%1\" \nfiles to \"%2\"?").arg(stringlist.join("\n")).arg(local))==QMessageBox::Yes){
+                    auto instance = Publisher::getInstance();
+                    instance->post(Type::M_OPEN_FILE_TRANSFTER);//open file transfer
+                    auto iter = list.begin();
+                    while(iter!=list.end()){
+                        QString remote = (*iter).remote;
+                        if((*iter).is_file==false && remote.endsWith("/")){
+                            remote = remote.left(remote.size() - 1);
+                        }
+                        QFileInfo fi(remote);
+                        (*iter).local = local+"/"+fi.fileName();
+
+                        instance->post(Type::M_DOWNLOAD,&(*iter));
+                        iter++;
+                    }
+                }
+            }
+        }
+
+    }else if(sender == ui->actionPermissions){
+
 
     }else if(sender==ui->actionRename){
         QModelIndex index = model->currentIndex();

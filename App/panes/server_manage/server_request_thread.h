@@ -38,18 +38,23 @@ public:
     ~ServerRequestThread();
     void interrupt();
 
+
+
+
+
 protected:
     virtual void run() override;
 
 private:
-    void delFile(const QString& path);
-    void delFolder(const QString& path);
+    bool delFile(const QString& path);
+    void delFolder(const QString& path,int* successTotal,int* errorTotal);
 
 private:
     ServerRequestThreadPrivate* d;
 
 signals:
     void resultReady(NetworkResponse* response,int command,int result=0);
+    void message(const QString& message,int result);
 
 };
 }

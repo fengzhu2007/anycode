@@ -35,6 +35,7 @@ public slots:
     void cdDir(long long id,const QString& path,bool refresh=false);
     void deleteFiles(long long id,const QStringList& list);
     void onNetworkResponse(NetworkResponse* response,int command,int result=0);
+    void onMessage(const QString& message,int result);
     void onTreeItemExpanded(const QModelIndex& index);
     void onTreeItemDClicked(const QModelIndex& index);
     void onActionTriggered();

@@ -58,14 +58,14 @@ public:
         bool ret = false;
         if(d->addons.contains(type)){
             if(d->addons[type].isEmpty()==false){
-                ret = loader->load(d->addons[type]);
+                ret = loader->loadFile(d->addons[type]);
             }else{
                 ret = false;
             }
         }else{
             AddonRecord record = addonStorage.one(type);
             if(record.id>0){
-                ret = loader->load(record.file);
+                ret = loader->loadFile(record.file);
                 d->addons.insert(record.name,record.file);
             }else{
                 d->addons.insert(type,"");

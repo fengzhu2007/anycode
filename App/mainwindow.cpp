@@ -216,7 +216,7 @@ namespace ady {
             while(iter!=sites.end()){
                 QString name = (*iter).type;// type name
                 if(data.contains(name)){
-                    if(loader->load(data[name])){
+                    if(loader->loadFile(data[name])){
                         Panel* panel = loader->getPanel((*iter).id,ui->remoteTabWidget,name);
                         if(panel!=nullptr){
                             panel->setPorjectDir(r.path);

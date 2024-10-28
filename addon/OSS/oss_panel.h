@@ -1,7 +1,7 @@
 #ifndef OSS_PANEL_H
 #define OSS_PANEL_H
 #include "oss_global.h"
-#include "interface/Panel.h"
+#include "interface/panel.h"
 #include "storage/site_storage.h"
 #include <QMutex>
 #include <QMimeData>

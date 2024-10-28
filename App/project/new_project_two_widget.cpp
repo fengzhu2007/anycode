@@ -8,7 +8,7 @@
 #include "SiteGroupListModel.h"
 #include "SiteTypeListModel.h"
 #include "addon_loader.h"
-#include "interface/FormPanel.h"
+#include "interface/form_panel.h"
 #include "components/message_dialog.h"
 #include "w_toast.h"
 #include <QStyleOption>
@@ -137,7 +137,7 @@ void NewProjectTwoWidget::onTypeChanged(int i){
         AddonRecord one = d->addons.at(i);
         QString name = one.name;
         AddonLoader* loader = AddonLoader::getInstance();
-        bool ret = loader->load(one.file);
+        bool ret = loader->loadFile(one.file);
         if(ret){
             int size =loader->getFormPanelSize(name);
             for(int i=0;i<size;i++){

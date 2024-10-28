@@ -1,7 +1,7 @@
 #ifndef OSSFormDirSETTING_H
 #define OSSFormDirSETTING_H
 #include "oss_global.h"
-#include "interface/FormPanel.h"
+#include "interface/form_panel.h"
 namespace Ui{
     class OSSFormDirSettingUi;
 }

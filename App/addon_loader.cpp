@@ -1,8 +1,9 @@
 #include "addon_loader.h"
-#include "interface/Panel.h"
-#include "interface/FormPanel.h"
+#include "interface/panel.h"
+#include "interface/form_panel.h"
 #include "network/network_request.h"
 #include "network/network_manager.h"
+#include "storage/addon_storage.h"
 #include <QStandardPaths>
 #include <QCoreApplication>
 #include <QMessageBox>
@@ -29,7 +30,7 @@ namespace ady {
     }
 
 
-    bool AddonLoader::load(QString file)
+    bool AddonLoader::loadFile(const QString& file)
     {
 
       //QString dir = QCoreApplication::applicationDirPath();
@@ -87,10 +88,26 @@ namespace ady {
         }else{
             return false;
         }
-        return this->load(file);
+        return this->loadFile(file);
     }
 
-    Panel* AddonLoader::getPanel(long long id,QWidget* parent,QString name)
+    bool AddonLoader::load(const QString name){
+        if(m_nameList.contains(name)){
+            return loadFile(m_nameList[name]);
+        }else{
+            //load
+            AddonStorage storage;
+            auto r = storage.one(name);
+            if(r.id>0){
+                m_nameList.insert(r.name,r.file);
+                return loadFile(r.file);
+            }else{
+                return false;
+            }
+        }
+    }
+
+    Panel* AddonLoader::getPanel(long long id,QWidget* parent,const QString& name)
     {
         if(this->m_current==nullptr){
             return nullptr;
@@ -104,7 +121,7 @@ namespace ady {
     }
 
 
-    size_t AddonLoader::getFormPanelSize(QString name)
+    size_t AddonLoader::getFormPanelSize(const QString& name)
     {
         if(this->m_current==nullptr){
             return 0;
@@ -117,7 +134,7 @@ namespace ady {
         }
     }
 
-    FormPanel* AddonLoader::getFormPanel(QWidget* parent,QString name,size_t n)
+    FormPanel* AddonLoader::getFormPanel(QWidget* parent,const QString& name,size_t n)
     {
         if(this->m_current==nullptr){
             return nullptr;

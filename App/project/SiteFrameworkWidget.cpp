@@ -3,7 +3,7 @@
 #include "SiteGroupListModel.h"
 #include "SiteTypeListModel.h"
 #include "../addon_loader.h"
-#include "interface/FormPanel.h"
+#include "interface/form_panel.h"
 #include "ManagerWindow.h"
 #include "ManagerTreeModel.h"
 #include "ManagerTreeItem.h"
@@ -207,7 +207,7 @@ namespace ady {
         panels.clear();
 
         AddonLoader* loader = AddonLoader::getInstance();
-        bool ret = loader->load(r.file);
+        bool ret = loader->loadFile(r.file);
         if(ret){
             int size =loader->getFormPanelSize(name);
             for(int i=0;i<size;i++){
@@ -289,7 +289,7 @@ namespace ady {
 
             SiteTypeListModel* model = static_cast<SiteTypeListModel*>(ui->typeComboBox->model());
             AddonRecord r = model->dataIndex(ui->typeComboBox->currentIndex());
-            bool ret = loader->load(r.file);
+            bool ret = loader->loadFile(r.file);
             if(ret){
                 int result = loader->requestConnect(&this->record);
                 if(result==0){

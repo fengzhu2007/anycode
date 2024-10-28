@@ -1,0 +1,16 @@
+windows:
+编译顺序，主要参考依赖项:
+1、openssl  
+    编译：下载perl环境 http://strawberryperl.com
+    解压后管理员打开本地VS2019开发人员命令提示，切换到openssl源代码目录下，输入执行以下命令。
+    perl Configure VC-WIN32  no-asm --prefix=D:\Qt\AnyDeployQ\third_party\openssl-1.1.1l\build
+    perl需要添加到系统环境变量中，否则报错No such file or directory
+    openssl 1.1.0版本以后就不再有ms\do_*.bat这样的文件，而是直接使用nmake命令。
+    执行命令：
+    nmake
+    nmake install
+    nmake test
+
+2、zlib
+3、libssh2
+4、curl 依赖openssl libssh2 zlib

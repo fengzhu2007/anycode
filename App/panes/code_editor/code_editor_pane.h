@@ -14,6 +14,12 @@ class ANYENGINE_EXPORT CodeEditorPane : public DockingPane
 {
     Q_OBJECT
 public:
+    enum FileState{
+        None=0,
+        Deleted=1,
+        Changed=2
+    };
+
     explicit CodeEditorPane(QWidget *parent = nullptr);
     virtual ~CodeEditorPane();
     virtual QString id() override;
@@ -32,10 +38,24 @@ public:
     //CodeEditor* editor();
     CodeEditorView* editor();
 
+    int fileState();
+    void setFileState(int state);
+    void invokeFileState();
+
+    bool isModification();
+
+    void reload();
+
+
+
     static CodeEditorPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 
 public slots:
     void onModificationChanged(bool changed);
+
+protected:
+    virtual void showEvent(QShowEvent* e) override;
+
 
 public:
     static const QString PANE_ID;

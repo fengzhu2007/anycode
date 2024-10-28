@@ -20,11 +20,13 @@ namespace ady {
             SFTP
         };
         static AddonLoader* getInstance();
-        bool load(QString file);
+        bool loadFile(const QString& file);
         bool load(AddonName name);
-        Panel* getPanel(long long id,QWidget* parent,QString name);
-        size_t getFormPanelSize(QString name);
-        FormPanel* getFormPanel(QWidget* parent,QString name,size_t n);
+        bool load(const QString name);
+
+        Panel* getPanel(long long id,QWidget* parent,const QString& name);
+        size_t getFormPanelSize(const QString& name);
+        FormPanel* getFormPanel(QWidget* parent,const QString& name,size_t n);
         int requestConnect(void* ptr);
         NetworkRequest* initRequest(long long id);
         static void destory();
@@ -36,6 +38,7 @@ namespace ady {
 
     protected:
         QMap<QString,QLibrary*> m_loadLists;
+        QMap<QString,QString> m_nameList;
         QLibrary* m_current;
 
     };
