@@ -56,6 +56,6 @@ def build_library(source_dir, arch):
     
     
 if __name__ == "__main__":
-    for platform in ["win32","x64"]:
+    for platform in ["x64"]:
         for library in ["curl"]:
             build_library(library, platform)

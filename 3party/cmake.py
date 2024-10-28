@@ -16,7 +16,7 @@ def configure(source_dir, build_dir, bin_dir, arch):
     print("Configure:"+source_dir)
     cmake(
         "-G%s" % generators[arch],
-        "-A %s"% arch,
+        "-A%s"% arch,
         "-B%s" % build_dir,
         "-DCMAKE_INSTALL_PREFIX=%s" % bin_dir,
         "-Wno-dev",
