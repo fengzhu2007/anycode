@@ -165,5 +165,9 @@
         <file>Resource/icons/CloudRefresh_16x.svg</file>
         <file>Resource/icons/CloudStagingRefresh_16x.svg</file>
         <file>Resource/icons/PageLock_16x.svg</file>
+        <file>Resource/icons/ListView_16x.svg</file>
+        <file>Resource/icons/ShowGrid_16x.svg</file>
+        <file>Resource/icons/TransferUpload_16x.svg</file>
+        <file>Resource/icons/TransferDownload_16x.svg</file>
     </qresource>
 </RCC>

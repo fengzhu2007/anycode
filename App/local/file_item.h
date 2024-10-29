@@ -10,7 +10,8 @@ namespace ady {
         enum Type{
             Unkown=0,
             File=1,
-            Dir=2
+            Dir=2,
+            Folder=Dir
         };
 
 

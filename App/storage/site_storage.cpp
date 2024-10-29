@@ -4,6 +4,11 @@
 #include <QSqlQuery>
 #include <QDebug>
 namespace ady {
+
+QMap<long long,SiteRecord> SiteStorage::data;
+
+
+
 constexpr const  char SiteStorage::TABLE_NAME[] ;
 constexpr const  char SiteStorage::COL_NAME[];
 constexpr const  char SiteStorage::COL_HOST[];
@@ -22,7 +27,12 @@ SiteStorage::SiteStorage(){
 
 }
 
-SiteRecord SiteStorage::one(long long id){
+SiteRecord SiteStorage::one(long long id,bool igoreCache){
+    if(igoreCache==false){
+        if(SiteStorage::data.contains(id)){
+            return SiteStorage::data[id];
+        }
+    }
     SiteRecord record;
     QString sql = QString("SELECT * FROM [%1] WHERE [%2]=?").arg(TABLE_NAME).arg(DatabaseHelper::COL_ID);
     QSqlQuery query(DatabaseHelper::getDatabase()->get());
@@ -32,6 +42,7 @@ SiteRecord SiteStorage::one(long long id){
     this->error = query.lastError();
     if(ret && query.next()){
         record = toRecord(query);
+        SiteStorage::data.insert(record.id,record);
     }else{
         record.id = 0l;
     }
@@ -111,6 +122,7 @@ bool SiteStorage::update(SiteRecord record)
     query.bindValue(12,record.id);
     bool ret = query.exec();
     this->error = query.lastError();
+    SiteStorage::data.remove(record.id);
     return ret;
 }
 
@@ -155,11 +167,16 @@ bool SiteStorage::del(long long id)
     query.bindValue(0,id);
     bool ret = query.exec();
     this->error = query.lastError();
+    SiteStorage::data.remove(id);//remove cache
     return ret;
 }
 
 bool SiteStorage::del_list(long long pid)
 {
+    auto list = this->list(pid);
+    for(auto one:list){
+        SiteStorage::data.remove(one.id);//remove cache
+    }
     QString sql = QString("DELETE FROM [%1] WHERE [%2]=?").arg(TABLE_NAME).arg(COL_PID);
     QSqlQuery query(DatabaseHelper::getDatabase()->get());
     query.prepare(sql);

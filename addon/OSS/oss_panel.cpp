@@ -8,7 +8,7 @@
 #include <QMenu>
 #include <QCursor>
 #include <QLabel>
-#include "interface/RemoteFileItemModel.h"
+#include "interface/remote_file_item_model.h"
 #include "interface/NewFileDialog.h"
 #include "components/message_dialog.h"
 #include "components/Notification.h"

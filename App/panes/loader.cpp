@@ -7,6 +7,7 @@
 #include "panes/file_transfer/file_transfer_pane.h"
 #include "panes/find_replace/find_replace_pane.h"
 #include "panes/server_manage/server_manage_pane.h"
+#include "panes/server_manage/server_client_pane.h"
 
 namespace ady{
 
@@ -24,6 +25,8 @@ DockingPane* PaneLoader::init(DockingPaneManager* dockingManager,const QString& 
         pane = FindReplacePane::make(dockingManager,data);
     }else if(group == ServerManagePane::PANE_GROUP){
         pane = ServerManagePane::make(dockingManager,data);
+    }else if(group == ServerClientPane::PANE_GROUP){
+        pane = ServerClientPane::make(dockingManager,data);
     }
     return pane;
 }

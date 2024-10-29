@@ -51,11 +51,13 @@ PermissionDialog::PermissionDialog(int mode,QWidget* parent):
     if((c&x)==x){
         ui->permission9Checkbox->setChecked(true);
     }
+
+    this->resetupUi();
 }
 
 
 PermissionDialog::~PermissionDialog(){
-    delete d;
+    //delete d;
     delete ui;
 }
 
@@ -100,9 +102,68 @@ bool PermissionDialog::applyChildren()
     return ui->applyChildrenCheckbox->isChecked();
 }
 
+void PermissionDialog::setFileInfo(const QString& file,int count){
+    if(count>1){
+        ui->fileLabel->setText(tr("File/Folder:%1;%2 files, etc").arg(file).arg(count));
+    }else{
+        ui->fileLabel->setText(tr("File/Folder:%1").arg(file));
+    }
+}
+
 void PermissionDialog::onOK()
 {
     this->accept();
+}
+
+
+
+
+int PermissionDialog::format(const QString& permission)
+{
+    int a=0,b=0,c=0;
+    int r=4,w=2,x=1;
+    if(permission.isEmpty()==false){
+        if(permission[0]=='0'){
+            int index = 1;
+            if(permission.size()==5){
+                index++;
+            }
+            a = permission.mid(index++,1).toInt();
+            b = permission.mid(index++,1).toInt();
+            c = permission.mid(index++,1).toInt();
+            //qDebug()<<"format a:"<<a<<";b:"<<b<<";c:"<<c;
+        }else if(permission[0]=='d'||permission[0]=='-'||permission[0]=='l'){
+            if(permission[1]=='r'){
+                a |= r;
+            }
+            if(permission[2]=='w'){
+                a |= w;
+            }
+            if(permission[3]=='x'){
+                a |= x;
+            }
+            if(permission[4]=='r'){
+                b |= r;
+            }
+            if(permission[5]=='w'){
+                b |= w;
+            }
+            if(permission[6]=='x'){
+                b |= x;
+            }
+            if(permission[7]=='r'){
+                c |= r;
+            }
+            if(permission[8]=='w'){
+                c |= w;
+            }
+            if(permission[9]=='x'){
+                c |= x;
+            }
+        }
+    }
+    int mode = a*100 + b*10 + c;
+    return mode;
 }
 
 }

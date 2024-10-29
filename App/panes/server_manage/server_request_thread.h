@@ -11,6 +11,12 @@ struct RenameData{
     QString parent;
 };
 
+struct ChmodData{
+    int mode;
+    bool apply_children;
+    QStringList list;
+};
+
 
 class ServerRequestThreadPrivate;
 class ServerRequestThread : public QThread
@@ -36,7 +42,7 @@ public:
 
     ServerRequestThread(NetworkRequest* request,int command,void* data=nullptr,QObject *parent = nullptr);
     ~ServerRequestThread();
-    void interrupt();
+    //void interrupt();
 
 
 
@@ -48,6 +54,8 @@ protected:
 private:
     bool delFile(const QString& path);
     void delFolder(const QString& path,int* successTotal,int* errorTotal);
+    int chmodFile(const QString& path,int);
+    void chmodFolder(const QString& path,int mode,bool apply_children,int* successTotal,int* errorTotal);
 
 private:
     ServerRequestThreadPrivate* d;

@@ -1,5 +1,5 @@
-#ifndef REMOTEFILEITEMMODEL_H
-#define REMOTEFILEITEMMODEL_H
+#ifndef REMOTE_FILE_ITEM_MODEL_H
+#define REMOTE_FILE_ITEM_MODEL_H
 #include "../global.h"
 #include "local/file_item.h"
 #include <QAbstractTableModel>
@@ -35,13 +35,13 @@ namespace ady {
 
 
 
-        void updateAll(QList<FileItem> data);
+        void updateAll(const QList<FileItem>& data);
         void removeItem(FileItem item);
         void insertItem(int index,FileItem);
         void updateItem(int index,FileItem);
         FileItem getItem(int row);
 
-        void setList(QList<FileItem> data);
+        void setList(QList<FileItem>& data);
         //void sort(Column col,bool asc);
 
 
@@ -60,4 +60,4 @@ namespace ady {
     };
 
 }
-#endif // REMOTEFILEITEMMODEL_H
+#endif // REMOTE_FILE_ITEM_MODEL_H

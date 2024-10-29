@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>95</height>
+    <height>108</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,8 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Please enter a folder name</string>
+      <string>Current Folder:%1
+Please enter a new folder name.</string>
      </property>
     </widget>
    </item>

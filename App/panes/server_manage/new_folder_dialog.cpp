@@ -22,6 +22,8 @@ NewFolderDialog::NewFolderDialog(long long id,const QString& path,QWidget* paren
     connect(ui->ok,&QPushButton::clicked,this,&NewFolderDialog::onOk);
     connect(ui->cancel,&QPushButton::clicked,this,&NewFolderDialog::close);
     this->resetupUi();
+
+    ui->label->setText(ui->label->text().arg(d->path));
 }
 
 NewFolderDialog::~NewFolderDialog(){

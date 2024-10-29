@@ -7,7 +7,7 @@ public:
     NetworkRequest* req;
     int cmd;
     void* data;
-    bool interrupt = false;
+    //bool interrupt = false;
 };
 
 ServerRequestThread::ServerRequestThread(NetworkRequest* request,int command,void* data,QObject *parent)
@@ -23,9 +23,9 @@ ServerRequestThread::~ServerRequestThread(){
     delete d;
 }
 
-void ServerRequestThread::interrupt(){
+/*void ServerRequestThread::interrupt(){
     d->interrupt = true;
-}
+}*/
 
 void ServerRequestThread::run(){
     NetworkResponse* response = nullptr;
@@ -75,6 +75,7 @@ void ServerRequestThread::run(){
         for(auto one:*list){
              if(response!=nullptr){
                  delete response;
+                 response = nullptr;
              }
              QString path;
              if(one.endsWith("/")){
@@ -98,8 +99,11 @@ void ServerRequestThread::run(){
              if(parent.isEmpty() || parent.contains(path)){
                  parent = path;
              }
-             if(d->interrupt){
-                 goto interrupt;
+             if(this->isInterruptionRequested()){
+                 //goto interrupt;
+                 delete list;
+                 emit resultReady(response,d->cmd,Interrupt);
+                 return ;
              }
         }
 
@@ -113,16 +117,38 @@ void ServerRequestThread::run(){
         }
         //refresh parent
     }else if(d->cmd==Chmod){
+        auto data = static_cast<ChmodData*>(d->data);
+        int successTotal = 0;
+        int errorTotal = 0;
+        for(auto one:data->list){
+            if(one.endsWith("/")){
+                 //folder
+                 this->chmodFolder(one,data->mode,data->apply_children,&successTotal,&errorTotal);
 
+                 if(successTotal==-1){
+                     result = Unsppport;
+                     break;
+                 }
+            }else{
+                 int ret = this->chmodFile(one,data->mode);
+                 if(ret==-1){
+                    result = Unsppport;
+                    break;
+                 }else if(ret==1){
+                    successTotal += 1;
+                 }else{
+                    errorTotal += 1;
+                 }
+            }
+        }
+        if(errorTotal>0){
+            emit message(tr("%1 files and directories permission changed successfully, %2 files and directories permission changed failed.").arg(successTotal).arg(errorTotal),Failed);
+            result = Failed;
+        }
+        delete data;
     }else if(d->cmd==Unlink){
         response = d->req->unlink();
     }
-
-interrupt:
-    if(d->interrupt){
-        result = Interrupt;
-    }
-
     emit resultReady(response,d->cmd,result);
 }
 
@@ -141,7 +167,7 @@ void ServerRequestThread::delFolder(const QString& path,int* successTotal,int* e
     auto list = response->parseList();
     delete response;
     for(auto one:list){
-        if(d->interrupt){
+        if(this->isInterruptionRequested()){
             return ;
         }
         if(one.type==FileItem::File){
@@ -164,6 +190,54 @@ void ServerRequestThread::delFolder(const QString& path,int* successTotal,int* e
     }
     response->debug();
     delete response;
+}
+
+int ServerRequestThread::chmodFile(const QString& path,int mode){
+    auto response = d->req->chmod(path,mode);
+    if(response==nullptr){
+        return -1;
+    }
+    int ret = 0;
+    if(response->status()){
+        ret = 1;
+    }
+    delete response;
+    return ret;
+}
+void ServerRequestThread::chmodFolder(const QString& path,int mode,bool apply_children,int* successTotal,int* errorTotal){
+    auto response = d->req->chmod(path,mode);
+    if(response==nullptr){
+        *successTotal = *errorTotal = -1;
+        return ;
+    }
+    if(response->status()){
+        *successTotal += 1;
+    }else{
+        *errorTotal += 1;
+    }
+    //response->debug();
+    delete response;
+    if(apply_children){
+         response = d->req->tinyListDir(path);
+        auto list = response->parseList();
+        delete response;
+        for(auto one:list){
+            if(this->isInterruptionRequested()){
+                return ;
+            }
+            if(one.type==FileItem::File){
+                int ret = this->chmodFile(one.path,mode);
+                if(ret==1){
+                     *successTotal += 1;
+                }else{
+                     *errorTotal += 1;
+                }
+            }else{
+                //folder
+                this->chmodFolder(one.path,mode,apply_children,successTotal,errorTotal);
+            }
+        }
+    }
 }
 
 }

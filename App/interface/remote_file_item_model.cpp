@@ -1,4 +1,4 @@
-#include "RemoteFileItemModel.h"
+#include "remote_file_item_model.h"
 #include <QDir>
 #include <QDebug>
 #include <QFile>
@@ -238,7 +238,7 @@ int RemoteFileItemModel::columnCount(const QModelIndex &parent) const
 }*/
 
 
-void RemoteFileItemModel::updateAll(QList<FileItem> data)
+void RemoteFileItemModel::updateAll(const QList<FileItem>& data)
 {
     QMutexLocker locker(&mutex);
 }
@@ -264,10 +264,9 @@ FileItem RemoteFileItemModel::getItem(int row)
     return m_data.at(row);
 }
 
-void RemoteFileItemModel::setList(QList<FileItem> data)
+void RemoteFileItemModel::setList(QList<FileItem>& data)
 {
     QMutexLocker locker(&mutex);
-
     beginResetModel();
     if(data.size()>0){
         QList<FileItem>::iterator iter = data.begin();

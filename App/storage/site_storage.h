@@ -46,7 +46,7 @@ namespace ady {
         constexpr const static char COL_SETTINGS[] = "settings";
 
         SiteStorage();
-        SiteRecord one(long long id);
+        SiteRecord one(long long id,bool igoreCache=false);
         QList<SiteRecord> all();
         QList<SiteRecord> list(long long pid);
         QList<SiteRecord> list(long long pid,int status);
@@ -56,6 +56,12 @@ namespace ady {
         bool del_list(long long pid);
     private:
         SiteRecord toRecord(QSqlQuery& query);
+
+
+    private:
+        static QMap<long long,SiteRecord> data;
+
+
 
     };
 }

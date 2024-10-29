@@ -21,12 +21,14 @@ public:
     ~PermissionDialog();
     int mode();
     bool applyChildren();
+    void setFileInfo(const QString& file,int count=1);
+    static int format(const QString& permission);
 
 public slots:
     void onOK();
 
 private:
-    PermissionDialogPrivate* d;
+    //PermissionDialogPrivate* d;
     Ui::PermissionDialog* ui;
 };
 

@@ -2,7 +2,7 @@
 #include "ui_server_manage_pane.h"
 #include "docking_pane_manager.h"
 #include "docking_pane_container.h"
-#include "docking_workbench.h""
+#include "docking_workbench.h"
 #include "docking_pane_layout_item_info.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
@@ -13,9 +13,9 @@
 #include "network/network_manager.h"
 #include "server_request_thread.h"
 #include "new_folder_dialog.h"
+#include "permission_dialog.h"
 #include "w_toast.h"
 #include "components/message_dialog.h"
-#include "addon_loader.h"
 #include "server_client_pane.h"
 #include <QMenu>
 #include <QThread>
@@ -82,7 +82,8 @@ ServerManagePane::~ServerManagePane()
 {
     Subscriber::unReg();
     for(auto one:d->list){
-        one->interrupt();
+        //one->interrupt();
+        one->requestInterruption();
         one->quit();
         //one->wait();
     }
@@ -148,7 +149,7 @@ void ServerManagePane::onContextMenu(const QPoint& pos){
         ServerManageModelItem::Type type = item->type();
         if(type==ServerManageModelItem::Server || type==ServerManageModelItem::Folder){
             contextMenu.addAction(ui->actionRefresh);
-            //contextMenu.addAction(ui->actionDock_To_Client);
+            contextMenu.addAction(ui->actionDock_To_Client);
             contextMenu.addSeparator();
             contextMenu.addAction(ui->actionNew_Folder);
         }
@@ -220,8 +221,10 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
         }else{
             if(item!=nullptr){
                 item->setLoading(false);
+                model->changeItem(item);
             }
             wToast::showText(response->errorMsg);
+
         }
     }else if(command==ServerRequestThread::List){
         auto dir = response->params["dir"].toString();
@@ -236,6 +239,7 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
         }else{
             if(item!=nullptr){
                 item->setLoading(false);
+                model->changeItem(item);
             }
             wToast::showText(response->errorMsg);
         }
@@ -261,6 +265,7 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
         }else{
             if(item!=nullptr){
                 item->setLoading(false);
+                model->changeItem(item);
             }
             wToast::showText(response->errorMsg);
         }
@@ -281,13 +286,20 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
                 model->refreshItems(list,item);
             }
             if(result==ServerRequestThread::Unsppport){
-                wToast::showText(tr("This operation is not supported"));
+                wToast::showText(tr("This operation is not supported."));
             }
         }else{
             if(item!=nullptr){
                 item->setLoading(false);
+                model->changeItem(item);
             }
             wToast::showText(response->errorMsg);
+        }
+    }else if(command==ServerRequestThread::Chmod){
+        if(result==ServerRequestThread::Unsppport){
+            wToast::showText(tr("This operation is not supported."));
+        }else if(result==ServerRequestThread::Success){
+            wToast::showText(tr("Permission changed successfully."));
         }
     }
     //response->debug();
@@ -330,9 +342,9 @@ void ServerManagePane::onTreeItemDClicked(const QModelIndex& index){
 }
 
 void ServerManagePane::onActionTriggered(){
+
     QObject* sender = this->sender();
     auto model = ui->treeView->selectionModel();
-
     if(sender==ui->actionRefresh){
         QModelIndex index = model->currentIndex();
         if(index.isValid()){
@@ -346,30 +358,20 @@ void ServerManagePane::onActionTriggered(){
             }
         }
     }else if(sender==ui->actionDock_To_Client){
-        auto instance = AddonLoader::getInstance();
         QModelIndex index = model->currentIndex();
         if(index.isValid()){
             auto item = static_cast<ServerManageModelItem*>(index.internalPointer());
-            if(instance->load(item->addonType())){
-                long long siteid = item->sid();
-                auto model = static_cast<ServerManageModel*>(ui->treeView->model());
-                auto site = model->find(siteid,false);
-                if(site!=nullptr){
-                    auto workbench = this->container()->workbench();
-                    auto pane = new ServerClientPane(workbench,item->sid());
-                    auto widget = instance->getPanel(siteid,pane,{});
-                    if(widget!=nullptr){
+            long long siteid = item->sid();
+            auto model = static_cast<ServerManageModel*>(ui->treeView->model());
+            auto site = model->find(siteid,false);
+            auto workbench = this->container()->workbench();
+            auto pane = new ServerClientPane(workbench,item->sid());
+            pane->setWindowTitle(site->name());
+            auto manager = workbench->manager();
+            manager->createPane(pane,DockingPaneManager::Center,true);
+            pane->setRootPath(site->path());
+            pane->setCurrentPath(item->path(),true);
 
-                        pane->setCenterWidget(widget);
-                        pane->setWindowTitle(site->name());
-                        auto manager = workbench->manager();
-                        manager->createPane(pane,DockingPaneManager::Center,true);
-                        return ;
-                    }
-                    pane->close();
-                    pane->deleteLater();
-                }
-            }
         }
     }else if(sender==ui->actionOpen){
 
@@ -433,7 +435,34 @@ void ServerManagePane::onActionTriggered(){
 
     }else if(sender == ui->actionPermissions){
 
+        QModelIndexList indexlist = model->selectedRows();
+        int size = 0;
+        int mode = -1;
+        QString filename;
+        for(auto one:indexlist){
+            auto item = static_cast<ServerManageModelItem*>(one.internalPointer());
 
+            auto type = item->type();
+            if(type==ServerManageModelItem::File || type==ServerManageModelItem::Folder){
+                size += 1;
+                if(filename.isEmpty()){
+                    filename = item->name();
+                    mode = PermissionDialog::format(item->data()->permission);
+                }
+            }
+        }
+        if(mode<0){
+            mode = 0;
+        }
+        if(size>0){
+            auto dialog = new PermissionDialog(size==1?mode:0,this);
+            dialog->setFileInfo(filename,size);
+            dialog->setModal(true);
+            if(dialog->exec()==QDialog::Accepted){
+                this->chmod(dialog->mode(),dialog->applyChildren());
+                delete dialog;
+            }
+        }
     }else if(sender==ui->actionRename){
         QModelIndex index = model->currentIndex();
         auto item = static_cast<ServerManageModelItem*>(index.internalPointer());
@@ -500,6 +529,39 @@ void ServerManagePane::onRename(ServerManageModelItem* item,const QString& newNa
          this->addThread(thread);
          thread->start();
     }
+}
+
+
+void ServerManagePane::chmod(int mode,bool apply_children){
+    auto indexlist = ui->treeView->selectionModel()->selectedRows();
+    QMap<long long,ChmodData*> data;
+    for(auto one:indexlist){
+         auto item = static_cast<ServerManageModelItem*>(one.internalPointer());
+         auto type = item->type();
+         if(type==ServerManageModelItem::File||type==ServerManageModelItem::Folder){
+            long long sid = item->sid();
+            if(!data.contains(sid)){
+                data.insert(sid,new ChmodData{mode,apply_children});
+            }
+            data[sid]->list << item->path();
+         }
+    }
+
+    QMap<long long,ChmodData*>::iterator iter = data.begin();
+    while(iter!=data.end()){
+         auto id = iter.key();
+         auto req = NetworkManager::getInstance()->request(id);
+         if(req!=nullptr){
+            auto thread = new ServerRequestThread(req,ServerRequestThread::Chmod,iter.value());
+            connect(thread,&ServerRequestThread::finished,thread,&ServerRequestThread::deleteLater);
+            connect(thread,&ServerRequestThread::resultReady, this, &ServerManagePane::onNetworkResponse);
+            connect(thread,&ServerRequestThread::message, this, &ServerManagePane::onMessage);
+            this->addThread(thread);
+            thread->start();
+         }
+         iter++;
+    }
+
 }
 
 void ServerManagePane::onThreadFinished(){

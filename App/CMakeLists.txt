@@ -98,7 +98,7 @@ add_library(App SHARED
         interface/NewFileDialog.cpp
         interface/NotificationImpl.cpp
         interface/panel.cpp interface/panel.cpp
-        interface/RemoteFileItemModel.cpp
+        interface/remote_file_item_model.h interface/remote_file_item_model.cpp
         local/file_item.h local/file_item.cpp
         local/FileItemModel.cpp
         localdirpanel.cpp
@@ -215,8 +215,9 @@ add_library(App SHARED
         panes/startup/startup_pane.h panes/startup/startup_pane.cpp
         panes/startup/startup_pane.ui
         panes/file_transfer/job_thread.h panes/file_transfer/job_thread.cpp
-        panes/server_manage/server_client_pane.h panes/server_manage/server_client_pane.cpp
+        panes/server_manage/server_client_pane.ui panes/server_manage/server_client_pane.h panes/server_manage/server_client_pane.cpp
         panes/server_manage/permission_dialog.ui panes/server_manage/permission_dialog.h panes/server_manage/permission_dialog.cpp
+
 
 
 

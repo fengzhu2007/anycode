@@ -265,14 +265,12 @@ FileTransferModel* FileTransferModel::instance = nullptr;
 
 class FileTransferModelPrivate{
 public:
-    FileTransferModelPrivate():projectIcon(QString::fromUtf8(":/Resource/icons/DocumentsFolder_16x.svg")),serverIcon(":/Resource/icons/RemoteServer_16x.svg"){}
+    FileTransferModelPrivate():projectIcon(QString::fromUtf8(":/Resource/icons/DocumentsFolder_16x.svg")),serverIcon(":/Resource/icons/RemoteServer_16x.svg"),uploadIcon(":/Resource/icons/TransferUpload_16x.svg"),downloadIcon(":/Resource/icons/TransferDownload_16x.svg"){}
     FileTransferModelItem* root = nullptr;
     QIcon projectIcon;
     QIcon serverIcon;
-    QIcon downloadFolderIcon;
-    QIcon uploadFolderIcon;
-    QIcon downloadFileIcon;
-    QIcon uploadFileIcon;
+    QIcon uploadIcon;
+    QIcon downloadIcon;
     QMutex mutex;
     QWaitCondition cond;
     QList<JobThread*> threads;
@@ -436,6 +434,18 @@ QVariant FileTransferModel::data(const QModelIndex &index, int role) const
                 return d->provider->icon(QFileIconProvider::File);
             }else if(type==FileTransferModelItem::JobGroup){
                 return d->provider->icon(QFileIconProvider::Folder);
+            }
+        }else if(index.column() == Src){
+            FileTransferModelItem* item = static_cast<FileTransferModelItem*>(index.internalPointer());
+            //DownloadFolder
+            FileTransferModelItem::Type type = item->type();
+            if(type==FileTransferModelItem::Job || type==FileTransferModelItem::JobGroup){
+                auto mode = item->mode();
+                if(mode==FileTransferModelItem::Upload){
+                    return d->uploadIcon;
+                }else{
+                    return d->downloadIcon;
+                }
             }
         }else{
             return QVariant();
