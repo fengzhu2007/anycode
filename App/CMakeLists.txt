@@ -33,34 +33,12 @@ find_library(GIT2_LIB git2 PATHS "../3party/bin/x64/lib")
 #find_library(QCINTILLA_LIB qscintilla2_qt5 PATHS "../3party/qscintilla")
 
 
-set(FORMS
-    components/NotificationItem.ui
-    interface/NewFileDialog.ui
-    localdirpanel.ui
-    mainwindow.ui
-    modules/addon/AddonManageWindow.ui
-    modules/favorite/AddDialog.ui
-    modules/favorite/ManageDialog.ui
-    modules/help/aboutdialog.ui
-    modules/help/donationdialog.ui
-    modules/log/LogViewer.ui
-    project/ManagerWindow.ui
-    project/open_project_window.ui
-    project/ProjectEditWidget.ui
-    project/SiteFrameworkWidget.ui
-    project/splitterhandlewidgetui.ui
-    view/StatusBarView.ui
-    dockwindow.ui
-)
-
-qt5_wrap_ui(FORMS_HEADERS ${FORMS})
 
 set(RESOURCES
     r.qrc
 )
 
 qt5_add_resources(RESOURCE_ADDED ${RESOURCES})
-
 
 
 set(SOURCES
@@ -74,9 +52,12 @@ if(WIN32)
 endif()
 
 add_library(App SHARED
-        ${FORMS_HEADERS}
         ${RESOURCE_ADDED}
         ${SOURCES}
+
+
+
+
         addon_loader.h addon_loader.cpp
         components/DirComboBox.cpp
         components/DirMappingView.cpp
@@ -241,8 +222,7 @@ set(TRANSLATIONS
 
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}.dll        ${CMAKE_BINARY_DIR}/src/${PROJECT_NAME}.dll
-    #COMMAND ${CMAKE_COMMAND} -E copy        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/language.zh_CN.qm        ${CMAKE_BINARY_DIR}/src/langs/${PROJECT_NAME}.zh_CN.qm
+    COMMAND ${CMAKE_COMMAND} -E copy        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.dll        ${CMAKE_BINARY_DIR}/src/${PROJECT_NAME}.dll
     COMMENT "Copying file to binary directory"
 )
 
