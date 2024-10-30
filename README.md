@@ -21,7 +21,7 @@ python build_all.py
 ```
 build_openssl_x64.bat
 ```
-#### 编译 curl
+#### 编译 curl 选择7.88; 8.x以上依赖库（zlib,openssl,libssh）需要更新更高版本
 ```
 python build_curl.py
 ```
@@ -33,7 +33,14 @@ build_subversion_x64.bat
 ```
 
 使用Qt Creator 打开项目（根目录CMakeLists.txt文件）
-由于项目是使用CMake管理。所以需要将Qt框架下的CMake 加入到环境变量PATH中。最好从PATH中删除其他版本的CMake(Strawberry Perl安装也有CMake)
+由于项目是使用CMake管理。所以需要将Qt框架下的CMake和Ninja 加入到环境变量PATH中。最好从PATH中删除其他版本的CMake(Strawberry Perl安装也有CMake)
+Ninja必须使用Qt自带的，否则会有问题；并且如果不加入环境变量CMake可能会生成VS项目文件进行编译，会有问题。  
+Qt Creator  编译生成之后将Qt 依赖库和插件库（iconengines，imageformats，platforms，sqldrivers）复制到 anycode.exe目录下；并且将第三方编译生成的动态链接库（3party\bin\x64\bin）也复制到相同目录中。
+
+
+
+
+## 参考网站
 
 https://www.freedesktop.org/wiki/Software/uchardet/  
 
