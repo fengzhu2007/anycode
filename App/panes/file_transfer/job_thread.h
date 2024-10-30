@@ -4,7 +4,7 @@
 #include <QThread>
 #include <QList>
 #include <QFileInfo>
-#include "local/file_item.h"
+#include "interface/file_item.h"
 namespace ady{
 class FileTransferModelItem;
 class FileTransferModel;

@@ -1,8 +1,8 @@
 #ifndef SITE_STORAGE_H
 #define SITE_STORAGE_H
 #include <QString>
-#include "SiteSetting.h"
-#include "Storage.h"
+#include "site_setting.h"
+#include "storage.h"
 #include "global.h"
 class QSqlQuery;
 namespace ady {

@@ -203,7 +203,7 @@
   <customwidget>
    <class>ady::TreeView</class>
    <extends>QTreeView</extends>
-   <header>components/treeview.h</header>
+   <header>components/tree_view.h</header>
   </customwidget>
   <customwidget>
    <class>wProgressBar</class>

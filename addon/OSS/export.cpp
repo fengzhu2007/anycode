@@ -1,5 +1,4 @@
 #include "export.h"
-#include "oss_panel.h"
 #include "oss_form_general.h"
 #include "oss_form_dir_setting.h"
 #include "network/network_manager.h"
@@ -7,12 +6,6 @@
 #include "storage/site_storage.h"
 #include "oss_response.h"
 #include <QDebug>
-ady::Panel* getPanel(long long id,QWidget* parent,QString name)
-{
-    Q_UNUSED(name);
-    return new ady::OSSPanel(id,parent);
-}
-
 
 size_t getFormPanelSize(QString name)
 {

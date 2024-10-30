@@ -1,5 +1,4 @@
 #include "export.h"
-#include "ftp_panel.h"
 #include "ftp_form_general.h"
 #include "ftp_form_dir_setting.h"
 #include "network/network_manager.h"
@@ -8,12 +7,6 @@
 #include "ftp_response.h"
 
 #include <QDebug>
-ady::Panel* getPanel(long long id,QWidget* parent,QString name)
-{
-    Q_UNUSED(name);
-    return new ady::FTPPanel(id,parent);
-}
-
 
 size_t getFormPanelSize(QString name)
 {

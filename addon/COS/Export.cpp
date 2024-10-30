@@ -1,5 +1,4 @@
 #include "export.h"
-#include "cos_panel.h"
 #include "cos_form_general.h"
 #include "cos_form_dir_setting.h"
 #include "network/network_manager.h"
@@ -9,11 +8,6 @@
 #include "cos_response.h"
 
 #include <QDebug>
-ady::Panel* getPanel(long long id,QWidget* parent,QString name)
-{
-    Q_UNUSED(name);
-    return new ady::COSPanel(id,parent);
-}
 
 
 size_t getFormPanelSize(QString name)

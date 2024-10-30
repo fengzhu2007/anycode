@@ -5,7 +5,7 @@
 #include <QWaitCondition>
 #include <QMutex>
 #include <QVariant>
-#include "local/file_item.h"
+#include "interface/file_item.h"
 namespace ady {
     class SFTP;
     class NetworkResponse;

@@ -2,7 +2,7 @@
 #define NETWORK_RESPONSE_H
 #include "global.h"
 #include <QString>
-#include "local/file_item.h"
+#include "interface/file_item.h"
 #include <QList>
 #include <QMap>
 #include <QVariant>

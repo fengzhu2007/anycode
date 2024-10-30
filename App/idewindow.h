@@ -51,9 +51,10 @@ namespace ady{
         CodeEditorPane* currentEditorPane();
         void restoreFromSettings();
         void restoreDockpanes();
-        DockingPaneLayoutItemInfo* restoreDockContainers(QJsonArray& list,int orientation,DockingPaneLayoutItemInfo* parentInfo);
-        DockingPaneLayoutItemInfo* restoreDockTabs(QJsonArray& tabs,DockingPaneLayoutItemInfo* parentInfo,int orientation,int client=0);
         void restoreProjects();
+
+        void restoreContainers(QJsonArray& list,int orientation,DockingPaneLayoutItemInfo* parent);
+        int restoreTabs(QJsonArray& list,DockingPaneLayoutItemInfo* info);
 
     private:
         Ui::IDEWindow *ui;

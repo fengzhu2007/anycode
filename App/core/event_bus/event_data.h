@@ -2,11 +2,15 @@
 #define EVENT_DATA_H
 
 #include "global.h"
+#include "interface/file_item.h"
+
 #include <QString>
 #include <QList>
 #include <QMap>
 #include <QPair>
 #include <QJsonObject>
+#include <QJsonArray>
+
 namespace ady{
 
 struct ANYENGINE_EXPORT UploadData{
@@ -80,6 +84,23 @@ struct ANYENGINE_EXPORT CloseProjectData{
         return {
             {"id",id},
             {"path",path}
+        };
+    }
+};
+
+struct ANYENGINE_EXPORT ServerRefreshData{
+    long long id;
+    QString path;
+    QList<FileItem> list;
+    QJsonObject toJson(){
+        QJsonArray array;
+        for(auto one:list){
+            array << one.toJson();
+        }
+        return {
+            {"id",id},
+            {"path",path},
+            {"list",array},
         };
     }
 };

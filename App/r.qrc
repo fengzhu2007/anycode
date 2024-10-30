@@ -1,104 +1,4 @@
 <RCC>
-    <qresource prefix="/img">
-        <file>Resource/18_FileNew_16.png</file>
-        <file>Resource/18_FileNew_32.png</file>
-        <file>Resource/23_FileOpen_16.png</file>
-        <file>Resource/23_FileOpen_32.png</file>
-        <file>Resource/137_Add_16.png</file>
-        <file>Resource/137_Add_32.png</file>
-        <file>Resource/228_RecorderStopVisio_16.png</file>
-        <file>Resource/228_RecorderStopVisio_32.png</file>
-        <file>Resource/478_Delete_16.png</file>
-        <file>Resource/478_Delete_32.png</file>
-        <file>Resource/923_PrintPreviewClose_16.png</file>
-        <file>Resource/923_PrintPreviewClose_32.png</file>
-        <file>Resource/927_About_16.png</file>
-        <file>Resource/927_About_32.png</file>
-        <file>Resource/1021_Favorites_16.png</file>
-        <file>Resource/1021_Favorites_32.png</file>
-        <file>Resource/1698_SubscriberOptions_16.png</file>
-        <file>Resource/1698_SubscriberOptions_32.png</file>
-        <file>Resource/2137_TasksUnlink_16.png</file>
-        <file>Resource/2137_TasksUnlink_32.png</file>
-        <file>Resource/2169_TasksLink_16.png</file>
-        <file>Resource/2169_TasksLink_32.png</file>
-        <file>Resource/3945_Web_16.png</file>
-        <file>Resource/3945_Web_32.png</file>
-        <file>Resource/13205_SmartArtAddShapeBefore_16.png</file>
-        <file>Resource/13205_SmartArtAddShapeBefore_32.png</file>
-        <file>Resource/15501_Remove_16.png</file>
-        <file>Resource/15501_Remove_32.png</file>
-        <file>Resource/15796_Edit_16.png</file>
-        <file>Resource/15796_Edit_32.png</file>
-        <file>Resource/19523_DeliverableCreate_16.png</file>
-        <file>Resource/19523_DeliverableCreate_32.png</file>
-        <file>Resource/20056_GroupCompareProjectsCompare_16.png</file>
-        <file>Resource/20056_GroupCompareProjectsCompare_32.png</file>
-        <file>Resource/20216_FileDiscardCachedChanges_16.png</file>
-        <file>Resource/20216_FileDiscardCachedChanges_32.png</file>
-        <file>Resource/20696_Project_16.png</file>
-        <file>Resource/20696_Project_32.png</file>
-        <file>Resource/24848_PlayVideo_16.png</file>
-        <file>Resource/24848_PlayVideo_32.png</file>
-        <file>Resource/26040_ReplaceClientWithServerVersionVisibleByContext_16.png</file>
-        <file>Resource/26040_ReplaceClientWithServerVersionVisibleByContext_32.png</file>
-        <file>Resource/26115_RefreshEngagements_16.png</file>
-        <file>Resource/26115_RefreshEngagements_32.png</file>
-        <file>Resource/27784_InsertClosedCaption_16.png</file>
-        <file>Resource/27784_InsertClosedCaption_32.png</file>
-        <file>Resource/27785_RemoveClosedCaption_16.png</file>
-        <file>Resource/27785_RemoveClosedCaption_32.png</file>
-        <file>Resource/33163_Subversion_16.png</file>
-        <file>Resource/33163_Subversion_32.png</file>
-        <file>Resource/33379_PauseGif_16.png</file>
-        <file>Resource/33379_PauseGif_32.png</file>
-        <file>Resource/92399_Stop_16.png</file>
-        <file>Resource/92399_Stop_32.png</file>
-        <file>Resource/all_packages.png</file>
-        <file>Resource/anycode.png</file>
-        <file>Resource/ftp_16.png</file>
-        <file>Resource/ftp_32.png</file>
-        <file>Resource/go.png</file>
-        <file>Resource/icons.xrc</file>
-        <file>Resource/installed_pkgs.png</file>
-        <file>Resource/oss_16.png</file>
-        <file>Resource/oss_32.png</file>
-        <file>Resource/package_16.png</file>
-        <file>Resource/package_32.png</file>
-        <file>Resource/package_add.png</file>
-        <file>Resource/package_delete.png</file>
-        <file>Resource/package_upgradeable.png</file>
-        <file>Resource/16803_SmartArtReorderUp_16.png</file>
-        <file>Resource/16803_SmartArtReorderUp_32.png</file>
-        <file>Resource/16804_SmartArtReorderDown_16.png</file>
-        <file>Resource/16804_SmartArtReorderDown_32.png</file>
-        <file>Resource/info-circle.svg</file>
-        <file>Resource/close.svg</file>
-        <file>Resource/close-hover.svg</file>
-        <file>Resource/error-circle.svg</file>
-        <file>Resource/success-circle.svg</file>
-        <file>Resource/warning-circle.svg</file>
-        <file>Resource/cvs_file_addition.svg</file>
-        <file>Resource/cvs_file_change.svg</file>
-        <file>Resource/cvs_file_deletion.svg</file>
-        <file>Resource/2293_IndexMarkEntry_16.png</file>
-        <file>Resource/2293_IndexMarkEntry_32.png</file>
-        <file>Resource/183_TableFind_16.png</file>
-        <file>Resource/183_TableFind_32.png</file>
-        <file>Resource/140_FileFind_16.png</file>
-        <file>Resource/140_FileFind_32.png</file>
-        <file>Resource/net_status_error.png</file>
-        <file>Resource/net_status_ok.png</file>
-        <file>Resource/flag_dev.svg</file>
-        <file>Resource/flag_other.svg</file>
-        <file>Resource/flag_prod.svg</file>
-        <file>Resource/minus.svg</file>
-        <file>Resource/plus.svg</file>
-        <file>Resource/logo.png</file>
-        <file>Resource/clear_16.png</file>
-        <file>Resource/clear_32.png</file>
-        <file>Resource/alipay.jpg</file>
-    </qresource>
     <qresource prefix="/">
         <file>Resource/icons/OpenFile_16x.svg</file>
         <file>Resource/icons/OpenProject_16x.svg</file>
@@ -169,5 +69,10 @@
         <file>Resource/icons/ShowGrid_16x.svg</file>
         <file>Resource/icons/TransferUpload_16x.svg</file>
         <file>Resource/icons/TransferDownload_16x.svg</file>
+        <file>Resource/icons/cvs_file_change.svg</file>
+        <file>Resource/icons/cvs_file_addition.svg</file>
+        <file>Resource/icons/cvs_file_deletion.svg</file>
+        <file>Resource/icons/plus.svg</file>
+        <file>Resource/icons/minus.svg</file>
     </qresource>
 </RCC>

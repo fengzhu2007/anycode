@@ -1,6 +1,6 @@
 #ifndef COSSETTING_H
 #define COSSETTING_H
-#include "storage/SiteSetting.h"
+#include "storage/site_setting.h"
 
 namespace ady {
 

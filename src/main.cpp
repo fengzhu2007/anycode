@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QTranslator>
 #include <QDateTime>
-#include "mainwindow.h"
+//#include "mainwindow.h"
 //#include "dockwindow.h"
 #include "idewindow.h"
 #include <QDebug>

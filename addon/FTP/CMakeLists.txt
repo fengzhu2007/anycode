@@ -20,11 +20,8 @@ include_directories(SYSTEM "../../3party/bin/x64/include")
 
 
 set(FORMS
-    chmod_dialog.ui
     ftp_form_dir_setting.ui
     ftp_form_general.ui
-    ftp_panel.ui
-
 )
 
 qt5_wrap_ui(FORMS_HEADERS ${FORMS})
@@ -35,15 +32,12 @@ add_library(FTP SHARED
     ${FORMS_HEADERS}
 
     ftp_global.h
-    chmod_dialog.h chmod_dialog.cpp
     export.h export.cpp
     ftp_form_dir_setting.h ftp_form_dir_setting.cpp
     ftp_form_general.h ftp_form_general.cpp
-    ftp_panel.h ftp_panel.cpp
     ftp_parse.h ftp_parse.cpp
     ftp_response.h ftp_response.cpp
     ftp_setting.h ftp_setting_key.h ftp_setting.cpp
-    ftp_worker.h ftp_worker.cpp
     ftp.h ftp.cpp
 )
 
@@ -54,7 +48,7 @@ target_compile_definitions(FTP PRIVATE FTP_LIBRARY)
 
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy  ${CMAKE_BINARY_DIR}/addon/${PROJECT_NAME}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.dll ${CMAKE_BINARY_DIR}/src/addon/${PROJECT_NAME}/${PROJECT_NAME}.dll
+    COMMAND ${CMAKE_COMMAND} -E copy  ${CMAKE_BINARY_DIR}/addon/${PROJECT_NAME}/${PROJECT_NAME}.dll ${CMAKE_BINARY_DIR}/src/addon/${PROJECT_NAME}/${PROJECT_NAME}.dll
     #COMMAND ${CMAKE_COMMAND} -E copy  ${CMAKE_BINARY_DIR}/addon/${PROJECT_NAME}/language.zh_CN.qm  ${CMAKE_BINARY_DIR}/src/addon/${PROJECT_NAME}/language.zh_CN.qm
     COMMENT "Copying file to binary directory"
 )

@@ -29,6 +29,11 @@ const QString Type::M_OPEN_FIND = "OpenFind";
 
 const QString Type::M_GOTO = "Goto";
 
+const QString Type::M_NOTIFY_REFRESH_TREE = "NotifyRefreshTree";
+const QString Type::M_NOTIFY_REFRESH_LIST = "NotifyRefreshList";
+
+
+
 Type::Type()
 {
 

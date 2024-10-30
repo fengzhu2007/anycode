@@ -1,6 +1,6 @@
 #ifndef COMMIT_STORAGE_H
 #define COMMIT_STORAGE_H
-#include "Storage.h"
+#include "storage.h"
 #include <QDateTime>
 #include "cvs/commit.h"
 namespace ady {

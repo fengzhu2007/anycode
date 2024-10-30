@@ -117,6 +117,7 @@ VersionControlPane::VersionControlPane(QWidget *parent)
 
 
 VersionControlPane::~VersionControlPane(){
+    Subscriber::unReg();
     instance = nullptr;
     delete d;
     delete ui;

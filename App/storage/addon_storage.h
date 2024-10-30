@@ -3,7 +3,7 @@
 #include <QString>
 #include <QSqlQuery>
 #include <QMap>
-#include "Storage.h"
+#include "storage.h"
 #include "global.h"
 namespace ady {
     class ANYENGINE_EXPORT AddonRecord{

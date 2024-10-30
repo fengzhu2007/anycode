@@ -36,8 +36,12 @@ public:
     static const QString M_FIND;
 
     static const QString M_OPEN_FIND;
-
     static const QString M_GOTO;
+
+
+    //server manager
+    static const QString M_NOTIFY_REFRESH_TREE;
+    static const QString M_NOTIFY_REFRESH_LIST;
 };
 }
 

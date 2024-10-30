@@ -1,5 +1,4 @@
 #include "export.h"
-#include "sftp_panel.h"
 #include "sftp_form_general.h"
 #include "sftp_form_dir_setting.h"
 #include "network/network_manager.h"
@@ -8,11 +7,6 @@
 #include "sftp_response.h"
 
 #include <QDebug>
-ady::Panel* getPanel(long long id,QWidget* parent,QString name)
-{
-    Q_UNUSED(name);
-    return new ady::SFTPPanel(id,parent);
-}
 
 
 size_t getFormPanelSize(QString name)

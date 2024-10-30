@@ -1,7 +1,6 @@
 #ifndef OSSEXPORT_H
 #define OSSEXPORT_H
 #include "oss_global.h"
-#include "interface/panel.h"
 #include "interface/form_panel.h"
 #include "network/network_request.h"
 
@@ -9,7 +8,6 @@
 extern "C" {
 #endif
 
-OSS_EXPORT ady::Panel* getPanel(long long id,QWidget* parent,QString name);
 OSS_EXPORT size_t getFormPanelSize(QString);
 OSS_EXPORT ady::FormPanel* getFormPanel(QWidget* parent,QString,size_t n);
 OSS_EXPORT ady::NetworkRequest* getRequest(QString name);

@@ -2,7 +2,7 @@
 #define FILETRANSFERMODEL_H
 #include "global.h"
 #include "core/event_bus/event_data.h"
-#include "local/file_item.h"
+#include "interface/file_item.h"
 #include <QAbstractItemModel>
 #include <QFile>
 #include <QFileInfo>

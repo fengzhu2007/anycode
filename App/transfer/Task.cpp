@@ -1,4 +1,4 @@
-#include "Task.h"
+#include "task.h"
 #include "panes/file_transfer/file_transfer_model.h"
 #include <QDebug>
 namespace ady {

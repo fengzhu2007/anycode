@@ -1,6 +1,6 @@
 #ifndef SFTPSETTING_H
 #define SFTPSETTING_H
-#include "storage/SiteSetting.h"
+#include "storage/site_setting.h"
 
 namespace ady {
 

@@ -1,7 +1,6 @@
 #ifndef COSEXPORT_H
 #define COSEXPORT_H
 #include "cos_global.h"
-#include "interface/panel.h"
 #include "interface/form_panel.h"
 #include "network/network_request.h"
 
@@ -10,7 +9,6 @@
 extern "C" {
 #endif
 
-COS_EXPORT ady::Panel* getPanel(long long id,QWidget* parent,QString name);
 COS_EXPORT size_t getFormPanelSize(QString);
 COS_EXPORT ady::FormPanel* getFormPanel(QWidget* parent,QString,size_t n);
 COS_EXPORT ady::NetworkRequest* getRequest(QString name);

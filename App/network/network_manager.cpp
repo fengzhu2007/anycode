@@ -1,5 +1,5 @@
 #include "network_manager.h"
-#include "transfer/Task.h"
+#include "transfer/task.h"
 #include "network_response.h"
 #include "addon_loader.h"
 #include "storage/addon_storage.h"

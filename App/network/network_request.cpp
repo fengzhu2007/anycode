@@ -1,7 +1,7 @@
 #include "network_request.h"
 #include "network_response.h"
 #include <QString>
-#include "transfer/Task.h"
+#include "transfer/task.h"
 //#include "transfer/TaskPoolModel.h"
 #include "panes/file_transfer/file_transfer_model.h"
 #include <QDebug>

@@ -2,7 +2,7 @@
 #define GROUP_STORAGE_H
 #include <QString>
 #include <QSqlQuery>
-#include "Storage.h"
+#include "storage.h"
 #include "global.h"
 
 namespace ady {

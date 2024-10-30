@@ -1,6 +1,6 @@
 #include "job_thread.h"
 #include "file_transfer_model.h"
-#include "transfer/Task.h"
+#include "transfer/task.h"
 #include "network/network_manager.h"
 #include "network/network_response.h"
 

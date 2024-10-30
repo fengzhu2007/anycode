@@ -4,7 +4,6 @@
 #include <QMap>
 #include <QLibrary>
 namespace ady {
-    class Panel;
     class FormPanel;
     class NetworkRequest;
     class AddonLoader
@@ -24,7 +23,6 @@ namespace ady {
         bool load(AddonName name);
         bool load(const QString name);
 
-        Panel* getPanel(long long id,QWidget* parent,const QString& name);
         size_t getFormPanelSize(const QString& name);
         FormPanel* getFormPanel(QWidget* parent,const QString& name,size_t n);
         int requestConnect(void* ptr);

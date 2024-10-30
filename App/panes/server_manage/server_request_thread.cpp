@@ -61,6 +61,7 @@ void ServerRequestThread::run(){
         auto data = static_cast<RenameData*>(d->data);
         response = d->req->rename(data->src,data->dest);
         if(response!=nullptr){
+            response->debug();
              delete response;
         }else{
              result = Unsppport;
@@ -120,7 +121,9 @@ void ServerRequestThread::run(){
         auto data = static_cast<ChmodData*>(d->data);
         int successTotal = 0;
         int errorTotal = 0;
+        QString parent;
         for(auto one:data->list){
+            QString path;
             if(one.endsWith("/")){
                  //folder
                  this->chmodFolder(one,data->mode,data->apply_children,&successTotal,&errorTotal);
@@ -129,6 +132,7 @@ void ServerRequestThread::run(){
                      result = Unsppport;
                      break;
                  }
+                 path = one.left(one.size() - 1);
             }else{
                  int ret = this->chmodFile(one,data->mode);
                  if(ret==-1){
@@ -139,6 +143,17 @@ void ServerRequestThread::run(){
                  }else{
                     errorTotal += 1;
                  }
+                 path = one;
+            }
+            path = path.left(path.lastIndexOf("/")+1);
+            if(parent.isEmpty() || parent.contains(path)){
+                parent = path;
+            }
+            if(this->isInterruptionRequested()){
+                //goto interrupt;
+                delete data;
+                emit resultReady(response,d->cmd,Interrupt);
+                return ;
             }
         }
         if(errorTotal>0){
@@ -146,6 +161,10 @@ void ServerRequestThread::run(){
             result = Failed;
         }
         delete data;
+        if(!parent.isEmpty()){
+            delete response;
+            response = d->req->listDir(parent);
+        }
     }else if(d->cmd==Unlink){
         response = d->req->unlink();
     }

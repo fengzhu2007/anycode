@@ -956,49 +956,69 @@ void FileTransferModel::addDownloadJob(QJsonObject data){
     QMutexLocker locker(&d->mutex);
     long long pid = data.find("pid")->toInt(0);
     long long siteid = data.find("siteid")->toInt();
-    if(pid!=0 && siteid!=0){
-        auto proj = d->root->findByProjectId(pid);
-        if(proj!=nullptr){
-            auto site = proj->findBySiteId(siteid);
+    if(siteid!=0){
 
-            auto index = createIndex(site->row(),0,site);//site modelindex (job parent modelindex)
-            int position = site->childrenCount();
-            QString remote = data.find("remote")->toString();//absolute path
-            QString local = data.find("local")->toString();//absolute path
-            bool is_file = data.find("is_file")->toBool(true);
-            long long filesize = data.find("filesize")->toInt();
-            bool matched = false;
-            if(local.isEmpty()){
-                auto req = NetworkManager::getInstance()->request(siteid);
-                if(req!=nullptr){
-                    const QString projectPath = proj->source() + "/";
-                    const QString remotePath = site->destination();//site remote path
-                    if(remote.startsWith(remotePath)){
-                        QString rRemote = remote.mid(remotePath.length());
-                        QString rLocal = req->matchToPath(rRemote,true);
-                        if(rLocal.isEmpty()){
-                            return ;
-                        }
-                        local = projectPath + rLocal;
-                    }else if(remote==site->destination()){
-                        //download to project folder
-                        local = projectPath;
-                    }else{
-                        return ;//not match project
-                    }
-                }else{
-                    return;
-                }
-                matched = true;
+        FileTransferModelItem* proj = nullptr;
+        FileTransferModelItem* site = nullptr;
+        if(pid!=0){
+            proj = d->root->findByProjectId(pid);
+            if(proj!=nullptr){
+                site = proj->findBySiteId(siteid);
             }
-            beginInsertRows(index,position,position);
-            auto item = new FileTransferModelItem(FileTransferModelItem::Download,is_file,local,remote,site);
-            item->setFilesize(filesize);
-            qDebug()<<"filesize:"<<filesize;
-            item->setMatchedPath(matched);
-            site->appendItem(item);
-            endInsertRows();
+        }else{
+            site = d->root->findBySiteId(siteid);
+            auto parent = site->parent();
+            if(parent->type()==FileTransferModelItem::Project){
+                proj = parent;
+            }
         }
+
+        if(site==nullptr){
+            return ;
+        }
+
+        auto index = createIndex(site->row(),0,site);//site modelindex (job parent modelindex)
+        int position = site->childrenCount();
+        QString remote = data.find("remote")->toString();//absolute path
+        QString local = data.find("local")->toString();//absolute path
+        bool is_file = data.find("is_file")->toBool(true);
+        long long filesize = data.find("filesize")->toInt();
+        bool matched = false;
+        if(local.isEmpty()){
+            //if not set local folder ,it will try donwload to project folder
+            if(proj==nullptr){
+                return ;
+            }
+            auto req = NetworkManager::getInstance()->request(siteid);
+            if(req!=nullptr){
+                const QString projectPath = proj->source() + "/";
+                const QString remotePath = site->destination();//site remote path
+                if(remote.startsWith(remotePath)){
+                    QString rRemote = remote.mid(remotePath.length());
+                    QString rLocal = req->matchToPath(rRemote,true);
+                    if(rLocal.isEmpty()){
+                        return ;
+                    }
+                    local = projectPath + rLocal;
+                }else if(remote==site->destination()){
+                    //download to project folder
+                    local = projectPath;
+                }else{
+                    return ;//not match project
+                }
+            }else{
+                return;
+            }
+            matched = true;
+        }
+        beginInsertRows(index,position,position);
+        auto item = new FileTransferModelItem(FileTransferModelItem::Download,is_file,local,remote,site);
+        item->setFilesize(filesize);
+        item->setMatchedPath(matched);
+        site->appendItem(item);
+        endInsertRows();
+
+
     }
     d->cond.wakeAll();
 }

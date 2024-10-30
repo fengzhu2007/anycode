@@ -50,6 +50,7 @@ public slots:
 private:
     ServerManagePane(QWidget *parent = nullptr);
     void chmod(int mode,bool apply_children);
+    void refresh(ServerManageModelItem* item);
 
 public:
     static const QString PANE_ID;

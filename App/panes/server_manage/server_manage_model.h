@@ -1,7 +1,7 @@
 #ifndef SERVERMANAGEMODEL_H
 #define SERVERMANAGEMODEL_H
 #include "global.h"
-#include "local/file_item.h"
+#include "interface/file_item.h"
 #include <QAbstractItemModel>
 
 namespace ady{

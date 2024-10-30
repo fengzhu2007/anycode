@@ -1,7 +1,6 @@
 #ifndef SFTPEXPORT_H
 #define SFTPEXPORT_H
 #include "sftp_global.h"
-#include "interface/panel.h"
 #include "interface/form_panel.h"
 #include "network/network_request.h"
 
@@ -10,7 +9,6 @@
 extern "C" {
 #endif
 
-SFTP_EXPORT ady::Panel* getPanel(long long id,QWidget* parent,QString name);
 SFTP_EXPORT size_t getFormPanelSize(QString);
 SFTP_EXPORT ady::FormPanel* getFormPanel(QWidget* parent,QString,size_t n);
 SFTP_EXPORT ady::NetworkRequest* getRequest(QString name);

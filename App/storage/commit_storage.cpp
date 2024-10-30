@@ -1,5 +1,5 @@
 #include "commit_storage.h"
-#include "DatabaseHelper.h"
+#include "database_helper.h"
 #include <QVariant>
 #include <QDebug>
 namespace ady {

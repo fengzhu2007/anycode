@@ -3,7 +3,6 @@
 #include "network/network_manager.h"
 #include "network/network_request.h"
 #include "network/network_response.h"
-#include "interface/panel.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/type.h"
@@ -11,6 +10,7 @@
 #include "storage/site_storage.h"
 #include "docking_pane_manager.h"
 #include "interface/remote_file_item_model.h"
+#include "components/message_dialog.h"
 #include "server_request_thread.h"
 #include "new_folder_dialog.h"
 #include "permission_dialog.h"
@@ -49,7 +49,7 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
     SiteStorage storage;
     auto r = storage.one(id);
 
-    this->regMessageIds({Type::M_UPLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY});
+    this->regMessageIds({Type::M_UPLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY,Type::M_NOTIFY_REFRESH_LIST});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -62,6 +62,7 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
 
     d = new ServerClientPanePrivate;
     d->id = id;
+    d->type = r.type;
 
 
     ui->treeView->header()->setSortIndicator(0,Qt::AscendingOrder);
@@ -134,9 +135,31 @@ QString ServerClientPane::group(){
 
 
 bool ServerClientPane::onReceive(Event* e){
-
+    if(e->id()==Type::M_NOTIFY_REFRESH_LIST){
+        auto data = e->toJsonOf<ServerRefreshData>().toObject();
+        long long id = data.find("id")->toInt(0);
+        const QString path = data.find("path")->toString();
+        if(id==d->id && path == d->currentPath){
+            //this->reload();
+            auto array = data.find("list")->toArray();
+            QList<FileItem> list;
+            for(auto one:array){
+                list<<FileItem::fromJson(one.toObject());
+            }
+            auto model = static_cast<RemoteFileItemModel*>(ui->treeView->model());
+            FileItem item;
+            item.type = FileItem::Dir;
+            item.name = "..";
+            item.path = path.mid(0,path.lastIndexOf("/",-2) + 1);
+            if(path==d->rootPath){
+                item.enabled = false;
+            }
+            list.insert(0,item);
+            model->setList(list);
+            return true;
+        }
+    }
     return false;
-
 }
 
 QJsonObject ServerClientPane::toJson(){
@@ -275,13 +298,17 @@ void ServerClientPane::deleteFiles(long long id,const QStringList& list){
 }
 
 void ServerClientPane::onNetworkResponse(NetworkResponse* response,int command,int result){
-    //qDebug()<<"commend:"<<command<<result;
+    if(result==ServerRequestThread::Unsppport){
+        wToast::showText(tr("This operation is not supported"));
+        return ;
+    }
     auto model = static_cast<RemoteFileItemModel*>(ui->treeView->model());
     if(command==ServerRequestThread::Link || command==ServerRequestThread::List || command==ServerRequestThread::Refresh || command==ServerRequestThread::NewFolder || command==ServerRequestThread::Delete){
         if(response->status()){
             //list default dir
             auto list = response->parseList();
             auto dir = response->params["dir"].toString();
+            ServerRefreshData data{d->id,dir,list};//
 
             FileItem item;
             item.type = FileItem::Dir;
@@ -295,15 +322,12 @@ void ServerClientPane::onNetworkResponse(NetworkResponse* response,int command,i
             model->setList(list);
             ui->lineEdit->setText(dir);
             d->currentPath = dir;
+
+            Publisher::getInstance()->post(Type::M_NOTIFY_REFRESH_TREE,&data);
         }else{
             wToast::showText(response->errorMsg);
         }
-    }else if(command==ServerRequestThread::Rename){
-        if(result==ServerRequestThread::Unsppport){
-            wToast::showText(tr("This operation is not supported"));
-            return ;
-        }
-
+    }else if(command==ServerRequestThread::Rename || command==ServerRequestThread::Chmod){
         if(response->status()){
             //list default dir
             auto list = response->parseList();
@@ -320,20 +344,13 @@ void ServerClientPane::onNetworkResponse(NetworkResponse* response,int command,i
             model->setList(list);
             ui->lineEdit->setText(dir);
             d->currentPath = dir;
+
+            ServerRefreshData data{d->id,d->currentPath};
+            Publisher::getInstance()->post(Type::M_NOTIFY_REFRESH_TREE,&data);
+
         }else{
             wToast::showText(response->errorMsg);
         }
-    }else if(command==ServerRequestThread::Rename){
-        if(result==ServerRequestThread::Unsppport){
-            wToast::showText(tr("This operation is not supported"));
-            return ;
-        }else{
-            QTimer::singleShot(50,[this]{
-                this->reload();
-            });
-        }
-    }else if(command==ServerRequestThread::Chmod){
-
     }
     if(response!=nullptr){
         delete response;
@@ -434,9 +451,34 @@ void ServerClientPane::onActionTriggered(){
     }else if(sender==ui->actionListView){
 
     }else if(sender==ui->actionDelete){
-
+        QModelIndexList indexlist = model->selectedRows();
+        QMap<long long,QStringList> data;
+        auto m = static_cast<RemoteFileItemModel*>(ui->treeView->model());
+        QStringList list;
+        for(auto one:indexlist){
+            auto item = m->getItem(one.row());
+            if(item.name!=".."){
+                list<<item.path;
+            }
+        }
+        if(list.size()>0){
+            if(MessageDialog::confirm(this,tr("Are you sure you want to delete the selected file?"))==QMessageBox::Yes){
+                this->deleteFiles(d->id,list);
+            }
+        }
     }else if(sender==ui->actionDownload){
-
+        QModelIndexList indexlist = model->selectedRows();
+        auto instance = Publisher::getInstance();
+        instance->post(Type::M_OPEN_FILE_TRANSFTER);//open file transfer
+        auto m = static_cast<RemoteFileItemModel*>(ui->treeView->model());
+        for(auto one:indexlist){
+            auto item = m->getItem(one.row());
+            if(item.type==FileItem::File || item.type==FileItem::Folder){
+                long long filesize = item.size;
+                DownloadData data{0,d->id,filesize,item.type==FileItem::File,item.path,{}};
+                instance->post(Type::M_DOWNLOAD,&data);
+            }
+        }
     }else if(sender==ui->actionPermissions){
         QModelIndexList indexlist = model->selectedRows();
         int size = 0;
@@ -525,6 +567,9 @@ void ServerClientPane::onRename(const QModelIndex index,const QString& newName){
         int offset = parent.lastIndexOf("/");
         if(offset>-1){
             parent = parent.left(offset);
+        }
+        if(!parent.endsWith("/")){
+            parent += "/";
         }
         const QString dest = parent + newName;
         auto data = new RenameData{item.type,src,dest,parent};

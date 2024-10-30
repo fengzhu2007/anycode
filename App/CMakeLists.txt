@@ -33,6 +33,9 @@ find_library(GIT2_LIB git2 PATHS "../3party/bin/x64/lib")
 #find_library(QCINTILLA_LIB qscintilla2_qt5 PATHS "../3party/qscintilla")
 
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DQ_DEBUG)
+endif()
 
 set(RESOURCES
     r.qrc
@@ -56,16 +59,12 @@ add_library(App SHARED
         ${SOURCES}
 
 
-
-
         addon_loader.h addon_loader.cpp
-        components/DirComboBox.cpp
-        components/DirMappingView.cpp
-        components/IconWidget.cpp
-        components/message_dialog.cpp
-        components/Notification.cpp
-        components/TreeView.cpp
-        core/des.cpp
+        components/message_dialog.h components/message_dialog.cpp
+        components/tree_view.h components/tree_view.cpp
+        components/statusbar/status_bar_view.h  components/statusbar/status_bar_view.cpp components/statusbar/status_bar_view.ui
+        components/dir_mapping_view.h components/dir_mapping_view.cpp
+        core/des.h core/des.cpp
         cvs/branch.h cvs/branch.cpp
         cvs/commit.h cvs/commit.cpp
         cvs/commit_model.h cvs/commit_model.cpp
@@ -76,62 +75,42 @@ add_library(App SHARED
         cvs/git/git_repository.h cvs/git/git_repository.cpp
         cvs/svn/svn_repository.h cvs/svn/svn_repository.cpp
         interface/form_panel.h interface/form_panel.cpp
-        interface/NewFileDialog.cpp
-        interface/NotificationImpl.cpp
-        interface/panel.cpp interface/panel.cpp
+
         interface/remote_file_item_model.h interface/remote_file_item_model.cpp
-        local/file_item.h local/file_item.cpp
-        local/FileItemModel.cpp
-        localdirpanel.cpp
-        mainwindow.cpp
-        modules/addon/AddonManageWindow.cpp
-        modules/addon/AddonModel.cpp
-        modules/export/DataExport.cpp
-        modules/favorite/AddDialog.cpp
-        modules/favorite/FavoriteItemModel.cpp
-        modules/favorite/ManageDialog.cpp
-        modules/help/AboutDialog.cpp
-        modules/help/DonationDialog.cpp
-        modules/import/DataImport.cpp
-        modules/log/Log.cpp
-        modules/log/LogViewer.cpp
+        interface/file_item.h interface/file_item.cpp
+
+
+
         network/network_listen.h network/network_listen.cpp
         network/network_manager.h network/network_manager.cpp
         network/network_request.h network/network_request.cpp
         network/network_response.h network/network_response.cpp
         network/http/http_client.h network/http/http_client.cpp
         network/http/http_response.h network/http/http_response.cpp
-        project/ManagerTreeItem.cpp
-        project/ManagerTreeModel.cpp
-        project/ManagerWindow.cpp
+
         project/open_project_window.cpp
-        project/ProjectEditWidget.cpp
-        project/ProjectListModel.cpp
-        project/SiteFrameworkWidget.cpp
-        project/SiteGroupListModel.cpp
-        project/SiteTypeListModel.cpp
-        project/SplitterHandleWidget.cpp
+
         storage/addon_storage.h storage/addon_storage.cpp
         storage/commit_storage.h storage/commit_storage.cpp
-        storage/CommonStorage.cpp
-        storage/DatabaseHelper.cpp
-        storage/FavoriteStorage.cpp
+
+        storage/common_storage.h storage/common_storage.cpp
+        storage/database_helper.h storage/database_helper.cpp
+        storage/favorite_storage.h storage/favorite_storage.cpp
         storage/group_storage.h storage/group_storage.cpp
         storage/project_storage.h storage/project_storage.cpp
-        storage/SiteSetting.cpp
+        storage/site_setting.h storage/site_setting.cpp
         storage/site_storage.h storage/site_storage.cpp
-        storage/Storage.cpp
-        transfer/Task.cpp
-        transfer/TaskPoolModel.cpp
-        transfer/TaskThread.cpp
+        storage/storage.h storage/storage.cpp
+        transfer/task.cpp transfer/task.cpp
+        #transfer/TaskPoolModel.cpp
+        #transfer/TaskThread.cpp
         common/utils.cpp common/utils.h
-        view/StatusBarView.cpp
         zip/zip_archive.h zip/zip_archive.cpp
         zip/minizip/ioapi.c
         zip/minizip/mztools.c
         zip/minizip/unzip.c
         zip/minizip/zip.c
-        mainwindow.h
+
 
         idewindow.h idewindow.cpp
         idewindow.ui
@@ -147,6 +126,10 @@ add_library(App SHARED
         project/new_project_two_widget.h project/new_project_two_widget.cpp project/new_project_two_widget.ui
         project/new_project_zero_widget.h project/new_project_zero_widget.cpp project/new_project_zero_widget.ui
         project/project_manage_model.h project/project_manage_model.cpp
+        project/site_group_list_model.h project/site_group_list_model.cpp
+        project/site_type_list_model.h project/site_type_list_model.cpp
+
+
         components/itd_button.h components/itd_button.cpp
         components/listview/listview.h components/listview/listview.cpp
         components/listview/listview_model.h components/listview/listview_model.cpp
@@ -157,6 +140,7 @@ add_library(App SHARED
 
         core/backend_thread.h core/backend_thread.cpp
         panes/resource_manager/resource_manage_read_folder_task.h panes/resource_manager/resource_manage_read_folder_task.cpp
+
 
 
 
@@ -222,7 +206,7 @@ set(TRANSLATIONS
 
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.dll        ${CMAKE_BINARY_DIR}/src/${PROJECT_NAME}.dll
+    COMMAND ${CMAKE_COMMAND} -E copy        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}.dll        ${CMAKE_BINARY_DIR}/src/${PROJECT_NAME}.dll
     COMMENT "Copying file to binary directory"
 )
 

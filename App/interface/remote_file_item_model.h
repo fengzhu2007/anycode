@@ -1,7 +1,7 @@
 #ifndef REMOTE_FILE_ITEM_MODEL_H
 #define REMOTE_FILE_ITEM_MODEL_H
 #include "../global.h"
-#include "local/file_item.h"
+#include "interface/file_item.h"
 #include <QAbstractTableModel>
 #include <QList>
 #include <QFileIconProvider>

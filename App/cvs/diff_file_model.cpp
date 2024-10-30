@@ -25,9 +25,9 @@ DiffFileModel::DiffFileModel(QObject* parent)
     :QAbstractTableModel(parent)
 {
     d = new DiffFileModelPrivate;
-    d->additionIcon.addFile(QString::fromUtf8(":/img/Resource/cvs_file_addition.svg"));
-    d->deletionIcon.addFile(QString::fromUtf8(":/img/Resource/cvs_file_deletion.svg"));
-    d->changeIcon.addFile(QString::fromUtf8(":/img/Resource/cvs_file_change.svg"));
+    d->additionIcon.addFile(QString::fromUtf8(":/Resource/icons/cvs_file_addition.svg"));
+    d->deletionIcon.addFile(QString::fromUtf8(":/Resource/icons/cvs_file_deletion.svg"));
+    d->changeIcon.addFile(QString::fromUtf8(":/Resource/icons/cvs_file_change.svg"));
 }
 
 DiffFileModel::~DiffFileModel(){
@@ -74,13 +74,10 @@ QVariant DiffFileModel::data(const QModelIndex &index, int role) const
         if(index.column()==Name){
             cvs::DiffFile::Status status = item.status();
             if(status==cvs::DiffFile::Addition){
-                //return QIcon(QString::fromUtf8(":/img/Resource/cvs_file_addition.svg"));
                 return d->additionIcon;
             }else if(status==cvs::DiffFile::Deletion){
-                //return QIcon(QString::fromUtf8(":/img/Resource/cvs_file_deletion.svg"));
                 return d->deletionIcon;
             }else if(status==cvs::DiffFile::Change){
-                //return QIcon(QString::fromUtf8(":/img/Resource/cvs_file_change.svg"));
                 return d->changeIcon;
             }
         }

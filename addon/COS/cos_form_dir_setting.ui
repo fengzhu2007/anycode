@@ -195,7 +195,7 @@
   <customwidget>
    <class>ady::DirMappingView</class>
    <extends>QTreeView</extends>
-   <header location="global">components/DirMappingView.h</header>
+   <header location="global">components/dir_mapping_view.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

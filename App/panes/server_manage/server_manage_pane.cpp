@@ -39,7 +39,7 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
     ui(new Ui::ServerManagePane)
 {
     Subscriber::reg();
-    this->regMessageIds({Type::M_UPLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY});
+    this->regMessageIds({Type::M_UPLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY,Type::M_NOTIFY_REFRESH_TREE});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -129,6 +129,33 @@ bool ServerManagePane::onReceive(Event* e) {
             auto model = static_cast<ServerManageModel*>(ui->treeView->model());
             model->removeProject(id);
         }
+    }else if(id==Type::M_NOTIFY_REFRESH_TREE){
+        auto data = e->toJsonOf<ServerRefreshData>().toObject();
+        long long id = data.find("id")->toInt(0);
+        const QString path = data.find("path")->toString();
+        if(id==0 || path.isEmpty()){
+            return false;
+        }
+        auto model = static_cast<ServerManageModel*>(ui->treeView->model());
+        auto site = model->find(id,false);
+        if(site!=nullptr){
+            ServerManageModelItem* child = nullptr;
+            if(path==site->path()){
+                child = site;
+            }else{
+                child = site->findChild(path);
+            }
+            if(child!=nullptr){
+                auto array = data.find("list")->toArray();
+                QList<FileItem> list;
+                for(auto one:array){
+                    list << FileItem::fromJson(one.toObject());
+                }
+                child->setExpanded(true);
+                model->refreshItems(list,child);
+                return true;
+            }
+        }
     }
     return false;
 }
@@ -205,6 +232,10 @@ void ServerManagePane::deleteFiles(long long id,const QStringList& list){
 }
 
 void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,int result){
+    if(result==ServerRequestThread::Unsppport){
+        wToast::showText(tr("This operation is not supported."));
+        return ;
+    }
     auto model = static_cast<ServerManageModel*>(ui->treeView->model());
     if(command==ServerRequestThread::Link){
         long long id = response->id;
@@ -218,6 +249,8 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
                 item->setLoading(false);
                 model->appendItems(list,item);
             }
+            ServerRefreshData data{id,dir,list};
+            Publisher::getInstance()->post(Type::M_NOTIFY_REFRESH_LIST,&data);
         }else{
             if(item!=nullptr){
                 item->setLoading(false);
@@ -236,6 +269,8 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
                 item->setLoading(false);
                 model->appendItems(list,item);
             }
+            ServerRefreshData data{response->id,dir,list};
+            Publisher::getInstance()->post(Type::M_NOTIFY_REFRESH_LIST,&data);
         }else{
             if(item!=nullptr){
                 item->setLoading(false);
@@ -260,8 +295,8 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
                     model->refreshItems(list,item);
                 }
             }
-
-
+            ServerRefreshData data{response->id,dir,list};
+            Publisher::getInstance()->post(Type::M_NOTIFY_REFRESH_LIST,&data);
         }else{
             if(item!=nullptr){
                 item->setLoading(false);
@@ -269,7 +304,7 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
             }
             wToast::showText(response->errorMsg);
         }
-    }else if(command==ServerRequestThread::Rename){
+    }else if(command==ServerRequestThread::Rename || command==ServerRequestThread::Chmod){
         auto dir = response->params["dir"].toString();
         auto item = model->find(response->id);
         if(item!=nullptr){
@@ -285,9 +320,8 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
                 item->setLoading(false);
                 model->refreshItems(list,item);
             }
-            if(result==ServerRequestThread::Unsppport){
-                wToast::showText(tr("This operation is not supported."));
-            }
+            ServerRefreshData data{response->id,dir,list};
+            Publisher::getInstance()->post(Type::M_NOTIFY_REFRESH_LIST,&data);
         }else{
             if(item!=nullptr){
                 item->setLoading(false);
@@ -295,14 +329,7 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
             }
             wToast::showText(response->errorMsg);
         }
-    }else if(command==ServerRequestThread::Chmod){
-        if(result==ServerRequestThread::Unsppport){
-            wToast::showText(tr("This operation is not supported."));
-        }else if(result==ServerRequestThread::Success){
-            wToast::showText(tr("Permission changed successfully."));
-        }
     }
-    //response->debug();
     if(response!=nullptr){
         delete response;
     }
@@ -562,6 +589,16 @@ void ServerManagePane::chmod(int mode,bool apply_children){
          iter++;
     }
 
+}
+
+void ServerManagePane::refresh(ServerManageModelItem* item){
+    auto type = item->type();
+    if(type==ServerManageModelItem::Folder || type==ServerManageModelItem::Server){
+        long long sid = item->sid();
+        item->setLoading(true);
+        static_cast<ServerManageModel*>(ui->treeView->model())->changeItem(item);
+        this->cdDir(sid,item->path(),true);
+    }
 }
 
 void ServerManagePane::onThreadFinished(){

@@ -20,10 +20,8 @@ include_directories(SYSTEM "../../3party/bin/x64/include")
 
 
 set(FORMS
-    chmod_dialog.ui
     sftp_form_dir_setting.ui
     sftp_form_general.ui
-    sftp_panel.ui
 )
 
 qt5_wrap_ui(FORMS_HEADERS ${FORMS})
@@ -32,15 +30,12 @@ qt5_wrap_ui(FORMS_HEADERS ${FORMS})
 add_library(SFTP SHARED
     ${FORMS_HEADERS}
     ${QM_FILES}
-    chmod_dialog.h chmod_dialog.cpp
     sftp_global.h export.h export.cpp
     sftp_form_dir_setting.h sftp_form_dir_setting.cpp
     sftp_form_general.h sftp_form_general.cpp
-    sftp_panel.h sftp_panel.cpp
     sftp_parse.h sftp_parse.cpp
     sftp_response.h sftp_response.cpp
     sftp_setting_key.h sftp_setting.h sftp_setting.cpp
-    sftp_worker.h sftp_worker.cpp
     sftp.h sftp.cpp
 )
 
@@ -49,7 +44,7 @@ target_link_libraries(SFTP PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION
 target_compile_definitions(SFTP PRIVATE SFTP_LIBRARY)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy   ${CMAKE_BINARY_DIR}/addon/${PROJECT_NAME}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.dll  ${CMAKE_BINARY_DIR}/src/addon/${PROJECT_NAME}/${PROJECT_NAME}.dll
+    COMMAND ${CMAKE_COMMAND} -E copy   ${CMAKE_BINARY_DIR}/addon/${PROJECT_NAME}/${PROJECT_NAME}.dll  ${CMAKE_BINARY_DIR}/src/addon/${PROJECT_NAME}/${PROJECT_NAME}.dll
     #COMMAND ${CMAKE_COMMAND} -E copy   ${CMAKE_BINARY_DIR}/addon/${PROJECT_NAME}/language.zh_CN.qm    ${CMAKE_BINARY_DIR}/src/addon/${PROJECT_NAME}/language.zh_CN.qm
     COMMENT "Copying file to binary directory"
 )

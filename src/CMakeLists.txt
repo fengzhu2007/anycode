@@ -64,6 +64,7 @@ endif()
 target_link_libraries(anycode PRIVATE Qt${QT_VERSION_MAJOR}::Widgets DbgHelp App wRect)
 
 
+message("1111 ${CMAKE_INSTALL_BINDIR}")
 
 
 

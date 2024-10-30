@@ -1,5 +1,4 @@
 #include "addon_loader.h"
-#include "interface/panel.h"
 #include "interface/form_panel.h"
 #include "network/network_request.h"
 #include "network/network_manager.h"
@@ -9,7 +8,8 @@
 #include <QMessageBox>
 #include <QTranslator>
 #include <QDebug>
-typedef ady::Panel*(*GET_PANEL_FUN) (long long ,QWidget*,QString);
+
+
 typedef size_t (*GET_FORMPANELSIZE_FUN) (QString);
 typedef ady::FormPanel*(*GET_FORMPANEL_FUN) (QWidget*,QString,size_t);
 typedef int (*REQUEST_CONNECT_FUN) (void*);
@@ -107,18 +107,6 @@ namespace ady {
         }
     }
 
-    Panel* AddonLoader::getPanel(long long id,QWidget* parent,const QString& name)
-    {
-        if(this->m_current==nullptr){
-            return nullptr;
-        }
-        GET_PANEL_FUN fun = (GET_PANEL_FUN)this->m_current->resolve("getPanel");
-        if(fun){
-            return fun(id,parent,name);
-        }else{
-            return nullptr;
-        }
-    }
 
 
     size_t AddonLoader::getFormPanelSize(const QString& name)
