@@ -89,6 +89,7 @@ struct ANYENGINE_EXPORT CloseProjectData{
 };
 
 struct ANYENGINE_EXPORT ServerRefreshData{
+    int cmd;
     long long id;
     QString path;
     QList<FileItem> list;
@@ -98,6 +99,7 @@ struct ANYENGINE_EXPORT ServerRefreshData{
             array << one.toJson();
         }
         return {
+            {"cmd",cmd},
             {"id",id},
             {"path",path},
             {"list",array},

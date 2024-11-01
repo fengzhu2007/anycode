@@ -14,6 +14,7 @@ namespace ady{
     class DockingPaneManager;
     class DockingPaneContainer;
     class DockingPane;
+    class IDEWindowPrivate;
     class ANYENGINE_EXPORT IDEWindow : public wMainWindow , public Subscriber
     {
         Q_OBJECT
@@ -40,6 +41,7 @@ namespace ady{
 
     protected:
         //virtual void closeEvent(QCloseEvent *event) override;
+        virtual void showEvent(QShowEvent* e) override;
 
     private:
         void onOpenFindAndReplace(int mode,const QString& text,const QString& scope);
@@ -59,6 +61,7 @@ namespace ady{
     private:
         Ui::IDEWindow *ui;
         DockingPaneManager* m_dockingPaneManager;
+        IDEWindowPrivate* d;
     };
 }
 

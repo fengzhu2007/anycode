@@ -201,7 +201,7 @@ bool ResourceManagerPane::onReceive(Event* e){
             }
         }
 
-        auto arr = proj.find("opendlist")->toArray();
+        auto arr = proj.find("opened")->toArray();
         if(arr.size()>0){
             QStringList opendlist;
             for(auto one:arr){

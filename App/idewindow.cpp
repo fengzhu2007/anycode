@@ -12,17 +12,13 @@
 #include "panes/resource_manager/resource_manager_model.h"
 #include "panes/code_editor/code_editor_pane.h"
 #include "panes/code_editor/code_editor_manager.h"
-#include "panes/code_editor/goto_line_dialog.h"
 #include "panes/version_control/version_control_pane.h"
 #include "panes/server_manage/server_manage_pane.h"
 #include "panes/file_transfer/file_transfer_pane.h"
 #include "panes/find_replace/find_replace_dialog.h"
 #include "panes/find_replace/find_replace_pane.h"
-
 #include "panes/file_transfer/file_transfer_model.h"
-
 #include "panes/loader.h"
-
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/type.h"
@@ -30,21 +26,10 @@
 #include "core/backend_thread.h"
 #include "core/ide_settings.h"
 #include "storage/project_storage.h"
-
-/*#include "highlighter.h"
-#include "texteditorsettings.h"
-#include "core/editormanager.h"
-#include "core/actionmanager/actionmanager.h"
-#include "codeassist/codeassistant.h"
-#include "codeassist/documentcontentcompletion.h"
-#include "snippets/snippetprovider.h"*/
+#include "network/network_manager.h"
+#include "w_toast.h"
 
 #include "languages/html/htmlscanner.h"
-
-
-#include "w_toast.h"
-#include "network/network_manager.h"
-
 
 #include <QLabel>
 #include <QCloseEvent>
@@ -53,10 +38,19 @@
 #include <QDebug>
 
 namespace ady{
+
+class IDEWindowPrivate{
+public:
+    bool init=false;
+
+
+};
+
 IDEWindow::IDEWindow(QWidget *parent) :
     wMainWindow(parent),
     ui(new Ui::IDEWindow)
 {
+    d = new IDEWindowPrivate;
     qRegisterMetaType<QFileInfoList>("QFileInfoList");
     Subscriber::reg();
     this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO,Type::M_OPEN_FILE_TRANSFTER});
@@ -66,7 +60,9 @@ IDEWindow::IDEWindow(QWidget *parent) :
     ui->toolBar->setFixedHeight(32);
     m_dockingPaneManager = new DockingPaneManager(this);
     auto w = m_dockingPaneManager->widget();
-    m_dockingPaneManager->workbench()->setContentsMargins(0,0,0,6);
+    auto workbench = m_dockingPaneManager->workbench();
+    workbench->setContentsMargins(0,0,0,6);
+
     this->setCentralWidget(w);
 
 
@@ -114,24 +110,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
     CodeEditorManager::init(m_dockingPaneManager);
 
 
-    this->restoreFromSettings();
-
-    //auto widget = new QPlainTextEdit(m_dockingPaneManager->widget());
-    //m_dockingPaneManager->createPane("test","test","TEST",widget,DockingPaneManager::Center);
-
-    /*new TextEditor::TextEditorSettings();
-    new Core::ActionManager(this);
-    auto editor = new TextEditor::TextEditorWidget(m_dockingPaneManager->widget());
-    TextEditor::SnippetProvider::registerGroup(TextEditor::Constants::TEXT_SNIPPET_GROUP_ID,tr("Text", "SnippetProvider"));
-    static TextEditor::DocumentContentCompletionProvider basicSnippetProvider;
-    QSharedPointer<TextEditor::TextDocument> doc(new TextEditor::TextDocument(Core::Constants::K_DEFAULT_TEXT_EDITOR_ID));
-    QString error;
-    doc->setCodec(QTextCodec::codecForName("UTF-8"));
-    doc->open(&error,Utils::FilePath::fromString("D:/wamp/www/guzheng2018/phpcms/base.php"),Utils::FilePath::fromString("D:/wamp/www/guzheng2018/phpcms/base.php"));
-    editor->setTextDocument(doc);
-    editor->configureGenericHighlighter();
-    doc->setCompletionAssistProvider(&basicSnippetProvider);
-    m_dockingPaneManager->createPane("test","test","TEST",editor,DockingPaneManager::Center);*/
+    //this->restoreFromSettings();
 
 
     this->forTest();
@@ -142,6 +121,7 @@ IDEWindow::~IDEWindow()
 
     this->shutdown();
 
+    delete d;
     delete ui;
 
     NetworkManager::destory();
@@ -382,6 +362,14 @@ CodeEditorPane* IDEWindow::currentEditorPane(){
     return nullptr;
 }
 
+void IDEWindow::showEvent(QShowEvent* e){
+    wMainWindow::showEvent(e);
+    if(d->init==false){
+        this->restoreFromSettings();
+        d->init = true;
+    }
+}
+
 void IDEWindow::restoreFromSettings(){
     auto settings = IDESettings::getInstance(this);
     if(settings->readFromFile()){
@@ -394,10 +382,10 @@ void IDEWindow::restoreFromSettings(){
         this->restoreProjects();
     }else{
         //start up by default
+        m_dockingPaneManager->initClient();//init client container
         this->showMaximized();
         ResourceManagerPane::open(m_dockingPaneManager);
     }
-
 }
 
 void IDEWindow::restoreDockpanes(){
@@ -407,11 +395,11 @@ void IDEWindow::restoreDockpanes(){
     if(innerV.isObject()){
         QJsonObject inner = innerV.toObject();
         int orientation = inner.take("orientation").toInt(1);
-        QJsonValue listV = inner.take("list");
-        if(listV.isArray()){
-            QJsonArray list = listV.toArray();
+        QJsonArray list = inner.take("list").toArray();
+        if(list.size()>0){
             auto root = m_dockingPaneManager->layout()->rootItem();
             this->restoreContainers(list,orientation,root);
+            root->calculateStretch();
         }
     }
 }
@@ -424,6 +412,7 @@ void IDEWindow::restoreContainers(QJsonArray& list,int orientation,DockingPaneLa
                 int active = containerJson.find("active")->toInt(0);
                 int client = containerJson.find("client")->toInt(0);
                 int stretch = containerJson.find("stretch")->toDouble(0);
+                int size = containerJson.find("size")->toDouble(0);
                 QJsonArray tabs = containerJson.take("tabs").toArray();
                 //auto info = new DockingPaneLayoutItemInfo();
                 auto workbench = m_dockingPaneManager->workbench();
@@ -441,7 +430,8 @@ void IDEWindow::restoreContainers(QJsonArray& list,int orientation,DockingPaneLa
                 }
                 int num = this->restoreTabs(tabs,info);
                 if(num>0){
-                    info->setStretch(stretch);
+                    //info->setStretch(stretch);
+                    info->setManualSize(size);
                     container->setPane(num-1>active?0:active);
                 }
             }else if(containerJson.find("children")!=containerJson.end()){
@@ -449,12 +439,16 @@ void IDEWindow::restoreContainers(QJsonArray& list,int orientation,DockingPaneLa
                 QJsonArray children = containerJson.take("children").toArray();
                 if(children.size()>1){
                     int stretch = containerJson.find("stretch")->toDouble(0);
+                    int size = containerJson.find("size")->toDouble(0);
                     auto info = new DockingPaneLayoutItemInfo(nullptr,DockingPaneManager::Left,parent);//create empty layout item
                     info->initHandle(m_dockingPaneManager->workbench());//init drag handle
                     int ori = orientation==DockingPaneLayoutItemInfo::Horizontal?DockingPaneLayoutItemInfo::Vertical:DockingPaneLayoutItemInfo::Horizontal;
                     this->restoreContainers(children,ori,info);
                     parent->appendItem(info);
-                    info->setStretch(stretch);
+                    info->setManualSize(size);
+                    qDebug()<<"info"<<info<<info->geometry(info->spacing());
+                    info->calculateStretch();
+                    //info->setStretch(stretch);
                 }
             }
         }
@@ -487,14 +481,12 @@ int IDEWindow::restoreTabs(QJsonArray& list,DockingPaneLayoutItemInfo* info){
 }
 
 void IDEWindow::restoreProjects(){
-
     //ProjectStorage projectStorage
     //27 demo
     //7 svn
     //1 guzheng
     auto settings = IDESettings::getInstance(this);
     QJsonArray projects = settings->projects();
-    //qDebug()<<"restoreProjects"<<projects;
     for(auto one:projects){
         if(one.isObject()){
             Publisher::getInstance()->post(Type::M_OPEN_PROJECT,one);
@@ -527,10 +519,6 @@ void IDEWindow::forTest(){
     }*/
 }
 
-/*void IDEWindow::closeEvent(QCloseEvent *event){
-
-    event->accept();
-}*/
 
 
 }

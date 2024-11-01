@@ -146,6 +146,10 @@ bool ServerManagePane::onReceive(Event* e) {
                 child = site->findChild(path);
             }
             if(child!=nullptr){
+                int cmd = data.find("cmd")->toInt(0);
+                if((cmd==ServerRequestThread::Link || cmd==ServerRequestThread::List || cmd==ServerRequestThread::Refresh) && child->expanded()){
+                    return true;
+                }
                 auto array = data.find("list")->toArray();
                 QList<FileItem> list;
                 for(auto one:array){
@@ -249,7 +253,7 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
                 item->setLoading(false);
                 model->appendItems(list,item);
             }
-            ServerRefreshData data{id,dir,list};
+            ServerRefreshData data{command,id,dir,list};
             Publisher::getInstance()->post(Type::M_NOTIFY_REFRESH_LIST,&data);
         }else{
             if(item!=nullptr){
@@ -269,7 +273,7 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
                 item->setLoading(false);
                 model->appendItems(list,item);
             }
-            ServerRefreshData data{response->id,dir,list};
+            ServerRefreshData data{command,response->id,dir,list};
             Publisher::getInstance()->post(Type::M_NOTIFY_REFRESH_LIST,&data);
         }else{
             if(item!=nullptr){
@@ -295,7 +299,7 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
                     model->refreshItems(list,item);
                 }
             }
-            ServerRefreshData data{response->id,dir,list};
+            ServerRefreshData data{command,response->id,dir,list};
             Publisher::getInstance()->post(Type::M_NOTIFY_REFRESH_LIST,&data);
         }else{
             if(item!=nullptr){
@@ -320,7 +324,7 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
                 item->setLoading(false);
                 model->refreshItems(list,item);
             }
-            ServerRefreshData data{response->id,dir,list};
+            ServerRefreshData data{command,response->id,dir,list};
             Publisher::getInstance()->post(Type::M_NOTIFY_REFRESH_LIST,&data);
         }else{
             if(item!=nullptr){

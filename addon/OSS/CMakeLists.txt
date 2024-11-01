@@ -19,6 +19,9 @@ include_directories(SYSTEM "../../App")
 include_directories(SYSTEM "../../3party/bin/x64/include")
 include_directories(SYSTEM "../../3party/openssl/crypto")
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DQ_DEBUG)
+endif()
 set(FORMS
     oss_form_dir_setting.ui
         oss_form_general.ui

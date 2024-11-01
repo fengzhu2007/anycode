@@ -18,6 +18,9 @@ find_library(CURL_LIB libcurl_imp PATHS "../3party/bin/x64/lib")
 include_directories(SYSTEM "../../App")
 include_directories(SYSTEM "../../3party/bin/x64/include")
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DQ_DEBUG)
+endif()
 
 set(FORMS
     ftp_form_dir_setting.ui

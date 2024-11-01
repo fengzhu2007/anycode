@@ -111,7 +111,7 @@ ServerClientPane::~ServerClientPane(){
         d->thread->requestInterruption();
         d->thread->quit();
     }
-
+    delete ui;
     delete d;
 }
 
@@ -308,7 +308,7 @@ void ServerClientPane::onNetworkResponse(NetworkResponse* response,int command,i
             //list default dir
             auto list = response->parseList();
             auto dir = response->params["dir"].toString();
-            ServerRefreshData data{d->id,dir,list};//
+            ServerRefreshData data{command,d->id,dir,list};//
 
             FileItem item;
             item.type = FileItem::Dir;
@@ -345,7 +345,7 @@ void ServerClientPane::onNetworkResponse(NetworkResponse* response,int command,i
             ui->lineEdit->setText(dir);
             d->currentPath = dir;
 
-            ServerRefreshData data{d->id,d->currentPath};
+            ServerRefreshData data{command,d->id,d->currentPath};
             Publisher::getInstance()->post(Type::M_NOTIFY_REFRESH_TREE,&data);
 
         }else{
