@@ -88,7 +88,9 @@ void FindWidget::onClicked(){
     }else if(sender==ui->findNext){
         dialog->search(text,bit,hightlight);
     }else if(sender==ui->findAll){
-        dialog->searchAll(text,ui->searchScope->currentText(),bit,ui->filePattern->currentText(),ui->exclusion->currentText());
+        int index = ui->searchScope->currentIndex();
+        auto one = dialog->searchScodeModel()->value(index);
+        dialog->searchAll(text,one,bit,ui->filePattern->currentText(),ui->exclusion->currentText());
         dialog->close();
     }else{
         return ;
@@ -117,7 +119,7 @@ void FindWidget::onSelectFolder(){
 }
 
 void FindWidget::onSearchScopeChanged(int i){
-    if(i==0){
+    if(i==0 || i==1){
         //current document
         ui->filePattern->setEnabled(false);
         ui->exclusion->setEnabled(false);

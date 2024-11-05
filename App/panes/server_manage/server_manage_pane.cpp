@@ -616,7 +616,7 @@ ServerManagePane* ServerManagePane::open(DockingPaneManager* dockingManager,bool
     if(instance==nullptr){
         instance = new ServerManagePane(dockingManager->widget());
         DockingPaneLayoutItemInfo* item = dockingManager->createPane(instance,DockingPaneManager::S_Right,active);
-        item->setStretch(300);
+        item->setManualSize(300);
     }
     return instance;
 

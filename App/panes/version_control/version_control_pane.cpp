@@ -548,7 +548,7 @@ VersionControlPane* VersionControlPane::open(DockingPaneManager* dockingManager,
     if(instance==nullptr){
         instance = new VersionControlPane(dockingManager->widget());
         DockingPaneLayoutItemInfo* item = dockingManager->createPane(instance,DockingPaneManager::Left,active);
-        item->setStretch(300);
+        item->setManualSize(300);
     }
     return instance;
 }

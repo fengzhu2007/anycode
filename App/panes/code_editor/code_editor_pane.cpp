@@ -79,6 +79,9 @@ QString CodeEditorPane::description(){
 void CodeEditorPane::activation(){
     //d->editor->init();
     d->editor->setFocus();
+    //qDebug()<<"activation"<<this->id()<<this->windowTitle();
+    CodeEditorManager::getInstance()->setCurrent(this);
+
 }
 
 void CodeEditorPane::save(bool rename){

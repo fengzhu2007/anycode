@@ -84,6 +84,8 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     ui->treeView->setItemDelegate(new ResourceManagerTreeItemDelegate(ui->treeView));
     ui->treeView->setEditTriggers(QAbstractItemView::EditKeyPressed);
 
+   // ui->sear
+
     //init view
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeView,&QTreeView::customContextMenuRequested, this, &ResourceManagerPane::onContextMenu);
@@ -101,6 +103,8 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
 
     connect(d->model,&ResourceManagerModel::insertReady,this,&ResourceManagerPane::onInsertReady);
     connect(d->model,&ResourceManagerModel::itemsChanged,this,&ResourceManagerPane::onItemsChanged);
+
+    connect(ui->comboBox,&SearchComboBox::search,this,&ResourceManagerPane::onSearchFile);
 
     this->initView();
 }
@@ -673,6 +677,13 @@ void ResourceManagerPane::onUploadToGroup(){
     auto data = sender->data();
 }
 
+void ResourceManagerPane::onSearchFile(const QString& text){
+    qDebug()<<"search:"<<text;
+    auto delegate = static_cast<ResourceManagerTreeItemDelegate*>(ui->treeView->itemDelegate());
+    delegate->setSearchText(text);
+    ui->treeView->update();
+}
+
 QMenu* ResourceManagerPane::attchUploadMenu(QMenu* parent,long long id){
     QMenu* uploadM = nullptr;
     for(auto one:d->sites){
@@ -714,7 +725,7 @@ ResourceManagerPane* ResourceManagerPane::open(DockingPaneManager* dockingManage
     if(instance==nullptr){
         instance = new ResourceManagerPane(dockingManager->widget());
         DockingPaneLayoutItemInfo* item = dockingManager->createPane(instance,DockingPaneManager::S_Left,active);
-        item->setStretch(300);
+        item->setManualSize(300);
     }
     return instance;
 }

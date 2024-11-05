@@ -39,13 +39,10 @@ public:
     DockingPaneManager* docking_manager;
     QFileSystemWatcher *watcher;
     TextEditor::TextEditorSettings* settings;
-    //Core::ActionManager* action_manager;
-    //QSharedPointer<TextEditor::TextDocument> doc;
-    //std::unique_ptr<TextEditor::TextEditorActionHandler> m_textEditorActionHandler;
-    TextEditor::DocumentContentCompletionProvider provider;
-    CodeEditorPane* current;
-    CodeEditorView* editor;
 
+    TextEditor::DocumentContentCompletionProvider provider;
+    CodeEditorPane* current = nullptr;
+    CodeEditorView* editor;
 
     QAction *undoAction = nullptr;
     QAction *redoAction = nullptr;
@@ -60,19 +57,6 @@ public:
     QAction *textWrappingAction = nullptr;
     QAction *visualizeWhitespaceAction = nullptr;
 
-    /*QAction *autoFormatAction = nullptr;
-    QAction *m_visualizeWhitespaceAction = nullptr;
-    QAction *m_textWrappingAction = nullptr;
-    QAction *m_unCommentSelectionAction = nullptr;
-    QAction *m_unfoldAllAction = nullptr;
-    QAction *m_followSymbolAction = nullptr;
-    QAction *m_followSymbolInNextSplitAction = nullptr;
-    QAction *m_findUsageAction = nullptr;
-    QAction *m_renameSymbolAction = nullptr;
-    QAction *m_jumpToFileAction = nullptr;
-    QAction *m_jumpToFileInNextSplitAction = nullptr;
-    QList<QAction *> m_modifyingActions;*/
-
 
     QAction* saveAction=nullptr;
     QAction* closeAction=nullptr;
@@ -81,12 +65,6 @@ public:
     QAction* copyPathAction=nullptr;
     QAction* openFolderAction=nullptr;
     QAction* floatTabAction=nullptr;
-
-
-
-
-
-
 
 
 
@@ -101,28 +79,8 @@ CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
     d->watcher = new QFileSystemWatcher(this);
     connect(d->watcher,&QFileSystemWatcher::fileChanged,this,&CodeEditorManager::onFileChanged);
 
-    //init texteditor evn
-    //d->m_textEditorActionHandler.reset(new TextEditor::TextEditorActionHandler(Core::Constants::K_DEFAULT_TEXT_EDITOR_ID,Core::Constants::K_DEFAULT_TEXT_EDITOR_ID,TextEditor::TextEditorActionHandler::Format|TextEditor::TextEditorActionHandler::UnCommentSelection |TextEditor::TextEditorActionHandler::UnCollapseAll|TextEditor::TextEditorActionHandler::FollowSymbolUnderCursor));
-    //init theme
-    //Constants::DEFAULT_DARK_THEME
     d->settings = new TextEditor::TextEditorSettings();
     TextEditor::TextEditorEnvironment::init();
-    /*Utils::Theme *theme = new Utils::Theme(Core::Constants::DEFAULT_DARK_THEME);
-    Utils::setCreatorTheme(theme);
-    d->settings = new TextEditor::TextEditorSettings();
-    //d->action_manager = new Core::ActionManager(this);
-    TextEditor::SnippetProvider::registerGroup(TextEditor::Constants::TEXT_SNIPPET_GROUP_ID,tr("Text", "SnippetProvider"));*/
-
-    //d->doc = QSharedPointer<TextEditor::TextDocument>(new TextEditor::TextDocument(Core::Constants::K_DEFAULT_TEXT_EDITOR_ID));
-    //d->doc->setCodec(QTextCodec::codecForName("UTF-8"));
-    //d->doc->setCompletionAssistProvider(&d->provider);
-
-    /*QString error;
-    doc->setCodec(QTextCodec::codecForName("UTF-8"));
-    doc->open(&error,Utils::FilePath::fromString("D:/wamp/www/anycode/modules/App/controller/Video.php"),Utils::FilePath::fromString("D:/wamp/www/anycode/modules/App/controller/Video.php"));
-    editor->setTextDocument(doc);
-    editor->configureGenericHighlighter();
-    doc->setCompletionAssistProvider(&basicSnippetProvider);*/
 }
 
 CodeEditorManager::~CodeEditorManager(){
@@ -173,22 +131,41 @@ QList<CodeEditorPane*> CodeEditorManager::getAll(const QString& prefix){
     return list;
 }
 
+CodeEditorPane* CodeEditorManager::current(){
+    return d->current;
+}
+
+void CodeEditorManager::setCurrent(CodeEditorPane* pane){
+    d->current = pane;
+}
+
+QTextDocument* CodeEditorManager::currentDoc(){
+    QMutexLocker locker(&d->mutex);
+    if(d->current!=nullptr){
+        return d->current->editor()->document();
+    }
+    return nullptr;
+}
+
+QMap<QString,QTextDocument*> CodeEditorManager::docData(){
+    QMutexLocker locker(&d->mutex);
+    QMap<QString,QTextDocument*> data;
+    for(auto one:d->list){
+        QString path = one->path();
+        if(path.isEmpty()){
+            path = one->windowTitle();
+        }
+        data.insert(path,one->editor()->document());
+    }
+    return data;
+}
+
 CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const QString& path,int line,int column){
     auto pane = this->get(path);
     if(pane==nullptr){
         const QJsonObject data = {{"path",path},{"line",line}};
         pane = CodeEditorPane::make(dockingManager,data);
-        /*pane = new CodeEditorPane();
-        if(path.isEmpty()){
-            pane->setWindowTitle(QObject::tr("New File"));
-        }else{
-            d->watcher->addPath(path);
-            QFileInfo fi(path);
-            pane->setWindowTitle(fi.fileName());
-            pane->readFile(path);
-        }*/
         dockingManager->createPane(pane,DockingPaneManager::Center,true);
-        //pane->editor()->gotoLine(1);
     }else{
         //set pane to current
         pane->activeToCurrent();
@@ -214,6 +191,9 @@ void CodeEditorManager::remove(CodeEditorPane* pane){
         d->watcher->removePath(path);
     }
     QMutexLocker locker(&d->mutex);
+    if(pane==d->current){
+        d->current = nullptr;
+    }
     d->list.removeOne(pane);
 }
 
@@ -332,7 +312,6 @@ bool CodeEditorManager::onReceive(Event* e){
 void CodeEditorManager::onFileChanged(const QString &path){
     auto pane = this->get(path);
     if(pane!=nullptr){
-        //qDebug()<<"path:"<<path<<"state:"<<pane->isVisible();
         //to fix
         QFileInfo fi(path);
         if(!fi.exists()){

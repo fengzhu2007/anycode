@@ -473,4 +473,11 @@ void ResourceManagerModel::onDirectoryChanged(const QString &path){
 }
 
 
+
+
+
+
+
+
+
 }

@@ -15,6 +15,8 @@ public:
         SearchAndReplace
     };
     FindReplaceProgress(Mode mode,const QString& before,const QString& after,int flags,const QString& folder,const QString& filter,const QString& exclusion);
+    FindReplaceProgress(Mode mode,const QString& before,const QString& after,int flags,const QString& filename,QTextDocument* doc,const QString& filter,const QString& exclusion);
+    FindReplaceProgress(Mode mode,const QString& before,const QString& after,int flags,QMap<QString,QTextDocument*>docs,const QString& filter,const QString& exclusion);
     ~FindReplaceProgress();
 
 signals:
@@ -29,6 +31,7 @@ private:
     void searchFolder(const QString& folder);
     void searchFile(const QString& path);
     void searchFileRegExp(const QString& path);
+    void searchDocument(const QTextDocument* doc,const QString& path);
     QRegularExpressionMatch doGuardedMatch(const QString &line, int offset) const;
     QStringList replaceAll(const QString &text,const QList<SearchResultItem> &items,bool preserveCase);
 

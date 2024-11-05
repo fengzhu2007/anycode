@@ -214,7 +214,7 @@ FileTransferPane* FileTransferPane::open(DockingPaneManager* dockingManager,bool
     if(instance==nullptr){
         instance = new FileTransferPane(dockingManager->widget());
         DockingPaneLayoutItemInfo* item = dockingManager->createPane(instance,DockingPaneManager::Bottom,active);
-        item->setStretch(220);
+        item->setManualSize(220);
     }
     return instance;
 }

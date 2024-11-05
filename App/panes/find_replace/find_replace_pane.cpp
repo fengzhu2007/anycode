@@ -93,9 +93,41 @@ bool FindReplacePane::onReceive(Event* e){
 void FindReplacePane::runSearch(const QString& text,const QString& scope,int flags,const QString& filter,const QString& exclusion){
     this->stop();
     if(d->list.size()==0){
+
+        //qDebug()<<"scope:"<<scope;
+        FindReplaceProgress* progress = nullptr;
+        if(scope==":"){
+            //current
+            auto instance = CodeEditorManager::getInstance();
+            if(instance==nullptr){
+                return ;
+            }
+            auto pane = instance->current();
+            if(pane==nullptr){
+                return ;
+            }
+            auto doc = pane->editor()->document();
+            QString path = pane->path();
+            if(path.isEmpty()){
+                path = pane->windowTitle();
+            }
+            progress = new FindReplaceProgress(FindReplaceProgress::SearcnOnly,text,{},flags,path,doc,filter,exclusion);
+        }else if(scope=="::"){
+            //opened
+            auto instance = CodeEditorManager::getInstance();
+            auto data = instance->docData();
+            if(data.size()==0){
+                return ;
+            }
+             progress = new FindReplaceProgress(FindReplaceProgress::SearcnOnly,text,{},flags,data,filter,exclusion);
+        }else{
+            //file or folder
+             progress = new FindReplaceProgress(FindReplaceProgress::SearcnOnly,text,{},flags,scope,filter,exclusion);
+        }
+
         ui->actionStop->setEnabled(true);
         ui->widget->start();
-        auto progress = new FindReplaceProgress(FindReplaceProgress::SearcnOnly,text,{},flags,scope,filter,exclusion);
+
         d->list << progress;
         connect(progress,&QThread::finished,progress,&QThread::deleteLater);
         connect(progress,&QThread::finished,this,&FindReplacePane::onSearchEnd);
@@ -207,7 +239,7 @@ FindReplacePane* FindReplacePane::open(DockingPaneManager* dockingManager,bool a
     if(instance==nullptr){
         instance = new FindReplacePane(dockingManager->widget());
         DockingPaneLayoutItemInfo* item = dockingManager->createPane(instance,DockingPaneManager::Bottom,active);
-        item->setStretch(220);
+        item->setManualSize(220);
     }
     return instance;
 }

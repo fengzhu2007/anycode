@@ -182,6 +182,11 @@ add_library(App SHARED
         panes/file_transfer/job_thread.h panes/file_transfer/job_thread.cpp
         panes/server_manage/server_client_pane.ui panes/server_manage/server_client_pane.h panes/server_manage/server_client_pane.cpp
         panes/server_manage/permission_dialog.ui panes/server_manage/permission_dialog.h panes/server_manage/permission_dialog.cpp
+        core/list_model.h core/list_model.cpp
+
+        panes/resource_manager/search_combobox.h panes/resource_manager/search_combobox.cpp
+        panes/terminal/terminal_pane.ui panes/terminal/terminal_pane.h panes/terminal/terminal_pane.cpp
+
 
 
 

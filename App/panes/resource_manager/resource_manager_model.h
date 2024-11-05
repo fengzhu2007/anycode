@@ -4,6 +4,8 @@
 #include <QAbstractItemModel>
 #include <QFileInfo>
 #include <QJsonArray>
+#include <QItemDelegate>
+
 
 
 namespace ady{
@@ -78,6 +80,10 @@ private:
     ResourceManagerModelPrivate* d;
     static ResourceManagerModel* instance;
 };
+
+
+
+
 
 }
 

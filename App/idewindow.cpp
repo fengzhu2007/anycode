@@ -412,7 +412,7 @@ void IDEWindow::restoreContainers(QJsonArray& list,int orientation,DockingPaneLa
                 int active = containerJson.find("active")->toInt(0);
                 int client = containerJson.find("client")->toInt(0);
                 int stretch = containerJson.find("stretch")->toDouble(0);
-                int size = containerJson.find("size")->toDouble(0);
+                int size = containerJson.find("size")->toInt(0);
                 QJsonArray tabs = containerJson.take("tabs").toArray();
                 //auto info = new DockingPaneLayoutItemInfo();
                 auto workbench = m_dockingPaneManager->workbench();
@@ -432,21 +432,22 @@ void IDEWindow::restoreContainers(QJsonArray& list,int orientation,DockingPaneLa
                 if(num>0){
                     //info->setStretch(stretch);
                     info->setManualSize(size);
-                    container->setPane(num-1>active?0:active);
+                    container->setPane(num-1<active?0:active);
+                    //qDebug()<<"restoreContainers"<<container<<active<<num;
                 }
             }else if(containerJson.find("children")!=containerJson.end()){
 
                 QJsonArray children = containerJson.take("children").toArray();
                 if(children.size()>1){
                     int stretch = containerJson.find("stretch")->toDouble(0);
-                    int size = containerJson.find("size")->toDouble(0);
+                    int size = containerJson.find("size")->toInt(0);
                     auto info = new DockingPaneLayoutItemInfo(nullptr,DockingPaneManager::Left,parent);//create empty layout item
                     info->initHandle(m_dockingPaneManager->workbench());//init drag handle
                     int ori = orientation==DockingPaneLayoutItemInfo::Horizontal?DockingPaneLayoutItemInfo::Vertical:DockingPaneLayoutItemInfo::Horizontal;
                     this->restoreContainers(children,ori,info);
                     parent->appendItem(info);
                     info->setManualSize(size);
-                    qDebug()<<"info"<<info<<info->geometry(info->spacing());
+                    //qDebug()<<"info"<<info<<info->geometry(info->spacing());
                     info->calculateStretch();
                     //info->setStretch(stretch);
                 }

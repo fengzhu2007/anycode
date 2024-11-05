@@ -4,11 +4,15 @@
 #include "docking_pane.h"
 #include "core/event_bus/subscriber.h"
 #include <QMenu>
+
 namespace Ui {
 class ResourceManagerPane;
 }
 
-namespace ady{
+
+namespace ady {
+
+
 class DockingPaneManager;
 class ResourceManagerModelItem;
 class ResourceManagerPanePrivate;
@@ -41,6 +45,8 @@ public slots:
     void onTopActionTriggered();
     void onUploadToSite();
     void onUploadToGroup();
+
+    void onSearchFile(const QString& text);
 
 
 
