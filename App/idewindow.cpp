@@ -18,6 +18,7 @@
 #include "panes/find_replace/find_replace_dialog.h"
 #include "panes/find_replace/find_replace_pane.h"
 #include "panes/file_transfer/file_transfer_model.h"
+#include "panes/terminal/terminal_pane.h"
 #include "panes/loader.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
@@ -272,7 +273,8 @@ void IDEWindow::onActionTriggered(){
         auto pane = ServerManagePane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
     }else if(sender==ui->actionTerminal){
-
+        auto pane = TerminalPane::open(m_dockingPaneManager,true);
+        pane->activeToCurrent();
     }else if(sender==ui->actionFile_Transfer){
         auto pane = FileTransferPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();

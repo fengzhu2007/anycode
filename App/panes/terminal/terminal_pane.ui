@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FindReplacePane</class>
- <widget class="QWidget" name="FindReplacePane">
+ <class>TerminalPane</class>
+ <widget class="QWidget" name="TerminalPane">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -40,14 +40,13 @@
        <height>16</height>
       </size>
      </property>
-     <addaction name="separator"/>
-     <addaction name="separator"/>
+     <addaction name="actionRemove"/>
     </widget>
    </item>
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="tabPosition">
-      <enum>QTabWidget::East</enum>
+      <enum>QTabWidget::West</enum>
      </property>
      <property name="currentIndex">
       <number>-1</number>
@@ -55,7 +54,33 @@
     </widget>
    </item>
   </layout>
+  <action name="actionRemove">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Trash_16x.svg</normaloff>:/Resource/icons/Trash_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Remove</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionAdd">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/AddImmediateWindow_16x.svg</normaloff>:/Resource/icons/AddImmediateWindow_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Add</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::TextHeuristicRole</enum>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../r.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -74,5 +74,8 @@
         <file>Resource/icons/cvs_file_deletion.svg</file>
         <file>Resource/icons/plus.svg</file>
         <file>Resource/icons/minus.svg</file>
+        <file>Resource/icons/AddImmediateWindow_16x.svg</file>
+        <file>Resource/icons/RemoveImmediateWindow_16x.svg</file>
+        <file>Resource/icons/Trash_16x.svg</file>
     </qresource>
 </RCC>

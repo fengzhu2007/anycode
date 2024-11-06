@@ -20,6 +20,8 @@ include_directories(SYSTEM "../dockingpane/src")
 include_directories(SYSTEM "../wRect/src")
 include_directories(SYSTEM "../texteditor")
 include_directories(SYSTEM "../3party/qscintilla/src")
+include_directories(SYSTEM "../3party/libvterm/include")
+
 #include_directories(SYSTEM "../3party/scintilla/qt/ScintillaEditBase")
 #include_directories(SYSTEM "../3party/scintilla/include")
 #include_directories(SYSTEM "../3party/scintilla/src")
@@ -30,7 +32,6 @@ find_library(CURL_LIB libcurl_imp PATHS "../3party/bin/x64/lib")
 find_library(SSH2_LIB libssh2 PATHS "../3party/bin/x64/lib")
 find_library(Z_LIB zlib PATHS "../3party/bin/x64/lib")
 find_library(GIT2_LIB git2 PATHS "../3party/bin/x64/lib")
-#find_library(QCINTILLA_LIB qscintilla2_qt5 PATHS "../3party/qscintilla")
 
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -186,6 +187,7 @@ add_library(App SHARED
 
         panes/resource_manager/search_combobox.h panes/resource_manager/search_combobox.cpp
         panes/terminal/terminal_pane.ui panes/terminal/terminal_pane.h panes/terminal/terminal_pane.cpp
+        panes/terminal/celliterator.cpp panes/terminal/celliterator.h panes/terminal/glyphcache.cpp panes/terminal/glyphcache.h panes/terminal/keys.cpp panes/terminal/keys.h panes/terminal/scrollback.cpp panes/terminal/scrollback.h panes/terminal/surfaceintegration.h panes/terminal/terminalsurface.cpp panes/terminal/terminalsurface.h panes/terminal/terminalview.cpp panes/terminal/terminalview.h
 
 
 
@@ -200,7 +202,7 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor)
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm)
 
 target_compile_definitions(App PRIVATE APP_LIBRARY)
 
