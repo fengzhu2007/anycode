@@ -9,9 +9,11 @@ void vterm_keyboard_unichar(VTerm *vt, uint32_t c, VTermModifier mod)
   /* The shift modifier is never important for Unicode characters
    * apart from Space
    */
+
   if(c != ' ')
     mod &= ~VTERM_MOD_SHIFT;
 
+  printf("info:%d,&d",c,mod);
   if(mod == 0) {
     // Normal text - ignore just shift
     char str[6];

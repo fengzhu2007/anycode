@@ -104,7 +104,7 @@ add_library(winpty STATIC
 )
 
 target_compile_definitions(winpty-agent PRIVATE WINPTY_AGENT_ASSERT)
-target_compile_definitions(winpty PRIVATE COMPILING_WINPTY_DLL)
+target_compile_definitions(winpty PUBLIC COMPILING_WINPTY_DLL)
 
 
 target_include_directories(winpty

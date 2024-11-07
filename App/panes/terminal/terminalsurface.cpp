@@ -557,14 +557,14 @@ void TerminalSurface::sendKey(const QString &text)
 
 void TerminalSurface::sendKey(QKeyEvent *event)
 {
+
+
     bool keypad = event->modifiers() & Qt::KeypadModifier;
     VTermModifier mod = qtModifierToVTerm(event->modifiers());
     VTermKey key = qtKeyToVTerm(Qt::Key(event->key()), keypad);
-
     if (key != VTERM_KEY_NONE) {
         if (mod == VTERM_MOD_SHIFT && (key == VTERM_KEY_ESCAPE || key == VTERM_KEY_BACKSPACE))
             mod = VTERM_MOD_NONE;
-
         vterm_keyboard_key(d->m_vterm.get(), key, mod);
     } else if (event->text().length() == 1) {
         // event->text() already contains the correct unicode character based on the modifiers

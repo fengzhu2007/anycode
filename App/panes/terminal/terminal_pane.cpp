@@ -56,6 +56,10 @@ void TerminalPane::initView(){
         //init first tab
         auto tab = new TerminalSolution::TerminalView(ui->tabWidget);
         ui->tabWidget->addTab(tab,tr("One"));
+        /*QTimer::singleShot(100,[this,tab]{
+            tab->writeToTerminal((tr("Connecting...") + "\r\n").toUtf8(), true);
+        });*/
+
     }
 
 }

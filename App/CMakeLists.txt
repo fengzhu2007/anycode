@@ -21,6 +21,8 @@ include_directories(SYSTEM "../wRect/src")
 include_directories(SYSTEM "../texteditor")
 include_directories(SYSTEM "../3party/qscintilla/src")
 include_directories(SYSTEM "../3party/libvterm/include")
+include_directories(SYSTEM "../3party/libptyqt")
+
 
 #include_directories(SYSTEM "../3party/scintilla/qt/ScintillaEditBase")
 #include_directories(SYSTEM "../3party/scintilla/include")
@@ -196,13 +198,15 @@ add_library(App SHARED
 
 
 
+
+
 )
 
 
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm)
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt)
 
 target_compile_definitions(App PRIVATE APP_LIBRARY)
 

@@ -108,11 +108,8 @@ public:
         }
     };
 
-    virtual qint64 writeToPty(const QByteArray &data)
-    {
-        Q_UNUSED(data);
-        return 0;
-    }
+    virtual qint64 writeToPty(const QByteArray &data);
+
     void writeToTerminal(const QByteArray &data, bool forceFlush);
 
     void restart();
@@ -141,6 +138,10 @@ public:
     virtual void surfaceChanged(){};
 
     TerminalSurface *surface() const;
+
+
+public slots:
+    void onReadReady();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -220,6 +221,8 @@ protected:
     void configBlinkTimer();
 
     QColor toQColor(std::variant<int, QColor> color) const;
+
+
 
 private:
     std::unique_ptr<TerminalViewPrivate> d;

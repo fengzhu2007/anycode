@@ -6,6 +6,7 @@
 #include "terminalsurface.h"
 #include <array>
 #include <vterm.h>
+#include <ptyqt.h>
 
 #include <QApplication>
 #include <QCache>
@@ -26,6 +27,7 @@
 #include <QTextItem>
 #include <QTextLayout>
 #include <QToolTip>
+#include <QProcess>
 
 Q_LOGGING_CATEGORY(terminalLog, "qtc.terminal", QtWarningMsg)
 Q_LOGGING_CATEGORY(selectionLog, "qtc.terminal.selection", QtWarningMsg)
@@ -89,6 +91,11 @@ public:
     bool m_passwordModeActive{false};
 
     SurfaceIntegration *m_surfaceIntegration{nullptr};
+
+
+
+    QProcess* m_process;
+    IPtyProcess* process;
 };
 
 QString defaultFontFamily()
@@ -149,9 +156,55 @@ TerminalView::TerminalView(QWidget *parent)
         else if (d->m_scrollDirection > 0)
             verticalScrollBar()->triggerAction(QAbstractSlider::SliderSingleStepAdd);
     });
+
+
+
+    //custome
+    d->m_currentColors[17] = Qt::white;//background
+    d->m_currentColors[18] = QColor{"#DBDBDC"};//selection background
+
+    d->m_process = nullptr;
+
+    /*d->m_process = new QProcess(this);
+    QStringList commandArgs;
+    d->m_process->start("cmd.exe",commandArgs);
+
+    connect(d->m_process,&QProcess::readyRead,this,&TerminalView::onReadReady);*/
+
+
+    d->process = PtyQt::createPtyProcess(IPtyProcess::AutoPty);
+    bool ret = d->process->startProcess("C:\\Windows\\System32\\cmd.exe",{},".",{},30,10);
+    qDebug()<<"ret:"<<ret<<d->process->lastError();
+
+    connect(d->process->notifier(), &QIODevice::readyRead, this, [this] {
+
+        //qDebug()<<d->process->readAll();
+        this->writeToTerminal(d->process->readAll(),false);
+        //emit readyRead(m_ptyProcess->readAll(), {});
+    });
+
+    /*connect(m_ptyProcess->notifier(), &QIODevice::aboutToClose, this, [this] {
+        if (m_ptyProcess) {
+            const ProcessResultData result
+                = {m_ptyProcess->exitCode(), QProcess::NormalExit, QProcess::UnknownError, {}};
+            emit done(result);
+            return;
+        }
+
+        const ProcessResultData result = {0, QProcess::NormalExit, QProcess::UnknownError, {}};
+        emit done(result);
+    });*/
 }
 
-TerminalView::~TerminalView() = default;
+TerminalView::~TerminalView() {
+    if(d->m_process!=nullptr){
+        d->m_process->close();
+        delete d->m_process;
+    }
+    d->process->kill();
+    delete d->process;
+
+}
 
 void TerminalView::setSurfaceIntegration(SurfaceIntegration *surfaceIntegration)
 {
@@ -215,6 +268,7 @@ void TerminalView::setupSurface()
     surfaceChanged();
     updateScrollBars();
 }
+
 
 void TerminalView::setAllowBlinkingCursor(bool allow)
 {
@@ -357,6 +411,17 @@ void TerminalView::moveCursorWordRight()
 void TerminalView::clearContents()
 {
     d->m_surface->clearAll();
+}
+
+qint64 TerminalView::writeToPty(const QByteArray &data){
+    //writeToTerminal(data,false);
+    //return data.size();
+    //writeToTerminal(data,false);
+    //auto ret =  d->m_process->write(data);
+    //qDebug()<<"write:"<<data<<ret;
+    //qDebug()<<"ret"<<ret;
+    //return ret;
+    return d->process->write(data);
 }
 
 void TerminalView::writeToTerminal(const QByteArray &data, bool forceFlush)
@@ -993,6 +1058,8 @@ void TerminalView::resizeEvent(QResizeEvent *event)
 
     setSelection(std::nullopt);
     d->m_ignoreScroll = false;
+    QSize size = event->size();
+    d->process->resize(size.width(),size.height());
 }
 
 QRect TerminalView::gridToViewport(QRect rect) const
@@ -1309,6 +1376,11 @@ bool TerminalView::event(QEvent *event)
     }
 
     return QAbstractScrollArea::event(event);
+}
+
+void TerminalView::onReadReady(){
+    qDebug()<<"onReadReady";
+    this->writeToTerminal(QString::fromLocal8Bit(d->m_process->readAll()).toUtf8(),true);
 }
 
 } // namespace TerminalSolution

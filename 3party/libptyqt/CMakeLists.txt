@@ -20,10 +20,10 @@ else()
 endif()
 
 add_library(ptyqt STATIC ${SOURCES})
-target_link_libraries(ptyqt PUBLIC Qt${QT_VERSION_MAJOR}::Core)
+target_link_libraries(ptyqt PUBLIC Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network winpty)
 
 if (WIN32)
-  target_link_libraries(ptyqt PRIVATE winpty Qt${QT_VERSION_MAJOR}::Network)
+  #target_link_libraries(ptyqt PRIVATE  )
   #target_compile_definitions(ptyqt PRIVATE PTYQT_DEBUG)
 endif()
 
