@@ -5,7 +5,7 @@
 
 #include <QString>
 
-namespace TerminalSolution {
+namespace ady {
 
 class SurfaceIntegration
 {
@@ -19,4 +19,4 @@ public:
     virtual void onGetClipboard() {}
 };
 
-} // namespace TerminalSolution
+} // namespace ady

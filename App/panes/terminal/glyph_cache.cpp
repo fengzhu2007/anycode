@@ -1,11 +1,11 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0+ OR GPL-3.0 WITH Qt-GPL-exception-1.0
 
-#include "glyphcache.h"
+#include "glyph_cache.h"
 
 #include <QTextLayout>
 
-namespace TerminalSolution {
+namespace ady {
 
 size_t qHash(const GlyphCacheKey &key, size_t seed = 0)
 {

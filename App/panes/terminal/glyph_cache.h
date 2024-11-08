@@ -8,7 +8,7 @@
 #include <QGlyphRun>
 #include <QString>
 
-namespace TerminalSolution {
+namespace ady {
 
 struct GlyphCacheKey
 {

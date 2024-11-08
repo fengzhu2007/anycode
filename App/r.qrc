@@ -77,5 +77,8 @@
         <file>Resource/icons/AddImmediateWindow_16x.svg</file>
         <file>Resource/icons/RemoveImmediateWindow_16x.svg</file>
         <file>Resource/icons/Trash_16x.svg</file>
+        <file>Resource/icons/PowerShellInteractiveWindow_16x.svg</file>
+        <file>Resource/icons/ZoomOut_16x.svg</file>
+        <file>Resource/icons/ZoomIn_16x.svg</file>
     </qresource>
 </RCC>

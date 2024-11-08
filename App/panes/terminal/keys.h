@@ -7,7 +7,7 @@
 
 #include <QKeyEvent>
 
-namespace TerminalSolution {
+namespace ady {
 
 VTermKey qtKeyToVTerm(Qt::Key key, bool keypad);
 VTermModifier qtModifierToVTerm(Qt::KeyboardModifiers mod);

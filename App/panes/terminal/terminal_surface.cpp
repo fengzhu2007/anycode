@@ -1,8 +1,8 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0+ OR GPL-3.0 WITH Qt-GPL-exception-1.0
 
-#include "terminalsurface.h"
-#include "surfaceintegration.h"
+#include "terminal_surface.h"
+#include "surface_integration.h"
 
 #include "keys.h"
 #include "scrollback.h"
@@ -12,7 +12,7 @@
 #include <QLoggingCategory>
 #include <QTimer>
 
-namespace TerminalSolution {
+namespace ady {
 
 Q_LOGGING_CATEGORY(log, "qtc.terminal.surface", QtWarningMsg);
 

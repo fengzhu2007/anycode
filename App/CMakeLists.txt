@@ -189,7 +189,9 @@ add_library(App SHARED
 
         panes/resource_manager/search_combobox.h panes/resource_manager/search_combobox.cpp
         panes/terminal/terminal_pane.ui panes/terminal/terminal_pane.h panes/terminal/terminal_pane.cpp
-        panes/terminal/celliterator.cpp panes/terminal/celliterator.h panes/terminal/glyphcache.cpp panes/terminal/glyphcache.h panes/terminal/keys.cpp panes/terminal/keys.h panes/terminal/scrollback.cpp panes/terminal/scrollback.h panes/terminal/surfaceintegration.h panes/terminal/terminalsurface.cpp panes/terminal/terminalsurface.h panes/terminal/terminalview.cpp panes/terminal/terminalview.h
+        panes/terminal/cell_iterator.cpp panes/terminal/cell_iterator.h panes/terminal/glyph_cache.cpp panes/terminal/glyph_cache.h panes/terminal/keys.cpp panes/terminal/keys.h panes/terminal/scrollback.cpp panes/terminal/scrollback.h panes/terminal/surface_integration.h panes/terminal/terminal_surface.cpp panes/terminal/terminal_surface.h panes/terminal/terminal_view.cpp panes/terminal/terminal_view.h
+        panes/terminal/terminal_widget.h panes/terminal/terminal_widget.cpp
+        panes/terminal/tab_style.h panes/terminal/tab_style.cpp
 
 
 

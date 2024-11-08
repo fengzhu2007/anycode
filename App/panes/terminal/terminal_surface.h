@@ -5,7 +5,7 @@
 
 #include "global.h"
 
-#include "celliterator.h"
+#include "cell_iterator.h"
 #include <variant>
 #include <QKeyEvent>
 #include <QSize>
@@ -13,7 +13,7 @@
 
 #include <memory>
 
-namespace TerminalSolution {
+namespace ady {
 
 class Scrollback;
 class SurfaceIntegration;

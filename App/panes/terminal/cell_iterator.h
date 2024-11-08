@@ -9,7 +9,7 @@
 
 #include <QPoint>
 
-namespace TerminalSolution {
+namespace ady {
 
 class TerminalSurface;
 

@@ -1,13 +1,13 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0+ OR GPL-3.0 WITH Qt-GPL-exception-1.0
 
-#include "celliterator.h"
+#include "cell_iterator.h"
 
-#include "terminalsurface.h"
+#include "terminal_surface.h"
 
 #include <stdexcept>
 
-namespace TerminalSolution {
+namespace ady {
 
 CellIterator::CellIterator(const TerminalSurface *surface, QPoint pos)
     : CellIterator(surface, pos.x() + (pos.y() * surface->liveSize().width()))

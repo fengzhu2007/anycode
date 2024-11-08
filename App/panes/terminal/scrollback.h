@@ -13,7 +13,7 @@
 #include <QFont>
 #include <QTextLayout>
 
-namespace TerminalSolution {
+namespace ady {
 
 class Scrollback
 {

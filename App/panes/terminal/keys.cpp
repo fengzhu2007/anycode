@@ -3,7 +3,7 @@
 
 #include "keys.h"
 
-namespace TerminalSolution {
+namespace ady {
 
 VTermModifier qtModifierToVTerm(Qt::KeyboardModifiers mod)
 {

@@ -8,7 +8,7 @@
 #include <cstring>
 #include <future>
 
-namespace TerminalSolution {
+namespace ady {
 
 Scrollback::Line::Line(int cols, const VTermScreenCell *cells)
     : m_cols(cols)

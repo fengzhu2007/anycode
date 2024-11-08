@@ -4,7 +4,7 @@
 #pragma once
 
 #include "global.h"
-#include "terminalsurface.h"
+#include "terminal_surface.h"
 
 #include <QAbstractScrollArea>
 #include <QAction>
@@ -15,7 +15,7 @@
 #include <memory>
 #include <optional>
 
-namespace TerminalSolution {
+namespace ady {
 
 class SurfaceIntegration;
 class TerminalViewPrivate;
@@ -140,8 +140,7 @@ public:
     TerminalSurface *surface() const;
 
 
-public slots:
-    void onReadReady();
+
 
 protected:
     void paintEvent(QPaintEvent *event) override;
