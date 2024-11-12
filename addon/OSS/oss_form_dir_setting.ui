@@ -10,6 +10,12 @@
     <height>344</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -192,7 +198,7 @@
   <customwidget>
    <class>ady::DirMappingView</class>
    <extends>QTreeView</extends>
-   <header location="global">components/DirMappingView.h</header>
+   <header location="global">components/dir_mapping_view.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

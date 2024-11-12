@@ -50,7 +50,7 @@ TerminalWidget::~TerminalWidget(){
 
 qint64 TerminalWidget::writeToPty(const QByteArray &data){
     if(d->process!=nullptr){
-        qDebug()<<"writeToPty"<<data;
+        //qDebug()<<"writeToPty"<<data;
         return d->process->write(data);
     }else{
         return 0;
@@ -59,7 +59,6 @@ qint64 TerminalWidget::writeToPty(const QByteArray &data){
 
 void TerminalWidget::onReadReady(){
     auto data = d->process->readAll();
-    qDebug()<<"onReadReady"<<data;
     this->writeToTerminal(data,false);
 }
 

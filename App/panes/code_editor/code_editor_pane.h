@@ -4,6 +4,9 @@
 #include "docking_pane.h"
 #include "code_editor_view.h"
 //#include "core/event_bus/subscriber.h"
+namespace Ui{
+class CodeEditorPane;
+}
 
 namespace ady{
 class DockingPaneManager;
@@ -21,6 +24,7 @@ public:
     };
 
     explicit CodeEditorPane(QWidget *parent = nullptr);
+    void initView();
     virtual ~CodeEditorPane();
     virtual QString id() override;
     virtual QString group() override;
@@ -29,6 +33,8 @@ public:
     virtual void save(bool rename) override;
     virtual void contextMenu(const QPoint& pos) override;
     virtual QJsonObject toJson() override;
+
+
     //virtual bool onReceive(Event* e) override;//event bus receive callback
     void rename(const QString& name);
     bool readFile(const QString& path);
@@ -50,11 +56,18 @@ public:
 
     static CodeEditorPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 
+private:
+    void updateInfoBar();
+
+
 public slots:
     void onModificationChanged(bool changed);
+    void onCursorPositionChanged();
+    void onFileOpend();
 
 protected:
     virtual void showEvent(QShowEvent* e) override;
+    virtual void resizeEvent(QResizeEvent* e) override;
 
 
 public:
@@ -64,6 +77,7 @@ public:
 
 private:
     CodeEditorPanePrivate* d;
+    Ui::CodeEditorPane* ui;
     static int SN;
 
 };

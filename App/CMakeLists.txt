@@ -10,6 +10,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 
+
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Xml Sql Gui Network Concurrent LinguistTools Svg)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Xml Sql Gui Network Concurrent LinguistTools Svg)
 
@@ -24,6 +26,7 @@ include_directories(SYSTEM "../3party/libvterm/include")
 include_directories(SYSTEM "../3party/libptyqt")
 
 
+
 #include_directories(SYSTEM "../3party/scintilla/qt/ScintillaEditBase")
 #include_directories(SYSTEM "../3party/scintilla/include")
 #include_directories(SYSTEM "../3party/scintilla/src")
@@ -34,6 +37,11 @@ find_library(CURL_LIB libcurl_imp PATHS "../3party/bin/x64/lib")
 find_library(SSH2_LIB libssh2 PATHS "../3party/bin/x64/lib")
 find_library(Z_LIB zlib PATHS "../3party/bin/x64/lib")
 find_library(GIT2_LIB git2 PATHS "../3party/bin/x64/lib")
+
+
+
+
+
 
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -139,7 +147,7 @@ add_library(App SHARED
         project/site_list_model.h project/site_list_model.cpp
         project/project_select_model.h project/project_select_model.cpp
         panes/resource_manager/resource_manager_tree_item_delegate.h panes/resource_manager/resource_manager_tree_item_delegate.cpp
-        panes/code_editor/code_editor_pane.h panes/code_editor/code_editor_pane.cpp
+        panes/code_editor/code_editor_pane.ui panes/code_editor/code_editor_pane.h panes/code_editor/code_editor_pane.cpp
 
         core/backend_thread.h core/backend_thread.cpp
         panes/resource_manager/resource_manage_read_folder_task.h panes/resource_manager/resource_manage_read_folder_task.cpp
@@ -192,6 +200,9 @@ add_library(App SHARED
         panes/terminal/cell_iterator.cpp panes/terminal/cell_iterator.h panes/terminal/glyph_cache.cpp panes/terminal/glyph_cache.h panes/terminal/keys.cpp panes/terminal/keys.h panes/terminal/scrollback.cpp panes/terminal/scrollback.h panes/terminal/surface_integration.h panes/terminal/terminal_surface.cpp panes/terminal/terminal_surface.h panes/terminal/terminal_view.cpp panes/terminal/terminal_view.h
         panes/terminal/terminal_widget.h panes/terminal/terminal_widget.cpp
         panes/terminal/tab_style.h panes/terminal/tab_style.cpp
+        panes/code_editor/zoom_label.h panes/code_editor/zoom_label.cpp
+
+
 
 
 
@@ -209,6 +220,7 @@ add_library(App SHARED
 
 
 target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt)
+
 
 target_compile_definitions(App PRIVATE APP_LIBRARY)
 
