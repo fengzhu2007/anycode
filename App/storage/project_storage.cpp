@@ -111,7 +111,7 @@ ProjectRecord ProjectStorage::toRecord(QSqlQuery& query)
     record.name = query.value(COL_NAME).toString();
     record.path = query.value(COL_PATH).toString();
     record.datetime = query.value(DatabaseHelper::COL_DATETIME).toLongLong();
-    record.updatetime = query.value(COL_PATH).toLongLong();
+    record.updatetime = query.value(COL_UPDATETIME).toLongLong();
     record.cvs =query.value(COL_CVS).toString();
     record.cvs_url = query.value(COL_CVS_URL).toString();
     record.cvs_username = query.value(COL_CVS_USERNAME).toString();

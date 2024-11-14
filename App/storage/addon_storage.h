@@ -15,6 +15,7 @@ namespace ady {
         QString file;
         int status;
         int is_system;
+        long long export_type;
     };
 
 
@@ -25,9 +26,9 @@ namespace ady {
         constexpr const static char COL_TYPENAME[] = "typename";
         constexpr const static char COL_TYPELABEL[] = "typelabel";
         constexpr const static char COL_FILE[] = "file";
+        constexpr const static char COL_EXPORT_TYPE[] = "export_type";
         constexpr const static char COL_STATUS[] = "status";
         constexpr const static char COL_IS_SYSTEM[] = "is_system";
-
 
 
         AddonStorage();

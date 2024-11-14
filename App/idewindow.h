@@ -3,6 +3,7 @@
 #include "global.h"
 #include "w_main_window.h"
 #include "core/event_bus/subscriber.h"
+//#include "storage/project_storage.h"
 
 namespace Ui {
 class IDEWindow;
@@ -15,6 +16,7 @@ namespace ady{
     class DockingPaneContainer;
     class DockingPane;
     class IDEWindowPrivate;
+    class ProjectRecord;
     class ANYENGINE_EXPORT IDEWindow : public wMainWindow , public Subscriber
     {
         Q_OBJECT
@@ -23,6 +25,11 @@ namespace ady{
         explicit IDEWindow(QWidget *parent = nullptr);
         ~IDEWindow();
         virtual bool onReceive(Event* e) override;//event bus receive callback
+        void initView();
+        void runExe(const QString& executable,const QStringList& arguments);
+        void openUrl(const QString& url);
+
+        void restart();
 
     public slots:
         void onDump();
@@ -36,6 +43,7 @@ namespace ady{
         void onReplaceAll(const QString& before,const QString& after,const QString& scope,int flags,const QString& filter,const QString& exclusion);
         void onReplace(const QString& before,const QString& after,int flags,bool hightlight=true);
         void onSearchCancel();
+        void onRecentMenuShow();
 
 
 
@@ -54,9 +62,9 @@ namespace ady{
         void restoreFromSettings();
         void restoreDockpanes();
         void restoreProjects();
-
         void restoreContainers(QJsonArray& list,int orientation,DockingPaneLayoutItemInfo* parent);
         int restoreTabs(QJsonArray& list,DockingPaneLayoutItemInfo* info);
+        void openProject(ProjectRecord& proj);
 
     private:
         Ui::IDEWindow *ui;

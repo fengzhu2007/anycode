@@ -33,7 +33,8 @@ public:
     virtual void save(bool rename) override;
     virtual void contextMenu(const QPoint& pos) override;
     virtual QJsonObject toJson() override;
-
+    virtual bool closeEnable() override;
+    virtual void doAction(int a) override;
 
     //virtual bool onReceive(Event* e) override;//event bus receive callback
     void rename(const QString& name);
@@ -79,6 +80,7 @@ private:
     CodeEditorPanePrivate* d;
     Ui::CodeEditorPane* ui;
     static int SN;
+    static int NEW_COUNT;
 
 };
 

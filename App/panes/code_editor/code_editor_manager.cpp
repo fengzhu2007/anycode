@@ -5,6 +5,7 @@
 #include "core/event_bus/event.h"
 #include "core/event_bus/type.h"
 #include "components/message_dialog.h"
+#include "storage/recent_storage.h"
 
 
 #include "texteditorsettings.h"
@@ -172,6 +173,9 @@ CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const
     }
     pane->editor()->gotoLine(line,column);
     pane->editor()->setFocus();
+    if(path.isEmpty()==false){
+        RecentStorage().add(RecentStorage::File,path);//add to recent
+    }
     return pane;
 }
 

@@ -846,6 +846,10 @@ void FileTransferModel::remoteItems(FileTransferModelItem* site,int from,int end
 
 
 void FileTransferModel::openProject(long long id,const QString& name,const QString& path){
+    auto exists = this->find(id,true);
+    if(exists){
+        return ;
+    }
     auto item = new FileTransferModelItem(FileTransferModelItem::Project,id,name,path,d->root);
     //find all site
     if(id>0){
@@ -1164,6 +1168,10 @@ begin:
 
 FileTransferModelItem* FileTransferModel::rootItem(){
     return d->root;
+}
+
+FileTransferModelItem* FileTransferModel::find(long long id,bool project){
+    return project?d->root->findByProjectId(id):d->root->findBySiteId(id);
 }
 
 void FileTransferModel::onThreadFinished(){

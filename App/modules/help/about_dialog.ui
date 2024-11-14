@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>200</height>
+    <width>420</width>
+    <height>240</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,12 +18,12 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>400</width>
-    <height>200</height>
+    <width>16777215</width>
+    <height>16777215</height>
    </size>
   </property>
   <property name="windowTitle">
-   <string>About AnyDeploy</string>
+   <string>About AnyCode</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>false</bool>
@@ -39,21 +39,21 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>100</width>
-       <height>100</height>
+       <width>120</width>
+       <height>120</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>100</width>
-       <height>100</height>
+       <width>120</width>
+       <height>120</height>
       </size>
      </property>
      <property name="text">
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="../../r.qrc">:/img/Resource/logo.png</pixmap>
+      <pixmap resource="../../r.qrc">:/Resource/images/logo.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -84,7 +84,7 @@
      <item>
       <widget class="QLabel" name="appName">
        <property name="text">
-        <string>AnyDeploy 0.9 Beta</string>
+        <string>AnyCode 0.9 Beta</string>
        </property>
       </widget>
      </item>
@@ -96,9 +96,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="qtVersion">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="appCopyright">
        <property name="text">
-        <string>Copyright (C) 2020-2022 Yangzhou Yihui Information Technology Co., Ltd</string>
+        <string>Copyright (C) 2020-2024 AnyCode</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -106,9 +113,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="appDescription">
+      <widget class="QLabel" name="appUrl">
        <property name="text">
-        <string>Multi protocol file transfer tool,Support FTP,SFTP,OSS,COS.</string>
+        <string/>
        </property>
        <property name="wordWrap">
         <bool>true</bool>

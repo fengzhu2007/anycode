@@ -8,6 +8,7 @@ constexpr const  char AddonStorage::COL_TITLE[];
 constexpr const  char AddonStorage::COL_TYPENAME[] ;
 constexpr const  char AddonStorage::COL_TYPELABEL[];
 constexpr const  char AddonStorage::COL_FILE[] ;
+constexpr const  char AddonStorage::COL_EXPORT_TYPE[] ;
 constexpr const  char AddonStorage::COL_STATUS[] ;
 constexpr const  char AddonStorage::COL_IS_SYSTEM[] ;
 AddonStorage::AddonStorage()
@@ -87,7 +88,7 @@ QList<AddonRecord> AddonStorage::list(int status)
 
 bool AddonStorage::update(AddonRecord record)
 {
-    QString sql = QString("UPDATE [%1] SET [%2]=?,[%3]=?,[%4]=?,[%5]=?,[%6]=? WHERE [%7]=?").arg(TABLE_NAME).arg(COL_TITLE).arg(COL_TYPENAME).arg(COL_TYPELABEL).arg(COL_STATUS).arg(COL_IS_SYSTEM).arg(DatabaseHelper::COL_ID);
+    QString sql = QString("UPDATE [%1] SET [%2]=?,[%3]=?,[%4]=?,[%5]=?,[%6]=?,[%7]=? WHERE [%8]=?").arg(TABLE_NAME).arg(COL_TITLE).arg(COL_TYPENAME).arg(COL_TYPELABEL).arg(COL_STATUS).arg(COL_IS_SYSTEM).arg(COL_EXPORT_TYPE).arg(DatabaseHelper::COL_ID);
     QSqlQuery query(DatabaseHelper::getDatabase()->get());
     query.prepare(sql);
     query.bindValue(0,record.title);
@@ -95,6 +96,8 @@ bool AddonStorage::update(AddonRecord record)
     query.bindValue(2,record.label);
     query.bindValue(3,record.status);
     query.bindValue(4,record.is_system);
+    query.bindValue(5,record.export_type);
+    query.bindValue(6,record.id);
     bool ret = query.exec();
     this->error = query.lastError();
     return ret;
@@ -102,7 +105,7 @@ bool AddonStorage::update(AddonRecord record)
 
 long long AddonStorage::insert(AddonRecord record)
 {
-    QString sql = QString("INSERT INTO [%1] ([%2],[%3],[%4],[%5],[%6]) VALUES (?,?,?,?,?)").arg(TABLE_NAME).arg(COL_TITLE).arg(COL_TYPENAME).arg(COL_TYPELABEL).arg(COL_STATUS).arg(COL_IS_SYSTEM);
+    QString sql = QString("INSERT INTO [%1] ([%2],[%3],[%4],[%5],[%6],[%7]) VALUES (?,?,?,?,?,?)").arg(TABLE_NAME).arg(COL_TITLE).arg(COL_TYPENAME).arg(COL_TYPELABEL).arg(COL_STATUS).arg(COL_IS_SYSTEM).arg(COL_EXPORT_TYPE);
     QSqlQuery query(DatabaseHelper::getDatabase()->get());
     query.prepare(sql);
     query.bindValue(0,record.title);
@@ -110,6 +113,7 @@ long long AddonStorage::insert(AddonRecord record)
     query.bindValue(2,record.label);
     query.bindValue(3,record.status);
     query.bindValue(4,record.is_system);
+    query.bindValue(5,record.export_type);
     bool ret = query.exec();
     this->error = query.lastError();
     if(ret){
@@ -152,6 +156,7 @@ AddonRecord AddonStorage::toRecord(QSqlQuery& query)
     record.file = query.value(COL_FILE).toString();
     record.status = query.value(COL_STATUS).toInt();
     record.is_system = query.value(COL_IS_SYSTEM).toInt();
+    record.export_type = query.value(COL_EXPORT_TYPE).toLongLong();
     return record;
 }
 

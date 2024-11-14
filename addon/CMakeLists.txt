@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.10)
 
 #add_subdirectory(COS)
 add_subdirectory(FTP)

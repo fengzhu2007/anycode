@@ -107,5 +107,20 @@ struct ANYENGINE_EXPORT ServerRefreshData{
     }
 };
 
+struct ANYENGINE_EXPORT OutputData{
+    QString source;
+    QString content;
+    QJsonObject toJson(){
+        return {
+                {"source",source},
+                {"content",content},
+        };
+    }
+    void fromJson(const QJsonObject& data){
+        this->source = data.find("source")->toString();
+        this->content = data.find("content")->toString();
+    }
+};
+
 }
 #endif // EVENT_DATA_H

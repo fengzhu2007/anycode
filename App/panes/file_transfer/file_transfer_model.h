@@ -164,6 +164,8 @@ public:
     FileTransferModelItem* take(int siteid);
     FileTransferModelItem* rootItem();
 
+    FileTransferModelItem* find(long long id,bool project=false);//find server
+
 signals:
     void notifyProgress(long long siteid,long long id,float progress);
 

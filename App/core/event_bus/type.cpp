@@ -32,6 +32,8 @@ const QString Type::M_GOTO = "Goto";
 const QString Type::M_NOTIFY_REFRESH_TREE = "NotifyRefreshTree";
 const QString Type::M_NOTIFY_REFRESH_LIST = "NotifyRefreshList";
 
+const QString Type::M_OUTPUT = "Output";
+
 
 
 Type::Type()

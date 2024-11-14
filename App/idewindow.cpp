@@ -12,6 +12,7 @@
 #include "panes/resource_manager/resource_manager_model.h"
 #include "panes/code_editor/code_editor_pane.h"
 #include "panes/code_editor/code_editor_manager.h"
+#include "panes/code_editor/goto_line_dialog.h"
 #include "panes/version_control/version_control_pane.h"
 #include "panes/server_manage/server_manage_pane.h"
 #include "panes/file_transfer/file_transfer_pane.h"
@@ -19,6 +20,7 @@
 #include "panes/find_replace/find_replace_pane.h"
 #include "panes/file_transfer/file_transfer_model.h"
 #include "panes/terminal/terminal_pane.h"
+#include "panes/output/output_pane.h"
 #include "panes/loader.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
@@ -27,15 +29,26 @@
 #include "core/backend_thread.h"
 #include "core/ide_settings.h"
 #include "storage/project_storage.h"
+#include "storage/recent_storage.h"
 #include "network/network_manager.h"
-#include "w_toast.h"
+
 
 #include "languages/html/htmlscanner.h"
+
+#include "modules/help/about_dialog.h"
+#include "modules/help/update_dialog.h"
+
+#include "common.h"
+
+#include <w_toast.h>
+
 
 #include <QLabel>
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QTextCodec>
+#include <QProcess>
+#include <QDesktopServices>
 #include <QDebug>
 
 namespace ady{
@@ -68,7 +81,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
 
 
 
-    connect(m_dockingPaneManager->workbench(),&DockingWorkbench::beforePaneClose,this,&IDEWindow::onBeforePaneClose);
+    //connect(m_dockingPaneManager->workbench(),&DockingWorkbench::beforePaneClose,this,&IDEWindow::onBeforePaneClose);
     connect(m_dockingPaneManager->workbench(),&DockingWorkbench::paneClosed,this,&IDEWindow::onPaneClosed);
     connect(ui->actionOpen_Project,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionOpen_Folder,&QAction::triggered,this,&IDEWindow::onActionTriggered);
@@ -80,7 +93,11 @@ IDEWindow::IDEWindow(QWidget *parent) :
     connect(ui->actionSave_All_L,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionClose_C,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionClose_Project,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionClear,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionClear_Files,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+
     connect(ui->actionQuit_Q_tAlt_F4,&QAction::triggered,this,&IDEWindow::close);
+
 
     //Edit
     connect(ui->actionUndo_U,&QAction::triggered,this,&IDEWindow::onActionTriggered);
@@ -99,22 +116,68 @@ IDEWindow::IDEWindow(QWidget *parent) :
     connect(ui->actionServer,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionTerminal,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionFile_Transfer,&QAction::triggered,this,&IDEWindow::onActionTriggered);
-    connect(ui->actionLog,&QAction::triggered,this,&IDEWindow::onActionTriggered);
-
-    connect(ui->actionAbout,&QAction::triggered,this,&IDEWindow::onDump);
+    connect(ui->actionOutput,&QAction::triggered,this,&IDEWindow::onActionTriggered);
 
 
+    //tool
+    connect(ui->actionOptions,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+
+
+    //addon
+    connect(ui->actionAddon_Manage,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+
+    //help
+    connect(ui->actionHome,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionView_Help_H,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionDonate,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionUpdate,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionAbout,&QAction::triggered,this,&IDEWindow::onActionTriggered);
 
 
     wToastManager::init(this);
     BackendThread::init()->start();
     CodeEditorManager::init(m_dockingPaneManager);
 
+    //this->forTest();
+    this->initView();
+}
 
-    //this->restoreFromSettings();
 
+void IDEWindow::initView(){
+    //init menu
+    connect(ui->menuRecent_Files,&QMenu::aboutToShow,this,&IDEWindow::onRecentMenuShow);
+    connect(ui->menuRecent_Projects,&QMenu::aboutToShow,this,&IDEWindow::onRecentMenuShow);
 
-    this->forTest();
+    //init command line
+#ifdef Q_OS_WIN
+    QMenu* commandLineMenu = new QMenu(ui->menuTool_T);
+    commandLineMenu->setTitle(tr("Command Line"));
+    auto icon = QIcon(":/Resource/icons/ImmediateWindow_16x.svg");
+    commandLineMenu->setIcon(icon);
+    commandLineMenu->addAction(icon,tr("Command Prompt"),[this]{
+        QStringList arguments;
+        arguments << "/c" << "start" << "cmd.exe";
+        this->runExe("cmd.exe",arguments);
+    });
+    commandLineMenu->addAction(QIcon(":/Resource/icons/PowerShellInteractiveWindow_16x.svg"),tr("PowerShell"),[this]{
+        QStringList arguments;
+        arguments << "/c" << "start" << "powershell.exe";
+        this->runExe("powershell.exe",arguments);
+    });
+    ui->menuTool_T->insertMenu(ui->actionOptions,commandLineMenu);
+    ui->menuTool_T->insertSeparator(ui->actionOptions);
+
+#elif defined(Q_OS_MAC)
+
+    QStringList arguments;
+    arguments << "-e" << QString("tell application \"Terminal\" to do script \"cd %1 && exec $SHELL\"").arg(directory);
+    this->runExe("osascript",arguments);
+
+#elif defined(Q_OS_LINUX)
+    QStringList arguments;
+    arguments << QString("--working-directory=%1").arg(directory);
+    this->runExe("gnome-terminal",arguments);
+#endif
 }
 
 IDEWindow::~IDEWindow()
@@ -170,12 +233,25 @@ bool IDEWindow::onReceive(Event* e){
             pane->editor()->setFocus();
         }
     }else if(e->id()==Type::M_OPEN_FILE_TRANSFTER){
-        //auto data = static_cast<UploadData*>(e->data());
         auto pane = FileTransferPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
-
     }
     return false;
+}
+
+
+void IDEWindow::runExe(const QString& executable,const QStringList& arguments){
+    QProcess::startDetached(executable, arguments);
+}
+
+void IDEWindow::openUrl(const QString& url){
+     QDesktopServices::openUrl(QUrl(url));
+}
+
+void IDEWindow::restart(){
+    QString program = QCoreApplication::applicationFilePath();
+    QProcess::startDetached(program, QStringList());
+    QCoreApplication::quit();
 }
 
 void IDEWindow::onDump(){
@@ -183,13 +259,13 @@ void IDEWindow::onDump(){
 }
 
 void IDEWindow::onPaneClosed(QString&id,QString&group,bool isClient){
-    qDebug()<<"onPaneClosed:"<<id<<";"<<group<<";"<<isClient;
+    //qDebug()<<"onPaneClosed:"<<id<<";"<<group<<";"<<isClient;
 }
 void IDEWindow::onBeforePaneClose(DockingPane* pane,bool isClient){
-    qDebug()<<"onBeforePaneClose:"<<pane<<";"<<isClient;
+    /*qDebug()<<"onBeforePaneClose:"<<pane<<";"<<isClient;
     if(isClient){
         //pane->setCloseEnable(false);
-    }
+    }*/
 }
 
 void IDEWindow::onActionTriggered(){
@@ -232,40 +308,68 @@ void IDEWindow::onActionTriggered(){
             client->closeCurrent();
         }
     }else if(sender==ui->actionClose_Project){
-
-        /*auto model = ResourceManagerModel::getInstance();
-        if(model!=nullptr){
-
-        }*/
-        /*if(ResourceManagerPane::getInstance()==nullptr){
-
-        }*/
         Publisher::getInstance()->post(Type::M_CLOSE_PROJECT);
+    }else if(sender==ui->actionClear){
+        RecentStorage().clear(RecentStorage::ProjectAndFolder);
+    }else if(sender==ui->actionClear_Files){
+        RecentStorage().clear(RecentStorage::File);
 
-
-
+    //edit
     }else if(sender==ui->actionGoto){
         auto pane = this->currentEditorPane();
         if(pane!=nullptr){
             auto editor = pane->editor();
             auto cursor = editor->textCursor();
             int cur = cursor.blockNumber() + 1;
-            //GotoLineDialog::open(this,cur,editor->document()->lineCount());
+            GotoLineDialog::open(this,cur,editor->document()->lineCount());
         }
     }else if(sender==ui->actionFind_Replace){
         this->onOpenFindAndReplace(0,{},{});
-    }else if(sender==ui->actionResource_Manage){
+    }else if(sender==ui->actionCopy_C){
+        auto pane = this->currentEditorPane();
+        if(pane!=nullptr){
+            pane->doAction(DockingPane::Copy);
+        }
+    }else if(sender==ui->actionRedo){
+        auto pane = this->currentEditorPane();
+        if(pane!=nullptr){
+            pane->doAction(DockingPane::Redo);
+        }
+    }else if(sender==ui->actionUndo_U){
+        auto pane = this->currentEditorPane();
+        if(pane!=nullptr){
+            pane->doAction(DockingPane::Undo);
+        }
+    }else if(sender==ui->actionPaste_P){
+        auto pane = this->currentEditorPane();
+        if(pane!=nullptr){
+            pane->doAction(DockingPane::Paste);
+        }
+    }else if(sender==ui->actionDelete_D){
+        auto pane = this->currentEditorPane();
+        if(pane!=nullptr){
+            pane->doAction(DockingPane::Delete);
+        }
+    }else if(sender==ui->actionCut_X){
+        auto pane = this->currentEditorPane();
+        if(pane!=nullptr){
+            pane->doAction(DockingPane::Cut);
+        }
+    }else if(sender==ui->actionSelect_All){
+        auto pane = this->currentEditorPane();
+        if(pane!=nullptr){
+            pane->doAction(DockingPane::SelectAll);
+        }
+    }
+    //view
+    else if(sender==ui->actionResource_Manage){
         auto pane = ResourceManagerPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
         auto model = ResourceManagerModel::getInstance();
-        //qDebug()<<"count:"<<model->rowCount();
         if(model->rowCount()==0){
             //first open
             this->restoreProjects();
         }
-
-
-
     }else if(sender==ui->actionVersion_Control){
         auto pane = VersionControlPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
@@ -278,8 +382,30 @@ void IDEWindow::onActionTriggered(){
     }else if(sender==ui->actionFile_Transfer){
         auto pane = FileTransferPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
-    }else if(sender==ui->actionLog){
+    }else if(sender==ui->actionOutput){
+        auto pane = OutputPane::open(m_dockingPaneManager,true);
+        pane->activeToCurrent();
 
+    //tool
+    }else if(sender==ui->actionOptions){
+
+
+    //addon
+    }else if(sender==ui->actionAddon_Manage){
+
+
+
+    //help
+    }else if(sender==ui->actionView_Help_H){
+        this->openUrl(APP_HELP_URL);
+    }else if(sender==ui->actionHome){
+        this->openUrl(APP_URL);
+    }else if(sender==ui->actionDonate){
+        this->openUrl(APP_DONATE_URL);
+    }else if(sender==ui->actionUpdate){
+        UpdateDialog::open(this);
+    }else if(sender==ui->actionAbout){
+        AboutDialog::open(this);
     }
 }
 
@@ -330,6 +456,7 @@ void IDEWindow::onSearchCancel(){
     }
 }
 
+
 void IDEWindow::onOpenFindAndReplace(int mode,const QString& text,const QString& scope){
     auto dialog = FindReplaceDialog::getInstance();
     if(dialog==nullptr){
@@ -348,6 +475,65 @@ void IDEWindow::onOpenFindAndReplace(int mode,const QString& text,const QString&
     }
     if(!scope.isEmpty()){
         dialog->setSearchScope(scope);
+    }
+}
+
+void IDEWindow::onRecentMenuShow(){
+    auto sender = static_cast<QMenu*>(this->sender());
+    if(sender==ui->menuRecent_Files){
+        static QList<QAction*> actionFileList;
+        if(actionFileList.size()>0){
+            //remove action
+            for(auto one:actionFileList){
+                sender->removeAction(one);
+            }
+        }
+        auto list = RecentStorage().list(RecentStorage::File);
+        int size = list.size();
+        if(size>0){
+            auto separator = sender->insertSeparator(ui->actionClear_Files);
+            actionFileList<<separator;
+            for(auto one:list){
+                const QString path = one.path;
+                auto action = new QAction(path,sender);
+                actionFileList<<action;
+                connect(action,&QAction::triggered,this,[this,path](){
+                    this->onOpenFile(path);
+                });
+                sender->insertAction(separator,action);
+            }
+        }
+    }else if(sender==ui->menuRecent_Projects){
+        static QList<QAction*> actionProjectList;
+        if(actionProjectList.size()>0){
+            //remove action
+            for(auto one:actionProjectList){
+                sender->removeAction(one);
+            }
+        }
+        auto list = RecentStorage().list(RecentStorage::ProjectAndFolder);
+        int size = list.size();
+        if(size>0){
+            auto separator = sender->insertSeparator(ui->actionClear);
+            actionProjectList<<separator;
+            for(auto one:list){
+                const QString path = one.path;
+                auto action = new QAction(path,sender);
+                actionProjectList<<action;
+                connect(action,&QAction::triggered,this,[this,one](){
+                    if(one.dataid>0){
+                        auto proj = ProjectStorage().one(one.dataid);
+                        if(proj.id>0){
+                            this->openProject(proj);
+                            return ;
+                        }
+                    }
+                    this->onOpenFolder(one.path);
+                });
+                sender->insertAction(separator,action);
+            }
+        }
+
     }
 }
 
@@ -497,7 +683,9 @@ void IDEWindow::restoreProjects(){
     }
 }
 
-
+void IDEWindow::openProject(ProjectRecord& proj){
+    Publisher::getInstance()->post(new Event(Type::M_OPEN_PROJECT,&proj));
+}
 
 void IDEWindow::forTest(){
     //Css::Scanner scanner;

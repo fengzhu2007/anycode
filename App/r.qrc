@@ -80,5 +80,7 @@
         <file>Resource/icons/PowerShellInteractiveWindow_16x.svg</file>
         <file>Resource/icons/ZoomOut_16x.svg</file>
         <file>Resource/icons/ZoomIn_16x.svg</file>
+        <file>Resource/images/logo.png</file>
+        <file>Resource/icons/ClearWindowContent_16x.svg</file>
     </qresource>
 </RCC>

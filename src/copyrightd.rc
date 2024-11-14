@@ -22,15 +22,15 @@ VS_VERSION_INFO VERSIONINFO
         BEGIN
             BLOCK "080404b0"
             BEGIN
-                VALUE "CompanyName", "anycode\0"
-                VALUE "FileDescription", "anycode Debug\0"
+                VALUE "CompanyName", "AnyCode\0"
+                VALUE "FileDescription", "AnyCode Debug\0"
                 VALUE "FileVersion", "1.0.0.0\0"
                 VALUE "ProductVersion", "1.0.0.0\0"
-                VALUE "LegalCopyright", "版权所有 (C) anycode\0"
+                VALUE "LegalCopyright", "版权所有 (C) AnyCode\0"
                 VALUE "LegalTrademarks", "\0"
-                VALUE "OriginalFilename", "anycode.exe\0"
-                VALUE "ProductName", "anycode Debug\0"
-                VALUE "InternalName", "anycode.exe\0"
+                VALUE "OriginalFilename", "AnyCode.exe\0"
+                VALUE "ProductName", "AnyCode Debug\0"
+                VALUE "InternalName", "AnyCode.exe\0"
            END
         END
 

@@ -11,6 +11,7 @@
 #include "core/backend_thread.h"
 #include "storage/project_storage.h"
 #include "storage/site_storage.h"
+#include "storage/recent_storage.h"
 #include "docking_pane_manager.h"
 #include "docking_pane_layout_item_info.h"
 #include "components/message_dialog.h"
@@ -192,6 +193,18 @@ bool ResourceManagerPane::onReceive(Event* e){
             delete project;
             return false;
         }
+
+        //find proj
+        auto exists = d->model->findProject(project->path);
+        if(exists!=nullptr){
+            //has opened
+            return true;
+        }
+
+
+        //add to recent project
+        RecentStorage().add(project->name,project->path,project->id);
+
 
         auto item = d->model->appendItem(project);
         if(project->id>0){

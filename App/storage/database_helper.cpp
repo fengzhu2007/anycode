@@ -15,6 +15,7 @@
 #include "commit_storage.h"
 #include "group_storage.h"
 #include "favorite_storage.h"
+#include "recent_storage.h"
 
 #include <QDebug>
 namespace ady {
@@ -191,13 +192,15 @@ namespace ady {
                 upgradeV4();
             case 5:
                 upgradeV5();
+            case 6:
+                upgradeV6();
             default:
 
                 break;
         }
 
         //qDebug()<<"version:"<<version;
-        upgradeV5();
+        //upgradeV5();
         if(version != VERSIONID){
            bool ret = this->setVersion();
         }
@@ -380,6 +383,27 @@ namespace ady {
             this->db.exec(QString::fromUtf8("ALTER TABLE [%1] ADD COLUMN [%2] VARCHAR(250) NULL").arg(ProjectStorage::TABLE_NAME).arg(ProjectStorage::COL_CVS_URL));
             this->db.exec(QString::fromUtf8("ALTER TABLE [%1] ADD COLUMN [%2] VARCHAR(100) NULL").arg(ProjectStorage::TABLE_NAME).arg(ProjectStorage::COL_CVS_USERNAME));
             this->db.exec(QString::fromUtf8("ALTER TABLE [%1] ADD COLUMN [%2] VARCHAR(250) NULL").arg(ProjectStorage::TABLE_NAME).arg(ProjectStorage::COL_CVS_PASSWORD));
+         }
+     }
+
+     void DatabaseHelper::upgradeV6(){
+         int type = this->dbType();
+         if(type==1){
+             this->db.exec(QString::fromUtf8("ALTER TABLE [%1] ADD COLUMN [%2] INTEGER DEFAULT '0' NULL").arg(AddonStorage::TABLE_NAME).arg(AddonStorage::COL_EXPORT_TYPE));
+             this->db.exec(QString::fromUtf8(("UPDATE [%1] SET [%2]=1 WHERE 1")).arg(AddonStorage::TABLE_NAME).arg(AddonStorage::COL_EXPORT_TYPE));
+
+             //add recent table
+             QString sql = QString("CREATE TABLE [%1] (\
+                                    [%2] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT,\
+                                    [%3] VARCHAR(100)  NULL,\
+                                    [%4] VARCHAR(600)  NULL,\
+                                    [%5] INTEGER DEFAULT '0' NULL,\
+                                    [%6] INTEGER DEFAULT '0' NULL,\
+                                    [%7] INTEGER DEFAULT '0' NULL,\
+                                    [%8] INTEGER DEFAULT '0' NULL\
+                                    )").arg(RecentStorage::TABLE_NAME).arg(COL_ID).arg(RecentStorage::COL_NAME).arg(RecentStorage::COL_PATH).arg(RecentStorage::COL_DATAID).arg(RecentStorage::COL_TYPE).arg(COL_DATETIME).arg(RecentStorage::COL_UPDATETIME);
+            this->db.exec(sql);
+             //qDebug()<<sql<<this->db.lastError();
          }
      }
 

@@ -9,18 +9,13 @@ class ZoomLabel : public QLabel
     Q_OBJECT
 public:
     explicit ZoomLabel(QWidget* parent);
-
     void setZoom(int zoom);
-    void initData();
-public slots:
-    void onIndexSelected(const QModelIndex& index);
+signals:
+    void selected(int zoom);
 
 
 protected:
     void mousePressEvent(QMouseEvent *e) override;
-
-private:
-         //SearchComboBoxPrivate* d;
 
 
 };

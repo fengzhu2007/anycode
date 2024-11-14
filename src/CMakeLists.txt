@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
-project(anycode VERSION 0.1 LANGUAGES C CXX)
+project(AnyCode VERSION 0.1 LANGUAGES C CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -36,7 +36,7 @@ if(WIN32)
 endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(anycode
+    qt_add_executable(AnyCode
         MANUAL_FINALIZATION
         ${ANYCODE_SOURCES}
     )
@@ -46,13 +46,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
-        add_library(anycode SHARED
+        add_library(AnyCode SHARED
             ${ANYCODE_SOURCES}
         )
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
-        add_executable(anycode
+        add_executable(AnyCode
             ${ANYCODE_SOURCES}
             ${ANYCODE_CFILES}
         )
@@ -61,10 +61,9 @@ endif()
 
 
 
-target_link_libraries(anycode PRIVATE Qt${QT_VERSION_MAJOR}::Widgets DbgHelp App wRect)
+target_link_libraries(AnyCode PRIVATE Qt${QT_VERSION_MAJOR}::Widgets DbgHelp App wRect)
 
 
-message("1111 ${CMAKE_INSTALL_BINDIR}")
 
 
 
@@ -72,9 +71,9 @@ message("1111 ${CMAKE_INSTALL_BINDIR}")
 #set_target_properties(anycode PROPERTIES WIN32_ICON "${CMAKE_SOURCE_DIR}/others/logo.ico")
 
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.anycode)
+  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.AnyCode)
 endif()
-set_target_properties(anycode PROPERTIES
+set_target_properties(AnyCode PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -83,14 +82,14 @@ set_target_properties(anycode PROPERTIES
 )
 
 include(GNUInstallDirs)
-install(TARGETS anycode
+install(TARGETS AnyCode
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(anycode)
+    qt_finalize_executable(AnyCode)
 endif()
 
 

@@ -42,6 +42,9 @@ public:
     //server manager
     static const QString M_NOTIFY_REFRESH_TREE;
     static const QString M_NOTIFY_REFRESH_LIST;
+
+    //output
+    static const QString M_OUTPUT;
 };
 }
 

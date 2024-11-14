@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.14)
-
 project(COS)
 
 set(CMAKE_AUTOUIC ON)

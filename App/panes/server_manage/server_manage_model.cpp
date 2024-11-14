@@ -494,6 +494,11 @@ void ServerManageModel::refreshItems(QList<FileItem> list,ServerManageModelItem*
 }
 
 void ServerManageModel::openProject(long long id,const QString name){
+    //find proj
+    auto exists = this->find(id,true);
+    if(exists){
+        return ;
+    }
     auto item = new ServerManageModelItem(ServerManageModelItem::Project,id,name,d->root);
     //find all site
     auto instance = NetworkManager::getInstance();

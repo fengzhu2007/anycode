@@ -6,6 +6,7 @@
 #include "docking_pane_container_tabbar.h"
 #include "panes/resource_manager/resource_manager_model.h"
 #include "components/message_dialog.h"
+#include "storage/recent_storage.h"
 
 #include <textdocument.h>
 #include <texteditorsettings.h>
@@ -29,18 +30,15 @@
 #include <QDebug>
 
 
-#define BUFFER_SIZE 65536
-char buffer[BUFFER_SIZE];
-
 namespace ady{
 
 const QString CodeEditorPane::PANE_ID = "CodeEditor_%1";
 const QString CodeEditorPane::PANE_GROUP = "CodeEditor";
 int CodeEditorPane::SN = 0;
+int CodeEditorPane::NEW_COUNT = 0;
 
 class CodeEditorPanePrivate{
 public:
-    //CodeEditorView* editor;
     int id;
     int state=CodeEditorPane::None;
     bool modification=false;
@@ -53,10 +51,8 @@ public:
 CodeEditorPane::CodeEditorPane(QWidget *parent)
     :DockingPane(parent),ui(new Ui::CodeEditorPane)
 {
-    //Subscriber::reg();
     d = new CodeEditorPanePrivate;
     d->id = CodeEditorPane::SN;
-    //d->editor = new CodeEditorView(this);
     auto widget = new QWidget(this);
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -64,18 +60,22 @@ CodeEditorPane::CodeEditorPane(QWidget *parent)
     this->setStyleSheet(".ady--CodeEditorPane>#widget{background-color:#f5f5f5}"
                         ".ady--CodeEditorPane>#widget>#infoBar>QLabel{padding:0 2px;}");
 
-
     CodeEditorManager::getInstance()->append(this);
     CodeEditorPane::SN += 1;
+
+
+    this->initView();
+}
+
+
+void CodeEditorPane::initView(){
     connect(ui->editor,&QPlainTextEdit::modificationChanged,this,&CodeEditorPane::onModificationChanged);
     connect(ui->editor,&QPlainTextEdit::cursorPositionChanged,this,&CodeEditorPane::onCursorPositionChanged);
     connect(ui->editor->textDocument(),&TextEditor::TextDocument::openFinishedSuccessfully,this,&CodeEditorPane::onFileOpend);
 
+
     ui->editor->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
     ui->scrollBar->setRange(ui->editor->horizontalScrollBar()->minimum(),ui->editor->horizontalScrollBar()->maximum());
-
-
     QObject::connect(ui->scrollBar, &QScrollBar::valueChanged, ui->editor->horizontalScrollBar(), &QScrollBar::setValue);
 
     QObject::connect(ui->editor->horizontalScrollBar(), &QScrollBar::valueChanged, ui->scrollBar, &QScrollBar::setValue);
@@ -91,28 +91,24 @@ CodeEditorPane::CodeEditorPane(QWidget *parent)
         }
     });
 
+    auto instance = TextEditor::TextEditorSettings::instance();
+    connect(instance,&TextEditor::TextEditorSettings::fontSettingsChanged,this,[this](TextEditor::FontSettings settings){
+        ui->zoom->setZoom(settings.fontZoom());
+    });
     //zoom
-    this->initView();
-}
-
-
-void CodeEditorPane::initView(){
     int zoom = TextEditor::TextEditorSettings::instance()->fontSettings().fontZoom();
-
     ui->zoom->setZoom(zoom);
+    connect(ui->zoom,&ZoomLabel::selected,this,[=](int z){
+        TextEditor::TextEditorSettings::instance()->setZoom(z);
+        ui->zoom->setZoom(z);
+    });
 }
 
 CodeEditorPane::~CodeEditorPane(){
-    //Subscriber::unReg();
-    //qDebug()<<"CodeEditorPane::~CodeEditorPane";
-    //qDebug()<<"CodeEditorPane::~CodeEditorPane"<<this;
-
-
     auto manager = CodeEditorManager::getInstance();
     if(manager!=nullptr){
         manager->remove(this);
     }
-    //disconnect(d->editor,&QPlainTextEdit::modificationChanged,this,&CodeEditorPane::onModificationChanged);
     delete ui;
     delete d;
 }
@@ -130,15 +126,13 @@ QString CodeEditorPane::description(){
 }
 
 void CodeEditorPane::activation(){
-    //d->editor->init();
     ui->editor->setFocus();
-    //qDebug()<<"activation"<<this->id()<<this->windowTitle();
     CodeEditorManager::getInstance()->setCurrent(this);
-
 }
 
 void CodeEditorPane::save(bool rename){
     QString path = this->path();
+    const QString source = path;
     bool tabRename = false;
     if(rename){
         //save as
@@ -153,6 +147,7 @@ void CodeEditorPane::save(bool rename){
         return ;
     }
     //save
+
     auto instance = CodeEditorManager::getInstance();
     instance->removeWatchFile(this->path());
     QFileInfo fi(path);
@@ -175,6 +170,18 @@ void CodeEditorPane::save(bool rename){
             }
         }
         ui->editor->document()->setModified(false);
+
+        //add to recent
+        auto uri = QUrl(path);
+        if(source!=path && uri.isLocalFile()){
+
+            RecentStorage storage;
+            if(source.isEmpty()){
+                //remove
+                storage.del(RecentStorage::File,source);
+            }
+            storage.add(RecentStorage::File,source);
+        }
     }
     if(!list.isEmpty()){
         m->appendWatchDirectory(list.at(0));
@@ -207,10 +214,43 @@ QJsonObject CodeEditorPane::toJson(){
     };
 }
 
-/*bool CodeEditorPane::onReceive(Event* e){
+bool CodeEditorPane::closeEnable(){
+    if(d->modification){
+        auto ret = MessageDialog::confirm(this,tr("Save"),tr("Save file\n%1?").arg(path()),QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+        if(ret==QMessageBox::Cancel){
+            return false;
+        }
+        if(ret==QMessageBox::Yes){
+            this->save(false);
+        }
+    }
+    return true;
+}
 
-    return false;
-}*/
+void CodeEditorPane::doAction(int a){
+    if(a==DockingPane::Save){
+        this->save(false);
+    }else if(a==DockingPane::SaveAs){
+        this->save(true);
+    }else if(a==DockingPane::Redo){
+        ui->editor->redo();
+    }else if(a==DockingPane::Undo){
+        ui->editor->undo();
+    }else if(a==DockingPane::Cut){
+        ui->editor->cut();
+    }else if(a==DockingPane::Copy){
+        ui->editor->copy();
+    }else if(a==DockingPane::Paste){
+        ui->editor->paste();
+    }else if(a==DockingPane::Delete){
+        QKeyEvent *event = new QKeyEvent(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier);
+        QApplication::postEvent(ui->editor, event);
+    }else if(a==DockingPane::SelectAll){
+        ui->editor->selectAll();
+    }else if(a==DockingPane::Print){
+        //ui->editor->print();
+    }
+}
 
 void CodeEditorPane::rename(const QString& name){
     auto container = this->container();
@@ -317,28 +357,29 @@ void CodeEditorPane::reload(){
 
 CodeEditorPane* CodeEditorPane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
     auto pane = new CodeEditorPane();
-    auto value = data.find("path");
-    if(value!=data.end()){
-        const QString path = value->toString();
-        if(!path.isEmpty()){
-            QFileInfo fi(path);
-            pane->setWindowTitle(fi.fileName());
-            pane->readFile(path);
-            auto instance = CodeEditorManager::getInstance();
-            instance->appendWatchFile(path);
-
-            {
-                auto value = data.find("line");
-                if(value!=data.end()){
-                    int line = value->toInt(1);
-                    pane->editor()->gotoLine(line,0);
-                }
+    const QString path = data.find("path")->toString();
+    if(!path.isEmpty()){
+        QFileInfo fi(path);
+        pane->setWindowTitle(fi.fileName());
+        pane->readFile(path);
+        auto instance = CodeEditorManager::getInstance();
+        instance->appendWatchFile(path);
+        {
+            int line = data.find("line")->toInt(0);
+            if(line>0){
+                pane->editor()->gotoLine(line,0);
             }
-
-            return pane;
         }
+        //startup init,do not append to recent file
+        return pane;
     }
-    pane->setWindowTitle(QObject::tr("New File"));
+
+    if(CodeEditorPane::NEW_COUNT==0){
+        pane->setWindowTitle(QObject::tr("New File"));
+    }else{
+        pane->setWindowTitle(QObject::tr("New File (%1)").arg(CodeEditorPane::NEW_COUNT));
+    }
+    ++CodeEditorPane::NEW_COUNT;
     return pane;
 }
 
@@ -368,8 +409,6 @@ void CodeEditorPane::onModificationChanged(bool changed){
 
 void CodeEditorPane::onCursorPositionChanged(){
     auto cursor = ui->editor->textCursor();
-    //ui->row->setText(tr("Line:%1").arg(cursor.blockNumber() + 1));
-    //ui->column->setText(tr("Column:%1").arg(cursor.positionInBlock()+1));
     ui->position->setText(tr("Row:%1, Col:%2").arg(cursor.blockNumber() + 1).arg(cursor.positionInBlock()+1));
 }
 
@@ -379,7 +418,11 @@ void CodeEditorPane::onFileOpend(){
 
 void CodeEditorPane::updateInfoBar(){
     auto format = ui->editor->textDocument()->format();
-    ui->charset->setText(format.codec->name());
+    QString name = format.codec->name();
+    if(name==QLatin1String("System")){
+        name = QLatin1String("ANSI");
+    }
+    ui->charset->setText(name);
     if(format.lineTerminationMode==Utils::TextFileFormat::LFLineTerminator){
         ui->br->setText(QLatin1String("LF"));
     }else if(format.lineTerminationMode==Utils::TextFileFormat::CRLFLineTerminator){

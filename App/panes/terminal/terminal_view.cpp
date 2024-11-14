@@ -1134,6 +1134,7 @@ void TerminalView::mousePressEvent(QMouseEvent *event)
             d->m_surface->pasteFromClipboard(textFromSelection());
         }
     }
+    QAbstractScrollArea::mousePressEvent(event);
 }
 void TerminalView::mouseMoveEvent(QMouseEvent *event)
 {

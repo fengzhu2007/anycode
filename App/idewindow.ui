@@ -99,12 +99,13 @@
     <addaction name="actionTerminal"/>
     <addaction name="separator"/>
     <addaction name="actionFile_Transfer"/>
-    <addaction name="actionLog"/>
+    <addaction name="actionOutput"/>
    </widget>
    <widget class="QMenu" name="menuTool_T">
     <property name="title">
      <string>&amp;Tool</string>
     </property>
+    <addaction name="separator"/>
     <addaction name="actionOptions"/>
    </widget>
    <widget class="QMenu" name="menuExtend_X">
@@ -507,6 +508,33 @@
   <action name="actionUpdate">
    <property name="text">
     <string>Update</string>
+   </property>
+  </action>
+  <action name="actionCommand_Prompt_2">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/ImmediateWindow_16x.svg</normaloff>:/Resource/icons/ImmediateWindow_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Command Prompt</string>
+   </property>
+  </action>
+  <action name="actionPowerShell">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/PowerShellInteractiveWindow_16x.svg</normaloff>:/Resource/icons/PowerShellInteractiveWindow_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>PowerShell</string>
+   </property>
+  </action>
+  <action name="actionOutput">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Output_16x.svg</normaloff>:/Resource/icons/Output_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Output</string>
    </property>
   </action>
  </widget>

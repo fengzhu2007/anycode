@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.10)
 
 project(App)
 
@@ -39,14 +39,15 @@ find_library(Z_LIB zlib PATHS "../3party/bin/x64/lib")
 find_library(GIT2_LIB git2 PATHS "../3party/bin/x64/lib")
 
 
-
-
-
+string(TIMESTAMP BUILD_TIME "")
+add_definitions(-DBUILD_TIME="${BUILD_TIME}")
 
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DQ_DEBUG)
 endif()
+
+
 
 set(RESOURCES
     r.qrc
@@ -99,7 +100,7 @@ add_library(App SHARED
         network/http/http_client.h network/http/http_client.cpp
         network/http/http_response.h network/http/http_response.cpp
 
-        project/open_project_window.cpp
+        project/open_project_window.ui project/open_project_window.h project/open_project_window.cpp
 
         storage/addon_storage.h storage/addon_storage.cpp
         storage/commit_storage.h storage/commit_storage.cpp
@@ -202,6 +203,11 @@ add_library(App SHARED
         panes/terminal/tab_style.h panes/terminal/tab_style.cpp
         panes/code_editor/zoom_label.h panes/code_editor/zoom_label.cpp
 
+
+        modules/help/about_dialog.ui modules/help/about_dialog.h modules/help/about_dialog.cpp
+        modules/help/update_dialog.h modules/help/update_dialog.cpp modules/help/update_dialog.ui
+        storage/recent_storage.h storage/recent_storage.cpp
+        panes/output/output_pane.h panes/output/output_pane.cpp panes/output/output_pane.ui
 
 
 

@@ -56,7 +56,10 @@ public:
     QStringList takeWatchDirectory(const QString& path,bool include_children=true);
 
     ResourceManagerModelItem* find(const QString& path);
+    ResourceManagerModelItem* findProject(const QString& path);
     ResourceManagerModelItem* rootItem();
+
+
 
     //bool takeWatchDir(const QString& dir);
     QJsonArray toJson();
