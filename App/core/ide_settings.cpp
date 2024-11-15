@@ -119,7 +119,7 @@ bool IDESettings::readFromFile(const QString& filename){
     const QString appPath = QCoreApplication::applicationDirPath();
     QFile file(appPath+"/settings.json");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "can not write";
+        //qDebug() << "can not write";
         return false;
     }
     QTextStream in(&file);
@@ -203,7 +203,7 @@ bool IDESettings::saveToFile(const QString& filename){
 
     QFile file(appPath+"/settings.json");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "can not write";
+        //qDebug() << "can not write";
         return false;
     }
     QTextStream out(&file);

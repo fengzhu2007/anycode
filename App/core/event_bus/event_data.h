@@ -108,15 +108,18 @@ struct ANYENGINE_EXPORT ServerRefreshData{
 };
 
 struct ANYENGINE_EXPORT OutputData{
+    int level;
     QString source;
     QString content;
     QJsonObject toJson(){
         return {
+                {"level",level},
                 {"source",source},
                 {"content",content},
         };
     }
     void fromJson(const QJsonObject& data){
+        this->level = data.find("level")->toInt(0);
         this->source = data.find("source")->toString();
         this->content = data.find("content")->toString();
     }

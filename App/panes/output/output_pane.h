@@ -26,6 +26,7 @@ public:
 
 public slots:
     void onActionTriggered();
+    void onIndexChanged(int index);
 
 
 private:

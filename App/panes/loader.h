@@ -8,7 +8,7 @@ class DockingPaneManager;
 class PaneLoader
 {
 public:
-    static DockingPane* init(DockingPaneManager* dockingManager,const QString& group,QJsonObject& data);
+    static DockingPane* init(DockingPaneManager* dockingManager,const QString& group,const QJsonObject& data);
 private:
     PaneLoader();
 };

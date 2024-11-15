@@ -12,6 +12,7 @@ public:
     explicit Event(const QString& id);
     explicit Event(const QString& id,void *data);
     explicit Event(const QString& id,QJsonValueRef& data);
+    explicit Event(const QString& id,const QJsonValue& data);
     virtual ~Event();
     void ignore();
     bool isIgnore();

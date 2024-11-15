@@ -38,10 +38,14 @@ public:
 
     void reload();
 
+
     static ServerClientPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 
 protected:
     virtual void showEvent(QShowEvent* e) override;
+
+private:
+    void output(NetworkResponse* response);
 
 public slots:
     void onContextMenu(const QPoint& pos);

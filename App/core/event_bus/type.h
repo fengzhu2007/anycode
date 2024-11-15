@@ -8,6 +8,7 @@ class ANYENGINE_EXPORT Type
 public:
     Type();
 public:
+
     //resource manage
     static const QString M_OPEN_PROJECT;
     static const QString M_CLOSE_PROJECT;
@@ -44,6 +45,12 @@ public:
     static const QString M_NOTIFY_REFRESH_LIST;
 
     //output
+    enum OutputLevel{
+        Text=0,
+        Ok,
+        Warning,
+        Error
+    };
     static const QString M_OUTPUT;
 };
 }

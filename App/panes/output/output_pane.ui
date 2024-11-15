@@ -64,7 +64,20 @@
       </spacer>
      </item>
      <item>
-      <widget class="QComboBox" name="source"/>
+      <widget class="QComboBox" name="source">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>140</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QToolBar" name="toolBar">

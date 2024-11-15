@@ -13,7 +13,7 @@
 
 namespace ady{
 
-DockingPane* PaneLoader::init(DockingPaneManager* dockingManager,const QString& group,QJsonObject& data){
+DockingPane* PaneLoader::init(DockingPaneManager* dockingManager,const QString& group,const QJsonObject& data){
     DockingPane* pane = nullptr;
     if(group == ResourceManagerPane::PANE_GROUP){
         pane = ResourceManagerPane::make(dockingManager,data);

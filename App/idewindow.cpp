@@ -6,6 +6,7 @@
 #include "docking_pane_client.h"
 #include "docking_pane_layout.h"
 #include "docking_pane_layout_item_info.h"
+#include <docking_pane_tabbar.h>
 #include "project/open_project_window.h"
 #include "project/new_project_window.h"
 #include "panes/resource_manager/resource_manager_pane.h"
@@ -579,95 +580,9 @@ void IDEWindow::restoreFromSettings(){
 void IDEWindow::restoreDockpanes(){
     auto settings = IDESettings::getInstance(this);
     QJsonObject dockpanes = settings->dockpanes();
-    QJsonValue innerV = dockpanes.take("inner");
-    if(innerV.isObject()){
-        QJsonObject inner = innerV.toObject();
-        int orientation = inner.take("orientation").toInt(1);
-        QJsonArray list = inner.take("list").toArray();
-        if(list.size()>0){
-            auto root = m_dockingPaneManager->layout()->rootItem();
-            this->restoreContainers(list,orientation,root);
-            root->calculateStretch();
-        }
-    }
+    m_dockingPaneManager->restore(dockpanes,PaneLoader::init);
 }
 
-void IDEWindow::restoreContainers(QJsonArray& list,int orientation,DockingPaneLayoutItemInfo* parent){
-    for(auto one:list){
-        if(one.isObject()){
-            QJsonObject containerJson = one.toObject();
-            if(containerJson.find("tabs")!=containerJson.end()){
-                int active = containerJson.find("active")->toInt(0);
-                int client = containerJson.find("client")->toInt(0);
-                int stretch = containerJson.find("stretch")->toDouble(0);
-                int size = containerJson.find("size")->toInt(0);
-                QJsonArray tabs = containerJson.take("tabs").toArray();
-                //auto info = new DockingPaneLayoutItemInfo();
-                auto workbench = m_dockingPaneManager->workbench();
-                DockingPaneContainer* container = nullptr;
-                if(client>0){
-                    container = new DockingPaneClient(workbench,true);
-                }else{
-                    container = new DockingPaneContainer(workbench);
-                }
-                DockingPaneLayoutItemInfo* info = nullptr;
-                if(orientation==DockingPaneLayoutItemInfo::Vertical){
-                    info = parent->insertItem(workbench,new QWidgetItem(container),DockingPaneManager::Bottom);
-                }else{
-                    info = parent->insertItem(workbench,new QWidgetItem(container),DockingPaneManager::Right);
-                }
-                int num = this->restoreTabs(tabs,info);
-                if(num>0){
-                    //info->setStretch(stretch);
-                    info->setManualSize(size);
-                    container->setPane(num-1<active?0:active);
-                    //qDebug()<<"restoreContainers"<<container<<active<<num;
-                }
-            }else if(containerJson.find("children")!=containerJson.end()){
-
-                QJsonArray children = containerJson.take("children").toArray();
-                if(children.size()>1){
-                    int stretch = containerJson.find("stretch")->toDouble(0);
-                    int size = containerJson.find("size")->toInt(0);
-                    auto info = new DockingPaneLayoutItemInfo(nullptr,DockingPaneManager::Left,parent);//create empty layout item
-                    info->initHandle(m_dockingPaneManager->workbench());//init drag handle
-                    int ori = orientation==DockingPaneLayoutItemInfo::Horizontal?DockingPaneLayoutItemInfo::Vertical:DockingPaneLayoutItemInfo::Horizontal;
-                    this->restoreContainers(children,ori,info);
-                    parent->appendItem(info);
-                    info->setManualSize(size);
-                    //qDebug()<<"info"<<info<<info->geometry(info->spacing());
-                    info->calculateStretch();
-                    //info->setStretch(stretch);
-                }
-            }
-        }
-    }
-}
-
-int IDEWindow::restoreTabs(QJsonArray& list,DockingPaneLayoutItemInfo* info){
-    int total = 0;
-    for(auto one:list){
-        if(one.isObject()){
-            auto tab = one.toObject();
-            auto container = info->container();
-            const QString group = tab.take("group").toString();
-            QJsonObject data = tab.take("data").toObject();
-            auto pane = PaneLoader::init(m_dockingPaneManager,group,data);
-            if(pane!=nullptr){
-                container->appendPane(pane);
-                if(total==0){
-                    //set object name
-#ifdef Q_DEBUG
-                    container->setObjectName(pane->id()+"_container");
-                    info->setObjectName(pane->id()+"_container_itemInfo");
-#endif
-                }
-                total += 1;
-            }
-        }
-    }
-    return total;
-}
 
 void IDEWindow::restoreProjects(){
     //ProjectStorage projectStorage

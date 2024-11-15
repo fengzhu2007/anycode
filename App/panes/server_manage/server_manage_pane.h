@@ -27,9 +27,6 @@ public:
 
     void addThread(ServerRequestThread* thread);
 
-
-
-
     static ServerManagePane* open(DockingPaneManager* dockingManager,bool active=false);
     static ServerManagePane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 public slots:
@@ -51,10 +48,12 @@ private:
     ServerManagePane(QWidget *parent = nullptr);
     void chmod(int mode,bool apply_children);
     void refresh(ServerManageModelItem* item);
+    void output(NetworkResponse* response);
 
 public:
     static const QString PANE_ID;
     static const QString PANE_GROUP;
+    static const QString PANE_TITLE;
 
 private:
     Ui::ServerManagePane *ui;

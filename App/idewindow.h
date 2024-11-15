@@ -62,8 +62,7 @@ namespace ady{
         void restoreFromSettings();
         void restoreDockpanes();
         void restoreProjects();
-        void restoreContainers(QJsonArray& list,int orientation,DockingPaneLayoutItemInfo* parent);
-        int restoreTabs(QJsonArray& list,DockingPaneLayoutItemInfo* info);
+
         void openProject(ProjectRecord& proj);
 
     private:

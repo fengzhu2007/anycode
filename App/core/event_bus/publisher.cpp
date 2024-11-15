@@ -58,6 +58,10 @@ void Publisher::post(const QString&id,QJsonValueRef& data){
     this->post(new Event(id,data));
 }
 
+void Publisher::post(const QString&id,const QJsonValue& data){
+    this->post(new Event(id,data));
+}
+
 
 void Publisher::reg(Subscriber* subscriber){
     d->subscribers.push_back(subscriber);

@@ -17,6 +17,7 @@ public:
     void post(const QString& id);
     void post(const QString&id,void* data);
     void post(const QString&id,QJsonValueRef& data);
+    void post(const QString&id,const QJsonValue& data);
     void reg(Subscriber* subscriber);
     void unReg(Subscriber* subscriber);
 

@@ -15,7 +15,8 @@
 #include "new_folder_dialog.h"
 #include "permission_dialog.h"
 #include "common.h"
-#include "w_toast.h"
+#include <w_toast.h>
+#include <docking_pane_container.h>
 #include <QTimer>
 #include <QMenu>
 
@@ -27,6 +28,7 @@ const QString ServerClientPane::PANE_GROUP = "ServerClient";
 class ServerClientPanePrivate{
 public:
     long long id=0l;
+    long long pid=0l;
     bool showed=false;
     QString type;
     QString rootPath;
@@ -49,7 +51,8 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
     SiteStorage storage;
     auto r = storage.one(id);
 
-    this->regMessageIds({Type::M_UPLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY,Type::M_NOTIFY_REFRESH_LIST});
+
+    this->regMessageIds({Type::M_UPLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY,Type::M_NOTIFY_REFRESH_LIST,Type::M_CLOSE_PROJECT_NOTIFY});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -62,6 +65,7 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
 
     d = new ServerClientPanePrivate;
     d->id = id;
+    d->pid = r.pid;
     d->type = r.type;
 
 
@@ -158,6 +162,16 @@ bool ServerClientPane::onReceive(Event* e){
             model->setList(list);
             return true;
         }
+    }else if(e->id()==Type::M_CLOSE_PROJECT_NOTIFY){
+        auto data = e->toJsonOf<CloseProjectData>().toObject();
+        long long id = data.find("id")->toInt(0);
+        if(id!=0 && id==d->pid){
+            //close pane
+            auto container = this->container();
+            if(container!=nullptr){
+                container->closePane(this,true);
+            }
+        }
     }
     return false;
 }
@@ -201,6 +215,27 @@ void ServerClientPane::reload(){
         this->cdDir(d->id,d->currentPath,true);
     }
 }
+
+void ServerClientPane::output(NetworkResponse* response){
+    if(response){
+        if(response->status()){
+            QJsonObject json = {
+                {"level",Type::Ok},
+                {"source",this->windowTitle()},
+                {"content",response->command + "\n"+response->header}
+            };
+            Publisher::getInstance()->post(Type::M_OUTPUT,json);
+        }else{
+            QJsonObject json = {
+                {"level",Type::Error},
+                {"source",this->windowTitle()},
+                {"content",response->command + "\n"+response->errorMsg}
+            };
+            Publisher::getInstance()->post(Type::M_OUTPUT,json);
+        }
+    }
+}
+
 
 ServerClientPane* ServerClientPane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
 
@@ -353,6 +388,7 @@ void ServerClientPane::onNetworkResponse(NetworkResponse* response,int command,i
         }
     }
     if(response!=nullptr){
+        this->output(response);
         delete response;
     }
 }

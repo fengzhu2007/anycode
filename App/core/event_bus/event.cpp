@@ -30,6 +30,14 @@ Event::Event(const QString& id,QJsonValueRef& data){
     d->jsonData = data;
 }
 
+Event::Event(const QString& id,const QJsonValue& data){
+    d = new EventPrivate;
+    d->id = id;
+    d->data = nullptr;
+    d->jsonData = data;
+}
+
+
 Event::~Event(){
     delete d;
 }

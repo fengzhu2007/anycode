@@ -27,6 +27,8 @@ ServerManagePane* ServerManagePane::instance = nullptr;
 
 const QString ServerManagePane::PANE_ID = "ServerManager";
 const QString ServerManagePane::PANE_GROUP = "ServerManager";
+const QString ServerManagePane::PANE_TITLE = tr("Server Manager");
+
 
 
 class ServerManagePanePrivate{
@@ -44,7 +46,7 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
     widget->setObjectName("widget");
     ui->setupUi(widget);
     this->setCenterWidget(widget);
-    this->setWindowTitle(tr("Server Manager"));
+    this->setWindowTitle(PANE_TITLE);
     this->setStyleSheet("QToolBar{border:0px;}"
                         "QTreeView{border:0;background-color:#f5f5f5}"
                         ".ady--ServerManagePane>#widget{background-color:#EEEEF2}");
@@ -261,8 +263,8 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
                 model->changeItem(item);
             }
             wToast::showText(response->errorMsg);
-
         }
+        this->output(response);
     }else if(command==ServerRequestThread::List){
         auto dir = response->params["dir"].toString();
         auto item = model->find(response->id,dir);
@@ -282,6 +284,7 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
             }
             wToast::showText(response->errorMsg);
         }
+        this->output(response);
     }else if(command==ServerRequestThread::Refresh || command==ServerRequestThread::NewFolder || command==ServerRequestThread::Delete){
         auto item = model->find(response->id);
         if(response->status()){
@@ -308,6 +311,7 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
             }
             wToast::showText(response->errorMsg);
         }
+        this->output(response);
     }else if(command==ServerRequestThread::Rename || command==ServerRequestThread::Chmod){
         auto dir = response->params["dir"].toString();
         auto item = model->find(response->id);
@@ -333,6 +337,7 @@ void ServerManagePane::onNetworkResponse(NetworkResponse* response,int command,i
             }
             wToast::showText(response->errorMsg);
         }
+        this->output(response);
     }
     if(response!=nullptr){
         delete response;
@@ -602,6 +607,26 @@ void ServerManagePane::refresh(ServerManageModelItem* item){
         item->setLoading(true);
         static_cast<ServerManageModel*>(ui->treeView->model())->changeItem(item);
         this->cdDir(sid,item->path(),true);
+    }
+}
+
+void ServerManagePane::output(NetworkResponse* response){
+    if(response){
+        if(response->status()){
+            QJsonObject json = {
+                {"level",Type::Ok},
+                {"source",PANE_TITLE},
+                {"content",response->command + "\n"+response->header}
+            };
+            Publisher::getInstance()->post(Type::M_OUTPUT,json);
+        }else{
+            QJsonObject json = {
+                {"level",Type::Error},
+                {"source",PANE_TITLE},
+                {"content",response->command + "\n"+response->errorMsg}
+            };
+            Publisher::getInstance()->post(Type::M_OUTPUT,json);
+        }
     }
 }
 
