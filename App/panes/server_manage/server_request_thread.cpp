@@ -34,11 +34,14 @@ void ServerRequestThread::run(){
         response = d->req->link();
         if(response->status()){
             //cd data
+            emit output(response->command + "\n" +response->header,1);
             delete response;
             response = nullptr;
             QString* path = static_cast<QString*>(d->data);
             response = d->req->listDir(*path);
             delete path;
+        }else{
+            emit output(response->command + "\n" + response->errorInfo(),3);
         }
     }else if(d->cmd==List){
         QString* path = static_cast<QString*>(d->data);
@@ -61,7 +64,12 @@ void ServerRequestThread::run(){
         auto data = static_cast<RenameData*>(d->data);
         response = d->req->rename(data->src,data->dest);
         if(response!=nullptr){
-            response->debug();
+            //response->debug();
+            if(response->status()){
+                emit output(response->command + "\n" + response->header,1);
+            }else{
+                emit output(response->command + "\n" + response->errorInfo(),3);
+            }
              delete response;
         }else{
              result = Unsppport;
@@ -82,7 +90,6 @@ void ServerRequestThread::run(){
              if(one.endsWith("/")){
                  //folder
                  //read all sub files
-
                  this->delFolder(one,&successTotal,&errorTotal);
                  path = one.left(one.size() - 1);
              }else{
@@ -177,6 +184,11 @@ bool ServerRequestThread::delFile(const QString& path){
     if(response->status()){
         ret = true;
     }
+    if(response->status()){
+        emit output(response->command + "\n" + response->header,1);
+    }else{
+        emit output(response->command + "\n" + response->errorInfo(),3);
+    }
     delete response;
     return ret;
 }
@@ -207,7 +219,12 @@ void ServerRequestThread::delFolder(const QString& path,int* successTotal,int* e
     }else{
         *errorTotal += 1;
     }
-    response->debug();
+    if(response->status()){
+        emit output(response->command + "\n" + response->header,1);
+    }else{
+        emit output(response->command + "\n" + response->errorInfo(),3);
+    }
+    //response->debug();
     delete response;
 }
 
@@ -219,6 +236,11 @@ int ServerRequestThread::chmodFile(const QString& path,int mode){
     int ret = 0;
     if(response->status()){
         ret = 1;
+    }
+    if(response->status()){
+        emit output(response->command + "\n" + response->header,1);
+    }else{
+        emit output(response->command + "\n" + response->errorInfo(),3);
     }
     delete response;
     return ret;
@@ -234,6 +256,12 @@ void ServerRequestThread::chmodFolder(const QString& path,int mode,bool apply_ch
     }else{
         *errorTotal += 1;
     }
+    if(response->status()){
+        emit output(response->command + "\n" + response->header,1);
+    }else{
+        emit output(response->command + "\n" + response->errorInfo(),3);
+    }
+
     //response->debug();
     delete response;
     if(apply_children){

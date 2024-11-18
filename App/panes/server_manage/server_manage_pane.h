@@ -42,6 +42,7 @@ public slots:
     void onNewFolder(long long id,const QString& path,const QString& name);
     void onRename(ServerManageModelItem* item,const QString& newName);
     void onThreadFinished();
+    void onOutput(const QString& message,int status);
 
 
 private:

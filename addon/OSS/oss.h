@@ -48,14 +48,20 @@ public:
     //virtual NetworkResponse* chDir(const QString &dir) override;
     virtual NetworkResponse* mkDir(const QString &dir) override;
     virtual NetworkResponse* rmDir(const QString &dir) override;
+
+
+
+
     NetworkResponse* del(const QString& bucket,const QString& dst);
 
 
 
     virtual NetworkResponse* customeAccess(const QString& name,QMap<QString,QVariant> data) override;
+    virtual QString matchToPath(const QString& from,bool local) override;
 
 
     inline void setDefaultDir(const QString& dir){m_rootPath = dir;}
+
 
 
 protected:
@@ -68,6 +74,7 @@ private:
 
     OSSSetting* m_setting;
     QList<QPair<QString,QString>> m_dirMapping;
+    QList<QRegularExpression> m_filters;
 
 };
 }

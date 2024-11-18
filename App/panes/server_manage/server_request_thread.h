@@ -63,6 +63,8 @@ private:
 signals:
     void resultReady(NetworkResponse* response,int command,int result=0);
     void message(const QString& message,int result);
+    void output(const QString& message,int status);
+    //void output(NetworkResponse* response);
 
 };
 }

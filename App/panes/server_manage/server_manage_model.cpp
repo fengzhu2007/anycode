@@ -258,10 +258,11 @@ QString ServerManageModelItem::addonType(){
 
 class ServerManageModelPrivate{
 public:
-    ServerManageModelPrivate():projectIcon(QString::fromUtf8(":/Resource/icons/DocumentsFolder_16x.svg")),serverIcon(":/Resource/icons/RemoteServer_16x.svg"){}
+    ServerManageModelPrivate():projectIcon(QString::fromUtf8(":/Resource/icons/DocumentsFolder_16x.svg")),serverIcon(":/Resource/icons/RemoteServer_16x.svg"),folderIcon(":/Resource/icons/FolderClosed_16x.svg"){}
     ServerManageModelItem* root = nullptr;
     QIcon projectIcon;
     QIcon serverIcon;
+    QIcon folderIcon;
     QMap<QString,QString> addons;
     QFileIconProvider* provider;
     FileItemSorting* sorting;
@@ -377,7 +378,8 @@ QVariant ServerManageModel::data(const QModelIndex &index, int role) const{
             }else if(type==ServerManageModelItem::Server){
                 return d->serverIcon;
             }else if(type==ServerManageModelItem::Folder){
-                return d->provider->icon(QFileIconProvider::Folder);
+                //return d->provider->icon(QFileIconProvider::Folder);
+                return d->folderIcon;
             }else if(type==ServerManageModelItem::File){
                 return d->provider->icon(QFileIconProvider::File);
             }

@@ -79,9 +79,18 @@ FileTransferModelItem::FileTransferModelItem(Mode mode,bool is_file,const QStrin
     d->src = src;
     d->dest = dest;
     d->parent = parent;
-    QFileInfo fi(src);
-    d->name = fi.fileName();
-    d->filesize = fi.size();
+    if(is_file==false && src.endsWith("/")){
+        QFileInfo fi(src.left(src.length() - 1));
+        d->name = fi.fileName();
+        d->filesize = fi.size();
+    }else{
+        QFileInfo fi(src);
+        d->name = fi.fileName();
+        d->filesize = fi.size();
+    }
+
+
+
     d->matched = true;
     // qDebug()<<"item init:"<<this<<"file"<<src;
 }
@@ -265,12 +274,13 @@ FileTransferModel* FileTransferModel::instance = nullptr;
 
 class FileTransferModelPrivate{
 public:
-    FileTransferModelPrivate():projectIcon(QString::fromUtf8(":/Resource/icons/DocumentsFolder_16x.svg")),serverIcon(":/Resource/icons/RemoteServer_16x.svg"),uploadIcon(":/Resource/icons/TransferUpload_16x.svg"),downloadIcon(":/Resource/icons/TransferDownload_16x.svg"){}
+    FileTransferModelPrivate():projectIcon(QString::fromUtf8(":/Resource/icons/DocumentsFolder_16x.svg")),serverIcon(":/Resource/icons/RemoteServer_16x.svg"),uploadIcon(":/Resource/icons/TransferUpload_16x.svg"),downloadIcon(":/Resource/icons/TransferDownload_16x.svg"),folderIcon(":/Resource/icons/FolderClosed_16x.svg"){}
     FileTransferModelItem* root = nullptr;
     QIcon projectIcon;
     QIcon serverIcon;
     QIcon uploadIcon;
     QIcon downloadIcon;
+    QIcon folderIcon;
     QMutex mutex;
     QWaitCondition cond;
     QList<JobThread*> threads;
@@ -433,7 +443,8 @@ QVariant FileTransferModel::data(const QModelIndex &index, int role) const
             }else if(type==FileTransferModelItem::Job){
                 return d->provider->icon(QFileIconProvider::File);
             }else if(type==FileTransferModelItem::JobGroup){
-                return d->provider->icon(QFileIconProvider::Folder);
+                //return d->provider->icon(QFileIconProvider::Folder);
+                return d->folderIcon;
             }
         }else if(index.column() == Src){
             FileTransferModelItem* item = static_cast<FileTransferModelItem*>(index.internalPointer());

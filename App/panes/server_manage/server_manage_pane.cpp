@@ -232,6 +232,7 @@ void ServerManagePane::deleteFiles(long long id,const QStringList& list){
         connect(thread,&ServerRequestThread::finished,thread,&ServerRequestThread::deleteLater);
         connect(thread,&ServerRequestThread::resultReady, this, &ServerManagePane::onNetworkResponse);
         connect(thread,&ServerRequestThread::message, this, &ServerManagePane::onMessage);
+        connect(thread,&ServerRequestThread::output, this, &ServerManagePane::onOutput);
         this->addThread(thread);
         thread->start();
     }
@@ -545,6 +546,7 @@ void ServerManagePane::onNewFolder(long long id,const QString& path,const QStrin
          auto thread = new ServerRequestThread(req,ServerRequestThread::NewFolder,new QString(path+name));
          connect(thread,&ServerRequestThread::finished,thread,&ServerRequestThread::deleteLater);
          connect(thread,&ServerRequestThread::resultReady, this, &ServerManagePane::onNetworkResponse);
+         connect(thread,&ServerRequestThread::output, this, &ServerManagePane::onOutput);
          this->addThread(thread);
          thread->start();
     }
@@ -562,6 +564,7 @@ void ServerManagePane::onRename(ServerManageModelItem* item,const QString& newNa
          auto thread = new ServerRequestThread(req,ServerRequestThread::Rename,data);
          connect(thread,&ServerRequestThread::finished,thread,&ServerRequestThread::deleteLater);
          connect(thread,&ServerRequestThread::resultReady, this, &ServerManagePane::onNetworkResponse);
+         connect(thread,&ServerRequestThread::output, this, &ServerManagePane::onOutput);
          this->addThread(thread);
          thread->start();
     }
@@ -592,6 +595,7 @@ void ServerManagePane::chmod(int mode,bool apply_children){
             connect(thread,&ServerRequestThread::finished,thread,&ServerRequestThread::deleteLater);
             connect(thread,&ServerRequestThread::resultReady, this, &ServerManagePane::onNetworkResponse);
             connect(thread,&ServerRequestThread::message, this, &ServerManagePane::onMessage);
+            connect(thread,&ServerRequestThread::output, this, &ServerManagePane::onOutput);
             this->addThread(thread);
             thread->start();
          }
@@ -613,19 +617,16 @@ void ServerManagePane::refresh(ServerManageModelItem* item){
 void ServerManagePane::output(NetworkResponse* response){
     if(response){
         if(response->status()){
-            QJsonObject json = {
-                {"level",Type::Ok},
-                {"source",PANE_TITLE},
-                {"content",response->command + "\n"+response->header}
-            };
-            Publisher::getInstance()->post(Type::M_OUTPUT,json);
+            this->onOutput(response->command + "\n"+response->header,Type::Ok);
         }else{
-            QJsonObject json = {
+            /*QJsonObject json = {
                 {"level",Type::Error},
                 {"source",PANE_TITLE},
                 {"content",response->command + "\n"+response->errorMsg}
             };
-            Publisher::getInstance()->post(Type::M_OUTPUT,json);
+            Publisher::getInstance()->post(Type::M_OUTPUT,json);*/
+
+            this->onOutput(response->command + "\n"+response->errorMsg,Type::Error);
         }
     }
 }
@@ -635,6 +636,15 @@ void ServerManagePane::onThreadFinished(){
     if(d->list.contains(sender)){
          d->list.removeOne(sender);
     }
+}
+
+void ServerManagePane::onOutput(const QString& message,int status){
+    QJsonObject json = {
+        {"level",status},
+        {"source",PANE_TITLE},
+        {"content",message}
+    };
+    Publisher::getInstance()->post(Type::M_OUTPUT,json);
 }
 
 ServerManagePane* ServerManagePane::open(DockingPaneManager* dockingManager,bool active){

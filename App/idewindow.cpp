@@ -134,6 +134,9 @@ IDEWindow::IDEWindow(QWidget *parent) :
     connect(ui->actionUpdate,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionAbout,&QAction::triggered,this,&IDEWindow::onActionTriggered);
 
+    //debug
+    connect(ui->actionDebug,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+
 
     wToastManager::init(this);
     BackendThread::init()->start();
@@ -407,6 +410,8 @@ void IDEWindow::onActionTriggered(){
         UpdateDialog::open(this);
     }else if(sender==ui->actionAbout){
         AboutDialog::open(this);
+    }else if(sender==ui->actionDebug){
+        m_dockingPaneManager->dump();
     }
 }
 

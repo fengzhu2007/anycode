@@ -23,6 +23,17 @@ namespace ady {
         this->command = command;
     }
 
+    QString NetworkResponse::errorInfo(){
+        QStringList list;
+        if(!this->errorMsg.isEmpty()){
+            list<<this->errorMsg;
+        }
+        if(!this->networkErrorMsg.isEmpty()){
+            list<<this->networkErrorMsg;
+        }
+        return list.join("\n");
+    }
+
     NetworkResponse::~NetworkResponse()
     {
         headers.clear();

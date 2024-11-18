@@ -20,7 +20,9 @@ private:
 
 private:
     static ResourceManageIconProvider* instance;
-     QFileIconProvider* provider;
+    QFileIconProvider* provider;
+    QIcon m_projectIcon;
+    QIcon m_folderIcon;
 
 
 

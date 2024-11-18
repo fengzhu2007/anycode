@@ -79,6 +79,7 @@ HttpResponse* HttpClient::get(QString url,HttpResponse* response)
         m_requestHeaders.clear();
         curl_slist_free_all(chunk);
     }
+
     return response;
 }
 

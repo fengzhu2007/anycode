@@ -20,6 +20,10 @@ namespace ady {
             Permission,
             Max
         };
+        enum Mode{
+            List=0,
+            Grid
+        };
 
         RemoteFileItemModel(long long id,QObject *parent = nullptr);
         ~RemoteFileItemModel();
@@ -33,6 +37,9 @@ namespace ady {
 
         virtual QMimeData *mimeData(const QModelIndexList &indexes) const override;
 
+        inline void setMode(Mode mode){m_mode = mode;}
+        inline Mode mode(){return m_mode;}
+
 
 
         void updateAll(const QList<FileItem>& data);
@@ -42,6 +49,12 @@ namespace ady {
         FileItem getItem(int row);
 
         void setList(QList<FileItem>& data);
+
+    private:
+
+        QIcon icon(const QFileInfo& fi) const;
+        QIcon icon(const QString& name) const;
+
         //void sort(Column col,bool asc);
 
 
@@ -55,8 +68,11 @@ namespace ady {
         QList<FileItem> m_data;
         QFileIconProvider* m_iconProvider;
         FileItemSorting* m_sorting;
+        Mode m_mode;
         QMutex mutex;
         long long id;
+        QIcon folderIcon;
+        static QMap<QString,QIcon> icons;
     };
 
 }

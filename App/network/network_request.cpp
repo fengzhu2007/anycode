@@ -174,7 +174,7 @@ namespace ady {
     QString NetworkRequest::matchToPath(const QString& from,bool local){
         Q_UNUSED(from);
         Q_UNUSED(local);
-        return {};
+        return from;
     }
 }
 

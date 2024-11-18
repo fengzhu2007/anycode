@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QMimeDatabase>
+#include <common/utils.h>
 #include "oss_response.h"
 #include "transfer/Task.h"
 #include "oss_setting.h"
@@ -37,26 +38,6 @@ OSS::OSS(CURL* curl,long long id)
     this->setOption(CURLOPT_TIMEOUT,COMMAND_TIMEOUT);
 }
 
-/*int OSS::access(NetworkResponse* response,bool body)
-{
-    this->setHeaderHolder(&response->header);
-    if(body){
-        this->setBodyHolder(&response->body);
-    }
-    CURLcode res = curl_easy_perform(this->curl);
-    if(res!=CURLE_OK && res != CURLE_FTP_COULDNT_RETR_FILE ){
-        this->errorMsg = curl_easy_strerror(res);
-        this->errorCode = (int)res;
-    }else{
-        this->errorMsg = "";
-        this->errorCode = 0;
-    }
-    response->errorCode = this->errorCode;
-    response->errorMsg = this->errorMsg;
-    response->parse();
-    return (int)res;
-}*/
-
 void OSS::init(const SiteRecord& info){
     this->setHost(info.host);
     this->setPort(info.port);
@@ -67,6 +48,14 @@ void OSS::init(const SiteRecord& info){
     //m_dirSync = m_setting->dirSync();
     m_dirMapping = m_setting->dirMapping();
 
+    //stringToExpression
+    /*QList<QRegularExpression> list;
+    for(auto filter:filters){
+        list<<QRegularExpression(Utils::wildcardToRegularExpression(filter),QRegularExpression::CaseInsensitiveOption);
+    }*/
+    for(auto filter:m_setting->filterExtensions()){
+        m_filters << QRegularExpression(Utils::stringToExpression(filter));
+    }
 }
 
 NetworkResponse* OSS::link()
@@ -99,10 +88,17 @@ NetworkResponse* OSS::link()
     }
     this->addHeader(lists);
     this->setOption(CURLOPT_NOBODY,1);
-    QString url = "http://"+options[HOST]+"/"+options[OBJECT];
+    QString url = "http://"+options[HOST];
+    if(!options[OBJECT].startsWith("/")){
+        url += QLatin1String("/");
+    }
+    url += this->escape(options[OBJECT]);
     OSSResponse* response = new  OSSResponse(this->id);
     this->get(url,response);
     this->setOption(CURLOPT_NOBODY,0);
+    //qDebug()<<"OBJECT"<<options[OBJECT];
+    response->setCommand(QLatin1String("GET %1").arg(prefix));
+
     return response;
 
 }
@@ -152,12 +148,15 @@ NetworkResponse* OSS::listDir(const QString& dir,int page,int pageSize)
         lists.push_back((iter.key()+": "+iter.value()).toStdString().c_str());
         iter++;
     }
-    //qDebug()<<"lists:"<<lists;
     this->addHeader(lists);
-    QString url = "http://"+options[HOST]+"/"+options[OBJECT];
+    QString url = "http://"+options[HOST];
+    if(!options[OBJECT].startsWith("/")){
+        url += QLatin1String("/");
+    }
+    url += this->escape(options[OBJECT]);
     OSSResponse* response = new  OSSResponse(this->id);
     this->get(url,response);
-    //response->debug();
+    response->setCommand(QLatin1String("GET %1").arg("/"+prefix));
     return response;
 
 }
@@ -197,10 +196,15 @@ NetworkResponse* OSS::tinyListDir(const QString& dir)
     }
     //qDebug()<<"lists:"<<lists;
     this->addHeader(lists);
-    QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
+    //QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
+    QString url = "http://"+options[HOST];
+    if(!options[OBJECT].startsWith("/")){
+        url += QLatin1String("/");
+    }
     OSSResponse* response = new  OSSResponse(this->id);
     this->get(url,response);
     //response->debug();
+    response->setCommand(QLatin1String("GET %1").arg("/"+prefix));
     return response;
 }
 
@@ -240,7 +244,12 @@ NetworkResponse* OSS::upload(Task* task)
             lists.push_back("Expect:");
             this->addHeader(lists);
             //qDebug()<<"header:"<<lists;
-            QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
+            //QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
+            QString url = "http://"+options[HOST];
+            if(!options[OBJECT].startsWith("/")){
+                url += QLatin1String("/");
+            }
+            url += this->escape(options[OBJECT]);
             OSSResponse* response = new  OSSResponse(this->id);
             this->setOption(CURLOPT_URL,url.toStdString().c_str());
             this->setOption(CURLOPT_POST,0);
@@ -287,6 +296,7 @@ NetworkResponse* OSS::upload(Task* task)
                 response->errorMsg = QObject::tr("User aborted");
                 task->abort = false;
             }
+            response->setCommand(QLatin1String("PUT %1").arg(options[OBJECT]));
             return response;
         }else{
             response->errorCode = -1;
@@ -343,7 +353,12 @@ NetworkResponse* OSS::download(Task* task)
             }
             this->addHeader(lists);
 
-            QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
+            //QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
+            QString url = "http://"+options[HOST];
+            if(!options[OBJECT].startsWith("/")){
+                url += QLatin1String("/");
+            }
+            url += this->escape(options[OBJECT]);
             OSSResponse* response = new  OSSResponse(this->id);
 
 
@@ -389,7 +404,7 @@ NetworkResponse* OSS::download(Task* task)
                 response->errorMsg = QObject::tr("User aborted");
                 task->abort = false;
             }
-
+            response->setCommand(QLatin1String("GET %1").arg(options[OBJECT]));
             return response;
         }else{
             response->errorCode = -2;
@@ -427,7 +442,6 @@ NetworkResponse* OSS::del(const QString& bucket,const QString& dst)
     }else{
         options[BUCKET] = bucket;
     }
-
     options[METHOD] = "DELETE";
     options[OBJECT] = dst;
     QStringList arr = this->host.split(".");
@@ -456,7 +470,13 @@ NetworkResponse* OSS::del(const QString& bucket,const QString& dst)
     //curl_easy_setopt(this->curl, CURLOPT_HEADERDATA, (void *)&response->header);
     //curl_easy_setopt(this->curl, CURLOPT_WRITEDATA, (void *)&response->body);
     curl_easy_setopt(this->curl, CURLOPT_HTTPHEADER, chunk);
-    QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
+    //QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
+    QString url = "http://"+options[HOST];
+    if(!options[OBJECT].startsWith("/")){
+        url += QLatin1String("/");
+    }
+    url += this->escape(options[OBJECT]);
+
     curl_easy_setopt(this->curl,CURLOPT_URL,url.toStdString().c_str());
     curl_easy_setopt(this->curl,CURLOPT_CUSTOMREQUEST,"DELETE");
 
@@ -465,11 +485,7 @@ NetworkResponse* OSS::del(const QString& bucket,const QString& dst)
         m_requestHeaders.clear();
         curl_slist_free_all(chunk);
     }
-
-    /*CURLcode res = curl_easy_perform(this->curl);
-    curl_easy_setopt(this->curl,CURLOPT_CUSTOMREQUEST, nullptr);
-    curl_slist_free_all(chunk);*/
-
+    response->setCommand(QLatin1String("DELETE %1").arg(options[OBJECT]));
     return response;
 }
 
@@ -501,8 +517,13 @@ NetworkResponse* OSS::mkDir(const QString &dir)
         iter++;
     }
     this->addHeader(lists);
-    QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
-    qDebug()<<"url:"<<url;
+    //QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
+    QString url = "http://"+options[HOST];
+    if(!options[OBJECT].startsWith("/")){
+        url += QLatin1String("/");
+    }
+    url += this->escape(options[OBJECT]);
+
     OSSResponse* response = new  OSSResponse(this->id);
     this->setOption(CURLOPT_URL,url.toStdString().c_str());
     this->setOption(CURLOPT_POST,0);
@@ -522,9 +543,7 @@ NetworkResponse* OSS::mkDir(const QString &dir)
         m_requestHeaders.clear();
         curl_slist_free_all(chunk);
     }
-    qDebug()<<"lists:"<<lists;
-    response->debug();
-    //response->parse();
+    response->setCommand(QLatin1String("PUT %1").arg(options[OBJECT]));
     return response;
 }
 
@@ -543,6 +562,61 @@ NetworkResponse* OSS::customeAccess(const QString& name,QMap<QString,QVariant> d
 {
     //return this->errorCode;
     return nullptr;
+}
+
+static bool orMatches(const QList<QRegularExpression> &exprList, const QString &filePath)
+{
+    bool ret = false;
+    for(auto reg:exprList){
+        ret = reg.match(filePath).hasMatch();
+        if(ret){
+            break;
+        }
+    }
+    return ret;
+}
+
+
+QString OSS::matchToPath(const QString& from,bool local){
+    if(local && from.endsWith("/")==false){
+        //file
+        if(m_filters.size()>0 && orMatches(m_filters,from)==false){
+            return {};
+        }
+    }
+    if(m_dirMapping.size()>0){
+        QString ret;
+        if(local){
+            //local to remote
+            for(auto one:m_dirMapping){
+                const QString localPath = one.first;//like  path1/path2/
+                const QString remotePath = one.second;//like path3/path4/
+                if(from.startsWith(localPath)){
+                    ret = remotePath + from.mid(localPath.length());
+                    break;
+                }
+            }
+            if(ret.isEmpty()){
+                ret = from;
+            }
+        }else{
+            //remote to local
+            for(auto one:m_dirMapping){
+                const QString localPath = one.first;//like  path1/path2/
+                const QString remotePath = one.second;//like path3/path4/
+                if(from.startsWith(remotePath)){
+                    ret = localPath + from.mid(localPath.length());
+                    break;
+                }
+            }
+            if(ret.isEmpty()){
+                ret = from;
+            }
+        }
+        return ret;//new relative path
+    }else{
+        return from;
+    }
 }
 
 
@@ -593,14 +667,17 @@ HttpParams OSS::signHeaders(const HttpParams& options)
     }
 
     if(options.contains(OBJECT) && options[OBJECT]!="/"){
-        signableResource += ("/" + options[OBJECT]);
+        if(!options[OBJECT].startsWith("/")){
+            signableResource += "/";
+        }
+        signableResource += this->escape(options[OBJECT]);
     }
 
     //GET\n\napplication/octet-stream\nWed, 29 Mar 2023 02:08:48 GMT\n
     //GET\n\napplication/octet-stream\nWed, 29 Mar 2023 02:08:48 GMT\n/qnsapp123/statics/
     string_to_sign += signableResource;
     //qDebug()<<"data:"<<options;
-    //qDebug()<<"sing:"<<string_to_sign;
+    //qDebug()<<"sign:"<<string_to_sign.toUtf8();
     HMAC_CTX *ctx = HMAC_CTX_new();
     HMAC_CTX_reset(ctx);
     unsigned int len = 20;
@@ -608,7 +685,9 @@ HttpParams OSS::signHeaders(const HttpParams& options)
     unsigned char* result = (unsigned char*) new char[size];
 
     HMAC_Init_ex(ctx, this->password.toStdString().c_str(), this->password.length(), EVP_sha1(), NULL);
-    HMAC_Update(ctx, (unsigned char*)string_to_sign.toStdString().c_str(),string_to_sign.length() );
+    //HMAC_Update(ctx, (unsigned char*)string_to_sign.toStdString().c_str(),string_to_sign.length() );
+    auto bytearr = string_to_sign.toUtf8();
+    HMAC_Update(ctx, (unsigned char*)bytearr.data(),bytearr.length() );
     HMAC_Final(ctx, result, &len);
     HMAC_CTX_free(ctx);
 

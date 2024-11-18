@@ -19,6 +19,8 @@ namespace ady {
 
         void setCommand(QString command);
 
+        QString errorInfo();
+
 
 
     public:

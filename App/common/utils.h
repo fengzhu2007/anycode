@@ -19,6 +19,8 @@ namespace ady {
         static QStringList split(const QString& str,QRegExp sep,int limit=0);
         static bool copy(const QString& oDir,const QString& nDir);
         static QString stringToExpression(const QString &original);
+
+
     };
 }
 

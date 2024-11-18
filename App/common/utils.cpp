@@ -172,7 +172,7 @@ namespace ady {
         return true;
     }
 
-    QString stringToExpression(const QString &original)
+    QString Utils::stringToExpression(const QString &original)
     {
         const qsizetype wclen = original.size();
         QString rx;

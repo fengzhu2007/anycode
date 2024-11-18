@@ -28,9 +28,11 @@ QIcon ResourceManageIconProvider::icon(ResourceManagerModelItem* item){
     switch(item->type()){
     case ResourceManagerModelItem::Project:
         //return provider->icon(QFileIconProvider::Network);
-       return QIcon(":/Resource/icons/DocumentsFolder_16x.svg");
+       //return QIcon(":/Resource/icons/DocumentsFolder_16x.svg");
+        return m_projectIcon;
     case ResourceManagerModelItem::Folder:
-        return provider->icon(QFileIconProvider::Folder);
+        return m_folderIcon;
+        //return provider->icon(QFileIconProvider::Folder);
     default:
     {
         const QString path = item->path();
@@ -44,7 +46,8 @@ QIcon ResourceManageIconProvider::icon(ResourceManagerModelItem* item){
     }
 }
 
-ResourceManageIconProvider::ResourceManageIconProvider()
+ResourceManageIconProvider::ResourceManageIconProvider():m_projectIcon(":/Resource/icons/DocumentsFolder_16x.svg"),
+    m_folderIcon(":/Resource/icons/FolderClosed_16x.svg")
 {
     provider = new QFileIconProvider();
 

@@ -19,11 +19,13 @@
 #include <docking_pane_container.h>
 #include <QTimer>
 #include <QMenu>
+#include <QStyledItemDelegate>
 
 namespace ady{
 
 const QString ServerClientPane::PANE_ID = "ServerClient_%1_%2";
 const QString ServerClientPane::PANE_GROUP = "ServerClient";
+
 
 class ServerClientPanePrivate{
 public:
@@ -34,6 +36,7 @@ public:
     QString rootPath;
     QString currentPath;
     ServerRequestThread* thread = nullptr;
+    RemoteFileItemModel* model = nullptr;
     QJsonObject toJson(){
         return {
             {"id",id},
@@ -60,6 +63,8 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
     this->setWindowTitle(r.name);
     this->setStyleSheet("QToolBar{border:0px;}"
                         "QTreeView{border:0;background-color:#f5f5f5}"
+                        "QListView{border:0;background-color:#f5f5f5}"
+                        "QListView::item{ margin: 20px;}"
                         ".ady--ServerClientPane>#widget{background-color:#EEEEF2}");
 
 
@@ -71,11 +76,11 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
 
     ui->treeView->header()->setSortIndicator(0,Qt::AscendingOrder);
 
-    RemoteFileItemModel* model = new RemoteFileItemModel(id,ui->treeView);
-    connect(model,&RemoteFileItemModel::cellEditing,this,&ServerClientPane::onRename);
+    d->model = new RemoteFileItemModel(id,this);
+    connect(d->model,&RemoteFileItemModel::cellEditing,this,&ServerClientPane::onRename);
 
 
-    ui->treeView->setModel(model);
+    ui->treeView->setModel(d->model);
     ui->treeView->setColumnWidth(RemoteFileItemModel::Name,220);
     ui->treeView->setColumnWidth(RemoteFileItemModel::Size,100);
     ui->treeView->setColumnWidth(RemoteFileItemModel::ModifyTime,160);
@@ -84,13 +89,27 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView->setEditTriggers(QAbstractItemView::EditKeyPressed);
 
+    ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->listView->setBatchSize(20);
+    ui->listView->setSpacing(20);
+    ui->listView->setGridSize({140,180});
+    ui->listView->setIconSize({125,125});
+
+
 
     connect(ui->treeView,&QTreeView::activated,this,&ServerClientPane::onTreeItemDClicked);
     connect(ui->treeView,&TreeView::dropFinished,this,&ServerClientPane::onDropUpload);
     connect(ui->treeView,&QTreeView::customContextMenuRequested,this,&ServerClientPane::onContextMenu);
 
     //tree view sorting
-    connect(ui->treeView->header(),&QHeaderView::sortIndicatorChanged,model,&RemoteFileItemModel::sortList);
+    connect(ui->treeView->header(),&QHeaderView::sortIndicatorChanged,d->model,&RemoteFileItemModel::sortList);
+
+
+    //listview
+    ui->listView->setModel(d->model);
+    connect(ui->listView,&QListView::activated,this,&ServerClientPane::onTreeItemDClicked);
+    //connect(ui->listView,&QListView::dropFinished,this,&ServerClientPane::onDropUpload);
+    connect(ui->listView,&QListView::customContextMenuRequested,this,&ServerClientPane::onContextMenu);
 
 
     connect(ui->actionBack,&QAction::triggered,this,&ServerClientPane::onActionTriggered);
@@ -103,7 +122,6 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
     connect(ui->actionPermissions,&QAction::triggered,this,&ServerClientPane::onActionTriggered);
     connect(ui->actionNew_Folder,&QAction::triggered,this,&ServerClientPane::onActionTriggered);
     connect(ui->actionDelete,&QAction::triggered,this,&ServerClientPane::onActionTriggered);
-
 
 }
 
@@ -219,19 +237,11 @@ void ServerClientPane::reload(){
 void ServerClientPane::output(NetworkResponse* response){
     if(response){
         if(response->status()){
-            QJsonObject json = {
-                {"level",Type::Ok},
-                {"source",this->windowTitle()},
-                {"content",response->command + "\n"+response->header}
-            };
-            Publisher::getInstance()->post(Type::M_OUTPUT,json);
+
+            this->onOutput(response->command + "\n"+response->header,1);
         }else{
-            QJsonObject json = {
-                {"level",Type::Error},
-                {"source",this->windowTitle()},
-                {"content",response->command + "\n"+response->errorMsg}
-            };
-            Publisher::getInstance()->post(Type::M_OUTPUT,json);
+
+            this->onOutput(response->command + "\n"+(response->errorInfo()),3);
         }
     }
 }
@@ -266,7 +276,9 @@ void ServerClientPane::onContextMenu(const QPoint& pos){
         return ;
     }
     QMenu contextMenu(this);
-    auto model = ui->treeView->selectionModel();
+
+    auto view = static_cast<QAbstractItemView*>(this->sender());
+    auto model = view->selectionModel();
     QModelIndex index = model->currentIndex();
     //int total = model->model()->rowCount();
     if(index.isValid()){
@@ -294,6 +306,7 @@ void ServerClientPane::connectServer(long long id,const QString& path){
         d->thread = new ServerRequestThread(req,ServerRequestThread::Link,new QString(path));
         connect(d->thread,&ServerRequestThread::finished,this,&ServerClientPane::onThreadFinished);
         connect(d->thread,&ServerRequestThread::resultReady, this, &ServerClientPane::onNetworkResponse);
+        //connect(d->thread,&ServerRequestThread::output, this, &ServerClientPane::onOutput);
         d->thread->start();
     }
 }
@@ -308,7 +321,6 @@ void ServerClientPane::cdDir(long long id,const QString& path,bool refresh){
             this->connectServer(id,path);
             return ;
         }
-
         ui->widget->start();
         d->thread = new ServerRequestThread(req,refresh?ServerRequestThread::Refresh:ServerRequestThread::List,new QString(path));
         connect(d->thread,&ServerRequestThread::finished,this,&ServerClientPane::onThreadFinished);
@@ -328,6 +340,7 @@ void ServerClientPane::deleteFiles(long long id,const QStringList& list){
         connect(d->thread,&ServerRequestThread::finished,this,&ServerClientPane::onThreadFinished);
         connect(d->thread,&ServerRequestThread::resultReady, this, &ServerClientPane::onNetworkResponse);
         connect(d->thread,&ServerRequestThread::message, this, &ServerClientPane::onMessage);
+        connect(d->thread,&ServerRequestThread::output, this, &ServerClientPane::onOutput);
         d->thread->start();
     }
 }
@@ -337,7 +350,7 @@ void ServerClientPane::onNetworkResponse(NetworkResponse* response,int command,i
         wToast::showText(tr("This operation is not supported"));
         return ;
     }
-    auto model = static_cast<RemoteFileItemModel*>(ui->treeView->model());
+    //auto model = static_cast<RemoteFileItemModel*>(ui->treeView->model());
     if(command==ServerRequestThread::Link || command==ServerRequestThread::List || command==ServerRequestThread::Refresh || command==ServerRequestThread::NewFolder || command==ServerRequestThread::Delete){
         if(response->status()){
             //list default dir
@@ -354,13 +367,14 @@ void ServerClientPane::onNetworkResponse(NetworkResponse* response,int command,i
             }
             list.insert(0,item);
 
-            model->setList(list);
+            d->model->setList(list);
             ui->lineEdit->setText(dir);
             d->currentPath = dir;
 
             Publisher::getInstance()->post(Type::M_NOTIFY_REFRESH_TREE,&data);
         }else{
-            wToast::showText(response->errorMsg);
+
+            wToast::showText(response->errorInfo());
         }
     }else if(command==ServerRequestThread::Rename || command==ServerRequestThread::Chmod){
         if(response->status()){
@@ -376,7 +390,7 @@ void ServerClientPane::onNetworkResponse(NetworkResponse* response,int command,i
                 item.enabled = false;
             }
             list.insert(0,item);
-            model->setList(list);
+            d->model->setList(list);
             ui->lineEdit->setText(dir);
             d->currentPath = dir;
 
@@ -388,6 +402,7 @@ void ServerClientPane::onNetworkResponse(NetworkResponse* response,int command,i
         }
     }
     if(response!=nullptr){
+        response->debug();
         this->output(response);
         delete response;
     }
@@ -400,9 +415,8 @@ void ServerClientPane::onMessage(const QString& message,int result){
 
 
 void ServerClientPane::onTreeItemDClicked(const QModelIndex& index){
-    auto model = static_cast<RemoteFileItemModel*>(ui->treeView->model());
-    auto item = model->getItem(index.row());
-    if(item.enabled)
+    auto item = d->model->getItem(index.row());
+    if(item.enabled && item.type==FileItem::Folder)
         this->cdDir(d->id,item.path,false);
 }
 
@@ -474,7 +488,8 @@ void ServerClientPane::onActionTriggered(){
         return ;
     }
     QObject* sender = this->sender();
-    auto model = ui->treeView->selectionModel();
+    //auto model = ui->treeView->selectionModel();
+    auto model = ui->stackedWidget->currentIndex()==0?ui->treeView->selectionModel():ui->listView->selectionModel();
     if(sender==ui->actionRefresh){
         this->reload();
     }else if(sender==ui->actionBack){
@@ -483,16 +498,28 @@ void ServerClientPane::onActionTriggered(){
             this->cdDir(d->id,path);
         }
     }else if(sender==ui->actionGridView){
-
+        d->model->setMode(RemoteFileItemModel::Grid);
+        ui->actionGridView->setChecked(true);
+        ui->actionListView->setChecked(false);
+        ui->stackedWidget->setCurrentIndex(1);
     }else if(sender==ui->actionListView){
-
+        d->model->setMode(RemoteFileItemModel::List);
+        ui->actionListView->setChecked(true);
+        ui->actionGridView->setChecked(false);
+        ui->stackedWidget->setCurrentIndex(0);
     }else if(sender==ui->actionDelete){
-        QModelIndexList indexlist = model->selectedRows();
+        //QModelIndexList indexlist = model->selectedRows();
+        QModelIndexList indexlist;
+        if(ui->stackedWidget->currentIndex()==0){
+            indexlist = model->selectedRows();
+        }else{
+            indexlist = model->selectedIndexes();
+        }
         QMap<long long,QStringList> data;
-        auto m = static_cast<RemoteFileItemModel*>(ui->treeView->model());
+        //auto m = static_cast<RemoteFileItemModel*>(ui->treeView->model());
         QStringList list;
         for(auto one:indexlist){
-            auto item = m->getItem(one.row());
+            auto item = d->model->getItem(one.row());
             if(item.name!=".."){
                 list<<item.path;
             }
@@ -503,12 +530,18 @@ void ServerClientPane::onActionTriggered(){
             }
         }
     }else if(sender==ui->actionDownload){
-        QModelIndexList indexlist = model->selectedRows();
+        //QModelIndexList indexlist = model->selectedRows();
+        QModelIndexList indexlist;
+        if(ui->stackedWidget->currentIndex()==0){
+            indexlist = model->selectedRows();
+        }else{
+            indexlist = model->selectedIndexes();
+        }
         auto instance = Publisher::getInstance();
         instance->post(Type::M_OPEN_FILE_TRANSFTER);//open file transfer
-        auto m = static_cast<RemoteFileItemModel*>(ui->treeView->model());
+        //auto m = static_cast<RemoteFileItemModel*>(ui->treeView->model());
         for(auto one:indexlist){
-            auto item = m->getItem(one.row());
+            auto item = d->model->getItem(one.row());
             if(item.type==FileItem::File || item.type==FileItem::Folder){
                 long long filesize = item.size;
                 DownloadData data{0,d->id,filesize,item.type==FileItem::File,item.path,{}};
@@ -516,14 +549,19 @@ void ServerClientPane::onActionTriggered(){
             }
         }
     }else if(sender==ui->actionPermissions){
-        QModelIndexList indexlist = model->selectedRows();
+        QModelIndexList indexlist;
+        if(ui->stackedWidget->currentIndex()==0){
+            indexlist = model->selectedRows();
+        }else{
+            indexlist = model->selectedIndexes();
+        }
         int size = 0;
         int mode = -1;
         QString filename;
         QStringList list;
-        auto m = static_cast<RemoteFileItemModel*>(ui->treeView->model());
+        //auto m = static_cast<RemoteFileItemModel*>(ui->treeView->model());
         for(auto one:indexlist){
-            auto item = m->getItem(one.row());
+            auto item = d->model->getItem(one.row());
             if(item.name!=".."){
                 size+=1;
                 list<<item.path;
@@ -556,14 +594,20 @@ void ServerClientPane::onActionTriggered(){
                 connect(d->thread,&ServerRequestThread::finished,this,&ServerClientPane::onThreadFinished);
                 connect(d->thread,&ServerRequestThread::resultReady, this, &ServerClientPane::onNetworkResponse);
                 connect(d->thread,&ServerRequestThread::message, this, &ServerClientPane::onMessage);
+                connect(d->thread,&ServerRequestThread::output, this, &ServerClientPane::onOutput);
                 d->thread->start();
             }else{
                 delete data;
             }
         }
     }else if(sender==ui->actionRename){
-        QModelIndex index = ui->treeView->currentIndex();
-        ui->treeView->edit(index);
+        if(ui->stackedWidget->currentIndex()==0){
+            QModelIndex index = ui->treeView->currentIndex();
+            ui->treeView->edit(index);
+        }else{
+            QModelIndex index = ui->listView->currentIndex();
+            ui->listView->edit(index);
+        }
     }else if(sender==ui->actionNew_Folder){
         auto dialog = NewFolderDialog::open(d->id,d->currentPath,this);
         connect(dialog,&NewFolderDialog::submit,this,&ServerClientPane::onNewFolder);
@@ -580,6 +624,7 @@ void ServerClientPane::onNewFolder(long long id,const QString& path,const QStrin
         d->thread = new ServerRequestThread(req,ServerRequestThread::NewFolder,new QString(path+name));
         connect(d->thread,&ServerRequestThread::finished,this,&ServerClientPane::onThreadFinished);
         connect(d->thread,&ServerRequestThread::resultReady, this, &ServerClientPane::onNetworkResponse);
+        connect(d->thread,&ServerRequestThread::output, this, &ServerClientPane::onOutput);
         d->thread->start();
     }
 }
@@ -592,8 +637,8 @@ void ServerClientPane::onRename(const QModelIndex index,const QString& newName){
     auto req = NetworkManager::getInstance()->request(d->id);
     if(req!=nullptr){
         ui->widget->start();
-        auto model = static_cast<RemoteFileItemModel*>(ui->treeView->model());
-        auto item = model->getItem(index.row());
+        //auto model = static_cast<RemoteFileItemModel*>(ui->treeView->model());
+        auto item = d->model->getItem(index.row());
 
         const QString src = item.path;
         QString parent = src;
@@ -613,6 +658,7 @@ void ServerClientPane::onRename(const QModelIndex index,const QString& newName){
         d->thread = new ServerRequestThread(req,ServerRequestThread::Rename,data);
         connect(d->thread,&ServerRequestThread::finished,this,&ServerClientPane::onThreadFinished);
         connect(d->thread,&ServerRequestThread::resultReady, this, &ServerClientPane::onNetworkResponse);
+        connect(d->thread,&ServerRequestThread::output, this, &ServerClientPane::onOutput);
         d->thread->start();
     }
 }
@@ -621,6 +667,15 @@ void ServerClientPane::onThreadFinished(){
     d->thread->deleteLater();
     d->thread = nullptr;
     ui->widget->stop();
+}
+
+void ServerClientPane::onOutput(const QString& message,int status){
+    QJsonObject json = {
+        {"level",status},
+        {"source",this->windowTitle()},
+        {"content",message}
+    };
+    Publisher::getInstance()->post(Type::M_OUTPUT,json);
 }
 
 

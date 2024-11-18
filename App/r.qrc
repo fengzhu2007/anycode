@@ -82,5 +82,7 @@
         <file>Resource/icons/ZoomIn_16x.svg</file>
         <file>Resource/images/logo.png</file>
         <file>Resource/icons/ClearWindowContent_16x.svg</file>
+        <file>Resource/icons/EnableDebugging_16x.svg</file>
+        <file>Resource/icons/FolderClosed_16x.svg</file>
     </qresource>
 </RCC>

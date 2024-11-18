@@ -171,6 +171,7 @@
    <addaction name="separator"/>
    <addaction name="actionNew_Project"/>
    <addaction name="actionOpen_Project"/>
+   <addaction name="actionDebug"/>
   </widget>
   <action name="actionNew_Project">
    <property name="icon">
@@ -535,6 +536,18 @@
    </property>
    <property name="text">
     <string>Output</string>
+   </property>
+  </action>
+  <action name="actionDebug">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/EnableDebugging_16x.svg</normaloff>:/Resource/icons/EnableDebugging_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Debug</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>

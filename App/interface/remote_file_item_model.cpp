@@ -7,6 +7,10 @@
 #include "common/utils.h"
 #include "common.h"
 namespace ady {
+// QIcon sIcon{":/Resource/icons/FolderClosed_16x.svg"};
+
+QMap<QString,QIcon> RemoteFileItemModel::icons;
+
 
 class FileItemSorting final{
 public:
@@ -80,8 +84,10 @@ private:
 };
 
 
+
+
 RemoteFileItemModel::RemoteFileItemModel(long long id,QObject *parent)
-    :QAbstractTableModel(parent)
+    :QAbstractTableModel(parent),folderIcon{":/Resource/icons/FolderClosed_16x.svg"}
 {
     m_iconProvider = new QFileIconProvider;
     m_sorting = new FileItemSorting(Name,true);
@@ -95,6 +101,7 @@ RemoteFileItemModel::~RemoteFileItemModel()
 
 QVariant RemoteFileItemModel::data(const QModelIndex &index, int role) const
 {
+
     if (!index.isValid())
         return QVariant();
 
@@ -122,9 +129,15 @@ QVariant RemoteFileItemModel::data(const QModelIndex &index, int role) const
         const auto &item = m_data.at(index.row());
         if(index.column()==Name){
             if(item.type == FileItem::Dir){
-                return m_iconProvider->icon(QFileIconProvider::Folder);
+                //return m_iconProvider->icon(QFileIconProvider::Folder).pixmap({72,72});
+                return folderIcon;
+                //return sIcon;
             }else{
-                return m_iconProvider->icon(QFileInfo(item.name));
+                //return m_iconProvider->icon(QFileInfo(item.name));
+                //return m_iconProvider->icon(item.name);
+
+                //return folderIcon;
+                return this->icon(item.name);
             }
 
         }
@@ -297,5 +310,27 @@ void RemoteFileItemModel::sortList(int col, Qt::SortOrder order)
 }
 
 
+
+QIcon RemoteFileItemModel::icon(const QFileInfo& fi) const{
+    auto extension = fi.suffix();
+    if(icons.contains(extension)){
+        return icons[extension];
+    }else{
+        auto icon = m_iconProvider->icon(fi);
+        icons.insert(extension,icon);
+        return icon;
+    }
+}
+
+QIcon RemoteFileItemModel::icon(const QString& name) const{
+    auto extension = name.split(".").last().toLower();
+    if(icons.contains(extension)){
+        return icons[extension];
+    }else{
+        auto icon = m_iconProvider->icon(QFileInfo(name));
+        icons.insert(extension,icon);
+        return icon;
+    }
+}
 
 }
