@@ -13,7 +13,7 @@ public:
     const int UNLINK_TIMEOUT = 2;
 
 
-    FTP(CURL* curl,long long id=0);
+    explicit FTP(CURL* curl,long long id=0);
     virtual ~FTP();
 
     NetworkResponse* sendSyncCommand(const QString& command,bool pre_utf8=true);

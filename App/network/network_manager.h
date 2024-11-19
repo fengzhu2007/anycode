@@ -7,6 +7,7 @@
 namespace ady {
     class NetworkRequest;
     class Task;
+    class SiteRecord;
     class NetworkManagerPrivate;
     class ANYENGINE_EXPORT NetworkManager
     {
@@ -18,6 +19,7 @@ namespace ady {
         static void destory();
         NetworkRequest* request(long long id);
         NetworkRequest* initRequest(long long id,const QString& type);
+        void update(const SiteRecord& site);
 
         bool contains(long long id);
 

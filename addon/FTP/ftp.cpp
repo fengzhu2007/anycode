@@ -35,8 +35,10 @@ namespace ady {
         this->setUsername(info.username);
         this->setPassword(info.password);
         m_rootPath = info.path;
+        if(m_setting!=nullptr){
+            delete m_setting;
+        }
         m_setting = new FTPSetting(info.data);
-        //m_dirSync = m_setting->dirSync();
         m_dirMapping = m_setting->dirMapping();
 
     }

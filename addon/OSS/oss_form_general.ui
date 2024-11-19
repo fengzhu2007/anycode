@@ -126,7 +126,7 @@
       <string>AccessKey Secret</string>
      </property>
      <property name="text">
-      <string>AK Secret</string>
+      <string>AccessKey ID</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -164,7 +164,7 @@
       <string>AccessKey ID</string>
      </property>
      <property name="text">
-      <string>AK ID</string>
+      <string>AccessKey Secret</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

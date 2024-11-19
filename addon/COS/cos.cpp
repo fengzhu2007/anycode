@@ -11,6 +11,7 @@
 #include <openssl/hmac.h>
 #include <openssl/opensslconf.h>
 #include <locale.h>
+#include <common/utils.h>
 
 #ifdef Q_OS_WIN
 #include <hmac/hmac_local.h>
@@ -40,27 +41,37 @@ COS::COS(CURL* curl,long long id)
 {
     this->connected = false;
     this->setOption(CURLOPT_TIMEOUT,COMMAND_TIMEOUT);
+    this->m_setting = nullptr;
 }
 
-/*int COS::access(NetworkResponse* response,bool body)
-{
-    this->setHeaderHolder(&response->header);
-    if(body){
-        this->setBodyHolder(&response->body);
+COS::~COS(){
+    if(this->m_setting!=nullptr){
+        delete m_setting;
     }
-    CURLcode res = curl_easy_perform(this->curl);
-    if(res!=CURLE_OK && res != CURLE_FTP_COULDNT_RETR_FILE ){
-        this->errorMsg = curl_easy_strerror(res);
-        this->errorCode = (int)res;
-    }else{
-        this->errorMsg = "";
-        this->errorCode = 0;
+}
+
+void COS::init(const SiteRecord& info){
+    this->setHost(info.host);
+    this->setPort(info.port);
+    this->setUsername(info.username);
+    this->setPassword(info.password);
+    m_rootPath = info.path;
+
+    if(m_setting!=nullptr){
+        delete m_setting;
     }
-    response->errorCode = this->errorCode;
-    response->errorMsg = this->errorMsg;
-    response->parse();
-    return (int)res;
-}*/
+
+    m_setting = new COSSetting(info.data);
+    m_dirMapping = m_setting->dirMapping();
+
+    m_filters.clear();
+    for(auto filter:m_setting->filterExtensions()){
+        m_filters << QRegularExpression(Utils::stringToExpression(filter));
+    }
+}
+
+
+
 
 NetworkResponse* COS::link()
 {
@@ -70,8 +81,7 @@ NetworkResponse* COS::link()
     if(pos>-1){
         m_bucket = m_bucket.left(pos);
     }
-    qDebug()<<"bucket:"<<m_bucket;
-    QString dst = this->m_defaultDir;
+    QString dst = this->m_rootPath;
     HttpParams headers;
     HttpParams params;
     //headers[BUCKET] = m_bucket;
@@ -82,7 +92,7 @@ NetworkResponse* COS::link()
     headers[HOST] = host;
 
 
-    QString prefix = this->m_defaultDir;
+    QString prefix = this->m_rootPath;
     if(prefix.startsWith("/")){
         prefix = prefix.mid(1);
     }
@@ -102,10 +112,12 @@ NetworkResponse* COS::link()
     this->setOption(CURLOPT_NOBODY,1);
     QString url = "http://"+headers[HOST]+"/";
     url = this->fixUrl(url,params);
-   //qDebug()<<"url:"<<url;
+   qDebug()<<"url:"<<url;
     COSResponse* response = new  COSResponse(this->id);
     this->get(url,response);
     this->setOption(CURLOPT_NOBODY,0);
+
+    response->setCommand(QLatin1String("GET /%1").arg(prefix));
     return response;
 
 }
@@ -124,7 +136,7 @@ NetworkResponse* COS::listDir(const QString& dir,int page,int pageSize)
     m_bucket = this->host.left(this->host.indexOf("."));
     QStringList arr = this->host.split(".");
     QString host = this->host;
-    QString prefix = this->m_defaultDir;
+    QString prefix = this->m_rootPath;
     if(dir.isEmpty()==false){
         prefix = dir;
     }
@@ -161,16 +173,18 @@ NetworkResponse* COS::listDir(const QString& dir,int page,int pageSize)
         this->addHeader(lists);
         QString url = "http://"+headers[HOST]+"/";
         url = this->fixUrl(url,params);
-        //qDebug()<<"url:"<<url;
         COSResponse* res = new  COSResponse(this->id);
         this->get(url,res);
-        res->debug();
+        //res->debug();
+        response->id = res->id;
+        response->errorCode = res->errorCode;
+        response->networkErrorCode = res->networkErrorCode;
         if(res->status()){
             response->setStatus(true);
             response->appendLists(res->parseList());
             marker = res->marker();
             response->params = res->params;
-            //qDebug()<<"marker:"<<marker;
+            response->header = res->header;
             delete res;
             if(marker.isEmpty()){
                 break;
@@ -178,10 +192,13 @@ NetworkResponse* COS::listDir(const QString& dir,int page,int pageSize)
         }else{
             response->setStatus(false);
             response->errorMsg = res->errorMsg;
+            response->networkErrorMsg = res->networkErrorMsg;
             delete res;
             break;
         }
     }while(true);
+
+    response->setCommand(QLatin1String("GET /%1").arg(prefix));
     return response;
 
 }
@@ -193,7 +210,7 @@ NetworkResponse* COS::tinyListDir(const QString& dir)
     m_bucket = this->host.left(this->host.indexOf("."));
     QStringList arr = this->host.split(".");
     QString host = this->host;
-    QString prefix = this->m_defaultDir;
+    QString prefix = this->m_rootPath;
     if(dir.isEmpty()==false){
         prefix = dir;
     }
@@ -232,22 +249,32 @@ NetworkResponse* COS::tinyListDir(const QString& dir)
         url = this->fixUrl(url,params);
         COSResponse* res = new  COSResponse(this->id);
         this->get(url,res);
+
+        response->errorCode = res->errorCode;
+        response->networkErrorCode = res->networkErrorCode;
         if(res->status()){
             response->setStatus(true);
             response->appendLists(res->parseList());
             marker = res->marker();
             response->params = res->params;
+            response->header = res->header;
             delete res;
             if(marker.isEmpty()){
                 break;
             }
         }else{
+            response->errorMsg = res->errorMsg;
+            response->networkErrorMsg = res->networkErrorMsg;
             response->setStatus(false);
             response->errorMsg = res->errorMsg;
             delete res;
             break;
         }
     }while(true);
+
+    //response->setCommand("GET "+prefix);
+    response->setCommand(QLatin1String("GET /%1").arg(prefix));
+
     return response;
 }
 
@@ -261,9 +288,7 @@ NetworkResponse* COS::upload(Task* task)
     if(fi.exists()){
         task->file = new QFile(local);
         if(task->file->open(QIODevice::ReadOnly)){
-            //qDebug()<<"remote:"<<remote;
-            //QByteArray md5 = QCryptographicHash::hash(task->file->readAll(), QCryptographicHash::Md5).toBase64();
-            //qDebug()<<"md5:"<<md5;
+
             task->filesize = fi.size();
             task->readysize = 0l;
             HttpParams headers;
@@ -287,13 +312,20 @@ NetworkResponse* COS::upload(Task* task)
             }
             lists.push_back("Expect:");
             this->addHeader(lists);
-            //qDebug()<<"header:"<<lists;
-            QString url = "http://"+headers[HOST]+this->escape(remote);
+            QString url = "http://"+headers[HOST];
+            if(!remote.startsWith("/")){
+                url += QLatin1String("/");
+            }
+            url += this->escape(remote);
+
             COSResponse* response = new  COSResponse(this->id);
             this->setOption(CURLOPT_URL,url.toStdString().c_str());
             this->setOption(CURLOPT_POST,0);
             this->setOption(CURLOPT_HTTPPOST,nullptr);
             this->setOption(CURLOPT_CUSTOMREQUEST,"PUT");
+
+
+
             this->setOption(CURLOPT_TIMEOUT,(std::max)((int)task->filesize/1024*20,3));
 
 
@@ -310,7 +342,6 @@ NetworkResponse* COS::upload(Task* task)
                 }
                 this->setOption(CURLOPT_HTTPHEADER,chunk);
             }
-            //qDebug()<<"headers:"<<m_requestHeaders;
             this->access(response);
             if(size>0){
                 m_requestHeaders.clear();
@@ -324,21 +355,17 @@ NetworkResponse* COS::upload(Task* task)
             this->setOption(CURLOPT_INFILESIZE_LARGE,0);
             this->setOption(CURLOPT_HTTPHEADER,nullptr);
 
-
-            //reset end
-
-            //response->parse();
-            //response->debug();
             task->file->close();
             delete task->file;
             task->file = nullptr;
-            //response->debug();
 
             if(task->abort==true){
                 response->errorCode = -3;
                 response->errorMsg = QObject::tr("User aborted");
                 task->abort = false;
             }
+
+            response->setCommand(QLatin1String("PUT %1").arg(remote));
 
 
             return response;
@@ -390,11 +417,13 @@ NetworkResponse* COS::download(Task* task)
             }
             this->addHeader(lists);
 
-            QString url = "http://"+headers[HOST]+this->escape(remote);
-            qDebug()<<"url:"<<url;
+            QString url = "http://"+headers[HOST];
+            if(!remote.startsWith("/")){
+                url += QLatin1String("/");
+            }
+            url += this->escape(remote);
+
             COSResponse* response = new  COSResponse(this->id);
-
-
             this->setOption(CURLOPT_URL,url.toStdString().c_str());
             this->setOption(CURLOPT_POST,0);
             this->setOption(CURLOPT_HTTPPOST,nullptr);
@@ -420,8 +449,7 @@ NetworkResponse* COS::download(Task* task)
                 m_requestHeaders.clear();
                 curl_slist_free_all(chunk);
             }
-            //response->debug();
-            //response->parse();
+
             task->file->close();
             delete task->file;
             task->file = nullptr;
@@ -437,6 +465,8 @@ NetworkResponse* COS::download(Task* task)
                 response->errorMsg = QObject::tr("User aborted");
                 task->abort = false;
             }
+
+            response->setCommand(QLatin1String("GET %1").arg(remote));
 
             return response;
         }else{
@@ -497,11 +527,12 @@ NetworkResponse* COS::del(const QString& bucket,const QString& dst)
     }
 
     COSResponse* response = new  COSResponse(this->id);
-
-    //curl_easy_setopt(this->curl, CURLOPT_HEADERDATA, (void *)&response->header);
-    //curl_easy_setopt(this->curl, CURLOPT_WRITEDATA, (void *)&response->body);
     curl_easy_setopt(this->curl, CURLOPT_HTTPHEADER, chunk);
-    QString url = "http://"+headers[HOST]+"/"+this->escape(dst);
+    QString url = "http://"+headers[HOST];
+    if(!dst.startsWith("/")){
+        url += QLatin1String("/");
+    }
+    url += this->escape(dst);
     curl_easy_setopt(this->curl,CURLOPT_URL,url.toStdString().c_str());
     curl_easy_setopt(this->curl,CURLOPT_CUSTOMREQUEST,"DELETE");
 
@@ -510,10 +541,7 @@ NetworkResponse* COS::del(const QString& bucket,const QString& dst)
         m_requestHeaders.clear();
         curl_slist_free_all(chunk);
     }
-
-    /*CURLcode res = curl_easy_perform(this->curl);
-    curl_easy_setopt(this->curl,CURLOPT_CUSTOMREQUEST, nullptr);
-    curl_slist_free_all(chunk);*/
+    response->setCommand(QLatin1String("DELETE %1").arg(dst));
 
     return response;
 }
@@ -592,6 +620,61 @@ NetworkResponse* COS::customeAccess(const QString& name,QMap<QString,QVariant> d
 {
     //return this->errorCode;
     return nullptr;
+}
+
+static bool orMatches(const QList<QRegularExpression> &exprList, const QString &filePath)
+{
+    bool ret = false;
+    for(auto reg:exprList){
+        ret = reg.match(filePath).hasMatch();
+        if(ret){
+            break;
+        }
+    }
+    return ret;
+}
+
+QString COS::matchToPath(const QString& from,bool local){
+    if(local && from.endsWith("/")==false){
+        //file
+        if(m_filters.size()>0 && orMatches(m_filters,from)==false){
+            return {};
+        }
+    }
+    if(m_dirMapping.size()>0){
+        QString ret;
+        if(local){
+            //local to remote
+            for(auto one:m_dirMapping){
+                const QString localPath = one.first;//like  path1/path2/
+                const QString remotePath = one.second;//like path3/path4/
+                if(from.startsWith(localPath)){
+                    ret = remotePath + from.mid(localPath.length());
+                    break;
+                }
+            }
+            if(ret.isEmpty()){
+                ret = from;
+            }
+        }else{
+            //remote to local
+            for(auto one:m_dirMapping){
+                const QString localPath = one.first;//like  path1/path2/
+                const QString remotePath = one.second;//like path3/path4/
+                if(from.startsWith(remotePath)){
+                    ret = localPath + from.mid(localPath.length());
+                    break;
+                }
+            }
+            if(ret.isEmpty()){
+                ret = from;
+            }
+        }
+        return ret;//new relative path
+    }else{
+        return from;
+    }
+
 }
 
 QString COS::fixUrl(QString& url,HttpParams& params)

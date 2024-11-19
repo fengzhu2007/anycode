@@ -15,12 +15,17 @@ namespace ady{
         Q_OBJECT
 
     public:
-        explicit NewProjectWindow(QWidget *parent = nullptr);
+
         ~NewProjectWindow();
         void setCurrentIndex(int i);
         void setCurrentProjectId(long long id);
         long long currentProjectId();
         void setOrigin(int i);
+
+
+    private:
+        explicit NewProjectWindow(QWidget *parent = nullptr);
+
     public slots:
         void next();
         void previous();
@@ -33,6 +38,7 @@ namespace ady{
     private:
         Ui::NewProjectWindow *ui;
         NewProjectWindowPrivate *d;
+        static NewProjectWindow* instance;
     };
 }
 

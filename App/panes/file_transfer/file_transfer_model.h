@@ -60,6 +60,9 @@ public:
     QString name() const;
     QString source() const;
     QString destination() const;
+    void setName(const QString& name);
+    void setSource(const QString& source);
+    void setDestination(const QString& destination);
     State state();
     void setState(State state);
     float progress();
@@ -86,7 +89,7 @@ private:
 
 
 
-
+class SiteRecord;
 class FileTransferModelPrivate;
 class ANYENGINE_EXPORT FileTransferModel : public QAbstractItemModel
 {
@@ -136,6 +139,7 @@ public:
     void removeItem(FileTransferModelItem* item);
     void removeItem(long long siteid,long long id);
     void removeProject(long long id);
+    void removeSite(long long id);
 
     void removeAllItems(FileTransferModelItem::State=FileTransferModelItem::Any);
     void removeItems(QModelIndexList list,FileTransferModelItem::State=FileTransferModelItem::Any);
@@ -148,11 +152,16 @@ public:
 
     void openProject(long long id,const QString& name,const QString& path);
 
+    void addSite(const SiteRecord& site);
     void addJob(UploadData* data);
     void addUploadJob(QJsonObject data);
     void addDownloadJob(QJsonObject data);
+
+    void updateSite(const SiteRecord& site);
+
     void progress(long long siteid,long long id,float progress);
     void setItemFailed(long long siteid,long long id,const QString& msg);
+
 
 
 

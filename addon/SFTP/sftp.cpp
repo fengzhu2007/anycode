@@ -1,7 +1,8 @@
 #include "sftp.h"
 #include "sftp_response.h"
 #include "transfer/Task.h"
-#include "common/utils.h"
+#include "sftp_setting.h"
+#include <common/utils.h>
 #include <QFileInfo>
 #include <QFile>
 #include <QDir>
@@ -11,11 +12,17 @@ namespace ady {
     SFTP::SFTP(CURL* curl,long long id)
         :NetworkRequest(curl,id)
     {
+        this->m_setting = nullptr;
         this->connected = false;
-        /*this->mlsd = false;
-        this->mfmt = false;
-        this->utf8 = false;*/
         this->setOption(CURLOPT_TIMEOUT,COMMAND_TIMEOUT);
+    }
+
+
+    SFTP::~SFTP(){
+        if(m_setting!=nullptr){
+            delete m_setting;
+            m_setting = nullptr;
+        }
     }
 
     int SFTP::access(NetworkResponse* response,bool body)
@@ -36,6 +43,24 @@ namespace ady {
         response->errorMsg = this->errorMsg;
         response->parse();
         return (int)res;
+    }
+
+
+
+
+
+    void SFTP::init(const SiteRecord& info){
+        this->setHost(info.host);
+        this->setPort(info.port);
+        this->setUsername(info.username);
+        this->setPassword(info.password);
+        m_rootPath = info.path;
+        if(m_setting!=nullptr){
+            delete m_setting;
+        }
+        m_setting = new SFTPSetting(info.data);
+        m_dirMapping = m_setting->dirMapping();
+        m_uploadCommands = m_setting->uploadCommands();
     }
 
     NetworkResponse* SFTP::link()
@@ -107,6 +132,7 @@ namespace ady {
             curl_slist_free_all(headerlist);
         }
         this->setOption(CURLOPT_POSTQUOTE,NULL);
+        response->setCommand(command);
         return response;
     }
 
@@ -115,20 +141,20 @@ namespace ady {
         Q_UNUSED(page);
         Q_UNUSED(pageSize);
         QMutexLocker locker(&mutex);
-        QString host = "sftp://" + this->host + this->escape(dir);
-        if(host.endsWith("/")==false){
-            host += "/";
+
+        QString url = "sftp://"+this->host;
+        if(!dir.startsWith("/")){
+            url += "/";
         }
-        //qDebug()<<"url:"<<host;
-        this->setOption(CURLOPT_URL,host.toStdString().c_str());
+        url += this->escape(dir);
+        this->setOption(CURLOPT_URL,url.toStdString().c_str());
         this->setOption(CURLOPT_NOBODY,0L);
-        //qDebug()<<"url:"<<host;
-        //QString command = "LIST -al";
         QString command ;
         NetworkResponse *response = this->sendCommand(command);
         if(response->errorCode==0){
             response->params["dir"] = dir;
         }
+        response->setCommand(QLatin1String("LIST %1").arg(dir));
         return response;
 
     }
@@ -136,19 +162,19 @@ namespace ady {
     NetworkResponse* SFTP::tinyListDir(const QString& dir)
     {
         QMutexLocker locker(&mutex);
-        QString host = "sftp://" + this->host + this->escape(dir);
-        if(host.endsWith("/")==false){
-            host += "/";
+        QString url = "sftp://"+this->host;
+        if(!dir.startsWith("/")){
+            url += "/";
         }
-        //qDebug()<<"tiny url:"<<host;
-        this->setOption(CURLOPT_URL,host.toStdString().c_str());
+        url += this->escape(dir);
+        this->setOption(CURLOPT_URL,url.toStdString().c_str());
         this->setOption(CURLOPT_NOBODY,0L);
         QString command ;
         NetworkResponse* response =  this->sendCommand(command);
         if(response->errorCode==0){
             response->params["dir"] = dir;
         }
-        response->debug();
+        response->setCommand(QLatin1String("LIST %1").arg(dir));
         return response;
     }
 
@@ -168,10 +194,14 @@ namespace ady {
                 //qDebug()<<"size:"<<task->filesize;
                 QDateTime dt = fi.fileTime(QFileDevice::FileModificationTime);
                 //QString url = QString("sftp://%1:%2%3").arg(this->host).arg(this->port).arg(remote);
-                QString url = QString("sftp://%1%2").arg(this->host).arg(this->escape(remote));
+                //QString url = QString("sftp://%1%2").arg(this->host).arg(this->escape(remote));
+                QString url = QLatin1String("sftp://%1").arg(this->host);
+                if(!remote.startsWith("/")){
+                    url += "/";
+                }
+                url += this->escape(remote);
                 struct curl_slist *cmdlist = NULL;
-                QString cmd = QString("cmd \"$1\" \"$2\"").arg(dt.toString(Qt::RFC2822Date)).arg(remote);
-                //QString cmd = ("mtime \"" + dt.toString(Qt::RFC2822Date) + "\" "+remote);
+                QString cmd = QString("mtime \"%1\" \"%2\"").arg(dt.toString(Qt::RFC2822Date)).arg(remote);
                 cmdlist = curl_slist_append(cmdlist,cmd.toStdString().c_str());//mtime date file
                 Q_FOREACH(QString cmd,m_uploadCommands){
                     cmdlist = curl_slist_append(cmdlist, fixedCommandPath(cmd,remote).toStdString().c_str());
@@ -184,7 +214,7 @@ namespace ady {
                 this->setOption(CURLOPT_URL,url.toStdString().c_str());
                 this->setOption(CURLOPT_INFILESIZE_LARGE,(curl_off_t)(task->filesize));
                 //this->setOption(CURLOPT_SFTPPORT,"-");
-                //this->setOption(CURLOPT_SFTP_CREATE_MISSING_DIRS,CURLSFTP_CREATE_DIR);
+                this->setOption(CURLOPT_FTP_CREATE_MISSING_DIRS,CURLFTP_CREATE_DIR);
                 //this->setOption(CURLOPT_PORT,0);
                 this->setOption(CURLOPT_CONNECTTIMEOUT,COMMAND_TIMEOUT);
                 this->setOption(CURLOPT_TIMEOUT,(std::max)((int)task->filesize/1024*20,3));
@@ -194,7 +224,7 @@ namespace ady {
                 this->setOption(CURLOPT_POSTQUOTE, cmdlist);
                 response->setCommand("UPLOAD "+local);
                 this->errorCode = this->access(response);
-                response->debug();
+                //response->debug();
                 this->header = response->header;;
                 this->body = response->body;
                 response->parse();
@@ -254,7 +284,12 @@ namespace ady {
         }else{
             task->file = new QFile(local);
             if(task->file->open(QIODevice::WriteOnly)){
-                QString url = QString("sftp://%1%2").arg(this->host).arg(this->escape(remote));
+                //QString url = QString("sftp://%1%2").arg(this->host).arg(this->escape(remote));
+                QString url = QLatin1String("sftp://%1").arg(this->host);
+                if(!remote.startsWith("/")){
+                    url += "/";
+                }
+                url += this->escape(remote);
                 this->setOption(CURLOPT_WRITEDATA, (void*)task->file);
                 this->setOption(CURLOPT_WRITEFUNCTION, network_write_callback);
                 this->setOption(CURLOPT_XFERINFOFUNCTION, network_progress_callback);
@@ -433,6 +468,42 @@ namespace ady {
     void SFTP::setUploadCommands(QStringList commands)
     {
         m_uploadCommands = commands;
+    }
+
+    QString SFTP::matchToPath(const QString& from,bool local){
+        if(m_dirMapping.size()>0){
+            QString ret;
+            if(local){
+                //local to remote
+                for(auto one:m_dirMapping){
+                    const QString localPath = one.first;//like  path1/path2/
+                    const QString remotePath = one.second;//like path3/path4/
+                    if(from.startsWith(localPath)){
+                        ret = remotePath + from.mid(localPath.length());
+                        break;
+                    }
+                }
+                if(ret.isEmpty()){
+                    ret = from;
+                }
+            }else{
+                //remote to local
+                for(auto one:m_dirMapping){
+                    const QString localPath = one.first;//like  path1/path2/
+                    const QString remotePath = one.second;//like path3/path4/
+                    if(from.startsWith(remotePath)){
+                        ret = localPath + from.mid(localPath.length());
+                        break;
+                    }
+                }
+                if(ret.isEmpty()){
+                    ret = from;
+                }
+            }
+            return ret;//new relative path
+        }else{
+            return from;
+        }
     }
 
     NetworkResponse* SFTP::customeAccess(const QString& name,QMap<QString,QVariant> data)

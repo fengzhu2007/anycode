@@ -4,6 +4,7 @@
 #include "cos_global.h"
 #include "network/network_request.h"
 #include "network/http/http_client.h"
+#include "cos_setting.h"
 #include <QStringList>
 namespace ady {
 
@@ -27,8 +28,9 @@ public:
     constexpr const static char PREFIX[] = "prefix";
     constexpr const static char ACCEPT_ENCODING[] = "Accept-Encoding";
 
-    COS(CURL* curl,long long id=0);
-
+    explicit COS(CURL* curl,long long id=0);
+    ~COS();
+    void init(const SiteRecord& info);
 
     virtual NetworkResponse* link() override;
     virtual NetworkResponse* unlink() override;
@@ -44,9 +46,9 @@ public:
     NetworkResponse* del(const QString& bucket,const QString& dst);
 
     virtual NetworkResponse* customeAccess(const QString& name,QMap<QString,QVariant> data) override;
+    virtual QString matchToPath(const QString& from,bool local) override;
 
-
-    inline void setDefaultDir(QString dir){m_defaultDir = dir;}
+    inline void setDefaultDir(QString dir){m_rootPath = dir;}
 
 
 protected:
@@ -60,7 +62,12 @@ protected:
 
 private:
     QString m_bucket;
-    QString m_defaultDir;
+
+    QString m_rootPath;
+
+    COSSetting* m_setting;
+    QList<QPair<QString,QString>> m_dirMapping;
+    QList<QRegularExpression> m_filters;
 
 
 };

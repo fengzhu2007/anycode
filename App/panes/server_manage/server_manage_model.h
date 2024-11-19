@@ -33,6 +33,8 @@ public:
     Type type();
     QString name() const;
     QString path() const;
+    void setName(const QString& name);
+    void setPath(const QString& path);
     bool expanded();
     void setExpanded(bool expanded);
     long long sid();
@@ -51,7 +53,7 @@ private:
     ServerManageModelItemPrivate* d;
 };
 
-
+class SiteRecord;
 class ServerManageModelPrivate;
 class ANYENGINE_EXPORT ServerManageModel : public QAbstractItemModel
 {
@@ -80,8 +82,12 @@ public:
     void refreshItems(QList<FileItem> list,ServerManageModelItem* parent);
     void openProject(long long id,const QString name);
 
+    void addSite(const SiteRecord& site);
+    void updateSite(const SiteRecord& site);
+
     void removeItem(ServerManageModelItem* item);
     void removeProject(long long id);
+    void removeSite(long long id);
 
     ServerManageModelItem* find(const QString& path);
     ServerManageModelItem* find(long long id,bool project=false);//find server

@@ -92,6 +92,12 @@ public:
         }
     }
 
+    void NetworkManager::update(const SiteRecord& site){
+        if(site.id!=0 && this->requests.contains(site.id)){
+            this->requests[site.id]->init(site);
+        }
+    }
+
     bool NetworkManager::contains(long long id){
         return this->requests.contains(id);
     }

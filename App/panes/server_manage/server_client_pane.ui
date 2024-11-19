@@ -49,6 +49,8 @@
         </size>
        </property>
        <addaction name="actionBack"/>
+       <addaction name="separator"/>
+       <addaction name="actionNew_Folder"/>
       </widget>
      </item>
      <item>

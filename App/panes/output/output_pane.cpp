@@ -97,8 +97,10 @@ bool OutputPane::onReceive(Event* e) {
             //update combobox
             ui->source->addItem(data.source);
         }
-        ui->textBrowser->append(levelStr(data.level) + data.content);
-        ui->textBrowser->moveCursor(QTextCursor::End);
+        if(ui->source->currentIndex()==0 || ui->source->currentText()==data.source){
+            ui->textBrowser->append(levelStr(data.level) + data.content);
+            ui->textBrowser->moveCursor(QTextCursor::End);
+        }
         return true;
     }
     return false;

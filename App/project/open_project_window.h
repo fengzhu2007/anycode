@@ -11,9 +11,12 @@ namespace ady {
     {
         Q_OBJECT
     public:
-        OpenProjectWindow(QWidget* parent);
+        ~OpenProjectWindow();
         void initData();
         static OpenProjectWindow* open(QWidget* parent);
+
+    private:
+        explicit OpenProjectWindow(QWidget* parent);
 
     public slots:
         void onSelected();
@@ -22,6 +25,7 @@ namespace ady {
 
     private:
         Ui::OpenProjectWindow *ui;
+        static OpenProjectWindow* instance;
 
     };
 }

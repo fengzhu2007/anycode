@@ -4,7 +4,7 @@
 #include <QJsonObject>
 namespace ady {
 
-COSSetting::COSSetting(SiteSetting & setting){
+COSSetting::COSSetting(const SiteSetting & setting){
     {
         QJsonValue value = setting.get(COS_LOCAL_DIR_SYNC);
         if(!value.isNull() && value.toArray().size()>0){

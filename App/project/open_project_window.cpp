@@ -5,9 +5,9 @@
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/type.h"
-#include "panes/resource_manager/resource_manager_pane.h"
 #include <QDebug>
 namespace ady {
+OpenProjectWindow* OpenProjectWindow::instance=nullptr;
 OpenProjectWindow::OpenProjectWindow(QWidget* parent)
     :wDialog(parent),
      ui(new Ui::OpenProjectWindow)
@@ -21,6 +21,10 @@ OpenProjectWindow::OpenProjectWindow(QWidget* parent)
     this->initData();
 }
 
+OpenProjectWindow::~OpenProjectWindow(){
+    instance = nullptr;
+}
+
 void OpenProjectWindow::initData()
 {
     ProjectStorage projectStorage;
@@ -31,10 +35,12 @@ void OpenProjectWindow::initData()
 }
 
 OpenProjectWindow* OpenProjectWindow::open(QWidget* parent){
-    OpenProjectWindow* window = new OpenProjectWindow(parent);
-    window->setModal(true);
-    window->show();
-    return window;
+    if(instance==nullptr){
+        instance = new OpenProjectWindow(parent);
+    }
+    instance->setModal(true);
+    instance->show();
+    return instance;
 }
 
 void OpenProjectWindow::onSelected()

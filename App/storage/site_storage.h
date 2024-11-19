@@ -26,6 +26,26 @@ namespace ady {
         QString settings;
         long long datetime = 0;
         SiteSetting data;
+        QJsonObject toJson(){
+            return {
+                    {"id",id},
+                    {"name",name},
+                    {"host",host},
+                    {"username",username},
+                    {"password",password},
+                    {"path",path},
+                    {"pid",pid},
+                    {"type",type},
+                    {"groupid",groupid},
+                {"status",status},
+                {"listorder",listorder},
+                {"settings",settings},
+                {"datetime",datetime},
+            };
+        }
+
+
+
     };
 
     class ANYENGINE_EXPORT SiteStorage  : public Storage

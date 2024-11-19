@@ -9,7 +9,7 @@ namespace ady {
     class COSSetting
     {
     public:
-        COSSetting(SiteSetting& setting);
+        COSSetting(const SiteSetting& setting);
         ~COSSetting();
         QList<QPair<QString,QString>> dirSync();
         QList<QPair<QString,QString>> dirMapping();

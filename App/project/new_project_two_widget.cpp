@@ -11,6 +11,8 @@
 #include "interface/form_panel.h"
 #include "components/message_dialog.h"
 #include "w_toast.h"
+#include "core/event_bus/type.h"
+#include "core/event_bus/publisher.h"
 #include <QStyleOption>
 #include <QPainter>
 #include <QPushButton>
@@ -94,6 +96,7 @@ void NewProjectTwoWidget::onNewSite(){
     ui->status->setChecked(false);
     ui->listView->clearSelected();
     d->current = {};
+    ui->type->setEnabled(true);
 }
 
 void NewProjectTwoWidget::onSiteItemClicked(int i){
@@ -121,6 +124,8 @@ void NewProjectTwoWidget::onSiteItemClicked(int i){
             iter++;
         }
         ui->status->setChecked(d->current.status==1?true:false);
+        //set type disable
+        ui->type->setEnabled(false);
     }
 }
 
@@ -181,6 +186,8 @@ void NewProjectTwoWidget::onDeleteSite(int i){
             SiteStorage db;
             db.del(one.id);
             model->itemRemoved(i);
+
+            Publisher::getInstance()->post(Type::M_SITE_DELETED,&d->current);//DELETE
             if(one.id==d->current.id){
                 //clear data
                 this->onNewSite();
@@ -235,6 +242,8 @@ void NewProjectTwoWidget::onSave(){
                 model->updateItem(d->current);
                 //ui->listView->setSelection(QList<int>{index});
 
+            Publisher::getInstance()->post(Type::M_SITE_UPDATED,&d->current);
+
             wToast::showText(tr("Save successful"));
         }else{
             //insert
@@ -248,6 +257,11 @@ void NewProjectTwoWidget::onSave(){
                 model->appendItem(d->current);
                 int index = model->count() - 1;
                 ui->listView->setSelection(QList<int>{index});
+
+                //send message
+                Publisher::getInstance()->post(Type::M_SITE_ADDED,&d->current);
+
+
                 wToast::showText(tr("Save successful"));
             }else{
                 //failed

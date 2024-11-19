@@ -4,7 +4,7 @@
 #include <QJsonObject>
 namespace ady {
 
-SFTPSetting::SFTPSetting(SiteSetting & setting){
+SFTPSetting::SFTPSetting(const SiteSetting & setting){
     {
         QJsonValue value = setting.get(SFTP_LOCAL_DIR_SYNC);
         if(!value.isNull() && value.toArray().size()>0){

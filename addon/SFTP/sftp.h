@@ -5,7 +5,7 @@
 #include "network/network_request.h"
 #include <QStringList>
 namespace ady {
-
+class SFTPSetting;
 class SFTP_EXPORT SFTP : public NetworkRequest
 {
 public:
@@ -13,10 +13,11 @@ public:
     const int UNLINK_TIMEOUT = 2;
 
 
-    SFTP(CURL* curl,long long id=0);
+    explicit SFTP(CURL* curl,long long id=0);
+    ~SFTP();
 
     NetworkResponse* sendSyncCommand(const QString& command);
-
+    virtual void init(const SiteRecord& info) override;
     virtual int access(NetworkResponse* response,bool body=true) override;
     virtual NetworkResponse* link() override;
     virtual NetworkResponse* unlink() override;
@@ -44,7 +45,9 @@ public:
 
 
 
+    virtual QString matchToPath(const QString& from,bool local) override;
     virtual NetworkResponse* customeAccess(const QString& name,QMap<QString,QVariant> data) override;
+
 
 protected:
     void initEnv();
@@ -54,11 +57,10 @@ protected:
 
 
 private:
-    /*QStringList feats;
-    bool mlsd;
-    bool mfmt;
-    bool utf8;*/
     QStringList m_uploadCommands;
+    SFTPSetting* m_setting;
+    QList<QPair<QString,QString>> m_dirMapping;
+    QString m_rootPath;
 
 
 };

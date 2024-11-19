@@ -9,6 +9,7 @@
 #include "core/event_bus/event_data.h"
 #include "storage/site_storage.h"
 #include "docking_pane_manager.h"
+#include "docking_pane_container_tabbar.h"
 #include "interface/remote_file_item_model.h"
 #include "components/message_dialog.h"
 #include "server_request_thread.h"
@@ -17,6 +18,7 @@
 #include "common.h"
 #include <w_toast.h>
 #include <docking_pane_container.h>
+#include <storage/site_storage.h>
 #include <QTimer>
 #include <QMenu>
 #include <QStyledItemDelegate>
@@ -55,7 +57,8 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
     auto r = storage.one(id);
 
 
-    this->regMessageIds({Type::M_UPLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY,Type::M_NOTIFY_REFRESH_LIST,Type::M_CLOSE_PROJECT_NOTIFY});
+    this->regMessageIds({Type::M_UPLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY,Type::M_NOTIFY_REFRESH_LIST,Type::M_CLOSE_PROJECT_NOTIFY,
+                         Type::M_SITE_UPDATED,Type::M_SITE_DELETED});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -189,6 +192,29 @@ bool ServerClientPane::onReceive(Event* e){
             if(container!=nullptr){
                 container->closePane(this,true);
             }
+        }
+    }else if(e->id()==Type::M_SITE_UPDATED){
+        auto site = e->toJsonOf<SiteRecord>().toObject();
+        auto id = site.find("id")->toInt(0);
+        if(id==d->id){
+            //update title
+            auto container = this->container();
+            //container->setT
+            if(container!=nullptr){
+                int i = container->indexOf(this);
+                if(i>=0){
+                    auto tabBar = container->tabBar();
+                    tabBar->setTabText(i,site.find("name")->toString());
+                }
+            }
+        }
+    }else if(e->id()==Type::M_SITE_DELETED){
+        auto site = e->toJsonOf<SiteRecord>().toObject();
+        auto id = site.find("id")->toInt(0);
+        if(id==d->id){
+            //close pane
+            auto container = this->container();
+            container->closePane(this);
         }
     }
     return false;
@@ -402,7 +428,7 @@ void ServerClientPane::onNetworkResponse(NetworkResponse* response,int command,i
         }
     }
     if(response!=nullptr){
-        response->debug();
+        //response->debug();
         this->output(response);
         delete response;
     }
@@ -575,29 +601,31 @@ void ServerClientPane::onActionTriggered(){
         if(mode<0){
             mode = 0;
         }
-        auto dialog = new PermissionDialog(size==1?mode:0,this);
-        dialog->setFileInfo(filename,size);
-        dialog->setModal(true);
-        if(dialog->exec()==QDialog::Accepted){
+        if(list.size()>0){
+            auto dialog = new PermissionDialog(size==1?mode:0,this);
+            dialog->setFileInfo(filename,size);
+            dialog->setModal(true);
+            if(dialog->exec()==QDialog::Accepted){
 
 
-            int mode = dialog->mode();
-            bool applyChildren = dialog->applyChildren();
-            delete  dialog;
-            auto data = new ChmodData{mode,applyChildren};
-            data->list = list;
+                int mode = dialog->mode();
+                bool applyChildren = dialog->applyChildren();
+                delete  dialog;
+                auto data = new ChmodData{mode,applyChildren};
+                data->list = list;
 
-            auto req = NetworkManager::getInstance()->request(d->id);
-            if(req!=nullptr){
-                ui->widget->start();
-                d->thread = new ServerRequestThread(req,ServerRequestThread::Chmod,data);
-                connect(d->thread,&ServerRequestThread::finished,this,&ServerClientPane::onThreadFinished);
-                connect(d->thread,&ServerRequestThread::resultReady, this, &ServerClientPane::onNetworkResponse);
-                connect(d->thread,&ServerRequestThread::message, this, &ServerClientPane::onMessage);
-                connect(d->thread,&ServerRequestThread::output, this, &ServerClientPane::onOutput);
-                d->thread->start();
-            }else{
-                delete data;
+                auto req = NetworkManager::getInstance()->request(d->id);
+                if(req!=nullptr){
+                    ui->widget->start();
+                    d->thread = new ServerRequestThread(req,ServerRequestThread::Chmod,data);
+                    connect(d->thread,&ServerRequestThread::finished,this,&ServerClientPane::onThreadFinished);
+                    connect(d->thread,&ServerRequestThread::resultReady, this, &ServerClientPane::onNetworkResponse);
+                    connect(d->thread,&ServerRequestThread::message, this, &ServerClientPane::onMessage);
+                    connect(d->thread,&ServerRequestThread::output, this, &ServerClientPane::onOutput);
+                    d->thread->start();
+                }else{
+                    delete data;
+                }
             }
         }
     }else if(sender==ui->actionRename){

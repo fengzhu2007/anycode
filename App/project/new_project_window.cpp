@@ -7,6 +7,8 @@
 #include <QPainter>
 
 namespace ady{
+NewProjectWindow* NewProjectWindow::instance=nullptr;
+
 class NewProjectWindowPrivate{
 public:
     long long project_id = 0;
@@ -36,6 +38,7 @@ NewProjectWindow::NewProjectWindow(QWidget *parent) :
 
 NewProjectWindow::~NewProjectWindow()
 {
+    instance = nullptr;
     delete ui;
     delete d;
 }
@@ -87,10 +90,12 @@ void NewProjectWindow::previous(){
 }
 
 NewProjectWindow* NewProjectWindow::open(QWidget* parent){
-    NewProjectWindow* window = new NewProjectWindow(parent);
-    window->setModal(true);
-    window->show();
-    return window;
+    if(instance==nullptr){
+        instance = new NewProjectWindow(parent);
+    }
+    instance->setModal(true);
+    instance->show();
+    return instance;
 }
 
 }

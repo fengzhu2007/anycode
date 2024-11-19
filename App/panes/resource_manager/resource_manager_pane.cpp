@@ -72,7 +72,7 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     ui(new Ui::ResourceManagerPane)
 {
     Subscriber::reg();
-    this->regMessageIds({Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT,Type::M_FILE_CHANGED});
+    this->regMessageIds({Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT,Type::M_FILE_CHANGED,Type::M_SITE_ADDED,Type::M_SITE_UPDATED,Type::M_SITE_DELETED});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -167,8 +167,8 @@ QString ResourceManagerPane::group(){
 }
 
 bool ResourceManagerPane::onReceive(Event* e){
-
-    if(e->id()==Type::M_OPEN_PROJECT){
+    const QString id = e->id();
+    if(id==Type::M_OPEN_PROJECT){
         auto proj = e->toJsonOf<ProjectRecord>().toObject();
         long long id = proj.find("id")->toInt(0);
         auto project = new ProjectRecord();
@@ -236,7 +236,7 @@ bool ResourceManagerPane::onReceive(Event* e){
         return true;
 
 
-    }else if(e->id()==Type::M_CLOSE_PROJECT){
+    }else if(id==Type::M_CLOSE_PROJECT){
         auto proj = e->toJsonOf<CloseProjectData>().toObject();
         if(proj.isEmpty()){
             //from menu
@@ -254,6 +254,40 @@ bool ResourceManagerPane::onReceive(Event* e){
             if(item!=nullptr && item->type()==ResourceManagerModelItem::Project){
                 this->closeProject(item);
             }
+        }
+    }else if(id==Type::M_SITE_ADDED){
+        auto site = e->toJsonOf<SiteRecord>().toObject();
+        auto id = site.find("id")->toInt(0);
+        if(id!=0){
+            auto one = SiteStorage().one(id);
+            if(one.id!=0 && one.status==1){
+                if(!d->sites.contains(one.id)){
+                    d->sites.insert(one.id,one);
+                }
+            }
+        }
+    }else if(id==Type::M_SITE_UPDATED){
+        auto site = e->toJsonOf<SiteRecord>().toObject();
+        auto id = site.find("id")->toInt(0);
+        if(id!=0){
+            auto one = SiteStorage().one(id);
+            if(one.id>0){
+                if(one.status!=1){
+                    //remove
+                    d->sites.remove(one.id);
+                }else{
+                    if(!d->sites.contains(one.id)){
+                        //update
+                        d->sites.insert(one.id,one);
+                    }
+                }
+            }
+        }
+    }else if(id==Type::M_SITE_DELETED){
+        auto site = e->toJsonOf<SiteRecord>().toObject();
+        auto id = site.find("id")->toInt(0);
+        if(id!=0){
+            d->sites.remove(id);
         }
     }
     return false;

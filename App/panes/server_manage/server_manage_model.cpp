@@ -166,6 +166,14 @@ QString ServerManageModelItem::path() const{
     return d->path;
 }
 
+void ServerManageModelItem::setName(const QString& name){
+    d->name = name;
+}
+
+void ServerManageModelItem::setPath(const QString& path){
+    d->path = path;
+}
+
 bool ServerManageModelItem::expanded(){
     return d->expanded;
 }
@@ -520,6 +528,59 @@ void ServerManageModel::openProject(long long id,const QString name){
         }
     }
     this->appendItem(d->root,item);
+}
+
+void ServerManageModel::addSite(const SiteRecord& site){
+    auto item = this->find(site.pid,true);
+    if(item!=nullptr){
+        auto index = createIndex(item->row(),0,item);
+        int position = item->childrenCount();
+        beginInsertRows(index,position,position);
+        auto server = new ServerManageModelItem(ServerManageModelItem::Server,site.id,site.name,site.path,item);
+        item->appendItem(server);
+        endInsertRows();
+
+        auto instance = NetworkManager::getInstance();
+        if(instance!=nullptr)
+            instance->initRequest(site.id,site.type);
+    }
+}
+
+void ServerManageModel::updateSite(const SiteRecord& site){
+    auto proj = this->find(site.pid,true);
+    if(proj!=nullptr){
+        auto r = proj->findChild(site.id,false);
+        if(r!=nullptr){
+            r->setName(site.name);
+            r->setPath(site.path);
+            QModelIndex index = createIndex(r->row(),0,r);
+            emit dataChanged(index,index,QVector<int>(Qt::DisplayRole));
+            //update network connect info;
+            auto instance = NetworkManager::getInstance();
+            instance->update(site);
+        }
+    }
+}
+
+void ServerManageModel::removeSite(long long id){
+    //QMutexLocker(&d->mutex);
+    int pTotal = d->root->childrenCount();
+    for(int i=0;i<pTotal;i++){
+        auto proj = d->root->childAt(i);
+        auto sTotal = proj->childrenCount();
+        for(int j=0;j<sTotal;j++){
+            auto site = proj->childAt(j);
+            if(site->sid()==id){
+                auto index = createIndex(proj->row(),0,proj);
+                int from = site->row();
+                beginRemoveRows(index,from,from);
+                auto r = proj->take(j);
+                endRemoveRows();
+                delete r;
+                return ;
+            }
+        }
+    }
 }
 
 void ServerManageModel::removeItem(ServerManageModelItem* item){

@@ -34,6 +34,11 @@ const QString Type::M_NOTIFY_REFRESH_LIST = "NotifyRefreshList";
 
 const QString Type::M_OUTPUT = "Output";
 
+const QString Type::M_SITE_ADDED = "SiteAdded";
+const QString Type::M_SITE_UPDATED = "SiteUpdated";
+const QString Type::M_SITE_DELETED = "SiteDeleted";
+
+
 
 
 Type::Type()

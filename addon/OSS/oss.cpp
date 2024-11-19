@@ -35,8 +35,17 @@ OSS::OSS(CURL* curl,long long id)
     :HttpClient(curl,id)
 {
     this->connected = false;
+    this->m_setting = nullptr;
     this->setOption(CURLOPT_TIMEOUT,COMMAND_TIMEOUT);
 }
+
+OSS::~OSS(){
+    if(this->m_setting!=nullptr){
+        delete m_setting;
+    }
+}
+
+
 
 void OSS::init(const SiteRecord& info){
     this->setHost(info.host);
@@ -44,15 +53,14 @@ void OSS::init(const SiteRecord& info){
     this->setUsername(info.username);
     this->setPassword(info.password);
     m_rootPath = info.path;
+    if(m_setting!=nullptr){
+        delete m_setting;
+    }
+
     m_setting = new OSSSetting(info.data);
-    //m_dirSync = m_setting->dirSync();
     m_dirMapping = m_setting->dirMapping();
 
-    //stringToExpression
-    /*QList<QRegularExpression> list;
-    for(auto filter:filters){
-        list<<QRegularExpression(Utils::wildcardToRegularExpression(filter),QRegularExpression::CaseInsensitiveOption);
-    }*/
+    m_filters.clear();
     for(auto filter:m_setting->filterExtensions()){
         m_filters << QRegularExpression(Utils::stringToExpression(filter));
     }
@@ -97,7 +105,7 @@ NetworkResponse* OSS::link()
     this->get(url,response);
     this->setOption(CURLOPT_NOBODY,0);
     //qDebug()<<"OBJECT"<<options[OBJECT];
-    response->setCommand(QLatin1String("GET %1").arg(prefix));
+    response->setCommand(QLatin1String("GET /%1").arg(prefix));
 
     return response;
 
@@ -156,7 +164,7 @@ NetworkResponse* OSS::listDir(const QString& dir,int page,int pageSize)
     url += this->escape(options[OBJECT]);
     OSSResponse* response = new  OSSResponse(this->id);
     this->get(url,response);
-    response->setCommand(QLatin1String("GET %1").arg("/"+prefix));
+    response->setCommand(QLatin1String("GET /%1").arg(prefix));
     return response;
 
 }
@@ -204,7 +212,7 @@ NetworkResponse* OSS::tinyListDir(const QString& dir)
     OSSResponse* response = new  OSSResponse(this->id);
     this->get(url,response);
     //response->debug();
-    response->setCommand(QLatin1String("GET %1").arg("/"+prefix));
+    response->setCommand(QLatin1String("GET /%1").arg(prefix));
     return response;
 }
 

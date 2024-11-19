@@ -223,6 +223,17 @@ QString FileTransferModelItem::destination() const{
     return d->dest;
 }
 
+void FileTransferModelItem::setName(const QString& name){
+    d->name = name;
+}
+
+void FileTransferModelItem::setSource(const QString& source){
+    d->src = source;
+}
+void FileTransferModelItem::setDestination(const QString& destination){
+    d->dest = destination;
+}
+
 
 FileTransferModelItem::State FileTransferModelItem::state(){
     return d->state;
@@ -701,6 +712,7 @@ void FileTransferModel::removeItem(long long siteid,long long id){
 }
 
 void FileTransferModel::removeProject(long long id){
+    //QMutexLocker(&d->mutex);
     if(id==0){
         return ;
     }
@@ -710,6 +722,28 @@ void FileTransferModel::removeProject(long long id){
         if(proj->id() == id){
             return this->removeItem(proj);
          }
+    }
+}
+
+void FileTransferModel::removeSite(long long id){
+    QMutexLocker(&d->mutex);
+    int pTotal = d->root->childrenCount();
+    for(int i=0;i<pTotal;i++){
+        auto proj = d->root->childAt(i);
+        auto sTotal = proj->childrenCount();
+        for(int j=0;j<sTotal;j++){
+            auto site = proj->childAt(j);
+            if(site->id()==id){
+                auto index = createIndex(proj->row(),0,proj);
+                int from = site->row();
+                beginRemoveRows(index,from,from);
+                auto r = proj->take(j);
+                endRemoveRows();
+                delete r;
+                return ;
+
+            }
+        }
     }
 }
 
@@ -874,49 +908,22 @@ void FileTransferModel::openProject(long long id,const QString& name,const QStri
     this->appendItem(d->root,item);
 }
 
+void FileTransferModel::addSite(const SiteRecord& site){
+    QMutexLocker locker(&d->mutex);
+    auto item = this->find(site.pid,true);
+    if(item!=nullptr){
+        auto index = createIndex(item->row(),0,item);
+        int position = item->childrenCount();
+        beginInsertRows(index,position,position);
+        auto server = new FileTransferModelItem(FileTransferModelItem::Server,site.id,site.name,site.path,item);
+        item->appendItem(server);
+        endInsertRows();
+    }
+}
+
 void FileTransferModel::addJob(UploadData* data){
     auto json = data->toJson();
     this->addUploadJob(json);
-    /*QMutexLocker locker(&d->mutex);
-    auto proj = d->root->findByProjectId(data->pid);
-    if(proj!=nullptr){
-        auto site = proj->findBySiteId(data->siteid);
-        if(site!=nullptr){
-            //add file or folder
-            auto index = createIndex(site->row(),0,site);//site modelindex (job parent modelindex)
-            int position = site->childrenCount();
-            QString source = data->source;//absolute path
-            QString destination = data->dest;//absolute path
-
-            if(destination.isEmpty()){
-                auto req = NetworkManager::getInstance()->request(data->siteid);
-                if(req!=nullptr){
-                    const QString projectPath = proj->source() + "/";
-                    //qDebug()<<"addJob"<<source<<projectPath;
-                    const QString remotePath = site->destination();
-                    if(source.startsWith(projectPath)){
-                        QString rSource = source.mid(projectPath.length());
-                        QString rDest = req->matchToPath(rSource,true);
-                        if(rDest.isEmpty()){
-                            return ;
-                        }
-                        destination = remotePath + rDest;
-                    }else if(source==proj->source()){
-                        //upload project folder
-                        destination = remotePath;
-                    }else{
-                        return ;//not match project
-                    }
-                }else{
-                    return;
-                }
-            }
-            beginInsertRows(index,position,position);
-            site->appendItem(new FileTransferModelItem(FileTransferModelItem::Upload,data->is_file,source,destination,site));
-            endInsertRows();
-        }
-    }
-    d->cond.wakeAll();*/
 }
 
 void FileTransferModel::addUploadJob(QJsonObject data){
@@ -1038,6 +1045,20 @@ void FileTransferModel::addDownloadJob(QJsonObject data){
     d->cond.wakeAll();
 }
 
+void FileTransferModel::updateSite(const SiteRecord& site){
+    QMutexLocker locker(&d->mutex);
+    auto proj = this->find(site.pid,true);
+    if(proj!=nullptr){
+        auto r = proj->findBySiteId(site.id);
+        if(r!=nullptr){
+            r->setName(site.name);
+            r->setDestination(site.path);
+            QModelIndex index = createIndex(r->row(),FileTransferModel::Name,r);
+            emit dataChanged(index,index,QVector<int>(Qt::DisplayRole));
+        }
+    }
+}
+
 
 void FileTransferModel::progress(long long siteid,long long id,float progress){
     emit notifyProgress(siteid,id,progress);
@@ -1078,7 +1099,6 @@ void FileTransferModel::setItemFailed(long long siteid,long long id,const QStrin
             return ;
         }
     }
-
 }
 
 void FileTransferModel::start(int num){

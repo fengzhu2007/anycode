@@ -7,6 +7,7 @@
 #include "core/event_bus/type.h"
 #include "core/event_bus/event_data.h"
 #include "storage/project_storage.h"
+#include "storage/site_storage.h"
 #include "file_transfer_model.h"
 #include "components/message_dialog.h"
 
@@ -31,7 +32,7 @@ FileTransferPane::FileTransferPane(QWidget *parent) :
 {
     d = new FileTransferPanePrivate;
     Subscriber::reg();
-    this->regMessageIds({Type::M_UPLOAD,Type::M_DOWNLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY});
+    this->regMessageIds({Type::M_UPLOAD,Type::M_DOWNLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY,Type::M_SITE_ADDED,Type::M_SITE_UPDATED,Type::M_SITE_DELETED});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -144,6 +145,45 @@ bool FileTransferPane::onReceive(Event* e) {
             for(auto id:ids){
                 model->abortJob(id);
             }
+        }
+    }else if(id==Type::M_SITE_ADDED){
+        auto site = e->toJsonOf<SiteRecord>().toObject();
+        auto id = site.find("id")->toInt(0);
+        if(id!=0){
+            auto one = SiteStorage().one(id);
+            if(one.id!=0 && one.status==1){
+                auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+                model->addSite(one);
+            }
+        }
+    }else if(id==Type::M_SITE_UPDATED){
+        auto site = e->toJsonOf<SiteRecord>().toObject();
+        auto id = site.find("id")->toInt(0);
+        if(id!=0){
+            auto one = SiteStorage().one(id);
+            if(one.id>0){
+                auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+                if(one.status!=1){
+                    //remove
+                    model->removeSite(one.id);
+
+                }else{
+                    auto r = model->find(one.id,false);
+                    if(r){
+                        model->updateSite(one);
+                    }else{
+                        //add
+                        model->addSite(one);
+                    }
+                }
+            }
+        }
+    }else if(id==Type::M_SITE_DELETED){
+        auto site = e->toJsonOf<SiteRecord>().toObject();
+        auto id = site.find("id")->toInt(0);
+        if(id!=0){
+            auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+            model->removeSite(id);
         }
     }
     return false;

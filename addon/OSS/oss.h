@@ -32,7 +32,8 @@ public:
 
 
 
-    OSS(CURL* curl,long long id=0);
+    explicit OSS(CURL* curl,long long id=0);
+    ~OSS();
 
     //virtual int access(NetworkResponse* response,bool body=true) override;
     virtual void init(const SiteRecord& info) override;

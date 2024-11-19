@@ -9,7 +9,7 @@ namespace ady {
     class SFTPSetting
     {
     public:
-        SFTPSetting(SiteSetting& setting);
+        SFTPSetting(const SiteSetting& setting);
         ~SFTPSetting();
         QList<QPair<QString,QString>> dirSync();
         QList<QPair<QString,QString>> dirMapping();

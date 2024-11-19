@@ -44,6 +44,12 @@ public:
     static const QString M_NOTIFY_REFRESH_TREE;
     static const QString M_NOTIFY_REFRESH_LIST;
 
+
+    //project
+    static const QString M_SITE_ADDED;
+    static const QString M_SITE_UPDATED;
+    static const QString M_SITE_DELETED;
+
     //output
     enum OutputLevel{
         Text=0,
