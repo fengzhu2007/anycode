@@ -38,6 +38,7 @@
 
 #include "modules/help/about_dialog.h"
 #include "modules/help/update_dialog.h"
+#include "modules/options/options_dialog.h"
 
 #include "common.h"
 
@@ -392,8 +393,7 @@ void IDEWindow::onActionTriggered(){
 
     //tool
     }else if(sender==ui->actionOptions){
-
-
+        OptionsDialog::open(this);
     //addon
     }else if(sender==ui->actionAddon_Manage){
 

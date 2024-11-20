@@ -26,14 +26,16 @@ VersionControlQueryDiffTask::~VersionControlQueryDiffTask(){
 
 bool VersionControlQueryDiffTask::exec(){
     auto oid = this->oid();
+    auto rid = d->repo->rid();
     auto list = d->repo->queryDiff(oid.first,oid.second);
+    auto error = d->repo->error();
     auto instance = VersionControlPane::getInstance();
     if(instance!=nullptr){
-        QMetaObject::invokeMethod(instance,"onUpdateDiff", Qt::AutoConnection,Q_ARG(const QString&,oid.first),Q_ARG(const QString&,oid.second),Q_ARG(int,d->repo->rid()),Q_ARG(void*, list));
+        QMetaObject::invokeMethod(instance,"onUpdateDiff", Qt::AutoConnection,Q_ARG(const QString&,oid.first),Q_ARG(const QString&,oid.second),Q_ARG(int,rid),Q_ARG(void*, list));
         if(list->size()==0){
-            auto error = d->repo->error();
+            //auto error = d->repo->error();
             if(error.code!=0){
-                QMetaObject::invokeMethod(instance,"onError", Qt::AutoConnection,Q_ARG(int,d->repo->rid()),Q_ARG(int,error.code),Q_ARG(const QString&, error.message));
+                QMetaObject::invokeMethod(instance,"onError", Qt::AutoConnection,Q_ARG(int,rid),Q_ARG(int,error.code),Q_ARG(const QString&, error.message));
             }
         }
         return true;

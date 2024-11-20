@@ -514,7 +514,7 @@ void ServerManageModel::openProject(long long id,const QString name){
     auto instance = NetworkManager::getInstance();
     if(id>0){
         SiteStorage db;
-        QList<SiteRecord> list = db.list(id);
+        QList<SiteRecord> list = db.list(id,1);
         for(auto one:list){
             auto server = new ServerManageModelItem(ServerManageModelItem::Server,one.id,one.name,one.path,item);
             server->setAddonType(one.type);

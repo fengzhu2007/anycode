@@ -4,13 +4,14 @@
 #include "docking_pane_layout_item_info.h"
 #include "panes/resource_manager/resource_manager_model.h"
 #include "panes/resource_manager/resource_manager_model_item.h"
-#include "core/backend_thread.h"
 #include "cvs/git/git_repository.h"
 #include "cvs/svn/svn_repository.h"
 #include "cvs/commit_model.h"
 #include "cvs/diff_file_model.h"
+#include "network/network_response.h"
 #include "version_control_query_commit_task.h"
 #include "version_control_query_diff_task.h"
+#include "version_control_delete_file_task.h"
 #include "w_toast.h"
 #include "components/message_dialog.h"
 #include "zip/zip_archive.h"
@@ -18,6 +19,8 @@
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/type.h"
 #include "core/event_bus/event_data.h"
+#include "storage/site_storage.h"
+#include "version_controller_thread.h"
 #include <memory>
 #include <QComboBox>
 #include <QLabel>
@@ -45,6 +48,10 @@ public:
     QLabel* label;
     std::shared_ptr<cvs::Repository> repo;
     long long current_pid=0;
+    bool init = false;
+    VersionControllerThread* thread;
+    QList<SiteRecord> sites;
+    QString current_path;
 };
 
 VersionControlPane::VersionControlPane(QWidget *parent)
@@ -52,6 +59,8 @@ VersionControlPane::VersionControlPane(QWidget *parent)
 {
     d = new VersionControlPanePrivate;
     d->repo = nullptr;
+    d->init = false;
+    d->thread = nullptr;
     Subscriber::reg();
     this->regMessageIds({Type::M_QUERY_COMMIT,Type::M_QUERY_DIFF});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
@@ -112,13 +121,19 @@ VersionControlPane::VersionControlPane(QWidget *parent)
     connect(ui->actionOpen_Folder,&QAction::triggered,this,&VersionControlPane::onActionTriggered);
     connect(ui->actionCopy_Path,&QAction::triggered,this,&VersionControlPane::onActionTriggered);
     connect(ui->actionSynchronous_Deletion,&QAction::triggered,this,&VersionControlPane::onActionTriggered);
-    this->initView();
+
+
+    //this->initView();
 }
 
 
 VersionControlPane::~VersionControlPane(){
     Subscriber::unReg();
     instance = nullptr;
+    if(d->thread!=nullptr){
+        d->thread->requestInterruption();
+        d->thread->quit();
+    }
     delete d;
     delete ui;
 }
@@ -144,11 +159,16 @@ bool VersionControlPane::onReceive(Event* e){
 }
 
 void VersionControlPane::queryCommit(bool refresh){
+    if(this->isThreadRunning()){
+        return ;
+    }
     if(refresh){
         //clear model;
         this->clearCommit();
     }
-    BackendThread::getInstance()->appendTask(new VersionControlQueryCommitTask(d->repo));
+    d->thread = new VersionControllerThread(new VersionControlQueryCommitTask(d->repo));
+    connect(d->thread,&VersionControllerThread::finished,this,&VersionControlPane::onFinished);
+    d->thread->start();
 }
 
 void VersionControlPane::clearCommit(){
@@ -157,9 +177,15 @@ void VersionControlPane::clearCommit(){
 }
 
 void VersionControlPane::queryDiff(const QString& oid1,const QString& oid2){
+    if(this->isThreadRunning()){
+        return ;
+    }
     this->showLoading();
     this->clearDiff();
-    BackendThread::getInstance()->appendTask(new VersionControlQueryDiffTask(d->repo,oid1,oid2));
+    //BackendThread::getInstance()->appendTask(new VersionControlQueryDiffTask(d->repo,oid1,oid2));
+    d->thread = new VersionControllerThread(new VersionControlQueryDiffTask(d->repo,oid1,oid2));
+    connect(d->thread,&VersionControllerThread::finished,this,&VersionControlPane::onFinished);
+    d->thread->start();
 }
 
 void VersionControlPane::clearDiff(){
@@ -184,17 +210,22 @@ void VersionControlPane::resizeEvent(QResizeEvent *event){
     wSpin::resize();
 }
 
+
 void VersionControlPane::onProjectChanged(int i){
     auto model = static_cast<ResourceManagerModel*>(ui->comboBox->model());
     this->clearProject();
     d->current_pid = 0;
+
     if(model!=nullptr){
         auto index = model->index(i,0);
         auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
         if(item!=nullptr){
             d->current_pid = item->pid();
+            //init sites
+            d->sites = SiteStorage().list(d->current_pid,1);
+
             ui->actionRefresh->setEnabled(true);
-            auto path = item->path();
+            auto path =  d->current_path = item->path();
             QDir dir(path);
             if(dir.exists(".svn")){
                 d->branch->hide();
@@ -338,39 +369,30 @@ void VersionControlPane::onActionTriggered(){
         this->queryDiff(first.oid(),last.oid());
     }else if(sender==ui->actionUpload){
 
+        auto model = static_cast<DiffFileModel*>(ui->diffListView->model());
+        auto list = ui->diffListView->selectionModel()->selectedRows();
+        QStringList files;
+        QString path = d->current_path;
+        if(!path.endsWith("/")){
+            path += "/";
+        }
+        for(auto one:list){
+            int row = one.row();
+            auto item = model->at(row);
+            files << path +item.path();
+        }
+        for(auto site:d->sites){
+            this->uploadFiles(site.id,files);
+        }
+
     }else if(sender==ui->actionPack_Zip){
         if(MessageDialog::confirm(this->topLevelWidget(),tr("Are you sure compress the diff files to a zip archive?"))==QMessageBox::Yes){
-            auto model = static_cast<DiffFileModel*>(ui->diffListView->model());
-            auto zipTool = static_cast<QAction*>(sender);
-            bool selected = zipTool->data().toBool();
-            QList<cvs::DiffFile> lists;
-            if(selected){
-                QModelIndexList indexlist = ui->diffListView->selectionModel()->selectedRows();
-                for(auto index:indexlist){
-                    lists.push_back(model->getItem(index.row()));
-                }
-            }else{
-                lists = model->lists();
-            }
-            if(lists.length()>0){
-                ZipArchive zip;
-                const QString path = d->repo->path();
-                QString filename = QString::fromUtf8("/%1.zip").arg(QDateTime::currentDateTime().toString("yyyyMMddHHmmss"));
-                if(zip.open(path+filename,ZipArchive::Overwrite)){
-                    for(auto item:lists){
-                        if(item.status()!=cvs::DiffFile::Deletion){
-                            zip.addFile(path+"/"+item.path(),item.path());
-                        }
-                    }
-                    zip.close();
-                    wToast::showText(tr("Compressed successfully"));
-                }else{
-                    qDebug()<<"zip open failed:"<<zip.errorCode();
-                }
-            }
+            this->compressZipPackage(false);
         }
     }else if(sender==ui->actionPack_Selection_To_Zip){
-
+        if(MessageDialog::confirm(this->topLevelWidget(),tr("Are you sure compress the diff files to a zip archive?"))==QMessageBox::Yes){
+            this->compressZipPackage(true);
+        }
     }else if(sender==ui->actionOpen_File){
         QModelIndexList indexlist = ui->diffListView->selectionModel()->selectedRows();
         if(indexlist.size()>0){
@@ -400,9 +422,25 @@ void VersionControlPane::onActionTriggered(){
             auto item = model->at(one.row());
             const QString project_dir = d->repo->path();
             QString path = project_dir + "/" + item.path();
+            //qDebug()<<"path"<<path;
             QApplication::clipboard()->setText(path);
         }
     }else if(sender==ui->actionSynchronous_Deletion){
+
+        auto model = static_cast<DiffFileModel*>(ui->diffListView->model());
+        auto list = ui->diffListView->selectionModel()->selectedRows();
+        QStringList files;
+        QString path = d->current_path;
+        if(!path.endsWith("/")){
+            path += "/";
+        }
+        for(auto one:list){
+            int row = one.row();
+            auto item = model->at(row);
+            files << path +item.path();
+        }
+
+        this->uploadFiles(-1ll,files);
 
     }else if(sender==ui->actionClear_Flags){
         QModelIndexList indexlist = ui->commitListView->selectionModel()->selectedRows();
@@ -493,14 +531,23 @@ void VersionControlPane::onDiffContextMenu(const QPoint& pos){
     contextMenu.addSeparator();
     contextMenu.addAction(ui->actionUpload);
     //contextMenu.addAction(tr)
-    QMenu* uploadToMenu = contextMenu.addMenu(tr("Upload To"));
+    //QMenu* uploadToMenu = contextMenu.addMenu(tr("Upload To"));
+    QMenu* uploadToMenu = this->attchUploadMenu(0,&contextMenu);
+    if(uploadToMenu!=nullptr){
+        contextMenu.addMenu(uploadToMenu);
+    }
     contextMenu.addSeparator();
     contextMenu.addAction(ui->actionPack_Zip);
     contextMenu.addAction(ui->actionPack_Selection_To_Zip);
     contextMenu.addAction(ui->actionSynchronous_Deletion);
-    QMenu* deleteMenu = contextMenu.addMenu(tr("Synchronous Deletion To"));
+    //QMenu* deleteMenu = contextMenu.addMenu(tr("Synchronous Deletion To"));
+    auto deleteMenu = this->attchUploadMenu(1,&contextMenu);
+    if(deleteMenu!=nullptr){
+        contextMenu.addMenu(deleteMenu);
+    }
     contextMenu.exec(QCursor::pos());
 }
+
 
 void VersionControlPane::onMarkAs(bool checked){
     QObject *sender = this->sender();
@@ -542,6 +589,152 @@ void VersionControlPane::onMarkAs(bool checked){
         }
         model->updateFlags(lists);
     }
+}
+
+void VersionControlPane::onFinished(){
+    //this->hideLoading();
+    //d->thread->wait();
+    d->thread->deleteLater();
+    d->thread = nullptr;
+}
+
+void VersionControlPane::onUploadToSite(){
+    auto action = static_cast<QAction*>(this->sender());
+    long long siteid = action->data().toLongLong();
+    auto model = static_cast<DiffFileModel*>(ui->diffListView->model());
+    auto list = ui->diffListView->selectionModel()->selectedRows();
+    QStringList files;
+    QString path = d->current_path;
+    if(!path.endsWith("/")){
+        path += "/";
+    }
+    for(auto one:list){
+        int row = one.row();
+        auto item = model->at(row);
+        files << path +item.path();
+    }
+    this->uploadFiles(siteid,files);
+}
+void VersionControlPane::onSynchronousToSite(){
+    auto action = static_cast<QAction*>(this->sender());
+    long long siteid = action->data().toLongLong();
+    auto model = static_cast<DiffFileModel*>(ui->diffListView->model());
+    int total = model->rowCount();
+    QStringList files;
+    QString path = d->current_path;
+    if(!path.endsWith("/")){
+        path += "/";
+    }
+    for(int i=0;i<total;i++){
+        auto item = model->at(i);
+        if(item.status()==cvs::DiffFile::Deletion){
+            const QString file = path +item.path();
+            if(!QFileInfo::exists(file)){
+                files<<file;
+            }
+        }
+    }
+    this->deleteFiles(siteid,files);
+}
+void VersionControlPane::onUploadToGroup(){
+
+}
+void VersionControlPane::onSynchronousToGroup(){
+
+}
+
+void VersionControlPane::onOutput(NetworkResponse* response){
+    if(response!=nullptr){
+        bool status = response->status();
+        QJsonObject json = {
+            {"level",status?Type::Ok:Type::Error},
+            {"source",this->windowTitle()},
+            {"content",response->command + "\n" + (status?response->header:response->errorInfo())}
+        };
+        Publisher::getInstance()->post(Type::M_OUTPUT,json);
+        delete response;
+    }
+}
+
+bool VersionControlPane::isThreadRunning(){
+    return d->thread!=nullptr;
+}
+
+void VersionControlPane::compressZipPackage(bool selected){
+    auto model = static_cast<DiffFileModel*>(ui->diffListView->model());
+    QList<cvs::DiffFile> lists;
+    if(selected){
+        QModelIndexList indexlist = ui->diffListView->selectionModel()->selectedRows();
+        for(auto index:indexlist){
+            lists.push_back(model->getItem(index.row()));
+        }
+    }else{
+        lists = model->lists();
+    }
+    if(lists.length()>0){
+        ZipArchive zip;
+        const QString path = d->repo->path();
+        QString filename = QString::fromUtf8("/%1.zip").arg(QDateTime::currentDateTime().toString("yyyyMMddHHmmss"));
+        if(zip.open(path+filename,ZipArchive::Overwrite)){
+            for(auto item:lists){
+                if(item.status()!=cvs::DiffFile::Deletion){
+                    zip.addFile(path+"/"+item.path(),item.path());
+                }
+            }
+            zip.close();
+            wToast::showText(tr("Compressed successfully"));
+        }else{
+            qDebug()<<"zip open failed:"<<zip.errorCode();
+        }
+    }
+}
+
+void VersionControlPane::uploadFiles(long long siteid,const QStringList& files){
+    if(files.size()>0){
+        UploadData data{d->current_pid,siteid,true,files.join("|"),{}};//not set dest ,should match remote
+        Publisher::getInstance()->post(Type::M_UPLOAD,&data);
+    }
+}
+
+void VersionControlPane::deleteFiles(long long siteid,const QStringList& files){
+    if(this->isThreadRunning()){
+        return ;
+    }
+    if(siteid==-1ll){
+        QList<VersionControlDeleteFileTask*> tasks;
+        for(auto site:d->sites){
+            tasks<<new VersionControlDeleteFileTask(site.id,files);
+        }
+        if(tasks.size()>0){
+            this->showLoading();
+            d->thread = new VersionControllerThread(new VersionControlDeleteFileTask(siteid,files));
+            connect(d->thread,&VersionControllerThread::finished,this,&VersionControlPane::onFinished);
+            d->thread->start();
+        }
+        return ;
+    }
+    this->showLoading();
+    d->thread = new VersionControllerThread(new VersionControlDeleteFileTask(siteid,files));
+    connect(d->thread,&VersionControllerThread::finished,this,&VersionControlPane::onFinished);
+    d->thread->start();
+}
+
+QMenu* VersionControlPane::attchUploadMenu(int type,QMenu* parent){
+    QMenu* uploadM = nullptr;
+    for(auto one:d->sites){
+        if(uploadM==nullptr){
+            uploadM = new QMenu(parent);
+            uploadM->setTitle(type==0?tr("Upload To"):tr("Synchronous Deletion To"));
+        }
+        if(type==0){
+            auto action = uploadM->addAction(QIcon(":/Resource/icons/RemoteServer_16x.svg"),one.name,this,&VersionControlPane::onUploadToSite);
+            action->setData(one.id);//site id
+        }else{
+            auto action = uploadM->addAction(QIcon(":/Resource/icons/RemoteServer_16x.svg"),one.name,this,&VersionControlPane::onSynchronousToSite);
+            action->setData(one.id);//site id
+        }
+    }
+    return uploadM;
 }
 
 VersionControlPane* VersionControlPane::open(DockingPaneManager* dockingManager,bool active){

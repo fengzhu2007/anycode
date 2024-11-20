@@ -5,6 +5,7 @@
 #include "w_spin.h"
 #include "core/event_bus/subscriber.h"
 #include <QItemSelection>
+#include <QMenu>
 
 namespace Ui {
 class VersionControlPane;
@@ -13,6 +14,7 @@ namespace ady{
 namespace cvs{
 class Repository;
 }
+class NetworkResponse;
 class VersionControlPanePrivate;
 class ANYENGINE_EXPORT VersionControlPane : public DockingPane ,public wSpin , public Subscriber
 {
@@ -49,9 +51,20 @@ public slots:
     void onCommitContextMenu(const QPoint& pos);
     void onDiffContextMenu(const QPoint& pos);
     void onMarkAs(bool checked=false);
+    void onFinished();
+    void onUploadToSite();
+    void onSynchronousToSite();
+    void onUploadToGroup();
+    void onSynchronousToGroup();
+    void onOutput(NetworkResponse* response);
 
 private:
-    VersionControlPane(QWidget *parent = nullptr);
+    explicit VersionControlPane(QWidget *parent = nullptr);
+    bool isThreadRunning();
+    void compressZipPackage(bool selected);
+    void uploadFiles(long long siteid,const QStringList& files);
+    void deleteFiles(long long siteid,const QStringList& files);
+    QMenu* attchUploadMenu(int type,QMenu* parent);
 
 public:
     static const QString PANE_ID;

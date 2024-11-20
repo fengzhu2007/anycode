@@ -102,6 +102,10 @@ void CodeEditorPane::initView(){
         TextEditor::TextEditorSettings::instance()->setZoom(z);
         ui->zoom->setZoom(z);
     });
+
+    //ui->charset->setText(QLatin1String("UTF-8"));
+    this->updateInfoBar();
+
 }
 
 CodeEditorPane::~CodeEditorPane(){
@@ -171,6 +175,11 @@ void CodeEditorPane::save(bool rename){
         }
         ui->editor->document()->setModified(false);
 
+        if(source.isEmpty()){
+            //new file save as
+            ui->editor->configureGenericHighlighter();
+        }
+
         //add to recent
         auto uri = QUrl(path);
         if(source!=path && uri.isLocalFile()){
@@ -233,8 +242,10 @@ void CodeEditorPane::doAction(int a){
     }else if(a==DockingPane::SaveAs){
         this->save(true);
     }else if(a==DockingPane::Redo){
+
         ui->editor->redo();
     }else if(a==DockingPane::Undo){
+        //qDebug()<<"Undo";
         ui->editor->undo();
     }else if(a==DockingPane::Cut){
         ui->editor->cut();
@@ -380,6 +391,7 @@ CodeEditorPane* CodeEditorPane::make(DockingPaneManager* dockingManager,const QJ
         pane->setWindowTitle(QObject::tr("New File (%1)").arg(CodeEditorPane::NEW_COUNT));
     }
     ++CodeEditorPane::NEW_COUNT;
+
     return pane;
 }
 

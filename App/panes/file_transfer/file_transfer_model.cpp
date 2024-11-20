@@ -488,6 +488,23 @@ void FileTransferModel::appendItem(FileTransferModelItem* parent,FileTransferMod
     endInsertRows();
 }
 
+void FileTransferModel::appendItems(FileTransferModelItem* parent,QList<FileTransferModelItem*> items){
+    QMutexLocker locker(&d->mutex);
+    int size = items.size();
+    if(size<=0){
+        return ;
+    }
+    int position = parent->childrenCount();
+    QModelIndex parentIndex;
+    if(parent!=d->root){
+        parentIndex = createIndex(parent->row(),0,parent);
+    }
+    beginInsertRows(parentIndex,position,position + size - 1);
+    parent->appendItems(items);
+    endInsertRows();
+
+}
+
 
 
 void FileTransferModel::insertFrontAndRemove(long long siteid,long long id,QFileInfoList list,FileTransferModelItem::State state){
@@ -940,36 +957,52 @@ void FileTransferModel::addUploadJob(QJsonObject data){
             QString source = data.find("source")->toString();//absolute path
             QString destination = data.find("dest")->toString();//absolute path
             bool is_file = data.find("is_file")->toBool(true);
-            bool matched = false;
+            QList<FileTransferModelItem*> items;
             if(destination.isEmpty()){
+                QStringList sourcelist;
+                if(is_file){
+                    sourcelist = source.split("|");
+                }else{
+                    sourcelist << source;
+                }
                 auto req = NetworkManager::getInstance()->request(siteid);
                 if(req!=nullptr){
                     const QString projectPath = proj->source() + "/";
                     const QString remotePath = site->destination();
-                    if(source.startsWith(projectPath)){
-                        QString rSource = source.mid(projectPath.length());
-                        QString rDest = req->matchToPath(rSource,true);
-                        if(rDest.isEmpty()){
-                            return ;
+
+                    for(auto source:sourcelist){
+                        if(source.startsWith(projectPath)){
+                            QString rSource = source.mid(projectPath.length());
+                            QString rDest = req->matchToPath(rSource,true);
+                            if(rDest.isEmpty()){
+                                continue;
+                            }
+                            destination = remotePath + rDest;
+                        }else if(source==proj->source()){
+                            //upload project folder
+                            destination = remotePath;
+                        }else{
+                            //return ;//not match project
+                            continue;
                         }
-                        destination = remotePath + rDest;
-                    }else if(source==proj->source()){
-                        //upload project folder
-                        destination = remotePath;
-                    }else{
-                        return ;//not match project
+                        auto item = new FileTransferModelItem(FileTransferModelItem::Upload,is_file,source,destination,site);
+                        item->setMatchedPath(true);
+                        items<<item;
                     }
                 }else{
                     return;
                 }
-                matched = true;
+            }else{
+                auto item = new FileTransferModelItem(FileTransferModelItem::Upload,is_file,source,destination,site);
+                item->setMatchedPath(false);
+                items<<item;
             }
-            beginInsertRows(index,position,position);
-            auto item = new FileTransferModelItem(FileTransferModelItem::Upload,is_file,source,destination,site);
-            item->setMatchedPath(matched);
-            site->appendItem(item);
-            endInsertRows();
-
+            int size = items.size();
+            if(size>0){
+                beginInsertRows(index,position,position + size - 1);
+                site->appendItems(items);
+                endInsertRows();
+            }
         }
     }
     d->cond.wakeAll();

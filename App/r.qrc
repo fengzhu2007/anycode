@@ -84,5 +84,8 @@
         <file>Resource/icons/ClearWindowContent_16x.svg</file>
         <file>Resource/icons/EnableDebugging_16x.svg</file>
         <file>Resource/icons/FolderClosed_16x.svg</file>
+        <file>Resource/icons/Computer_16x.svg</file>
+        <file>Resource/icons/Editor_16x.svg</file>
+        <file>Resource/icons/Network_16x.svg</file>
     </qresource>
 </RCC>

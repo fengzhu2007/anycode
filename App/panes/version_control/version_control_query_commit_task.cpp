@@ -34,8 +34,10 @@ bool VersionControlQueryCommitTask::exec(){
                 QMetaObject::invokeMethod(instance,"onError", Qt::AutoConnection,Q_ARG(int,d->repo->rid()),Q_ARG(int,error.code),Q_ARG(const QString&, error.message));
             }
         }
+        qDebug()<<"exe end";
         return true;
     }else{
+        qDebug()<<"exe end2";
         delete list;
         return false;
     }

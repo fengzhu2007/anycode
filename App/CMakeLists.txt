@@ -167,6 +167,7 @@ add_library(App SHARED
         panes/version_control/version_control_pane.ui
         panes/version_control/version_control_query_commit_task.h panes/version_control/version_control_query_commit_task.cpp
         panes/version_control/version_control_query_diff_task.h panes/version_control/version_control_query_diff_task.cpp
+        panes/version_control/version_controller_thread.h panes/version_control/version_controller_thread.cpp
         panes/resource_manager/resource_manage_tree_view.h panes/resource_manager/resource_manage_tree_view.cpp
         core/event_bus/type.h core/event_bus/type.cpp
         core/event_bus/event_data.h
@@ -208,6 +209,15 @@ add_library(App SHARED
         modules/help/update_dialog.h modules/help/update_dialog.cpp modules/help/update_dialog.ui
         storage/recent_storage.h storage/recent_storage.cpp
         panes/output/output_pane.h panes/output/output_pane.cpp panes/output/output_pane.ui
+        panes/version_control/version_control_delete_file_task.h panes/version_control/version_control_delete_file_task.cpp
+        modules/options/options_dialog.ui modules/options/options_dialog.h modules/options/options_dialog.cpp
+        modules/options/option_widget.h modules/options/option_widget.cpp
+        modules/options/environment_option_widget.h modules/options/environment_option_widget.cpp modules/options/environment_option_widget.ui
+        modules/options/texteditor_option_widget.h modules/options/texteditor_option_widget.cpp modules/options/texteditor_option_widget.ui
+        modules/options/options_model.h modules/options/options_model.cpp
+
+
+
 
 
 

@@ -130,6 +130,7 @@ public:
 
 
     void appendItem(FileTransferModelItem* parent,FileTransferModelItem* item);
+    void appendItems(FileTransferModelItem* parent,QList<FileTransferModelItem*> items);
 
     void insertFrontAndRemove(long long siteid,long long id,QFileInfoList list,FileTransferModelItem::State state);
     void insertFrontAndRemove(long long siteid,long long id,QList<FileItem> list,FileTransferModelItem::State state);
