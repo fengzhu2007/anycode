@@ -1,11 +1,9 @@
 #include "idewindow.h"
 #include "ui_idewindow.h"
-#include "docking_pane_manager.h"
-#include "docking_workbench.h"
-#include "docking_pane.h"
-#include "docking_pane_client.h"
-#include "docking_pane_layout.h"
-#include "docking_pane_layout_item_info.h"
+#include <docking_pane_manager.h>
+#include <docking_workbench.h>
+#include <docking_pane.h>
+#include <docking_pane_client.h>
 #include <docking_pane_tabbar.h>
 #include "project/open_project_window.h"
 #include "project/new_project_window.h"
@@ -28,7 +26,8 @@
 #include "core/event_bus/type.h"
 #include "core/event_bus/event_data.h"
 #include "core/backend_thread.h"
-#include "core/ide_settings.h"
+#include "core/layout_settings.h"
+#include "core/options_setting.h"
 #include "storage/project_storage.h"
 #include "storage/recent_storage.h"
 #include "network/network_manager.h"
@@ -139,12 +138,11 @@ IDEWindow::IDEWindow(QWidget *parent) :
     connect(ui->actionDebug,&QAction::triggered,this,&IDEWindow::onActionTriggered);
 
 
-    wToastManager::init(this);
-    BackendThread::init()->start();
-    CodeEditorManager::init(m_dockingPaneManager);
+
 
     //this->forTest();
     this->initView();
+    this->boot();
 }
 
 
@@ -196,15 +194,26 @@ IDEWindow::~IDEWindow()
     NetworkManager::destory();
 }
 
+
+void IDEWindow::boot(){
+    OptionsSetting::init();//init options settings
+    wToastManager::init(this);
+    BackendThread::init()->start();
+    CodeEditorManager::init(m_dockingPaneManager);
+
+
+
+}
+
 void IDEWindow::shutdown(){
     //save setting
     auto dockpanes = m_dockingPaneManager->toJson();
     auto projects = ResourceManagerModel::getInstance()->toJson();
-    auto settings = IDESettings::getInstance(this);
+    auto settings = LayoutSettings::getInstance(this);
     settings->setDockpanes(dockpanes);
     settings->setProjects(projects);
     settings->saveToFile();
-    IDESettings::destory();
+    LayoutSettings::destory();
 
     wToastManager::destory();
     auto t = BackendThread::getInstance();
@@ -565,7 +574,7 @@ void IDEWindow::showEvent(QShowEvent* e){
 }
 
 void IDEWindow::restoreFromSettings(){
-    auto settings = IDESettings::getInstance(this);
+    auto settings = LayoutSettings::getInstance(this);
     if(settings->readFromFile()){
         if(settings->isMaximized()){
             this->showMaximized();
@@ -583,7 +592,7 @@ void IDEWindow::restoreFromSettings(){
 }
 
 void IDEWindow::restoreDockpanes(){
-    auto settings = IDESettings::getInstance(this);
+    auto settings = LayoutSettings::getInstance(this);
     QJsonObject dockpanes = settings->dockpanes();
     m_dockingPaneManager->restore(dockpanes,PaneLoader::init);
 }
@@ -594,7 +603,7 @@ void IDEWindow::restoreProjects(){
     //27 demo
     //7 svn
     //1 guzheng
-    auto settings = IDESettings::getInstance(this);
+    auto settings = LayoutSettings::getInstance(this);
     QJsonArray projects = settings->projects();
     for(auto one:projects){
         if(one.isObject()){

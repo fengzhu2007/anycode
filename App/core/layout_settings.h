@@ -1,19 +1,19 @@
-#ifndef IDESETTINGS_H
-#define IDESETTINGS_H
+#ifndef LAYOUTSETTINGS_H
+#define LAYOUTSETTINGS_H
 #include <QString>
 #include <QJsonArray>
 #include <QJsonObject>
 
 namespace ady{
 class IDEWindow;
-class IDESettingsPrivate;
-class IDESettings
+class LayoutSettingsPrivate;
+class LayoutSettings
 {
 public:
-    static IDESettings* getInstance(IDEWindow* window=nullptr);
+    static LayoutSettings* getInstance(IDEWindow* window=nullptr);
     static void destory();
 
-    ~IDESettings();
+    ~LayoutSettings();
 
     bool readFromFile(const QString& filename={});
     bool saveToFile(const QString& filename={});
@@ -30,13 +30,13 @@ public:
 
 
 private:
-    IDESettings(IDEWindow* window=nullptr);
+    LayoutSettings(IDEWindow* window=nullptr);
 
 private:
-    static IDESettings* instance;
-    IDESettingsPrivate* d;
+    static LayoutSettings* instance;
+    LayoutSettingsPrivate* d;
     int m_version;
 
 };
 }
-#endif // IDESETTINGS_H
+#endif // LAYOUTSETTINGS_H

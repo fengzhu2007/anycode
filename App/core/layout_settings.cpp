@@ -1,4 +1,4 @@
-#include "ide_settings.h"
+#include "layout_settings.h"
 #include "idewindow.h"
 #include <QJsonDocument>
 #include <QCoreApplication>
@@ -82,10 +82,10 @@ projects:[
 namespace ady{
 
 
-IDESettings* IDESettings::instance = nullptr;
+LayoutSettings* LayoutSettings::instance = nullptr;
 
 
-class IDESettingsPrivate{
+class LayoutSettingsPrivate{
 public:
     int version=1;
     int width=800;
@@ -97,27 +97,27 @@ public:
 };
 
 
-IDESettings* IDESettings::getInstance(IDEWindow* window)
+LayoutSettings* LayoutSettings::getInstance(IDEWindow* window)
 {
     if(instance==nullptr){
-        instance = new IDESettings(window);
+        instance = new LayoutSettings(window);
     }
     return instance;
 }
 
-void IDESettings::destory(){
+void LayoutSettings::destory(){
     if(instance!=nullptr){
         delete instance;
     }
 }
 
-IDESettings::~IDESettings(){
+LayoutSettings::~LayoutSettings(){
     delete d;
 }
 
-bool IDESettings::readFromFile(const QString& filename){
+bool LayoutSettings::readFromFile(const QString& filename){
     const QString appPath = QCoreApplication::applicationDirPath();
-    QFile file(appPath+"/settings.json");
+    QFile file(appPath+"/layout.json");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         //qDebug() << "can not write";
         return false;
@@ -128,44 +128,12 @@ bool IDESettings::readFromFile(const QString& filename){
     QJsonDocument doc = QJsonDocument::fromJson(in.readAll().toUtf8(),&error);
     if(error.error==QJsonParseError::NoError){
         QJsonObject data = doc.object();
-        {
-            auto v = data.take("version");
-            if(!v.isUndefined()){
-                d->version = v.toInt(1);
-            }
-        }
-
-        {
-            auto v = data.take("maximized");
-            if(!v.isUndefined()){
-                d->maximized = v.toInt(0);
-            }
-        }
-        {
-            auto v = data.take("width");
-            if(!v.isUndefined()){
-                d->width = v.toInt(800);
-            }
-        }
-        {
-            auto v = data.take("height");
-            if(!v.isUndefined()){
-                d->height = v.toInt(600);
-            }
-        }
-        {
-            auto v = data.take("dockpanes");
-            if(v.isObject()){
-                d->dockpanes = v.toObject();
-            }
-        }
-
-        {
-            auto v = data.take("projects");
-            if(v.isArray()){
-                d->projects = v.toArray();
-            }
-        }
+        d->version = data.find("version")->toInt(1);
+        d->maximized = data.find("maximized")->toInt(0);
+        d->width = data.find("width")->toInt(800);
+        d->height = data.find("height")->toInt(600);
+        d->dockpanes = data.find("dockpanes")->toObject();
+        d->projects = data.find("projects")->toArray();
         return true;
     }else{
         qDebug()<<"json parse error:"<<error.errorString()<<";offset:"<<error.offset;
@@ -174,7 +142,7 @@ bool IDESettings::readFromFile(const QString& filename){
 
 }
 
-bool IDESettings::saveToFile(const QString& filename){
+bool LayoutSettings::saveToFile(const QString& filename){
     int width = 0;
     int height = 0;
     int maximized = 0;
@@ -201,7 +169,7 @@ bool IDESettings::saveToFile(const QString& filename){
 
     }
 
-    QFile file(appPath+"/settings.json");
+    QFile file(appPath+"/layout.json");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         //qDebug() << "can not write";
         return false;
@@ -215,38 +183,38 @@ bool IDESettings::saveToFile(const QString& filename){
 
 
 
-void IDESettings::setDockpanes(const QJsonObject& dockpanes){
+void LayoutSettings::setDockpanes(const QJsonObject& dockpanes){
 
     d->dockpanes = dockpanes;
 }
 
-void IDESettings::setProjects(const QJsonArray& projects){
+void LayoutSettings::setProjects(const QJsonArray& projects){
     d->projects = projects;
 }
 
-QJsonObject IDESettings::dockpanes(){
+QJsonObject LayoutSettings::dockpanes(){
     return d->dockpanes;
 }
 
-QJsonArray IDESettings::projects(){
+QJsonArray LayoutSettings::projects(){
     return d->projects;
 }
 
-bool IDESettings::isMaximized(){
+bool LayoutSettings::isMaximized(){
     return d->maximized==1;
 }
 
-int IDESettings::width(){
+int LayoutSettings::width(){
     return d->width;
 }
 
-int IDESettings::height(){
+int LayoutSettings::height(){
     return d->height;
 }
 
-IDESettings::IDESettings(IDEWindow* window)
+LayoutSettings::LayoutSettings(IDEWindow* window)
 {
-    d = new IDESettingsPrivate;
+    d = new LayoutSettingsPrivate;
     d->window = window;
 }
 

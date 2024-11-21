@@ -188,7 +188,7 @@ add_library(App SHARED
         panes/find_replace/search_scope_model.h panes/find_replace/search_scope_model.cpp
         panes/code_editor/goto_line_dialog.h panes/code_editor/goto_line_dialog.cpp panes/code_editor/gotolinedialog.ui
         panes/find_replace/replace_all_progress_dialog.h panes/find_replace/replace_all_progress_dialog.cpp panes/find_replace/replace_all_progress_dialog.ui
-        core/ide_settings.h core/ide_settings.cpp
+        core/layout_settings.h core/layout_settings.cpp
         panes/loader.h panes/loader.cpp
         panes/startup/startup_pane.h panes/startup/startup_pane.cpp
         panes/startup/startup_pane.ui
@@ -215,6 +215,13 @@ add_library(App SHARED
         modules/options/environment_option_widget.h modules/options/environment_option_widget.cpp modules/options/environment_option_widget.ui
         modules/options/texteditor_option_widget.h modules/options/texteditor_option_widget.cpp modules/options/texteditor_option_widget.ui
         modules/options/options_model.h modules/options/options_model.cpp
+        app_oss.h app_oss.cpp
+        components/list_item_delegate.h components/list_item_delegate.cpp
+        modules/options/option_tab.h modules/options/option_tab.cpp
+        modules/options/texteditor/general_tab.h modules/options/texteditor/general_tab.cpp
+        modules/options/texteditor/general_tab.ui
+        modules/options/texteditor/color_tab.h modules/options/texteditor/color_tab.cpp modules/options/texteditor/color_tab.ui
+        core/options_setting.h core/options_setting.cpp
 
 
 

@@ -21,6 +21,8 @@ public:
     virtual void initValue(const QJsonObject& value) override;
     virtual QJsonObject toJson() override;
 
+    void initView();
+
 private:
     Ui::EnvironmentOptionWidget *ui;
 };

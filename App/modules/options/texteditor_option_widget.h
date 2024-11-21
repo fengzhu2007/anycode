@@ -15,11 +15,14 @@ class TextEditorOptionWidget : public OptionWidget
 
 public:
     explicit TextEditorOptionWidget(QWidget *parent = nullptr);
-    ~TextEditorOptionWidget();
+    virtual ~TextEditorOptionWidget();
+
 
     virtual QString name() override;
     virtual void initValue(const QJsonObject& value) override;
     virtual QJsonObject toJson() override;
+
+    void initView();
 
 private:
     Ui::TextEditorOptionWidget *ui;

@@ -2,6 +2,7 @@
 #include "ui_options_dialog.h"
 #include "options_model.h"
 #include "addon_loader.h"
+#include "app_oss.h"
 
 #include "environment_option_widget.h"
 #include "texteditor_option_widget.h"
@@ -16,10 +17,13 @@ public:
 
 OptionsDialog::OptionsDialog(QWidget* parent):wDialog(parent),ui(new Ui::OptionsDialog) {
 
+
+    this->setStyleSheet(AppOSS::options());
     ui->setupUi(this);
     d = new OptionsDialogPrivate;
     d->model = new OptionsModel(ui->listView);
     ui->listView->setModel(d->model);
+    ui->listView->setFocusPolicy(Qt::NoFocus);
     connect(ui->listView,&QListView::clicked,this,&OptionsDialog::onActivate);
 
     connect(ui->ok,&QPushButton::clicked,this,&OptionsDialog::onSave);
