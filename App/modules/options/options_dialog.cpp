@@ -49,6 +49,8 @@ void OptionsDialog::initView(){
 
     if(d->model->rowCount()>0){
         this->setCurrentIndex(0);
+        auto index = d->model->index(0,0);
+        ui->listView->selectionModel()->select(index,QItemSelectionModel::Select);
     }
 }
 

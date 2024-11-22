@@ -28,7 +28,8 @@ QString AppOSS::options(){
                              ".QListView{padding:0;border:1px solid #ccc;}"
                              ".QListView::item{height:30px;border:1px solid white; }"
                              ".QListView::item:hover{border:1px solid #c9def5;background-color:#c9def5 }"
-                             ".QListView::item:selected{border:1px solid #007acc;background-color:#007acc;color:#fff;}");
+                             ".QListView::item:selected{border:1px solid #007acc;background-color:#007acc;color:#fff;}"
+                             ".QTabBar::tab{height:24px}");
 }
 
 

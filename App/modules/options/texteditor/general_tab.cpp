@@ -8,6 +8,7 @@
 #include <tabsettings.h>
 #include <displaysettings.h>
 #include <extraencodingsettings.h>
+#include <completionsettings.h>
 
 
 namespace ady{
@@ -40,10 +41,21 @@ void GeneralTab::initView(){
     auto instance = TextEditor::TextEditorSettings::instance();
     if(instance!=nullptr){
         {
-            /*auto setting = instance->fontSettings();
-            ui->font->setCurrentFont(setting.font());
-            ui->fontSize->setValue(setting.fontSize());
-            ui->zoom->setValue(setting.fontZoom());*/
+            auto setting = instance->completionSettings();
+            ui->caseSensitivity->addItem(tr("Case Insensitive"));
+            ui->caseSensitivity->addItem(tr("Case Sensitive"));
+            ui->caseSensitivity->addItem(tr("First Letter Case Sensitive"));
+            ui->caseSensitivity->setItemDelegate(new ListItemDelegate(22,ui->caseSensitivity));
+            ui->caseSensitivity->setCurrentIndex(setting.m_caseSensitivity);
+
+            ui->completionTrigger->addItem(tr("Manual Completion"));
+            ui->completionTrigger->addItem(tr("Triggered Completion"));
+            ui->completionTrigger->addItem(tr("Automatic Completion"));
+            ui->completionTrigger->setItemDelegate(new ListItemDelegate(22,ui->completionTrigger));
+            ui->completionTrigger->setCurrentIndex(setting.m_completionTrigger);
+
+            ui->timeout->setValue(setting.m_automaticProposalTimeoutInMs);
+            ui->characterThreshold->setValue(setting.m_characterThreshold);
         }
 
         {

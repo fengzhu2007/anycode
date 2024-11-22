@@ -11,7 +11,7 @@ ListItemDelegate::ListItemDelegate(int height,QObject *parent)
 
 
 QSize ListItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const {
-    return {100,m_height};
+    return {0,m_height};
 }
 
 }

@@ -7,14 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>574</width>
-    <height>315</height>
+    <height>359</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
-  <item>
+   <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Font</string>
@@ -78,6 +78,9 @@
         <property name="maximum">
          <number>400</number>
         </property>
+        <property name="singleStep">
+         <number>10</number>
+        </property>
        </widget>
       </item>
       <item>
@@ -128,64 +131,12 @@
            <number>8</number>
           </property>
           <item>
-           <widget class="QComboBox" name="style">
+           <widget class="QComboBox" name="scheme">
             <property name="minimumSize">
              <size>
               <width>120</width>
               <height>24</height>
              </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="copy">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>24</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Copy</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="deleteStyle">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>24</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Delete</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="importStyle">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>24</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Import</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="exportStyle">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>24</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Export</string>
             </property>
            </widget>
           </item>
@@ -207,157 +158,66 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
-           <widget class="QListView" name="listView"/>
-          </item>
-          <item>
-           <widget class="QStackedWidget" name="stacked">
-            <widget class="QWidget" name="page"/>
-            <widget class="QWidget" name="page_2">
-             <layout class="QVBoxLayout" name="verticalLayout_4">
-              <property name="spacing">
-               <number>0</number>
-              </property>
-              <property name="leftMargin">
-               <number>0</number>
-              </property>
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <property name="rightMargin">
-               <number>0</number>
-              </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_3">
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout">
-                  <item>
-                   <widget class="QLabel" name="label">
-                    <property name="text">
-                     <string>Foreground Color:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="foreground">
-                    <property name="text">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="foregroundUnset">
-                    <property name="text">
-                     <string>Unset</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_5">
-                  <item>
-                   <widget class="QLabel" name="label_2">
-                    <property name="text">
-                     <string>Background Color:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="background">
-                    <property name="text">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="backgroundUnset">
-                    <property name="text">
-                     <string>Unset</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_3">
-                  <property name="text">
-                   <string>Font</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_6">
-                  <item>
-                   <widget class="QCheckBox" name="bold">
-                    <property name="text">
-                     <string>Bold</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QCheckBox" name="italic">
-                    <property name="text">
-                     <string>Italic</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacer_2">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_4">
-                  <property name="text">
-                   <string>Underline</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_7">
-                  <item>
-                   <widget class="QLabel" name="label_5">
-                    <property name="text">
-                     <string>Color:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="underlineColor">
-                    <property name="text">
-                     <string/>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="underlineColorUnset">
-                    <property name="text">
-                     <string>Unset</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QComboBox" name="underlineStyle"/>
-                </item>
-               </layout>
-              </item>
-             </layout>
-            </widget>
+           <widget class="ady::SimpleEditorView" name="editor">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="plainText">
+             <string>// 定义一个类
+class Demo {
+  // 构造函数，初始化类的属性
+  constructor(name, number) {
+    this.name = name; // 字符串属性
+    this.number = number; // 数字属性
+  }
+
+  // 设置名称的方法
+  setName(newName) {
+    this.name = newName;
+  }
+
+  // 获取名称的方法
+  getName() {
+    return this.name;
+  }
+
+  // 设置数字的方法
+  setNumber(newNumber) {
+    this.number = newNumber;
+  }
+
+  // 获取数字的方法
+  getNumber() {
+    return this.number;
+  }
+
+}
+
+// 创建类的实例
+const demoObj = new Demo(&quot;Example&quot;, 42);
+
+// 输出初始值
+demoObj.displayInfo();
+
+// 使用方法修改值
+demoObj.setName(&quot;NewName&quot;);
+demoObj.setNumber(100);
+
+// 输出修改后的值
+demoObj.displayInfo();
+
+// 关键字示例：条件语句
+if (demoObj.getNumber() &gt; 50) {
+  console.log(&quot;The number is greater than 50.&quot;);
+} else {
+  console.log(&quot;The number is 50 or less.&quot;);
+}
+
+// 关键字示例：循环
+for (let i = 0; i &lt; 3; i++) {
+  console.log(`Loop iteration: ${i}`);
+}</string>
+            </property>
            </widget>
           </item>
          </layout>
@@ -369,6 +229,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ady::SimpleEditorView</class>
+   <extends>QPlainTextEdit</extends>
+   <header>modules/options/texteditor/simple_editor_view.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
