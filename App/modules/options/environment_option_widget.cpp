@@ -4,7 +4,8 @@
 #include <QListView>
 #include <QStyledItemDelegate>
 #include "components/list_item_delegate.h"
-#include "core/options_setting.h"
+#include "options_settings.h"
+#include "environment_settings.h"
 
 namespace ady{
 
@@ -32,7 +33,50 @@ EnvironmentOptionWidget::~EnvironmentOptionWidget()
 }
 
 QString EnvironmentOptionWidget::name(){
-    return QLatin1String("core::environment");
+    return EnvironmentSettings::name();
+}
+
+void EnvironmentOptionWidget::apply(){
+    auto instance = OptionsSettings::getInstance();
+    auto setting = instance->environmentSettings();
+    bool changed = false;
+    {
+        int index = ui->theme->currentIndex();
+        auto themes = EnvironmentSettings::themes();
+        if(index>=0 && index<themes.size()){
+            auto one = themes.at(index);
+            if(setting.m_theme!=one.first){
+                setting.m_theme = one.first;
+                changed = true;
+            }
+        }
+    }
+    {
+        int index = ui->language->currentIndex();
+        auto languages = EnvironmentSettings::languages();
+        if(index>=0 && index<languages.size()){
+            auto one = languages.at(index);
+            if(setting.m_language!=one.first){
+                setting.m_language = one.first;
+                changed = true;
+            }
+        }
+    }
+    if(setting.m_autoSave!=ui->auto_save->isChecked()){
+        setting.m_autoSave = ui->auto_save->isChecked();//apply
+        changed = true;
+    }
+    if(setting.m_autoSaveInterval!=ui->auto_save_interval->value()){
+        setting.m_autoSaveInterval = ui->auto_save_interval->value();
+        changed = true;
+    }
+    if(setting.m_texteditorFileLimit!=ui->texteditor_file_limit->value()){
+        setting.m_texteditorFileLimit = ui->texteditor_file_limit->value();
+        changed = true;
+    }
+    if(changed){
+        instance->setEnvironmentSettings(setting);
+    }
 }
 
 void EnvironmentOptionWidget::initValue(const QJsonObject& value){
@@ -42,23 +86,39 @@ void EnvironmentOptionWidget::initValue(const QJsonObject& value){
 
 
 QJsonObject EnvironmentOptionWidget::toJson() {
-
-    return {};
+    return OptionsSettings::getInstance()->environmentSettings().toJson();
 }
 
 
 
 void EnvironmentOptionWidget::initView(){
-    ui->theme->addItem(tr("Default"));
-    ui->language->addItem(tr("English"));
-    ui->language->addItem(tr("Chinese"));
+    auto instance = OptionsSettings::getInstance();
+    auto setting = instance->environmentSettings();
 
-    auto instance = OptionsSetting::getInstance();
-    ui->theme->setCurrentIndex(instance->toInt(OptionsSetting::Theme));
-    ui->language->setCurrentIndex(instance->toInt(OptionsSetting::Language));
-    ui->auto_save->setChecked(instance->toBool(OptionsSetting::AutoSave));
-    ui->auto_save_interval->setValue(instance->toInt(OptionsSetting::AutoSaveInterval));
-    ui->texteditor_file_limit->setValue(instance->toInt(OptionsSetting::TexteditorFileLimit));
+    auto themes = EnvironmentSettings::themes();
+    int i = 0;
+    for(auto one:themes){
+        ui->theme->addItem(one.second);
+        if(setting.m_theme==one.first){
+            ui->theme->setCurrentIndex(i);
+        }
+        i++;
+    }
+
+    i = 0;
+    auto languages = EnvironmentSettings::languages();
+    for(auto one:languages){
+        ui->language->addItem(one.second);
+        if(setting.m_language==one.first){
+            ui->language->setCurrentIndex(i);
+        }
+        i++;
+    }
+
+    ui->auto_save->setChecked(setting.m_autoSave);
+    ui->auto_save_interval->setValue(setting.m_autoSaveInterval);
+    ui->texteditor_file_limit->setValue(setting.m_texteditorFileLimit);
+
 }
 
 }

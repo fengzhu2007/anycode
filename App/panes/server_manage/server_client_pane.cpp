@@ -291,9 +291,8 @@ void ServerClientPane::showEvent(QShowEvent* e){
     DockingPane::showEvent(e);
     if(d->showed==false){
         d->showed = true;
-        QTimer::singleShot(0,[this]{
-            this->reload();
-        });
+
+        this->reload();
     }
 }
 

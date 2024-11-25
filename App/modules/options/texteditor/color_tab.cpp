@@ -7,6 +7,7 @@
 #include <tabsettings.h>
 #include <displaysettings.h>
 #include <extraencodingsettings.h>
+#include <fontsettings.h>
 #include "components/list_item_delegate.h"
 
 
@@ -39,6 +40,35 @@ ColorTab::~ColorTab()
 }
 QString ColorTab::name(){
     return QLatin1String("general");
+}
+
+void ColorTab::apply(){
+    auto instance = TextEditor::TextEditorSettings::instance();
+    if(instance!=nullptr){
+        {
+            bool changed = false;
+            auto setting = instance->fontSettings();
+
+            const QString family = ui->font->currentFont().family();
+            if(family!=setting.family()){
+                setting.setFamily(family);
+                changed = true;
+            }
+            if(ui->fontSize->value()!=setting.fontSize()){
+                setting.setFontSize(ui->fontSize->value());
+                changed = true;
+            }
+            if(ui->zoom->value()!=setting.fontZoom()){
+                setting.setFontZoom(ui->zoom->value());
+                changed = true;
+            }
+            if(changed){
+                instance->setFontSettings(setting);
+                instance->fontSettingsChanged(setting);
+            }
+
+        }
+    }
 }
 
 void ColorTab::initValue(const QJsonObject& value){

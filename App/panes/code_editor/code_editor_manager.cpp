@@ -79,8 +79,10 @@ CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
     d->docking_manager = docking_manager;
     d->watcher = new QFileSystemWatcher(this);
     connect(d->watcher,&QFileSystemWatcher::fileChanged,this,&CodeEditorManager::onFileChanged);
-
-    d->settings = new TextEditor::TextEditorSettings();
+    d->settings = TextEditor::TextEditorSettings::instance();
+    if(d->settings==nullptr){
+        d->settings = new TextEditor::TextEditorSettings();
+    }
     TextEditor::TextEditorEnvironment::init();
 }
 

@@ -57,6 +57,7 @@ bool CommonStorage::insert(const CommonRecord& record)
 
 bool CommonStorage::replace(const CommonRecord& record){
     auto r = this->one(record.name);
+
     if(r.name.isEmpty()){
        //insert
         return this->insert(record);

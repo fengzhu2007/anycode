@@ -13,6 +13,10 @@ OptionTab::~OptionTab(){
 
 }
 
+void OptionTab::apply(){
+
+}
+
 
 void OptionTab::initValue(const QJsonObject& value){
     Q_UNUSED(value);

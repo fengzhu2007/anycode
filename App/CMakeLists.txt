@@ -221,8 +221,9 @@ add_library(App SHARED
         modules/options/texteditor/general_tab.h modules/options/texteditor/general_tab.cpp
         modules/options/texteditor/general_tab.ui
         modules/options/texteditor/color_tab.h modules/options/texteditor/color_tab.cpp modules/options/texteditor/color_tab.ui
-        core/options_setting.h core/options_setting.cpp
+        modules/options/options_settings.h modules/options/options_settings.cpp
         modules/options/texteditor/simple_editor_view.h modules/options/texteditor/simple_editor_view.cpp
+        modules/options/environment_settings.h modules/options/environment_settings.cpp
 
 
 

@@ -7,12 +7,20 @@
 #include "environment_option_widget.h"
 #include "texteditor_option_widget.h"
 
+#include "storage/common_storage.h"
+
+#include <QJsonDocument>
+
+static int Version = 1;
+static QString Name = "AnyCode Options";
+
 
 namespace ady{
 OptionsDialog* OptionsDialog::instance=nullptr;
 class OptionsDialogPrivate{
 public:
     OptionsModel* model;
+    QList<OptionWidget*> list;
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent):wDialog(parent),ui(new Ui::OptionsDialog) {
@@ -39,11 +47,13 @@ void OptionsDialog::initView(){
         auto widget = new EnvironmentOptionWidget(ui->stacked);
         d->model->appendItem(widget);
         ui->stacked->addWidget(widget);
+        d->list <<widget;
     }
     {
         auto widget = new TextEditorOptionWidget(ui->stacked);
         d->model->appendItem(widget);
         ui->stacked->addWidget(widget);
+        d->list <<widget;
     }
 
 
@@ -70,7 +80,23 @@ void OptionsDialog::onActivate(const QModelIndex& index){
 }
 
 void OptionsDialog::onSave(){
+    QJsonObject options = {};
+    for(auto one:d->list){
+        one->apply();
+        options.insert(one->name(),one->toJson());
 
+    }
+    QJsonObject data = {
+            {"version",Version},
+            {"name",Name},
+            {"options",options},
+    };
+    QJsonDocument doc;
+    doc.setObject(data);
+    //qDebug()<<doc.toJson();
+    CommonStorage().replace(CommonStorage::OPTIONS,doc.toJson());
+
+    //this->close();
 }
 
 OptionsDialog* OptionsDialog::open(QWidget* parent){

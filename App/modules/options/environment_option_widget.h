@@ -18,6 +18,7 @@ public:
     virtual ~EnvironmentOptionWidget() override;
 
     virtual QString name() override;
+    virtual void apply() override;
     virtual void initValue(const QJsonObject& value) override;
     virtual QJsonObject toJson() override;
 

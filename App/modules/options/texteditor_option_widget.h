@@ -9,6 +9,7 @@ class TextEditorOptionWidget;
 
 
 namespace ady{
+class TextEditorOptionWidgetPrivate;
 class TextEditorOptionWidget : public OptionWidget
 {
     Q_OBJECT
@@ -19,6 +20,7 @@ public:
 
 
     virtual QString name() override;
+    virtual void apply() override;
     virtual void initValue(const QJsonObject& value) override;
     virtual QJsonObject toJson() override;
 
@@ -26,6 +28,7 @@ public:
 
 private:
     Ui::TextEditorOptionWidget *ui;
+    TextEditorOptionWidgetPrivate* d;
 };
 }
 

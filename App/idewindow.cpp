@@ -27,7 +27,7 @@
 #include "core/event_bus/event_data.h"
 #include "core/backend_thread.h"
 #include "core/layout_settings.h"
-#include "core/options_setting.h"
+#include "modules/options/options_settings.h"
 #include "storage/project_storage.h"
 #include "storage/recent_storage.h"
 #include "network/network_manager.h"
@@ -196,7 +196,7 @@ IDEWindow::~IDEWindow()
 
 
 void IDEWindow::boot(){
-    OptionsSetting::init();//init options settings
+    OptionsSettings::init();//init options settings
     wToastManager::init(this);
     BackendThread::init()->start();
     CodeEditorManager::init(m_dockingPaneManager);

@@ -1,10 +1,11 @@
-#ifndef OPTIONS_SETTING_H
-#define OPTIONS_SETTING_H
+#ifndef OPTIONS_SETTINGS_H
+#define OPTIONS_SETTINGS_H
 
 #include <QJsonObject>
 namespace ady{
-class OptionsSettingPrivate;
-class OptionsSetting
+class EnvironmentSettings;
+class OptionsSettingsPrivate;
+class OptionsSettings
 {
 public:
     enum Option{
@@ -15,10 +16,10 @@ public:
         AutoSaveInterval,
     };
 
-    static OptionsSetting* getInstance();
+    static OptionsSettings* getInstance();
     static void init();
     static void destory();
-    ~OptionsSetting();
+    ~OptionsSettings();
     QJsonObject& data();
 
     bool toBool(Option option);
@@ -27,13 +28,15 @@ public:
     QStringList& toStringList(Option option) const ;
     QMap<QVariant,QVariant> toMap(Option option) const;
 
+    EnvironmentSettings& environmentSettings();
+    void setEnvironmentSettings(const EnvironmentSettings& setting);
 private:
-    OptionsSetting();
+    OptionsSettings();
 
 private:
-    static OptionsSetting* instance;
-    OptionsSettingPrivate* d;
+    static OptionsSettings* instance;
+    OptionsSettingsPrivate* d;
 };
 }
 
-#endif // OPTIONS_SETTING_H
+#endif // OPTIONS_SETTINGS_H

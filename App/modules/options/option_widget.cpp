@@ -13,6 +13,11 @@ OptionWidget::~OptionWidget(){
 
 }
 
+
+void OptionWidget::apply(){
+
+}
+
 void OptionWidget::initValue(const QJsonObject& value){
     Q_UNUSED(value);
 }
