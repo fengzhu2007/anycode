@@ -36,4 +36,17 @@ void OptionsModel::appendItem(OptionWidget* item){
     m_list<<item;
 }
 
+void OptionsModel::filter(const QString& text){
+    this->beginResetModel();
+    auto iter = m_list.begin();
+    while(iter!=m_list.end()){
+        QString name = (*iter)->windowTitle();
+        if(!name.contains(text)){
+            m_list.erase(iter);
+        }
+        iter++;
+    }
+    this->endResetModel();
+}
+
 }

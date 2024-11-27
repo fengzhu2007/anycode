@@ -38,8 +38,11 @@
 #include "modules/help/about_dialog.h"
 #include "modules/help/update_dialog.h"
 #include "modules/options/options_dialog.h"
+#include "modules/addon/addon_manager_dialog.h"
 
+#include "components/statusbar/status_bar_view.h"
 #include "common.h"
+#include "app_oss.h"
 
 #include <w_toast.h>
 
@@ -50,6 +53,7 @@
 #include <QTextCodec>
 #include <QProcess>
 #include <QDesktopServices>
+#include <QLayout>
 #include <QDebug>
 
 namespace ady{
@@ -65,11 +69,21 @@ IDEWindow::IDEWindow(QWidget *parent) :
     wMainWindow(parent),
     ui(new Ui::IDEWindow)
 {
+    this->setStyleSheet(AppOSS::global());
     d = new IDEWindowPrivate;
     qRegisterMetaType<QFileInfoList>("QFileInfoList");
     Subscriber::reg();
     this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO,Type::M_OPEN_FILE_TRANSFTER});
     ui->setupUi(this);
+
+
+
+
+    //ui->statusbar->setFixedHeight(25);
+    ui->statusbar->addWidget(new StatusBarView(ui->statusbar),1);
+    ui->statusbar->setContentsMargins({0,0,0,0});
+
+
     this->resetupUi();
 
     ui->toolBar->setFixedHeight(32);
@@ -405,9 +419,7 @@ void IDEWindow::onActionTriggered(){
         OptionsDialog::open(this);
     //addon
     }else if(sender==ui->actionAddon_Manage){
-
-
-
+        AddonManagerDialog::open(this);
     //help
     }else if(sender==ui->actionView_Help_H){
         this->openUrl(APP_HELP_URL);
@@ -599,10 +611,6 @@ void IDEWindow::restoreDockpanes(){
 
 
 void IDEWindow::restoreProjects(){
-    //ProjectStorage projectStorage
-    //27 demo
-    //7 svn
-    //1 guzheng
     auto settings = LayoutSettings::getInstance(this);
     QJsonArray projects = settings->projects();
     for(auto one:projects){

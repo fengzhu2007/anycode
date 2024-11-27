@@ -56,7 +56,7 @@ OutputPane::~OutputPane(){
 }
 
 void OutputPane::initView(){
-    //ui->textBrowser->setText("111111111111111111111111111111111111111111111111111111122222222");
+    ui->actionAuto_Wrapping->setChecked(ui->textBrowser->lineWrapMode()==QTextEdit::NoWrap?false:true);
     ui->source->addItem(tr("All"));
 
 }

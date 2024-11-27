@@ -299,7 +299,7 @@ bool CodeEditorPane::readFile(const QString& path){
 
     QString error;
     auto ret = doc->open(&error,Utils::FilePath::fromString(path),Utils::FilePath::fromString(path));
-    qDebug()<<path<<doc->codec()->name();
+    //qDebug()<<path<<doc->codec()->name();
     return true;
 }
 

@@ -19,8 +19,13 @@ public:
 
     void appendItem(OptionWidget* item);
 
+    void filter(const QString& text);
+    inline void setDataSource(const QList<OptionWidget*>& list){m_list = list;}
+
 
     inline OptionWidget* at(int row) const {return m_list.at(row);}
+
+
 
 
 private:

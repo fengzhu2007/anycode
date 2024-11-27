@@ -50,6 +50,9 @@ public:
     static const QString M_SITE_UPDATED;
     static const QString M_SITE_DELETED;
 
+    //statusbar
+    static const QString M_MESSAGE;
+
     //output
     enum OutputLevel{
         Text=0,

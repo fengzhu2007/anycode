@@ -19,9 +19,13 @@ public:
 
     void setCurrentIndex(int row);
 
+protected:
+    void keyPressEvent(QKeyEvent *e);
+
 public slots:
     void onActivate(const QModelIndex& index);
     void onSave();
+    void onFilter();
 
 private:
     explicit OptionsDialog(QWidget* parent);

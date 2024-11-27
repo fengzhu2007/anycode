@@ -224,6 +224,10 @@ add_library(App SHARED
         modules/options/options_settings.h modules/options/options_settings.cpp
         modules/options/texteditor/simple_editor_view.h modules/options/texteditor/simple_editor_view.cpp
         modules/options/environment_settings.h modules/options/environment_settings.cpp
+        panes/error/error_pane.h panes/error/error_pane.cpp panes/error/error_pane.ui
+        modules/addon/addon_manager_dialog.h modules/addon/addon_manager_dialog.cpp modules/addon/addon_manager_dialog.ui
+        modules/addon/addon_manager_model.h modules/addon/addon_manager_model.cpp
+        modules/addon/addon_item_widget.h modules/addon/addon_item_widget.cpp modules/addon/addon_item_widget.ui
 
 
 

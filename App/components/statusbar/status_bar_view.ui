@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>StatusBarViewUi</class>
- <widget class="QWidget" name="StatusBarViewUi">
+ <class>StatusBarView</class>
+ <widget class="QWidget" name="StatusBarView">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>23</height>
+    <height>25</height>
    </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>25</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">
-    <number>0</number>
+    <number>6</number>
    </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>2</number>
    </property>
    <property name="topMargin">
     <number>0</number>
@@ -30,20 +36,20 @@
     <number>0</number>
    </property>
    <item>
-    <spacer name="horizontalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
+    <widget class="QLabel" name="icon">
+     <property name="minimumSize">
       <size>
-       <width>10</width>
-       <height>20</height>
+       <width>0</width>
+       <height>0</height>
       </size>
      </property>
-    </spacer>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="../../r.qrc">:/Resource/icons/TaskEmpty_16x.svg</pixmap>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QLabel" name="message">
@@ -52,6 +58,12 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
      </property>
      <property name="maximumSize">
       <size>
@@ -88,6 +100,12 @@
    </item>
    <item>
     <widget class="QLabel" name="label">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="toolTip">
       <string>Network Status</string>
      </property>
@@ -95,14 +113,14 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="../r.qrc">:/img/Resource/net_status_ok.png</pixmap>
+      <pixmap>:/img/Resource/net_status_ok.png</pixmap>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
  <resources>
-  <include location="../r.qrc"/>
+  <include location="../../r.qrc"/>
  </resources>
  <connections/>
 </ui>

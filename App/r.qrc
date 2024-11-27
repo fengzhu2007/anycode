@@ -89,5 +89,6 @@
         <file>Resource/icons/Network_16x.svg</file>
         <file>Resource/icons/GlyphUp_16x.svg</file>
         <file>Resource/icons/GlyphDown_16x.svg</file>
+        <file>Resource/icons/TaskEmpty_16x.svg</file>
     </qresource>
 </RCC>

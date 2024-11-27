@@ -10,6 +10,7 @@
 #include "storage/common_storage.h"
 
 #include <QJsonDocument>
+#include <QKeyEvent>
 
 static int Version = 1;
 static QString Name = "AnyCode Options";
@@ -36,6 +37,7 @@ OptionsDialog::OptionsDialog(QWidget* parent):wDialog(parent),ui(new Ui::Options
 
     connect(ui->ok,&QPushButton::clicked,this,&OptionsDialog::onSave);
     connect(ui->cancel,&QPushButton::clicked,this,&OptionsDialog::close);
+    connect(ui->filter,&QLineEdit::editingFinished,this,&OptionsDialog::onFilter);
 
     this->resetupUi();
 
@@ -75,9 +77,19 @@ void OptionsDialog::setCurrentIndex(int row){
     ui->label->setText(widget->windowTitle());
 }
 
+void OptionsDialog::keyPressEvent(QKeyEvent *e){
+    if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
+        e->ignore();
+    } else {
+        wDialog::keyPressEvent(e);
+    }
+}
+
 void OptionsDialog::onActivate(const QModelIndex& index){
     this->setCurrentIndex(index.row());
 }
+
+
 
 void OptionsDialog::onSave(){
     QJsonObject options = {};
@@ -96,7 +108,13 @@ void OptionsDialog::onSave(){
     //qDebug()<<doc.toJson();
     CommonStorage().replace(CommonStorage::OPTIONS,doc.toJson());
 
-    //this->close();
+    this->close();
+}
+
+void OptionsDialog::onFilter(){
+    const QString text = ui->filter->text();
+    d->model->setDataSource(d->list);
+    d->model->filter(text);
 }
 
 OptionsDialog* OptionsDialog::open(QWidget* parent){

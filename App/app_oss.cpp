@@ -6,7 +6,7 @@ namespace ady{
 
 
 QString AppOSS::global(){
-    return QString::fromUtf8("");
+    return QString::fromUtf8(".QStatusBar::item{border:0}");
 }
 
 
