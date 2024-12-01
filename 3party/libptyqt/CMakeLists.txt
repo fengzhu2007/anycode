@@ -2,8 +2,9 @@
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Network)
 
+if(WIN32)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DUNICODE /D_UNICODE")
-
+endif()
 
 set(SOURCES
     iptyprocess.h
@@ -20,7 +21,13 @@ else()
 endif()
 
 add_library(ptyqt STATIC ${SOURCES})
+
+if(WIN32)
 target_link_libraries(ptyqt PUBLIC Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network winpty)
+else()
+    target_link_libraries(ptyqt PUBLIC Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)
+
+endif()
 
 if (WIN32)
   #target_link_libraries(ptyqt PRIVATE  )

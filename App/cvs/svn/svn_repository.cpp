@@ -1,6 +1,5 @@
 #include "svn_repository.h"
 #include "../repository.h"
-#ifndef Q_OS_MAC
 
 
 #include <client/info.h>
@@ -225,4 +224,3 @@ public:
 }
 
 
-#endif

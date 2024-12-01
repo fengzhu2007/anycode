@@ -168,7 +168,7 @@ bool UnixPtyProcess::startProcess(const QString &shellPath,
     QObject::connect(m_readMasterNotify, &QSocketNotifier::activated, [this](int socket) {
         Q_UNUSED(socket)
 
-        const size_t maxRead = 16 * 1024;
+        /*const size_t maxRead = 16 * 1024;
         static std::array<char, maxRead> buffer;
 
         int len = ::read(m_shellProcess.m_handleMaster, buffer.data(), buffer.size());
@@ -181,14 +181,14 @@ bool UnixPtyProcess::startProcess(const QString &shellPath,
         if (len > 0) {
             m_shellReadBuffer.append(buffer.data(), len);
             m_shellProcess.emitReadyRead();
-        }
+        }*/
     });
 
-    QObject::connect(&m_shellProcess, &QProcess::finished, &m_shellProcess, [this](int exitCode) {
+    /*QObject::connect(&m_shellProcess, &QProcess::finished, &m_shellProcess, [this](int exitCode) {
         m_exitCode = exitCode;
         emit m_shellProcess.aboutToClose();
         m_readMasterNotify->disconnect();
-    });
+    });*/
 
     QProcessEnvironment env;
     for (const QString &envEntry : environment) {

@@ -31,12 +31,24 @@ include_directories(SYSTEM "../3party/libptyqt")
 #include_directories(SYSTEM "../3party/scintilla/include")
 #include_directories(SYSTEM "../3party/scintilla/src")
 
+
+if(WIN32)
 find_library(CRYPTO_LIB libcrypto PATHS "../3party/bin/x64/lib")
 find_library(SSL_LIB libssl PATHS "../3party/bin/x64/lib")
 find_library(CURL_LIB libcurl_imp PATHS "../3party/bin/x64/lib")
 find_library(SSH2_LIB libssh2 PATHS "../3party/bin/x64/lib")
 find_library(Z_LIB zlib PATHS "../3party/bin/x64/lib")
 find_library(GIT2_LIB git2 PATHS "../3party/bin/x64/lib")
+
+else()
+find_library(CRYPTO_LIB crypto PATHS "../3party/bin/x64/lib")
+find_library(SSL_LIB ssl PATHS "../3party/bin/x64/lib")
+find_library(CURL_LIB curl PATHS "../3party/bin/x64/lib")
+find_library(SSH2_LIB ssh2 PATHS "../3party/bin/x64/lib")
+find_library(Z_LIB z PATHS "../3party/bin/x64/lib")
+find_library(GIT2_LIB git2 PATHS "../3party/bin/x64/lib")
+
+endif()
 
 
 string(TIMESTAMP BUILD_TIME "")
@@ -113,7 +125,7 @@ add_library(App SHARED
         storage/site_setting.h storage/site_setting.cpp
         storage/site_storage.h storage/site_storage.cpp
         storage/storage.h storage/storage.cpp
-        transfer/task.cpp transfer/task.cpp
+        transfer/task.h transfer/task.cpp
         #transfer/TaskPoolModel.cpp
         #transfer/TaskThread.cpp
         common/utils.cpp common/utils.h
@@ -258,10 +270,13 @@ set(TRANSLATIONS
     zh_CN
 )
 
-
+if(WIN32)
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}.dll        ${CMAKE_BINARY_DIR}/src/${PROJECT_NAME}.dll
     COMMENT "Copying file to binary directory"
 )
+else()
 
+
+endif()
 
