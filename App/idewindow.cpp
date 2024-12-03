@@ -27,7 +27,9 @@
 #include "core/event_bus/event_data.h"
 #include "core/backend_thread.h"
 #include "core/layout_settings.h"
+#include "core/schedule/schedule.h"
 #include "modules/options/options_settings.h"
+#include "modules/options/environment_settings.h"
 #include "storage/project_storage.h"
 #include "storage/recent_storage.h"
 #include "network/network_manager.h"
@@ -199,12 +201,9 @@ void IDEWindow::initView(){
 
 IDEWindow::~IDEWindow()
 {
-
     this->shutdown();
-
     delete d;
     delete ui;
-
     NetworkManager::destory();
 }
 
@@ -214,13 +213,25 @@ void IDEWindow::boot(){
     wToastManager::init(this);
     BackendThread::init()->start();
     CodeEditorManager::init(m_dockingPaneManager);
+    Schedule::init(this);//init Schedule
 
+}
 
-
+void IDEWindow::delayBoot(){
+    //call from show event
+    //init Schedule task
+    auto settings = OptionsSettings::getInstance();
+    auto env = settings->environmentSettings();
+    auto schedule = Schedule::getInstance();
+    if(env.m_autoSave){
+        schedule->addAutoSave(env.m_autoSaveInterval * 60 * 1000);
+    }
+    Schedule::start();
 }
 
 void IDEWindow::shutdown(){
     //save setting
+    Schedule::stop();
     auto dockpanes = m_dockingPaneManager->toJson();
     auto projects = ResourceManagerModel::getInstance()->toJson();
     auto settings = LayoutSettings::getInstance(this);
@@ -582,6 +593,8 @@ void IDEWindow::showEvent(QShowEvent* e){
     if(d->init==false){
         this->restoreFromSettings();
         d->init = true;
+
+        this->delayBoot();
     }
 }
 

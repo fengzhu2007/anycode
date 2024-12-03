@@ -278,6 +278,20 @@ void CodeEditorPane::rename(const QString& name){
     }
 }
 
+void CodeEditorPane::autoSave(){
+    const QString path = this->path();
+    if(path.isEmpty()){
+        return ;
+    }
+    auto instance = CodeEditorManager::getInstance();
+    instance->removeWatchFile(path);
+    if(this->writeFile(path)){
+
+    }
+    instance->appendWatchFile(path);
+
+}
+
 bool CodeEditorPane::readFile(const QString& path){
     auto doc = ui->editor->textDocumentPtr();
     /*if(!doc){
@@ -303,9 +317,9 @@ bool CodeEditorPane::readFile(const QString& path){
     return true;
 }
 
-bool CodeEditorPane::writeFile(const QString& path){
+bool CodeEditorPane::writeFile(const QString& path,bool autoSave){
     QString error;
-    auto ret = ui->editor->textDocument()->save(&error,Utils::FilePath::fromString(path),false);
+    auto ret = ui->editor->textDocument()->save(&error,Utils::FilePath::fromString(path),autoSave);
     return true;
     //return d->editor->writeFile(path);
 }

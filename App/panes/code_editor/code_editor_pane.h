@@ -38,8 +38,9 @@ public:
 
     //virtual bool onReceive(Event* e) override;//event bus receive callback
     void rename(const QString& name);
+    void autoSave();
     bool readFile(const QString& path);
-    bool writeFile(const QString& path);
+    bool writeFile(const QString& path,bool autoSave=false);
     QString path();
     bool isModified() const;
     //CodeEditor* editor();

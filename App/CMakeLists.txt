@@ -228,6 +228,9 @@ add_library(App SHARED
         modules/addon/addon_manager_dialog.h modules/addon/addon_manager_dialog.cpp modules/addon/addon_manager_dialog.ui
         modules/addon/addon_manager_model.h modules/addon/addon_manager_model.cpp
         modules/addon/addon_item_widget.h modules/addon/addon_item_widget.cpp modules/addon/addon_item_widget.ui
+        core/schedule/schedule.h core/schedule/schedule.cpp
+        core/schedule/schedule_task.h core/schedule/schedule_task.cpp
+        core/schedule/auto_save_task.h core/schedule/auto_save_task.cpp
 
 
 

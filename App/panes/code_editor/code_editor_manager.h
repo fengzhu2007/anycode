@@ -39,6 +39,7 @@ public:
     bool appendWatchFile(const QString& path);
     bool removeWatchFile(const QString& path);
     bool rename(const QString& from,const QString& to);
+    void autoSave();
 
     virtual bool onReceive(Event*) override;
 

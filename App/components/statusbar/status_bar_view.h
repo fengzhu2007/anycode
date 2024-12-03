@@ -17,6 +17,7 @@ namespace ady{
         void showMessage(const QString& message);
         QString currentMessage();
         virtual bool onReceive(Event* e) override;//event bus receive callback
+        void setReady();
 
     private:
         Ui::StatusBarView* ui;

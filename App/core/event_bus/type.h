@@ -52,6 +52,7 @@ public:
 
     //statusbar
     static const QString M_MESSAGE;
+    static const QString M_READY;
 
     //output
     enum OutputLevel{

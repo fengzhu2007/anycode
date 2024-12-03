@@ -68,7 +68,6 @@ public:
     QAction* floatTabAction=nullptr;
 
 
-
 };
 
 CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
@@ -241,6 +240,15 @@ bool CodeEditorManager::rename(const QString& from,const QString& to){
         return true;
     }else{
         return false;
+    }
+}
+
+void CodeEditorManager::autoSave(){
+    QMutexLocker locker(&d->mutex);
+    for(auto one:d->list){
+        if(one->isModification()){
+            one->autoSave();
+        }
     }
 }
 

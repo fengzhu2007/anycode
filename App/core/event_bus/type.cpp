@@ -40,6 +40,7 @@ const QString Type::M_SITE_DELETED = "SiteDeleted";
 
 
 const QString Type::M_MESSAGE = "Message";
+const QString Type::M_READY = "Ready";
 
 
 

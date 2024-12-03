@@ -8,11 +8,12 @@ namespace ady{
         ui(new Ui::StatusBarView)
     {
         this->reg();
-        this->regMessageId({Type::M_MESSAGE});
+        this->regMessageIds({Type::M_MESSAGE,Type::M_READY});
+
         this->setStyleSheet(QString::fromUtf8(".QLabel{color:white;}"));
         ui->setupUi(this);
         m_isOnline = true;
-        ui->message->setText(tr("Ready"));
+        this->setReady();
     }
 
     StatusBarView::~StatusBarView(){
@@ -55,8 +56,15 @@ namespace ady{
             auto text = static_cast<QString*>(e->data());
             showMessage(*text);
             return true;
+        }else if(id==Type::M_READY){
+            this->setReady();
+            return true;
         }
         return false;
+    }
+
+    void StatusBarView::setReady(){
+        ui->message->setText(tr("Ready"));
     }
 
 
