@@ -189,7 +189,7 @@ void IDEWindow::initView(){
 #elif defined(Q_OS_MAC)
 
     QStringList arguments;
-    arguments << "-e" << QString("tell application \"Terminal\" to do script \"cd %1 && exec $SHELL\"").arg(directory);
+    arguments << "-e" << QString("tell application \"Terminal\" to do script \"cd %1 && exec $SHELL\"").arg("./");
     this->runExe("osascript",arguments);
 
 #elif defined(Q_OS_LINUX)

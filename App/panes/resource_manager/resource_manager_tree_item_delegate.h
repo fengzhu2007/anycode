@@ -1,7 +1,7 @@
 #ifndef RESOURCEMANAGERTREEITEMDELEGATE_H
 #define RESOURCEMANAGERTREEITEMDELEGATE_H
 
-#include <QStyledItemDelegate >
+#include <QStyledItemDelegate>
 #include <QItemDelegate>
 #include <QPainter>
 #include <QLineEdit>

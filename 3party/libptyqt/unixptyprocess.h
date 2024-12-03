@@ -22,7 +22,7 @@ public:
         , m_handleSlave(-1)
     {
         setProcessChannelMode(QProcess::SeparateChannels);
-        setChildProcessModifier([this]() { configChildProcess(); });
+        //setChildProcessModifier([this]() { configChildProcess(); });
     }
 
     void emitReadyRead() { emit readyRead(); }

@@ -13,8 +13,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Xml Sql Gui Network)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Xml Sql Gui Network)
+#find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Xml Sql Network)
+#find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Xml Sql Network)
 
 #find_package(DbgHelp)
 
@@ -61,9 +61,15 @@ endif()
 
 
 
+if(CMAKE_HOST_WIN32)
+
+
 target_link_libraries(AnyCode PRIVATE Qt${QT_VERSION_MAJOR}::Widgets DbgHelp App wRect)
 
+else()
+target_link_libraries(AnyCode PRIVATE Qt${QT_VERSION_MAJOR}::Widgets App wRect)
 
+endif()
 
 
 

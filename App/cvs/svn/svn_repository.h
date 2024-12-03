@@ -3,7 +3,6 @@
 
 #include "cvs/repository.h"
 
-#ifndef Q_OS_MAC
 
 #include <svnpp_client.h>
 
@@ -42,7 +41,7 @@ private:
 }
 }
 
-#endif
+
 
 //
 
