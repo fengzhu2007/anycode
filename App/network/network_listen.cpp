@@ -1,7 +1,6 @@
 #include "network_listen.h"
-#include <QDebug>
 #include "network_response.h"
-//#include "transfer/TaskPoolModel.h"
+#include <QDebug>
 namespace ady{
 
 NetworkListen::NetworkListen(QObject* parent)
@@ -9,14 +8,10 @@ NetworkListen::NetworkListen(QObject* parent)
     NetworkRequest(curl_easy_init())
 {
     m_isOnline = false;
-    m_second = 5;
-    connect(&m_timer,&QTimer::timeout,this,&NetworkListen::onTimeout);
-    m_timer.setSingleShot(true);
-    m_timer.start(m_second*1000);
 }
 
 
-void NetworkListen::onTimeout(){
+void NetworkListen::execute(){
     this->setOption(CURLOPT_TIMEOUT,2l);
     this->setOption(CURLOPT_URL,"www.qq.com");
     this->setOption(CURLOPT_NOBODY,1);
@@ -27,17 +22,9 @@ void NetworkListen::onTimeout(){
         m_isOnline = isOnline;
         emit onlineStateChanged(isOnline);
     }
-    m_timer.start(m_second*1000);
-    /*qDebug()<<"res:"<<res;
-    char *ipstr=NULL;
-    res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP, &ipstr);
-    qDebug()<<"res2:"<<res;
-    qDebug()<<"ip:"<<ipstr;*/
 }
 
-
-NetworkResponse* NetworkListen::customeAccess(const QString& name,QMap<QString,QVariant> data)
-{
+NetworkResponse* NetworkListen::customeAccess(const QString& name,QMap<QString,QVariant> data){
     return nullptr;
 }
 

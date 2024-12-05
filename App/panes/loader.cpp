@@ -37,6 +37,26 @@ DockingPane* PaneLoader::init(DockingPaneManager* dockingManager,const QString& 
     return pane;
 }
 
+DockingPane* PaneLoader::open(DockingPaneManager* dockingManager,const QString& group,const QJsonObject& data){
+    DockingPane* pane = nullptr;
+    if(group == ResourceManagerPane::PANE_GROUP){
+        pane = ResourceManagerPane::open(dockingManager,true);
+    }else if(group == VersionControlPane::PANE_GROUP){
+        pane = VersionControlPane::open(dockingManager,true);
+    }else if(group == FileTransferPane::PANE_GROUP){
+        pane = FileTransferPane::open(dockingManager,true);
+    }else if(group == FindReplacePane::PANE_GROUP){
+        pane = FindReplacePane::open(dockingManager,true);
+    }else if(group == ServerManagePane::PANE_GROUP){
+        pane = ServerManagePane::open(dockingManager,true);
+    }else if(group == TerminalPane::PANE_GROUP){
+        pane = TerminalPane::open(dockingManager,true);
+    }else if(group == OutputPane::PANE_GROUP){
+        pane = OutputPane::open(dockingManager,true);
+    }
+    return pane;
+}
+
 PaneLoader::PaneLoader()
 {
 

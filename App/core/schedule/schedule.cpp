@@ -1,6 +1,8 @@
 #include "schedule.h"
 #include "schedule_task.h"
-#include "auto_save_task.h"
+#include "file_auto_save_task.h"
+#include "network_auto_close_task.h"
+#include "network_rate_task.h"
 #include <QTimer>
 #include <QDateTime>
 #include <QDebug>
@@ -10,13 +12,20 @@ class SchedulePrivate{
 public:
     QTimer timer;
     QList<ScheduleTask*> queue;
+    FileAutoSaveTask* file_auto_save_task;
+    NetworkAutoCloseTask* network_auto_close_task;
+
 };
 
 Schedule::Schedule(QObject* parent):QObject(parent) {
     d = new SchedulePrivate;
+    d->file_auto_save_task = nullptr;
     connect(&d->timer,&QTimer::timeout,this,&Schedule::onTimeout);
 
     d->timer.setInterval(1*1000);//1 second
+
+    //add network rate task
+    d->queue << new NetworkRateTask(1*1000);
     //d->timer.start();
 }
 
@@ -43,8 +52,23 @@ void Schedule::start(){
     instance->d->timer.start();
 }
 
-void Schedule::addAutoSave(int msec){
-    d->queue<<(new AutoSaveTask(msec));
+void Schedule::addFileAutoSave(int msec){
+    if(d->file_auto_save_task==nullptr){
+        d->queue<<(d->file_auto_save_task = new FileAutoSaveTask(msec));
+    }else{
+        d->file_auto_save_task->m_interval = msec;
+    }
+}
+
+
+
+void Schedule::addNetworkAutoClose(int msec){
+    if(d->file_auto_save_task==nullptr){
+        d->queue<<(d->network_auto_close_task = new NetworkAutoCloseTask(msec));
+    }else{
+        d->network_auto_close_task->m_interval = msec;
+    }
+
 }
 
 void Schedule::onTimeout(){

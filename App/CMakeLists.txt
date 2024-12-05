@@ -83,7 +83,7 @@ add_library(App SHARED
         ${SOURCES}
 
 
-        addon_loader.h addon_loader.cpp
+        common.h addon_loader.h addon_loader.cpp
         components/message_dialog.h components/message_dialog.cpp
         components/tree_view.h components/tree_view.cpp
         components/statusbar/status_bar_view.h  components/statusbar/status_bar_view.cpp components/statusbar/status_bar_view.ui
@@ -242,7 +242,13 @@ add_library(App SHARED
         modules/addon/addon_item_widget.h modules/addon/addon_item_widget.cpp modules/addon/addon_item_widget.ui
         core/schedule/schedule.h core/schedule/schedule.cpp
         core/schedule/schedule_task.h core/schedule/schedule_task.cpp
-        core/schedule/auto_save_task.h core/schedule/auto_save_task.cpp
+        core/schedule/file_auto_save_task.h core/schedule/file_auto_save_task.cpp
+        core/schedule/network_auto_close_task.h core/schedule/network_auto_close_task.cpp
+        core/schedule/network_rate_task.h core/schedule/network_rate_task.cpp
+        core/schedule/network_status_task.h core/schedule/network_status_task.cpp
+        components/grid_view.h components/grid_view.cpp
+        panes/server_manage/site_quick_manager_dialog.h panes/server_manage/site_quick_manager_dialog.cpp panes/server_manage/site_quick_manager_dialog.ui
+
 
 
 

@@ -63,6 +63,7 @@ FileTransferPane::FileTransferPane(QWidget *parent) :
     connect(ui->actionRetry,&QAction::triggered,this,&FileTransferPane::onActionTriggered);
     connect(ui->actionRetry_All,&QAction::triggered,this,&FileTransferPane::onActionTriggered);
 
+    ui->treeView->expandAll();
     this->initView();
 }
 

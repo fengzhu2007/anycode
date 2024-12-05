@@ -6,6 +6,7 @@ const QString Type::M_CLOSE_PROJECT = "Close_Project";//from menu
 const QString Type::M_CLOSE_PROJECT_NOTIFY = "Close_Project_Notify";//after project closed send
 const QString Type::M_FILE_CHANGED = "File_Changed";
 const QString Type::M_OPEN_EDITOR = "Open_Editor";
+const QString Type::M_OPEN_PANE = "OpenPane";
 
 const QString Type::M_WILL_RENAME_FILE = "WillRenameFile";
 const QString Type::M_WILL_RENAME_FOLDER = "WillRenameFolder";

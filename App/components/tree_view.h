@@ -14,14 +14,13 @@ namespace ady {
         explicit TreeView(QWidget* parent=nullptr);
 
 
-        void addMimeType(QString mimeType);
-        void setMimeTypes(QStringList mimeTypes);
+        void addMimeType(const QString& mimeType);
+        void setMimeTypes(const QStringList& mimeTypes);
         void setSupportDropFile(bool res);
 
 
 
     signals:
-        void testA();
         void dropFinished(const QMimeData* data);
 
     protected:

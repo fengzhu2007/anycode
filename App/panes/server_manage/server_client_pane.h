@@ -5,6 +5,7 @@
 #include "core/event_bus/subscriber.h"
 #include <QMimeData>
 #include <QJsonObject>
+#include <QMimeData>
 
 namespace Ui {
 class ServerClientPane;
@@ -62,7 +63,6 @@ public slots:
     void onRename(const QModelIndex index,const QString& newName);
     void onThreadFinished();
     void onOutput(const QString& message,int status);
-
 
 
 public:

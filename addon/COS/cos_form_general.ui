@@ -56,7 +56,7 @@
       </size>
      </property>
      <property name="text">
-      <string>Host:</string>
+      <string>Host</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -132,7 +132,7 @@
       <string>AccessKey Secret</string>
      </property>
      <property name="text">
-      <string>AccessKey ID:</string>
+      <string>AccessKey ID</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -177,7 +177,7 @@
       <string>AccessKey ID</string>
      </property>
      <property name="text">
-      <string>AccessKey Secret:</string>
+      <string>AccessKey Secret</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -216,7 +216,7 @@
       </size>
      </property>
      <property name="text">
-      <string>Path:</string>
+      <string>Path</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

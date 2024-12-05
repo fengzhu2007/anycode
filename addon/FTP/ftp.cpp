@@ -57,6 +57,7 @@ namespace ady {
             this->errorMsg = "";
             this->errorCode = 0;
         }
+        m_last_request_time = QDateTime::currentMSecsSinceEpoch();
         response->errorCode = this->errorCode;
         response->errorMsg = this->errorMsg;
         response->parse();
@@ -67,6 +68,10 @@ namespace ady {
     {
         QMutexLocker locker(&mutex);
         QString host = "ftp://" + this->host;
+        //if(!m_rootPath.startsWith("/")){
+        //    host += "/";
+        //}
+        //host += m_rootPath;
         host += "/";
         this->setOption(CURLOPT_URL,host.toStdString().c_str());
         this->setOption(CURLOPT_PORT,this->port);
@@ -463,6 +468,13 @@ namespace ady {
             return ret;//new relative path
         }else{
             return from;
+        }
+    }
+
+    void FTP::autoClose(long long current){
+        if(this->connected && current > m_setting->interval() + m_last_request_time){
+            qDebug()<<"auto close";
+            this->unlink();
         }
     }
 

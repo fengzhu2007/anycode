@@ -83,6 +83,23 @@
     </widget>
    </item>
    <item>
+    <widget class="QLabel" name="rateImg">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="../../r.qrc">:/Resource/icons/Rate_16x.svg</pixmap>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="rate">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
+   <item>
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -99,7 +116,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="network">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -113,7 +130,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>:/img/Resource/net_status_ok.png</pixmap>
+      <pixmap resource="../../r.qrc">:/Resource/icons/NetworkStatus_16x.svg</pixmap>
      </property>
     </widget>
    </item>

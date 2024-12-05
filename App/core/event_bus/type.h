@@ -15,6 +15,7 @@ public:
     static const QString M_CLOSE_PROJECT_NOTIFY;
     static const QString M_FILE_CHANGED;
     static const QString M_OPEN_EDITOR;
+    static const QString M_OPEN_PANE;
 
     //editor manage
     static const QString M_WILL_RENAME_FILE;

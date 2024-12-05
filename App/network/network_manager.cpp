@@ -4,6 +4,7 @@
 #include "addon_loader.h"
 #include "storage/addon_storage.h"
 #include "storage/site_storage.h"
+#include <QtConcurrent>
 namespace ady {
     NetworkManager* NetworkManager::instance = nullptr;
 
@@ -96,6 +97,15 @@ public:
         if(site.id!=0 && this->requests.contains(site.id)){
             this->requests[site.id]->init(site);
         }
+    }
+
+    void NetworkManager::autoClose(){
+        QtConcurrent::run([this](){
+            long long  msec = QDateTime::currentMSecsSinceEpoch();
+            for(auto one:this->requests){
+                one->autoClose(msec);
+            }
+        });
     }
 
     bool NetworkManager::contains(long long id){

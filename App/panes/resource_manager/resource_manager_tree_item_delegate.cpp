@@ -31,7 +31,7 @@ ItemEditor::~ItemEditor(){
 }
 
 void ItemEditor::keyPressEvent(QKeyEvent *event){
-    qDebug()<<"ItemEditor keyPressEvent"<<event->key();
+    //qDebug()<<"ItemEditor keyPressEvent"<<event->key();
     if (event->key() == Qt::Key_Escape) {
         emit escapePressed(d->model,d->index);
     } else {

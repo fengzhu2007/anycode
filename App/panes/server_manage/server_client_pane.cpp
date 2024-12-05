@@ -8,8 +8,9 @@
 #include "core/event_bus/type.h"
 #include "core/event_bus/event_data.h"
 #include "storage/site_storage.h"
-#include "docking_pane_manager.h"
-#include "docking_pane_container_tabbar.h"
+#include <docking_pane_manager.h>
+#include <docking_pane_container_tabbar.h>
+#include "panes/file_transfer/file_transfer_pane.h"
 #include "interface/remote_file_item_model.h"
 #include "components/message_dialog.h"
 #include "server_request_thread.h"
@@ -242,6 +243,7 @@ QString ServerClientPane::rootPath(){
 
 void ServerClientPane::setCurrentPath(const QString& path,bool request){
     d->currentPath = path;
+    qDebug()<<"setCurrentPath"<<path;
     ui->lineEdit->setText(d->currentPath);
     if(request){
         //this->reload();
@@ -253,9 +255,11 @@ QString ServerClientPane::currentPath(){
 }
 
 void ServerClientPane::reload(){
+    qDebug()<<"current path"<<d->currentPath<<d->rootPath;
     if(d->currentPath==d->rootPath){
         this->connectServer(d->id,d->currentPath);
     }else{
+
         this->cdDir(d->id,d->currentPath,true);
     }
 }
@@ -446,65 +450,37 @@ void ServerClientPane::onTreeItemDClicked(const QModelIndex& index){
 }
 
 void ServerClientPane::onDropUpload(const QMimeData* data){
+    auto instance = Publisher::getInstance();
+    QString paneGroup = FileTransferPane::PANE_GROUP;
+    instance->post(Type::M_OPEN_PANE,&paneGroup);
+
     if(data->hasFormat(MM_UPLOAD)){
-        /*QByteArray b = data->data(MM_UPLOAD);
+        QByteArray b = data->data(MM_UPLOAD);
         QDataStream out(&b,QIODevice::ReadOnly);
-        qint64 p;
-        out >> p;
-        QList<FileItem>* lists = (QList<FileItem>*)(p);
-
-        QList<FileItem>::iterator iter = lists->begin();
-        QString siteCurrentDir = this->dirRender->text();
-        if(!siteCurrentDir.endsWith("/")){
-            siteCurrentDir += "/";
+        qint64 ptr;
+        out >> ptr;
+        auto list = (QStringList*)(ptr);
+        QString destination = d->currentPath;
+        if(!destination.endsWith("/")){
+            destination += "/";
         }
-        QList<Task*> tasks ;
-        while(iter!=lists->end()){
-            Task* t = new Task;
-            t->type = (*iter).type==FileItem::Type::File?0:1;//0=file 1=dir
-            t->cmd = UPLOAD;
-            t->local = (*iter).path;
-            t->remote = siteCurrentDir + (*iter).name;
-            t->filesize = (*iter).size;
-            t->siteid = this->id;
-            tasks.push_back(t);
-            iter++;
+        for(auto one:*list){
+            QFileInfo fi(one);
+            auto data = UploadData{d->pid,d->id,fi.isFile(),fi.absoluteFilePath(),destination+fi.fileName()};
+            instance->post(Type::M_UPLOAD,&data);
         }
-        delete lists;
-
-        if(tasks.size()>0)
-        {
-            emit command(tasks);
-        }*/
+        delete list;
     }else if(data->hasUrls()){
-        //drop system files
-        /*QString siteCurrentDir = this->dirRender->text();
-        if(!siteCurrentDir.endsWith("/")){
-            siteCurrentDir += "/";
-        }
         QList<QUrl> urls = data->urls();
-        QList<Task*> tasks ;
-        QList<QUrl>::iterator iter = urls.begin();
-        while(iter!=urls.end()){
-            QString path = (*iter).path().mid(1);
-            QFileInfo fi(path);
-            if(fi.exists()){
-                Task* t = new Task;
-                t->type = fi.isDir()==false?0:1;//0=file 1=dir
-                t->cmd = UPLOAD;
-                t->local = path;
-                t->remote = siteCurrentDir + fi.fileName();
-                if(t->type==0){
-                    t->filesize = fi.size();
-                }
-                t->siteid = this->id;
-                tasks.push_back(t);
-            }
-            iter++;
+        QString destination = d->currentPath;
+        if(!destination.endsWith("/")){
+            destination += "/";
         }
-        if(tasks.size()>0){
-            emit command(tasks);
-        }*/
+        for(auto url:urls){
+            QFileInfo fi(url.toLocalFile());
+            auto data = UploadData{d->pid,d->id,fi.isFile(),fi.absoluteFilePath(),destination+fi.fileName()};
+            instance->post(Type::M_UPLOAD,&data);
+        }
     }
 }
 
@@ -704,6 +680,8 @@ void ServerClientPane::onOutput(const QString& message,int status){
     };
     Publisher::getInstance()->post(Type::M_OUTPUT,json);
 }
+
+
 
 
 }

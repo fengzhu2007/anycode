@@ -26,6 +26,7 @@ public:
     int row();
     void appendItems(QList<ServerManageModelItem*> items);
     void appendItem(ServerManageModelItem* item);
+    void insertItem(int row,ServerManageModelItem* item);
     ServerManageModelItem* parent();
     ServerManageModelItem* childAt(int i);
     ServerManageModelItem* take(int i);

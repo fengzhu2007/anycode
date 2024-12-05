@@ -6,7 +6,7 @@ namespace ady {
     class ANYENGINE_EXPORT Utils
     {
     public:
-        static QString readableFilesize(quint64 filesize);
+        static QString readableFilesize(quint64 filesize,int decimal=2);
         static QString matchRemoteFilePath(const QString& local,const QString& projectDir,const QString& siteDir);
         static QString keepMatchFilePath(const QString& src,const QString& projectDir,const QString& siteDir);
         static bool allowExtension(const QString& ext,QStringList exts);

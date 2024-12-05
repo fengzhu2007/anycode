@@ -11,6 +11,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <QFileIconProvider>
+#include <QDateTime>
 #include <QDebug>
 namespace ady{
 
@@ -33,6 +34,7 @@ public:
     QString errorMsg;
 
     QList<FileTransferModelItem*> children;
+
     //QList<std::shared_ptr<FileTransferModelItem>>children;
 };
 
@@ -133,6 +135,10 @@ void FileTransferModelItem::insertItems(int position,QList<FileTransferModelItem
 
 void FileTransferModelItem::appendItem(FileTransferModelItem* item){
     d->children.push_back(item);
+}
+
+void FileTransferModelItem::insertItem(int row,FileTransferModelItem* item){
+    d->children.insert(row,item);
 }
 
 
@@ -287,16 +293,24 @@ class FileTransferModelPrivate{
 public:
     FileTransferModelPrivate():projectIcon(QString::fromUtf8(":/Resource/icons/DocumentsFolder_16x.svg")),serverIcon(":/Resource/icons/RemoteServer_16x.svg"),uploadIcon(":/Resource/icons/TransferUpload_16x.svg"),downloadIcon(":/Resource/icons/TransferDownload_16x.svg"),folderIcon(":/Resource/icons/FolderClosed_16x.svg"){}
     FileTransferModelItem* root = nullptr;
+    long long start_time;
+    long long upload_size;
+    long long donwload_size;
+    long long upload_rate;
+    long long download_rate;
+
     QIcon projectIcon;
     QIcon serverIcon;
     QIcon uploadIcon;
     QIcon downloadIcon;
     QIcon folderIcon;
     QMutex mutex;
+    QMutex rateMutex;
     QWaitCondition cond;
     QList<JobThread*> threads;
     QFileIconProvider* provider;
     FileTransferModel::State state;
+
 };
 
 
@@ -320,6 +334,8 @@ FileTransferModel::FileTransferModel(QObject *parent)
     d = new FileTransferModelPrivate;
     d->root = new FileTransferModelItem;
     d->provider = new QFileIconProvider();
+    d->start_time = 0;
+    d->upload_size = d->donwload_size = d->upload_rate = d->download_rate = 0;
     auto model = ResourceManagerModel::getInstance();
     if(model!=nullptr){
         auto root = model->rootItem();
@@ -751,12 +767,22 @@ void FileTransferModel::removeSite(long long id){
         for(int j=0;j<sTotal;j++){
             auto site = proj->childAt(j);
             if(site->id()==id){
-                auto index = createIndex(proj->row(),0,proj);
-                int from = site->row();
-                beginRemoveRows(index,from,from);
-                auto r = proj->take(j);
-                endRemoveRows();
-                delete r;
+                if(sTotal==1 && proj->id()==0){
+                    //delete proj node
+                    QModelIndex index;//root
+                    int from = proj->row();
+                    beginRemoveRows(index,from,from);
+                    auto r = d->root->take(i);
+                    endRemoveRows();
+                    delete r;
+                }else{
+                    auto index = createIndex(proj->row(),0,proj);
+                    int from = site->row();
+                    beginRemoveRows(index,from,from);
+                    auto r = proj->take(j);
+                    endRemoveRows();
+                    delete r;
+                }
                 return ;
 
             }
@@ -928,7 +954,15 @@ void FileTransferModel::openProject(long long id,const QString& name,const QStri
 void FileTransferModel::addSite(const SiteRecord& site){
     QMutexLocker locker(&d->mutex);
     auto item = this->find(site.pid,true);
-    if(item!=nullptr){
+    if(item==nullptr && site.pid==0){
+        auto proj = new FileTransferModelItem(FileTransferModelItem::Project,0,tr("Quick Connect"),{},d->root);
+        auto server = new FileTransferModelItem(FileTransferModelItem::Server,site.id,site.name,site.path,proj);
+        proj->appendItem(server);
+        QModelIndex index;
+        beginInsertRows(index,0,0);
+        d->root->insertItem(0,proj);
+        endInsertRows();
+    }else if(item!=nullptr){
         auto index = createIndex(item->row(),0,item);
         int position = item->childrenCount();
         beginInsertRows(index,position,position);
@@ -1093,8 +1127,37 @@ void FileTransferModel::updateSite(const SiteRecord& site){
 }
 
 
-void FileTransferModel::progress(long long siteid,long long id,float progress){
+void FileTransferModel::progress(long long siteid,long long id,float progress,bool upload,long long size){
     emit notifyProgress(siteid,id,progress);
+    QMutexLocker locker(&d->rateMutex);
+    if(upload){
+        d->upload_size += size;
+    }else{
+        d->donwload_size += size;
+    }
+    if(d->start_time==0){
+        d->start_time = QDateTime::currentMSecsSinceEpoch();
+    }
+
+}
+
+QPair<long long,long long> FileTransferModel::rate(){
+    QMutexLocker locker(&d->rateMutex);
+    if(d->start_time==0){
+        return {-1,-1};
+    }
+    int msec = QDateTime::currentMSecsSinceEpoch() - d->start_time;
+    if(msec<=0){
+        d->upload_rate = 0;
+        d->download_rate = 0;
+    }else{
+        long long upload_rate = d->upload_size * 0.8  / msec * 1000  + 0.2 * d->upload_rate;//byte/scend
+        long long download_rate = d->donwload_size * 0.8 / msec * 1000  + 0.2 * d->download_rate;
+        d->upload_rate = upload_rate;
+        d->download_rate = download_rate;
+    }
+    d->start_time = d->upload_size = d->donwload_size = 0;
+    return {d->upload_rate,d->download_rate};
 }
 
 void FileTransferModel::onUpdateProgress(long long siteid,long long id,float progress){

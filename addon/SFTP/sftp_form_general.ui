@@ -62,7 +62,7 @@
       </size>
      </property>
      <property name="text">
-      <string>Host:</string>
+      <string>Host</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -129,7 +129,7 @@
       </size>
      </property>
      <property name="text">
-      <string>Username:</string>
+      <string>Username</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -170,7 +170,7 @@
       </size>
      </property>
      <property name="text">
-      <string>Password:</string>
+      <string>Password</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -209,7 +209,7 @@
       </size>
      </property>
      <property name="text">
-      <string>Path:</string>
+      <string>Path</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

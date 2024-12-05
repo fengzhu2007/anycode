@@ -2,7 +2,10 @@
 #include "ui_status_bar_view.h"
 #include "core/event_bus/type.h"
 #include "core/event_bus/event.h"
+#include "common/utils.h"
 namespace ady{
+StatusBarView* StatusBarView::instance = nullptr;
+
     StatusBarView::StatusBarView(QWidget* parent)
         :QWidget(parent),
         ui(new Ui::StatusBarView)
@@ -14,6 +17,7 @@ namespace ady{
         ui->setupUi(this);
         m_isOnline = true;
         this->setReady();
+        this->setRate({-1,-1});
     }
 
     StatusBarView::~StatusBarView(){
@@ -31,12 +35,13 @@ namespace ady{
 
         if(m_isOnline!=isOnline){
             if(isOnline){
-                ui->label->setPixmap(QPixmap(QString::fromUtf8(":/img/Resource/net_status_ok.png")));
+                ui->network->setPixmap(QPixmap(QString::fromUtf8(":/Resource/icons/NetworkStatus_16x.svg")));
+                ui->network->setToolTip(tr("Network:OK"));
             }else{
-                ui->label->setPixmap(QPixmap(QString::fromUtf8(":/img/Resource/net_status_error.png")));
+                ui->network->setPixmap(QPixmap(QString::fromUtf8(":/Resource/icons/NetworkStatusWarning_16x.svg")));
+                ui->network->setToolTip(tr("Network:Error"));
             }
         }
-
         m_isOnline = isOnline;
     }
 
@@ -65,6 +70,32 @@ namespace ady{
 
     void StatusBarView::setReady(){
         ui->message->setText(tr("Ready"));
+    }
+
+    void StatusBarView::setRate(const QPair<long long,long long>& rate){
+        if(rate.first==-1 || rate.second==-1){
+            ui->rate->hide();
+            ui->rateImg->hide();
+        }else{
+            ui->rateImg->show();
+            ui->rate->show();
+            const QString text = tr("Upload:%1/s, Download:%2/s").arg(Utils::readableFilesize(rate.first,1)).arg(Utils::readableFilesize(rate.second,1));
+            ui->rate->setText(text);
+        }
+    }
+
+
+    StatusBarView* StatusBarView::getInstance(){
+        return instance;
+    }
+
+    StatusBarView* StatusBarView::make(QWidget* parent){
+        if(instance==nullptr){
+            instance = new StatusBarView(parent);
+            return instance;
+        }else{
+            return nullptr;
+        }
     }
 
 

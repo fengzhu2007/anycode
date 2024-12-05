@@ -10,7 +10,7 @@ namespace ady{
     {
         Q_OBJECT
     public:
-        StatusBarView(QWidget* parent=nullptr);
+
         ~StatusBarView();
         bool networkStatus();
         void setNetworkStatus(bool isOnline);
@@ -18,8 +18,15 @@ namespace ady{
         QString currentMessage();
         virtual bool onReceive(Event* e) override;//event bus receive callback
         void setReady();
+        void setRate(const QPair<long long,long long>& rate);
+
+        static StatusBarView* getInstance();
+        static StatusBarView* make(QWidget* parent);
+    private:
+        StatusBarView(QWidget* parent=nullptr);
 
     private:
+        static StatusBarView* instance;
         Ui::StatusBarView* ui;
         bool m_isOnline;
 

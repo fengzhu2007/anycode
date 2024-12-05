@@ -47,7 +47,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="treeView">
+    <widget class="ady::TreeView" name="treeView">
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>
      </property>
@@ -144,6 +144,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ady::TreeView</class>
+   <extends>QTreeView</extends>
+   <header>components/tree_view.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../r.qrc"/>
  </resources>

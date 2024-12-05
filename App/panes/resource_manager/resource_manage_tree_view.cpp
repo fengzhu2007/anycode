@@ -10,7 +10,7 @@ public:
 };
 
 ResourceManageTreeView::ResourceManageTreeView(QWidget* parent)
-    :QTreeView(parent)
+    :TreeView(parent)
 {
     d = new ResourceManageTreeViewPrivate;
 }

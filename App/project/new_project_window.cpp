@@ -22,7 +22,7 @@ NewProjectWindow::NewProjectWindow(QWidget *parent) :
     this->setStyleSheet("QStackedWidget .QLineEdit,QStackedWidget .QSpinBox{border:1px solid #ccc;height:32px;padding:0 4px 0 4px;font-size:14px}"
                         "QStackedWidget .QLineEdit:hover,QStackedWidget .QSpinBox:hover{border-color:#007acc}"
                         "QStackedWidget .QLineEdit:focus,QStackedWidget .QSpinBox:focus{border-color:#007acc}"
-                        "QStackedWidget .QPushButton,QStackedWidget .QComboBox{height:28px}"
+                        "QStackedWidget .QComboBox{height:28px}"
                         "QStackedWidget .QPushButton#next,QStackedWidget .QPushButton#previous,QStackedWidget .QPushButton#save,QStackedWidget .QPushButton#newSite{height:22px}"
                         "QStackedWidget QScrollArea{border:0;}");
     ui = new Ui::NewProjectWindow;

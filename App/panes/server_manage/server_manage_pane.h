@@ -3,6 +3,7 @@
 #include "global.h"
 #include "docking_pane.h"
 #include "core/event_bus/subscriber.h"
+#include <QMimeData>
 
 
 namespace Ui {
@@ -43,6 +44,7 @@ public slots:
     void onRename(ServerManageModelItem* item,const QString& newName);
     void onThreadFinished();
     void onOutput(const QString& message,int status);
+    void onDropUpload(const QMimeData* data);
 
 
 private:

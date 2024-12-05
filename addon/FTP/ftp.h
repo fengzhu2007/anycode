@@ -36,6 +36,7 @@ public:
     virtual NetworkResponse* chmod(const QString& dst,int mode) override;
 
     virtual QString matchToPath(const QString& from,bool local) override;
+    virtual void autoClose(long long current) override;
 
 
     NetworkResponse* setAscii();

@@ -152,7 +152,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QListView" name="listView">
+        <widget class="ady::GridView" name="listView">
          <property name="editTriggers">
           <set>QAbstractItemView::EditKeyPressed</set>
          </property>
@@ -297,6 +297,11 @@
    <extends>QWidget</extends>
    <header location="global">w_progress_bar.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ady::GridView</class>
+   <extends>QListView</extends>
+   <header>components/grid_view.h</header>
   </customwidget>
  </customwidgets>
  <resources>

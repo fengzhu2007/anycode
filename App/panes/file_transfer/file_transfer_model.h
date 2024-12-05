@@ -43,6 +43,7 @@ public:
     void appendItems(QList<FileTransferModelItem*> items);
     void insertItems(int position,QList<FileTransferModelItem*> items);
     void appendItem(FileTransferModelItem* item);
+    void insertItem(int row,FileTransferModelItem* item);
 
     FileTransferModelItem* parent();
     FileTransferModelItem* childAt(int i);
@@ -160,8 +161,9 @@ public:
 
     void updateSite(const SiteRecord& site);
 
-    void progress(long long siteid,long long id,float progress);
+    void progress(long long siteid,long long id,float progress,bool upload,long long size);
     void setItemFailed(long long siteid,long long id,const QString& msg);
+    QPair<long long,long long> rate();
 
 
 

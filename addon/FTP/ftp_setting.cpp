@@ -66,6 +66,10 @@ QList<QPair<QString,QString>> FTPSetting::dirSync()
     }
 }
 
+long long FTPSetting::interval(){
+    return 5 * 60 * 1000;//5 min
+}
+
 QList<QPair<QString,QString>> FTPSetting::dirMapping()
 {
     if(m_data.contains(FTP_REMOTE_DIR_MAPPING)){

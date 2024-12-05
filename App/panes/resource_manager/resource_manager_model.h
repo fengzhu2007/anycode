@@ -40,6 +40,7 @@ public:
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+    virtual QMimeData *mimeData(const QModelIndexList &indexes) const override;
 
     ResourceManagerModelItem* appendItem(ProjectRecord* project);
     ResourceManagerModelItem* appendItem(const QString& folder);

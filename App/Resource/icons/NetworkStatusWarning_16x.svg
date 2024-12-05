@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+<style>.st2{fill:#cccccc}.st5{fill:#e51400}</style>
+
+<g id="icon_x5F_bg">
+	<path class="st2" d="M1 10h2v3H1zM4 7h2v6H4zM10 2h2v11H10zM7 5h2v8H7z"/>
+
+</g>
+<path d="M1 8h1v1H1v-1zm0-1h1v-2H1v2z" id="not_x5F_fg" class="st5"/>
+</svg>

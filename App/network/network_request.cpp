@@ -11,6 +11,7 @@ namespace ady {
         this->curl = curl;
         this->id = id;
         this->connected = true;
+        this->m_last_request_time = 0;
     }
 
 
@@ -176,6 +177,10 @@ namespace ady {
         Q_UNUSED(local);
         return from;
     }
+
+    void NetworkRequest::autoClose(long long current){
+        Q_UNUSED(current);
+    }
 }
 
 
@@ -215,13 +220,14 @@ size_t network_read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
    if(task->abort==true){
        return 0;
    }
+
    nread = task->file->read((char *)ptr,size * nmemb);
    //size_t retcode = fread(ptr, size, nmemb, task->file);
    //nread = (curl_off_t)retcode;
    task->readysize += nread;
    float progress = task->readysize*1.0 / task->filesize;
    //ady::TaskPoolModel::getInstance()->progressTask(task);
-   ady::FileTransferModel::getInstance()->progress(task->siteid,task->id,progress);
+   ady::FileTransferModel::getInstance()->progress(task->siteid,task->id,progress,true,size * nmemb);
    return nread;
 }
 
@@ -242,9 +248,10 @@ int network_progress_callback(void *p,curl_off_t dltotal, curl_off_t dlnow,curl_
         return 1;
     }
     task->filesize = dltotal;
+    long long size = dlnow - task->readysize;
     task->readysize = dlnow;
     float progress = task->readysize*1.0 / task->filesize;
-    ady::FileTransferModel::getInstance()->progress(task->siteid,task->id,progress);
+    ady::FileTransferModel::getInstance()->progress(task->siteid,task->id,progress,false,size);
     //ady::TaskPoolModel::getInstance()->progressTask(task);
     return 0;
 }

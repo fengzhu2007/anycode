@@ -13,7 +13,8 @@ public:
     static void stop();
     static void start();
 
-    void addAutoSave(int msec);
+    void addFileAutoSave(int msec);
+    void addNetworkAutoClose(int msec);
 
 public slots:
     void onTimeout();

@@ -1,10 +1,10 @@
 #ifndef RESOURCEMANAGETREEVIEW_H
 #define RESOURCEMANAGETREEVIEW_H
 #include "global.h"
-#include <QTreeView>
+#include "components/tree_view.h"
 namespace ady{
 class ResourceManageTreeViewPrivate;
-class ANYENGINE_EXPORT ResourceManageTreeView : public QTreeView
+class ANYENGINE_EXPORT ResourceManageTreeView : public TreeView
 {
     Q_OBJECT
 public:

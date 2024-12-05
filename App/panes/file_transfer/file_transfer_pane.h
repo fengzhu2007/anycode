@@ -29,6 +29,7 @@ public slots:
     void onContextMenu(const QPoint& pos);
     void onActionTriggered();
 
+
 private:
     FileTransferPane(QWidget *parent = nullptr);
 

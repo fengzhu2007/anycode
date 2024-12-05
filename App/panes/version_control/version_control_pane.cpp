@@ -4,6 +4,7 @@
 #include "docking_pane_layout_item_info.h"
 #include "panes/resource_manager/resource_manager_model.h"
 #include "panes/resource_manager/resource_manager_model_item.h"
+#include "panes/file_transfer/file_transfer_pane.h"
 #include "cvs/git/git_repository.h"
 #include "cvs/svn/svn_repository.h"
 #include "cvs/commit_model.h"
@@ -691,8 +692,13 @@ void VersionControlPane::compressZipPackage(bool selected){
 
 void VersionControlPane::uploadFiles(long long siteid,const QStringList& files){
     if(files.size()>0){
+        auto instance = Publisher::getInstance();
+        QString paneGroup = FileTransferPane::PANE_GROUP;
+        instance->post(Type::M_OPEN_PANE,&paneGroup);
+
+
         UploadData data{d->current_pid,siteid,true,files.join("|"),{}};//not set dest ,should match remote
-        Publisher::getInstance()->post(Type::M_UPLOAD,&data);
+        instance->post(Type::M_UPLOAD,&data);
     }
 }
 

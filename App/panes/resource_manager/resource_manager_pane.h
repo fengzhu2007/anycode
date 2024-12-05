@@ -4,7 +4,7 @@
 #include "docking_pane.h"
 #include "core/event_bus/subscriber.h"
 #include <QMenu>
-
+#include <QMimeData>
 namespace Ui {
 class ResourceManagerPane;
 }
@@ -45,8 +45,8 @@ public slots:
     void onTopActionTriggered();
     void onUploadToSite();
     void onUploadToGroup();
-
     void onSearchFile(const QString& text);
+    void onDropAddFolder(const QMimeData* data);
 
 
 

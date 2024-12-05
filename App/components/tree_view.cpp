@@ -7,12 +7,12 @@ namespace ady {
 
     }
 
-    void TreeView::addMimeType(QString mimeType)
+    void TreeView::addMimeType(const QString& mimeType)
     {
         this->supportMimeTypes<<mimeType;
     }
 
-    void TreeView::setMimeTypes(QStringList mimeTypes)
+    void TreeView::setMimeTypes(const QStringList& mimeTypes)
     {
         this->supportMimeTypes = mimeTypes;
     }

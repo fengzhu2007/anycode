@@ -64,6 +64,8 @@ namespace ady {
 
         virtual QString matchToPath(const QString& from,bool local);
 
+        virtual void autoClose(long long current);
+
 
 
     protected:
@@ -81,6 +83,7 @@ namespace ady {
         QString body;
 
         bool connected;
+        long long m_last_request_time = 0;
 
         QMutex mutex;
 

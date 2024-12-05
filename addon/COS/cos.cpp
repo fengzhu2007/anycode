@@ -199,6 +199,9 @@ NetworkResponse* COS::listDir(const QString& dir,int page,int pageSize)
     }while(true);
 
     response->setCommand(QLatin1String("GET /%1").arg(prefix));
+    if(response->errorCode==0){
+        response->params["dir"] = dir;
+    }
     return response;
 
 }
@@ -274,7 +277,9 @@ NetworkResponse* COS::tinyListDir(const QString& dir)
 
     //response->setCommand("GET "+prefix);
     response->setCommand(QLatin1String("GET /%1").arg(prefix));
-
+    if(response->errorCode==0){
+        response->params["dir"] = dir;
+    }
     return response;
 }
 

@@ -136,6 +136,11 @@ void ServerManageModelItem::appendItems(QList<ServerManageModelItem*> items){
 void ServerManageModelItem::appendItem(ServerManageModelItem* item){
     d->children.push_back(item);
 }
+
+void ServerManageModelItem::insertItem(int row,ServerManageModelItem* item){
+    d->children.insert(row,item);
+}
+
 ServerManageModelItem* ServerManageModelItem::parent(){
     return d->parent;
 }
@@ -532,18 +537,28 @@ void ServerManageModel::openProject(long long id,const QString name){
 
 void ServerManageModel::addSite(const SiteRecord& site){
     auto item = this->find(site.pid,true);
-    if(item!=nullptr){
+    if(item==nullptr && site.pid==0){
+        //add Quick Connect
+        auto proj = new ServerManageModelItem(ServerManageModelItem::Project,0,tr("Quick Connect"),d->root);
+        auto server = new ServerManageModelItem(ServerManageModelItem::Server,site.id,site.name,site.path,proj);
+        proj->appendItem(server);
+        QModelIndex index;
+        beginInsertRows(index,0,0);
+        d->root->insertItem(0,proj);
+        endInsertRows();
+    }else if(item!=nullptr){
         auto index = createIndex(item->row(),0,item);
         int position = item->childrenCount();
         beginInsertRows(index,position,position);
         auto server = new ServerManageModelItem(ServerManageModelItem::Server,site.id,site.name,site.path,item);
         item->appendItem(server);
         endInsertRows();
-
-        auto instance = NetworkManager::getInstance();
-        if(instance!=nullptr)
-            instance->initRequest(site.id,site.type);
+    }else{
+        return ;
     }
+    auto instance = NetworkManager::getInstance();
+    if(instance!=nullptr)
+        instance->initRequest(site.id,site.type);
 }
 
 void ServerManageModel::updateSite(const SiteRecord& site){
@@ -571,12 +586,22 @@ void ServerManageModel::removeSite(long long id){
         for(int j=0;j<sTotal;j++){
             auto site = proj->childAt(j);
             if(site->sid()==id){
-                auto index = createIndex(proj->row(),0,proj);
-                int from = site->row();
-                beginRemoveRows(index,from,from);
-                auto r = proj->take(j);
-                endRemoveRows();
-                delete r;
+                if(sTotal==1 && site->pid()==0){
+                    //delete proj node
+                    QModelIndex index;//root
+                    int from = proj->row();
+                    beginRemoveRows(index,from,from);
+                    auto r = d->root->take(i);
+                    endRemoveRows();
+                    delete r;
+                }else{
+                    auto index = createIndex(proj->row(),0,proj);
+                    int from = site->row();
+                    beginRemoveRows(index,from,from);
+                    auto r = proj->take(j);
+                    endRemoveRows();
+                    delete r;
+                }
                 return ;
             }
         }

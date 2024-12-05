@@ -13,6 +13,7 @@ namespace ady {
         ~FTPSetting();
         QList<QPair<QString,QString>> dirSync();
         QList<QPair<QString,QString>> dirMapping();
+        long long interval();
 
 
 

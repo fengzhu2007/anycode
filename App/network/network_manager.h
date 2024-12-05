@@ -21,11 +21,15 @@ namespace ady {
         NetworkRequest* initRequest(long long id,const QString& type);
         void update(const SiteRecord& site);
 
+         void autoClose();
+
         bool contains(long long id);
 
         void clear();
         void remove(long long id);
         int exec(Task* task);
+
+
 
         template<class T>
         NetworkRequest* newRequest(long long id=0)

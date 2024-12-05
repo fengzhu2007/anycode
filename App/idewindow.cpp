@@ -75,14 +75,14 @@ IDEWindow::IDEWindow(QWidget *parent) :
     d = new IDEWindowPrivate;
     qRegisterMetaType<QFileInfoList>("QFileInfoList");
     Subscriber::reg();
-    this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO,Type::M_OPEN_FILE_TRANSFTER});
+    this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO,Type::M_OPEN_FILE_TRANSFTER,Type::M_OPEN_PANE});
     ui->setupUi(this);
 
 
 
 
     //ui->statusbar->setFixedHeight(25);
-    ui->statusbar->addWidget(new StatusBarView(ui->statusbar),1);
+    ui->statusbar->addWidget(StatusBarView::make(ui->statusbar),1);
     ui->statusbar->setContentsMargins({0,0,0,0});
 
 
@@ -224,8 +224,10 @@ void IDEWindow::delayBoot(){
     auto env = settings->environmentSettings();
     auto schedule = Schedule::getInstance();
     if(env.m_autoSave){
-        schedule->addAutoSave(env.m_autoSaveInterval * 60 * 1000);
+        schedule->addFileAutoSave(env.m_autoSaveInterval * 60 * 1000);
     }
+    //add network auto close
+    schedule->addNetworkAutoClose(5*60 * 1000);
     Schedule::start();
 }
 
@@ -256,13 +258,20 @@ void IDEWindow::shutdown(){
 
 bool IDEWindow::onReceive(Event* e){
     if(e->id()==Type::M_OPEN_EDITOR){
-        auto one = static_cast<OpenEditorData*>(e->data());
-        CodeEditorManager::getInstance()->open(m_dockingPaneManager,one->path,one->line,one->column);
-        e->ignore();
-        return true;
+        //auto one = static_cast<OpenEditorData*>(e->data());
+        auto one = e->toJsonOf<OpenEditorData>().toObject();
+        const QString path = one.find("path")->toString();
+        if(!path.isEmpty()){
+            CodeEditorManager::getInstance()->open(m_dockingPaneManager,path,one.find("line")->toInt(0),
+                    one.find("column")->toInt(0));
+            e->ignore();
+            return true;
+        }
     }else if(e->id()==Type::M_OPEN_FIND){
-        auto one = static_cast<OpenFindData*>(e->data());
-        this->onOpenFindAndReplace(one->mode,one->text,one->scope);
+        auto one = e->toJsonOf<OpenFindData>().toObject();
+        int mode = one.find("mode")->toInt(0);
+        //auto one = static_cast<OpenFindData*>(e->data());
+        this->onOpenFindAndReplace(mode,one.find("text")->toString(),one.find("scope")->toString());
         return true;
     }else if(e->id()==Type::M_GOTO){
         auto lineNo = static_cast<int*>(e->data());
@@ -274,6 +283,9 @@ bool IDEWindow::onReceive(Event* e){
     }else if(e->id()==Type::M_OPEN_FILE_TRANSFTER){
         auto pane = FileTransferPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
+    }else if(e->id()==Type::M_OPEN_PANE){
+        auto one = static_cast<QString*>(e->data());
+        PaneLoader::open(m_dockingPaneManager,*one,{});
     }
     return false;
 }

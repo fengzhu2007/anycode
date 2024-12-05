@@ -1,9 +1,9 @@
 #include "server_manage_pane.h"
 #include "ui_server_manage_pane.h"
-#include "docking_pane_manager.h"
-#include "docking_pane_container.h"
-#include "docking_workbench.h"
-#include "docking_pane_layout_item_info.h"
+#include <docking_pane_manager.h>
+#include <docking_pane_container.h>
+#include <docking_workbench.h>
+#include <docking_pane_layout_item_info.h>
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/type.h"
@@ -14,9 +14,12 @@
 #include "server_request_thread.h"
 #include "new_folder_dialog.h"
 #include "permission_dialog.h"
-#include "w_toast.h"
+#include "panes/file_transfer/file_transfer_pane.h"
+#include <w_toast.h>
 #include "components/message_dialog.h"
 #include "server_client_pane.h"
+#include "site_quick_manager_dialog.h"
+#include "common.h"
 #include <QMenu>
 #include <QThread>
 #include <QFileDialog>
@@ -59,13 +62,17 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
 
     ui->treeView->setModel(model);
     ui->treeView->setColumnWidth(ServerManageModel::Name,240);
-
+    ui->treeView->addMimeType(MM_UPLOAD);
+    ui->treeView->setSupportDropFile(true);
+    ui->treeView->setDragDropMode(QAbstractItemView::DragDrop);
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeView,&QTreeView::customContextMenuRequested, this, &ServerManagePane::onContextMenu);
     connect(ui->treeView,&QTreeView::expanded,this,&ServerManagePane::onTreeItemExpanded);
+    connect(ui->treeView,&TreeView::dropFinished,this,&ServerManagePane::onDropUpload);
     //connect(ui->treeView,&QTreeView::doubleClicked,this,&ServerManagePane::onTreeItemDClicked);
 
 
+    connect(ui->actionConnect_Server,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
     connect(ui->actionRefresh,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
     connect(ui->actionDock_To_Client,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
     //connect(ui->actionOpen,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
@@ -75,7 +82,6 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
     connect(ui->actionRename,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
     connect(ui->actionDelete,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
     connect(ui->actionNew_Folder,&QAction::triggered,this,&ServerManagePane::onActionTriggered);
-
 
     this->initView();
 }
@@ -166,6 +172,7 @@ bool ServerManagePane::onReceive(Event* e) {
         auto site = e->toJsonOf<SiteRecord>().toObject();
         auto id = site.find("id")->toInt(0);
         if(id!=0){
+            //Quick Connect
             auto one = SiteStorage().one(id);
             if(one.id!=0 && one.status==1){
                 auto model = static_cast<ServerManageModel*>(ui->treeView->model());
@@ -418,7 +425,6 @@ void ServerManagePane::onTreeItemDClicked(const QModelIndex& index){
 }
 
 void ServerManagePane::onActionTriggered(){
-
     QObject* sender = this->sender();
     auto model = ui->treeView->selectionModel();
     if(sender==ui->actionRefresh){
@@ -442,12 +448,11 @@ void ServerManagePane::onActionTriggered(){
             auto site = model->find(siteid,false);
             auto workbench = this->container()->workbench();
             auto pane = new ServerClientPane(workbench,item->sid());
+            pane->setRootPath(site->path());
+            pane->setCurrentPath(item->path(),true);
             pane->setWindowTitle(site->name());
             auto manager = workbench->manager();
             manager->createPane(pane,DockingPaneManager::Center,true);
-            pane->setRootPath(site->path());
-            pane->setCurrentPath(item->path(),true);
-
         }
     }else if(sender==ui->actionOpen){
 
@@ -576,6 +581,8 @@ void ServerManagePane::onActionTriggered(){
             auto dialog = NewFolderDialog::open(item->sid(),item->path(),this);
             connect(dialog,&NewFolderDialog::submit,this,&ServerManagePane::onNewFolder);
          }
+    }else if(sender==ui->actionConnect_Server){
+        SiteQuickManagerDialog::open(this);
     }
 }
 
@@ -684,6 +691,66 @@ void ServerManagePane::onOutput(const QString& message,int status){
         {"content",message}
     };
     Publisher::getInstance()->post(Type::M_OUTPUT,json);
+}
+
+void ServerManagePane::onDropUpload(const QMimeData* data){
+    auto instance = Publisher::getInstance();
+    QString paneGroup = FileTransferPane::PANE_GROUP;
+    instance->post(Type::M_OPEN_PANE,&paneGroup);
+
+    if(data->hasFormat(MM_UPLOAD)){
+        auto pos = ui->treeView->mapFromGlobal(QCursor::pos());
+        auto index = ui->treeView->indexAt(pos);
+        QByteArray b = data->data(MM_UPLOAD);
+        QDataStream out(&b,QIODevice::ReadOnly);
+        qint64 ptr;
+        out >> ptr;
+        auto list = (QStringList*)(ptr);
+        if(index.isValid()){
+            auto item = static_cast<ServerManageModelItem*>(index.internalPointer());
+            if(item){
+                auto type = item->type();
+                if(type==ServerManageModelItem::Server || type==ServerManageModelItem::Folder){
+                    QString destination = item->path();
+                    if(!destination.endsWith("/")){
+                        destination += "/";
+                    }
+                    int pid = item->pid();
+                    int siteid = item->sid();
+
+                    for(auto one:*list){
+                        QFileInfo fi(one);
+                        auto data = UploadData{pid,siteid,fi.isFile(),fi.absoluteFilePath(),destination+fi.fileName()};
+                        instance->post(Type::M_UPLOAD,&data);
+                    }
+                }
+            }
+        }
+        delete list;
+    }else if(data->hasUrls()){
+        auto pos = ui->treeView->mapFromGlobal(QCursor::pos());
+        auto index = ui->treeView->indexAt(pos);
+        if(index.isValid()){
+            auto item = static_cast<ServerManageModelItem*>(index.internalPointer());
+            if(item){
+                auto type = item->type();
+                if(type==ServerManageModelItem::Server || type==ServerManageModelItem::Folder){
+                    QList<QUrl> urls = data->urls();
+                    QString destination = item->path();
+                    if(!destination.endsWith("/")){
+                        destination += "/";
+                    }
+                    int pid = item->pid();
+                    int siteid = item->sid();
+                    for(auto url:urls){
+                        QFileInfo fi(url.toLocalFile());
+                        auto data = UploadData{pid,siteid,fi.isFile(),fi.absoluteFilePath(),destination+fi.fileName()};
+                        instance->post(Type::M_UPLOAD,&data);
+                    }
+                }
+            }
+        }
+    }
 }
 
 ServerManagePane* ServerManagePane::open(DockingPaneManager* dockingManager,bool active){

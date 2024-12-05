@@ -7,7 +7,7 @@
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/type.h"
-#include "panes/code_editor/code_editor_manager.h"
+#include "common.h"
 #include <QDir>
 #include <QFileInfo>
 #include <QFileSystemWatcher>
@@ -15,6 +15,7 @@
 #include <QMutexLocker>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QMimeData>
 #include <QDebug>
 namespace ady{
 
@@ -109,6 +110,12 @@ bool ResourceManagerModel::setData(const QModelIndex &index, const QVariant &val
                         return false;
                     }
                     file.close();
+                    //open file to editor
+                    auto instance = Publisher::getInstance();
+                    QJsonObject data = {
+                        {"path",fi.absoluteFilePath()},
+                    };
+                    instance->post(Type::M_OPEN_EDITOR,data);
                 }else if(type==ResourceManagerModelItem::Folder){
                     if(!fi.absoluteDir().mkdir(name)){
                         return false;
@@ -281,6 +288,30 @@ bool ResourceManagerModel::hasChildren(const QModelIndex &parent)const{
     }
     return true;
 }
+
+QMimeData* ResourceManagerModel::mimeData(const QModelIndexList &indexes) const
+{
+    auto data = QAbstractItemModel::mimeData(indexes);
+    QStringList* list = new QStringList;
+    list->reserve(indexes.size());
+    for(auto one:indexes){
+        auto item = static_cast<ResourceManagerModelItem*>(one.internalPointer());
+        auto type = item->type();
+        if(type==ResourceManagerModelItem::File || type==ResourceManagerModelItem::Folder){
+            *list<<item->path();
+        }
+    }
+    if(list->size()>0){
+        QByteArray b;
+        QDataStream in(&b,QIODevice::WriteOnly);
+        in<<(qint64)list;
+        data->setData(MM_UPLOAD,b);
+    }else{
+        delete list;
+    }
+    return data;
+}
+
 
 ResourceManagerModelItem* ResourceManagerModel::appendItem(ProjectRecord* project){
     auto item = new ResourceManagerModelItem(ResourceManagerModelItem::Project,project->name,d->root);

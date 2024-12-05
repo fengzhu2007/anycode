@@ -165,6 +165,9 @@ NetworkResponse* OSS::listDir(const QString& dir,int page,int pageSize)
     OSSResponse* response = new  OSSResponse(this->id);
     this->get(url,response);
     response->setCommand(QLatin1String("GET /%1").arg(prefix));
+     if(response->errorCode==0){
+        response->params["dir"] = dir;
+    }
     return response;
 
 }
@@ -213,6 +216,9 @@ NetworkResponse* OSS::tinyListDir(const QString& dir)
     this->get(url,response);
     //response->debug();
     response->setCommand(QLatin1String("GET /%1").arg(prefix));
+    if(response->errorCode==0){
+        response->params["dir"] = dir;
+    }
     return response;
 }
 

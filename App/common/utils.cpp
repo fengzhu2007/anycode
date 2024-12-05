@@ -9,10 +9,10 @@
 #include <QDebug>
 namespace ady {
 
-    QString Utils::readableFilesize(quint64 filesize)
+    QString Utils::readableFilesize(quint64 filesize,int decimal)
     {
         QStringList units;
-        units << "B" << "KB" << "MB" << "GB" << "TB" << "PB";
+        units << "Byte" << "KB" << "MB" << "GB" << "TB" << "PB";
         double mod  = 1024.0;
         double size = filesize;
         //qDebug() << size;
@@ -27,7 +27,7 @@ namespace ady {
         QString szResult = QString::number(floor(size));
         if( rest > 0)
         {
-           szResult += QString(".") + QString::number(rest).left(2);
+           szResult += QString(".") + QString::number(rest).left(decimal);
         }
         szResult += units[i];
         return  szResult;

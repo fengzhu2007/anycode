@@ -16,8 +16,10 @@
 #include "docking_pane_layout_item_info.h"
 #include "components/message_dialog.h"
 #include "panes/code_editor/code_editor_manager.h"
+#include "panes/file_transfer/file_transfer_pane.h"
 #include "network/network_manager.h"
 #include "common/utils.h"
+#include "common.h"
 #include <QMenu>
 #include <QAction>
 #include <QClipboard>
@@ -89,10 +91,15 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
 
     //init view
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->treeView->addMimeType(MM_UPLOAD);
+    ui->treeView->setSupportDropFile(true);
+    ui->treeView->setDragDropMode(QAbstractItemView::DragDrop);
+
     connect(ui->treeView,&QTreeView::customContextMenuRequested, this, &ResourceManagerPane::onContextMenu);
     connect(ui->treeView,&QTreeView::expanded,this,&ResourceManagerPane::onTreeItemExpanded);
     connect(ui->treeView,&QTreeView::collapsed,this,&ResourceManagerPane::onTreeItemCollapsed);
     connect(ui->treeView,&QTreeView::doubleClicked,this,&ResourceManagerPane::onTreeItemDClicked);
+    connect(ui->treeView,&TreeView::dropFinished,this,&ResourceManagerPane::onDropAddFolder);
 
     connect(ui->actionExpand,&QAction::triggered,this,&ResourceManagerPane::onTopActionTriggered);
     connect(ui->actionCollapse,&QAction::triggered,this,&ResourceManagerPane::onTopActionTriggered);
@@ -189,18 +196,16 @@ bool ResourceManagerPane::onReceive(Event* e){
                 project->name = fi.fileName();
             }
         }
-        if(project->id==0 || project->path.isEmpty()){
+        if(project->id==0 && project->path.isEmpty()){
             delete project;
             return false;
         }
-
         //find proj
         auto exists = d->model->findProject(project->path);
         if(exists!=nullptr){
             //has opened
             return true;
         }
-
 
         //add to recent project
         RecentStorage().add(project->name,project->path,project->id);
@@ -707,11 +712,16 @@ void ResourceManagerPane::onUploadToSite(){
         auto list = ui->treeView->selectionModel()->selectedRows();
         if(list.size()>0){
 
+            //open file transfer
+            auto instance = Publisher::getInstance();
+            QString paneGroup = FileTransferPane::PANE_GROUP;
+            instance->post(Type::M_OPEN_PANE,&paneGroup);
+
             auto index = list.at(0);
             auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
 
             UploadData data{item->pid(),siteid,item->type()==ResourceManagerModelItem::File,item->path()};//not set dest ,should match remote
-            Publisher::getInstance()->post(Type::M_UPLOAD,&data);
+            instance->post(Type::M_UPLOAD,&data);
 
         }
 
@@ -725,10 +735,24 @@ void ResourceManagerPane::onUploadToGroup(){
 }
 
 void ResourceManagerPane::onSearchFile(const QString& text){
-    qDebug()<<"search:"<<text;
     auto delegate = static_cast<ResourceManagerTreeItemDelegate*>(ui->treeView->itemDelegate());
     delegate->setSearchText(text);
     ui->treeView->update();
+}
+
+void ResourceManagerPane::onDropAddFolder(const QMimeData* data){
+    if(data->hasUrls()){
+        QList<QUrl> urls = data->urls();
+        for(auto url:urls){
+            QFileInfo fi(url.toLocalFile());
+            if(fi.isDir()){
+                ProjectRecord record;
+                record.path = fi.absoluteFilePath();
+                record.name = fi.fileName();
+                Publisher::getInstance()->post(Type::M_OPEN_PROJECT,(void*)&record);
+            }
+        }
+    }
 }
 
 QMenu* ResourceManagerPane::attchUploadMenu(QMenu* parent,long long id){
