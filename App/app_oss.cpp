@@ -6,15 +6,27 @@ namespace ady{
 
 
 QString AppOSS::global(){
-    return QString::fromUtf8(".QStatusBar::item{border:0}");
+
+
+    /*"QStackedWidget .ady--PasswordEdit,QStackedWidget .QLineEdit,QStackedWidget .QSpinBox{border:1px solid #ccc;height:32px;padding:0 4px 0 4px;font-size:14px}"
+    "QStackedWidget .ady--PasswordEdit:hover,QStackedWidget .QLineEdit:hover,QStackedWidget .QSpinBox:hover{border-color:#007acc}"
+    "QStackedWidget .ady--PasswordEdit:focus,QStackedWidget .QLineEdit:focus,QStackedWidget .QSpinBox:focus{border-color:#007acc}"
+    "QStackedWidget .QComboBox{height:28px}"*/
+
+
+
+    return QString::fromUtf8(".QStatusBar::item{border:0}"
+                             ".ady--PasswordEdit,.QLineEdit,.QSpinBox{height:24px;border:1px solid #ccc;font-size:12px;}"
+                             ".ady--PasswordEdit:focus,.QLineEdit:focus,.ady--PasswordEdit:hover,.QLineEdit:hover,.QSpinBox:focus,.QSpinBox:hover{border:1px solid #007acc}"
+                             ".QComboBox{height:24px}");
 }
 
 
 QString AppOSS::options(){
     //201,222,245
-    return QString::fromUtf8(".QLineEdit{border:1px solid #ccc;height:24px;}"
+    return QString::fromUtf8(".QLineEdit{border:1px solid #ccc;height:22px;}"
                              ".QLineEdit:focus{border:1px solid #007acc}"
-                             ".QComoboBox{height:44px;}"
+                             ".QComoboBox{height:32px;}"
                              ".QSpinBox{border:1px solid #ccc;}"
                              ".QSpinBox:hover{border:1px solid #007acc}"
                              ".QSpinBox::up-button{background:#EEEEF2;}"

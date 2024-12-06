@@ -177,6 +177,10 @@ bool ServerManagePane::onReceive(Event* e) {
             if(one.id!=0 && one.status==1){
                 auto model = static_cast<ServerManageModel*>(ui->treeView->model());
                 model->addSite(one);
+                if(one.pid==0){
+                    auto index = model->index(0,0);
+                    ui->treeView->expand(index);
+                }
             }
         }
     }else if(id==Type::M_SITE_UPDATED){
@@ -196,6 +200,10 @@ bool ServerManagePane::onReceive(Event* e) {
                     }else{
                         //add
                         model->addSite(one);
+                        if(one.pid==0){
+                            auto index = model->index(0,0);
+                            ui->treeView->expand(index);
+                        }
                     }
                 }
             }
@@ -432,11 +440,16 @@ void ServerManagePane::onActionTriggered(){
         if(index.isValid()){
             auto item = static_cast<ServerManageModelItem*>(index.internalPointer());
             auto type = item->type();
-            if(type==ServerManageModelItem::Folder || type==ServerManageModelItem::Server){
-                long long sid = item->sid();
-                item->setLoading(true);
-                static_cast<ServerManageModel*>(ui->treeView->model())->changeItem(item);
-                this->cdDir(sid,item->path(),true);
+            if(type==ServerManageModelItem::Server || type==ServerManageModelItem::Folder ){
+                if(item->expanded()){
+                    long long sid = item->sid();
+                    item->setLoading(true);
+                    static_cast<ServerManageModel*>(ui->treeView->model())->changeItem(item);
+                    this->cdDir(sid,item->path(),true);
+                }else{
+                    //connect server
+                    ui->treeView->expand(index);
+                }
             }
         }
     }else if(sender==ui->actionDock_To_Client){
@@ -465,12 +478,16 @@ void ServerManagePane::onActionTriggered(){
             auto type = item->type();
             if(type == ServerManageModelItem::File || type==ServerManageModelItem::Folder || type==ServerManageModelItem::Server){
                 //M_DOWNLOAD
+                long long pid = item->pid();
+                if(pid==0){
+                    continue;
+                }
                 auto d = item->data();
                 long long filesize = 0l;
                 if(d!=nullptr){
                     filesize = d->size;
                 }
-                DownloadData data{item->pid(),item->sid(),filesize,type==ServerManageModelItem::File,item->path(),{}};
+                DownloadData data{pid,item->sid(),filesize,type==ServerManageModelItem::File,item->path(),{}};
                 instance->post(Type::M_DOWNLOAD,&data);
             }
         }
@@ -698,6 +715,8 @@ void ServerManagePane::onDropUpload(const QMimeData* data){
     QString paneGroup = FileTransferPane::PANE_GROUP;
     instance->post(Type::M_OPEN_PANE,&paneGroup);
 
+    QList<UploadData> filelist;
+    QString destination;
     if(data->hasFormat(MM_UPLOAD)){
         auto pos = ui->treeView->mapFromGlobal(QCursor::pos());
         auto index = ui->treeView->indexAt(pos);
@@ -711,7 +730,7 @@ void ServerManagePane::onDropUpload(const QMimeData* data){
             if(item){
                 auto type = item->type();
                 if(type==ServerManageModelItem::Server || type==ServerManageModelItem::Folder){
-                    QString destination = item->path();
+                    destination = item->path();
                     if(!destination.endsWith("/")){
                         destination += "/";
                     }
@@ -721,7 +740,7 @@ void ServerManagePane::onDropUpload(const QMimeData* data){
                     for(auto one:*list){
                         QFileInfo fi(one);
                         auto data = UploadData{pid,siteid,fi.isFile(),fi.absoluteFilePath(),destination+fi.fileName()};
-                        instance->post(Type::M_UPLOAD,&data);
+                        filelist<<data;
                     }
                 }
             }
@@ -736,7 +755,7 @@ void ServerManagePane::onDropUpload(const QMimeData* data){
                 auto type = item->type();
                 if(type==ServerManageModelItem::Server || type==ServerManageModelItem::Folder){
                     QList<QUrl> urls = data->urls();
-                    QString destination = item->path();
+                    destination = item->path();
                     if(!destination.endsWith("/")){
                         destination += "/";
                     }
@@ -745,12 +764,19 @@ void ServerManagePane::onDropUpload(const QMimeData* data){
                     for(auto url:urls){
                         QFileInfo fi(url.toLocalFile());
                         auto data = UploadData{pid,siteid,fi.isFile(),fi.absoluteFilePath(),destination+fi.fileName()};
-                        instance->post(Type::M_UPLOAD,&data);
+                        filelist<<data;
                     }
                 }
             }
         }
     }
+    if(filelist.size()>0)
+        if(MessageDialog::confirm(this,tr("Upload Confirm"),tr("Are you want to upload files to \n\"%1\"").arg(destination))==QMessageBox::Ok){
+            for(auto one:filelist){
+                instance->post(Type::M_UPLOAD,&one);
+            }
+        }
+
 }
 
 ServerManagePane* ServerManagePane::open(DockingPaneManager* dockingManager,bool active){

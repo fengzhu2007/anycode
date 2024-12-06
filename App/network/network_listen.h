@@ -11,7 +11,7 @@ class NetworkResponse;
     public:
         explicit NetworkListen(QObject* parent = nullptr);
         virtual NetworkResponse* customeAccess(const QString& name,QMap<QString,QVariant> data) override;
-        void execute();
+        bool execute();
 
     signals:
         void onlineStateChanged(bool isOnline);

@@ -28,11 +28,8 @@ SiteQuickManagerDialog::SiteQuickManagerDialog(QWidget *parent)
     : wDialog(parent)
     , ui(new Ui::SiteQuickManagerDialog)
 {
-    this->setStyleSheet(".QStackedWidget .QLineEdit,QStackedWidget .QSpinBox{border:1px solid #ccc;height:32px;padding:0 4px 0 4px;font-size:14px}"
-                        ".QStackedWidget .QLineEdit:hover,QStackedWidget .QSpinBox:hover{border-color:#007acc}"
-                        ".QStackedWidget .QLineEdit:focus,QStackedWidget .QSpinBox:focus{border-color:#007acc}"
-                        ".QStackedWidget .QPushButton#del,QStackedWidget .QComboBox{height:28px}"
-                        ".QStackedWidget .QPushButton#next,QStackedWidget .QPushButton#connect,QStackedWidget .QPushButton#saveSite,QStackedWidget .QPushButton#newSite{height:22px}"
+    this->setStyleSheet(
+                        ".QPushButton#del,.QPushButton#connect,.QPushButton#saveSite,.QPushButton#newSite{height:22px}"
                         ".QTabWidget::pane{border-top:1px solid #ccc;margin-top:-1px}"
                         ".QTabBar::tab{height:28px}");
 

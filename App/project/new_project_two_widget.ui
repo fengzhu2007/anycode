@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>501</width>
-    <height>465</height>
+    <height>590</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -76,7 +76,7 @@
             <x>0</x>
             <y>0</y>
             <width>223</width>
-            <height>338</height>
+            <height>463</height>
            </rect>
           </property>
          </widget>
@@ -169,6 +169,12 @@
        </item>
        <item>
         <widget class="QTabWidget" name="tabWidget">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="tabPosition">
           <enum>QTabWidget::North</enum>
          </property>

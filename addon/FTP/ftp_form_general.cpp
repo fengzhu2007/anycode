@@ -22,6 +22,7 @@ void FTPFormGeneral::initFormData(SiteRecord record)
     ui->passwordLineEdit->setText(record.password);
     ui->pathLineEdit->setText(record.path);
     //ui->statusCheckBox->setCheckState(record.status==1?Qt::Checked:Qt::Unchecked);
+    ui->passwordLineEdit->addAction(ui->actionShow,QLineEdit::TrailingPosition);
 }
 
 bool FTPFormGeneral::validateFormData(SiteRecord& record)

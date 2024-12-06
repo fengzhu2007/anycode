@@ -557,8 +557,10 @@ void ServerManageModel::addSite(const SiteRecord& site){
         return ;
     }
     auto instance = NetworkManager::getInstance();
-    if(instance!=nullptr)
-        instance->initRequest(site.id,site.type);
+    if(instance!=nullptr){
+        auto ret = instance->initRequest(site.id,site.type);
+    }
+
 }
 
 void ServerManageModel::updateSite(const SiteRecord& site){

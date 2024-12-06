@@ -185,7 +185,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="passwordLineEdit">
+    <widget class="ady::PasswordEdit" name="passwordLineEdit">
      <property name="echoMode">
       <enum>QLineEdit::PasswordEchoOnEdit</enum>
      </property>
@@ -228,6 +228,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ady::PasswordEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">components/password_edit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

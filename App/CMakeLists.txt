@@ -248,6 +248,7 @@ add_library(App SHARED
         core/schedule/network_status_task.h core/schedule/network_status_task.cpp
         components/grid_view.h components/grid_view.cpp
         panes/server_manage/site_quick_manager_dialog.h panes/server_manage/site_quick_manager_dialog.cpp panes/server_manage/site_quick_manager_dialog.ui
+        components/password_edit.h components/password_edit.cpp
 
 
 

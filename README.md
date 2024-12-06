@@ -1,6 +1,12 @@
 # anycode
-Multi protocol file transfer tool, supports FTP SFTP OSS COS  
 
+文本编辑器，支持连接FTP,SFTP,阿里云OSS,腾讯云COS
+
+Text editor, supporting connection to FTP, SFTP, AliCloud OSS, Tencent Cloud COS
+
+## 截屏
+
+![](./screens/anycode.png)  
 
 
 ## Windows 构建  

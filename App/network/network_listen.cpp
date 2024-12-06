@@ -11,17 +11,18 @@ NetworkListen::NetworkListen(QObject* parent)
 }
 
 
-void NetworkListen::execute(){
+bool NetworkListen::execute(){
     this->setOption(CURLOPT_TIMEOUT,2l);
     this->setOption(CURLOPT_URL,"www.qq.com");
     this->setOption(CURLOPT_NOBODY,1);
     this->setOption(CURLOPT_HEADER,0);
     CURLcode res = curl_easy_perform(this->curl);
     bool isOnline = res == CURLE_OK;
-    if(m_isOnline!=isOnline){
+    return isOnline;
+    /*if(m_isOnline!=isOnline){
         m_isOnline = isOnline;
         emit onlineStateChanged(isOnline);
-    }
+    }*/
 }
 
 NetworkResponse* NetworkListen::customeAccess(const QString& name,QMap<QString,QVariant> data){

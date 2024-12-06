@@ -60,7 +60,14 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLineEdit" name="hostLineEdit"/>
+      <widget class="QLineEdit" name="hostLineEdit">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>24</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QSpinBox" name="portSpinBox">
@@ -125,7 +132,14 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="usernameLineEdit"/>
+    <widget class="QLineEdit" name="usernameLineEdit">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>24</height>
+      </size>
+     </property>
+    </widget>
    </item>
    <item>
     <spacer name="verticalSpacer_2">
@@ -166,7 +180,13 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="passwordLineEdit">
+    <widget class="ady::PasswordEdit" name="passwordLineEdit">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>24</height>
+      </size>
+     </property>
      <property name="echoMode">
       <enum>QLineEdit::PasswordEchoOnEdit</enum>
      </property>
@@ -205,10 +225,35 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="pathLineEdit"/>
+    <widget class="QLineEdit" name="pathLineEdit">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>24</height>
+      </size>
+     </property>
+    </widget>
    </item>
   </layout>
+  <action name="actionShow">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::ViewRefresh"/>
+   </property>
+   <property name="text">
+    <string>Show</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ady::PasswordEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">components/password_edit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

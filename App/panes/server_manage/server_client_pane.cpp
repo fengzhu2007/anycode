@@ -23,6 +23,7 @@
 #include <QTimer>
 #include <QMenu>
 #include <QStyledItemDelegate>
+#include <QFileDialog>
 
 namespace ady{
 
@@ -38,6 +39,7 @@ public:
     QString type;
     QString rootPath;
     QString currentPath;
+    SiteRecord site;
     ServerRequestThread* thread = nullptr;
     RemoteFileItemModel* model = nullptr;
     QJsonObject toJson(){
@@ -54,8 +56,10 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
 {
     Subscriber::reg();
 
+
     SiteStorage storage;
-    auto r = storage.one(id);
+    d = new ServerClientPanePrivate;
+    d->site = storage.one(id);
 
 
     this->regMessageIds({Type::M_UPLOAD,Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT_NOTIFY,Type::M_NOTIFY_REFRESH_LIST,Type::M_CLOSE_PROJECT_NOTIFY,
@@ -64,7 +68,7 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
     widget->setObjectName("widget");
     ui->setupUi(widget);
     this->setCenterWidget(widget);
-    this->setWindowTitle(r.name);
+    this->setWindowTitle(d->site.name);
     this->setStyleSheet("QToolBar{border:0px;}"
                         "QTreeView{border:0;background-color:#f5f5f5}"
                         "QListView{border:0;background-color:#f5f5f5}"
@@ -72,10 +76,10 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
                         ".ady--ServerClientPane>#widget{background-color:#EEEEF2}");
 
 
-    d = new ServerClientPanePrivate;
+
     d->id = id;
-    d->pid = r.pid;
-    d->type = r.type;
+    d->pid = d->site.pid;
+    d->type = d->site.type;
 
 
     ui->treeView->header()->setSortIndicator(0,Qt::AscendingOrder);
@@ -294,8 +298,12 @@ ServerClientPane* ServerClientPane::make(DockingPaneManager* dockingManager,cons
 void ServerClientPane::showEvent(QShowEvent* e){
     DockingPane::showEvent(e);
     if(d->showed==false){
+        if(d->site.pid==0){
+            //init quick connect
+            Publisher::getInstance()->post(Type::M_SITE_ADDED,&d->site);
+            NetworkManager::getInstance()->initRequest(d->id,d->type);
+        }
         d->showed = true;
-
         this->reload();
     }
 }
@@ -464,6 +472,7 @@ void ServerClientPane::onDropUpload(const QMimeData* data){
         if(!destination.endsWith("/")){
             destination += "/";
         }
+        qDebug()<<"destination"<<destination;
         for(auto one:*list){
             QFileInfo fi(one);
             auto data = UploadData{d->pid,d->id,fi.isFile(),fi.absoluteFilePath(),destination+fi.fileName()};
@@ -538,6 +547,14 @@ void ServerClientPane::onActionTriggered(){
         }else{
             indexlist = model->selectedIndexes();
         }
+        QString local;
+
+        if(d->pid==0l){
+            local = QFileDialog::getExistingDirectory(this, tr("Select Download To Folder"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+            if(local.isEmpty()){
+                return ;
+            }
+        }
         auto instance = Publisher::getInstance();
         instance->post(Type::M_OPEN_FILE_TRANSFTER);//open file transfer
         //auto m = static_cast<RemoteFileItemModel*>(ui->treeView->model());
@@ -545,7 +562,8 @@ void ServerClientPane::onActionTriggered(){
             auto item = d->model->getItem(one.row());
             if(item.type==FileItem::File || item.type==FileItem::Folder){
                 long long filesize = item.size;
-                DownloadData data{0,d->id,filesize,item.type==FileItem::File,item.path,{}};
+                const QString destination = d->pid==0l?(local+"/"+item.name):"";
+                DownloadData data{0,d->id,filesize,item.type==FileItem::File,item.path,destination};
                 instance->post(Type::M_DOWNLOAD,&data);
             }
         }
@@ -581,8 +599,6 @@ void ServerClientPane::onActionTriggered(){
             dialog->setFileInfo(filename,size);
             dialog->setModal(true);
             if(dialog->exec()==QDialog::Accepted){
-
-
                 int mode = dialog->mode();
                 bool applyChildren = dialog->applyChildren();
                 delete  dialog;

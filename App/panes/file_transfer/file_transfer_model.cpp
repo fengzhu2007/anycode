@@ -981,7 +981,7 @@ void FileTransferModel::addUploadJob(QJsonObject data){
     QMutexLocker locker(&d->mutex);
     long long pid = data.find("pid")->toInt(0);
     long long siteid = data.find("siteid")->toInt();
-    if(pid!=0 && siteid!=0){
+    if(siteid!=0){
         auto proj = d->root->findByProjectId(pid);
         if(proj!=nullptr){
             auto site = proj->findBySiteId(siteid);

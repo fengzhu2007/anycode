@@ -47,6 +47,7 @@ add_library(FTP SHARED
     ftp_response.h ftp_response.cpp
     ftp_setting.h ftp_setting_key.h ftp_setting.cpp
     ftp.h ftp.cpp
+
 )
 
 target_link_libraries(FTP PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql App ${CRYPTO_LIB} ${SSL_LIB}  ${CURL_LIB})

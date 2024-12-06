@@ -40,7 +40,6 @@ namespace ady {
         }
         m_setting = new FTPSetting(info.data);
         m_dirMapping = m_setting->dirMapping();
-
     }
 
     int FTP::access(NetworkResponse* response,bool body)

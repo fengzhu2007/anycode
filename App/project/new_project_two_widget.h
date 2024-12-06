@@ -27,6 +27,7 @@ public slots:
     void showSiteContextMenu(const QPoint &pos);
 protected:
     virtual void paintEvent(QPaintEvent *e) override;
+    virtual void showEvent(QShowEvent* e) override;
 private:
     Ui::NewProjectTwoWidget *ui;
     NewProjectTwoWidgetPrivate *d;

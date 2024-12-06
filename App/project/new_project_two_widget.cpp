@@ -10,6 +10,7 @@
 #include "addon_loader.h"
 #include "interface/form_panel.h"
 #include "components/message_dialog.h"
+#include "components/list_item_delegate.h"
 #include "w_toast.h"
 #include "core/event_bus/type.h"
 #include "core/event_bus/publisher.h"
@@ -34,7 +35,9 @@ NewProjectTwoWidget::NewProjectTwoWidget(QWidget *parent) :
 {
     d = new NewProjectTwoWidgetPrivate;
     this->setStyleSheet(QString::fromUtf8("QTabWidget::pane{border:0;border-top:1px solid #ccc}"
-                                          "QAbstractScrollArea>QWidget{background:transparent}"));
+                                          "QAbstractScrollArea>QWidget{background:transparent}"
+                                          ".QTabWidget::pane{border-top:1px solid #ccc;margin-top:-1px}"
+                                        ".QTabBar::tab{height:28px}"));
     ui->setupUi(this);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -47,6 +50,10 @@ NewProjectTwoWidget::NewProjectTwoWidget(QWidget *parent) :
     connect(ui->save,&QPushButton::clicked,this,&NewProjectTwoWidget::onSave);
     connect(ui->listView, &QWidget::customContextMenuRequested, this, &NewProjectTwoWidget::showSiteContextMenu);
 
+    ui->type->setItemDelegate(new ListItemDelegate(24,ui->type));
+    ui->group->setItemDelegate(new ListItemDelegate(24,ui->group));
+
+
     AddonStorage addonStorage;
     d->addons = addonStorage.list(1);
 
@@ -55,9 +62,7 @@ NewProjectTwoWidget::NewProjectTwoWidget(QWidget *parent) :
     model->setData(d->addons);
     ui->type->setModel(model);
     ui->group->setModel(new SiteGroupListModel(ui->group));
-
     //tab first tab widget
-
 }
 
 NewProjectTwoWidget::~NewProjectTwoWidget()
@@ -163,9 +168,12 @@ void NewProjectTwoWidget::onTypeChanged(int i){
         }else{
             //Toast
         }
+        this->onAdjustHeight(ui->tabWidget->currentIndex());
     }else{
         ui->tabWidget->hide();
     }
+
+
 }
 
 void NewProjectTwoWidget::onAdjustHeight(int i){
@@ -292,6 +300,11 @@ void NewProjectTwoWidget::paintEvent(QPaintEvent *e){
     opt.init(this);
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
+void NewProjectTwoWidget::showEvent(QShowEvent* e){
+    QWidget::showEvent(e);
+    this->onAdjustHeight(ui->tabWidget->currentIndex());
 }
 
 }

@@ -155,6 +155,10 @@ bool FileTransferPane::onReceive(Event* e) {
             if(one.id!=0 && one.status==1){
                 auto model = static_cast<FileTransferModel*>(ui->treeView->model());
                 model->addSite(one);
+                if(one.pid==0){
+                    auto index = model->index(0,0);
+                    ui->treeView->expand(index);
+                }
             }
         }
     }else if(id==Type::M_SITE_UPDATED){
@@ -175,6 +179,10 @@ bool FileTransferPane::onReceive(Event* e) {
                     }else{
                         //add
                         model->addSite(one);
+                        if(one.pid==0){
+                            auto index = model->index(0,0);
+                            ui->treeView->expand(index);
+                        }
                     }
                 }
             }
