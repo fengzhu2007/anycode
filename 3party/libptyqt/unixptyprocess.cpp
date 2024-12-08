@@ -12,7 +12,8 @@
 #include <unistd.h>
 #include <QCoreApplication>
 #include <QFileInfo>
-
+#include <array>
+#include <QDebug>
 UnixPtyProcess::UnixPtyProcess()
     : IPtyProcess()
     , m_readMasterNotify(0)
@@ -110,6 +111,8 @@ bool UnixPtyProcess::startProcess(const QString &shellPath,
         return false;
     }
 
+    //m_shellProcess.configChildProcess5();
+
     struct ::termios ttmode;
     rc = tcgetattr(m_shellProcess.m_handleMaster, &ttmode);
     if (rc != 0) {
@@ -160,6 +163,8 @@ bool UnixPtyProcess::startProcess(const QString &shellPath,
         return false;
     }
 
+
+
     m_readMasterNotify = new QSocketNotifier(m_shellProcess.m_handleMaster,
                                              QSocketNotifier::Read,
                                              &m_shellProcess);
@@ -168,7 +173,7 @@ bool UnixPtyProcess::startProcess(const QString &shellPath,
     QObject::connect(m_readMasterNotify, &QSocketNotifier::activated, [this](int socket) {
         Q_UNUSED(socket)
 
-        /*const size_t maxRead = 16 * 1024;
+        const size_t maxRead = 16 * 1024;
         static std::array<char, maxRead> buffer;
 
         int len = ::read(m_shellProcess.m_handleMaster, buffer.data(), buffer.size());
@@ -181,14 +186,14 @@ bool UnixPtyProcess::startProcess(const QString &shellPath,
         if (len > 0) {
             m_shellReadBuffer.append(buffer.data(), len);
             m_shellProcess.emitReadyRead();
-        }*/
+        }
     });
 
-    /*QObject::connect(&m_shellProcess, &QProcess::finished, &m_shellProcess, [this](int exitCode) {
+    QObject::connect(&m_shellProcess,  QOverload<int,QProcess::ExitStatus>::of(&ShellProcess::finished),[this](int exitCode,QProcess::ExitStatus status) {
         m_exitCode = exitCode;
         emit m_shellProcess.aboutToClose();
         m_readMasterNotify->disconnect();
-    });*/
+    });
 
     QProcessEnvironment env;
     for (const QString &envEntry : environment) {
@@ -199,14 +204,17 @@ bool UnixPtyProcess::startProcess(const QString &shellPath,
             env.insert(envEntry, QString());
     }
 
+
     m_shellProcess.setWorkingDirectory(workingDir);
     m_shellProcess.setProcessEnvironment(env);
     m_shellProcess.setReadChannel(QProcess::StandardOutput);
     m_shellProcess.start(m_shellPath, arguments);
+
     if (!m_shellProcess.waitForStarted())
         return false;
 
     m_pid = m_shellProcess.processId();
+
 
     resize(cols, rows);
 
@@ -313,6 +321,10 @@ void UnixPtyProcess::moveToThread(QThread *targetThread)
     m_shellProcess.moveToThread(targetThread);
 }
 
+void ShellProcess::setupChildProcess(){
+  this->configChildProcess();
+}
+
 void ShellProcess::configChildProcess()
 {
     dup2(m_handleSlave, STDIN_FILENO);
@@ -360,3 +372,4 @@ void ShellProcess::configChildProcess()
 
 #endif
 }
+

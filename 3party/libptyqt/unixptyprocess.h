@@ -22,13 +22,17 @@ public:
         , m_handleSlave(-1)
     {
         setProcessChannelMode(QProcess::SeparateChannels);
+        //this->configChildProcess5();
         //setChildProcessModifier([this]() { configChildProcess(); });
     }
 
     void emitReadyRead() { emit readyRead(); }
+    void configChildProcess5();
 
 protected:
+virtual void setupChildProcess() override;
     void configChildProcess();
+
 
 private:
     int m_handleMaster, m_handleSlave;
@@ -56,6 +60,8 @@ public:
     virtual qint64 write(const QByteArray &byteArray);
     static bool isAvailable();
     void moveToThread(QThread *targetThread);
+
+
 
 private:
     ShellProcess m_shellProcess;

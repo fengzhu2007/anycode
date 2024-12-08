@@ -1,4 +1,4 @@
-
+project(ptyqt)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Network)
 
@@ -17,16 +17,19 @@ if (WIN32)
         conptyprocess.cpp conptyprocess.h
     )
 else()
-    list(APPEND SOURCES unixptyprocess.cpp unixptyprocess.h)
+
+
+    list(APPEND SOURCES unixptyprocess.cpp unixptyprocess.h )
 endif()
 
-add_library(ptyqt STATIC ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
+
 
 if(WIN32)
-target_link_libraries(ptyqt PUBLIC Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network winpty)
+target_link_libraries(${PROJECT_NAME} PUBLIC Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network winpty)
 else()
+    target_include_directories(${PROJECT_NAME} PRIVATE ${Qt5Core_PRIVATE_INCLUDE_DIRS})
     target_link_libraries(ptyqt PUBLIC Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)
-
 endif()
 
 if (WIN32)

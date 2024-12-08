@@ -176,6 +176,7 @@ QList<TerminalPane::Excutable> TerminalPane::toExecutableList(){
         //find cmd
         //find powershell
         //shell linux
+
 #ifdef Q_OS_WIN
         const QString cmd = QStandardPaths::findExecutable("cmd.exe");
         if(!cmd.isEmpty()){
@@ -185,6 +186,15 @@ QList<TerminalPane::Excutable> TerminalPane::toExecutableList(){
         if(!powershell.isEmpty()){
             executablelist << Excutable{PowerShell,QIcon(":/Resource/icons/PowerShellInteractiveWindow_16x.svg"),tr("PowerShell"),powershell};
         }
+#else
+#ifdef Q_OS_MAC
+
+        const QString cmd = QStandardPaths::findExecutable("zsh");
+        if(!cmd.isEmpty()){
+            executablelist << Excutable{Cmd,QIcon(":/Resource/icons/ImmediateWindow_16x.svg"),tr("Bash"),cmd};
+        }
+        qDebug()<<"bash"<<cmd;
+#endif
 #endif
     }
     return executablelist;
