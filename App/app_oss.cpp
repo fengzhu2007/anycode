@@ -16,10 +16,10 @@ QString AppOSS::global(){
 #ifdef Q_OS_WIN
                              ".QSpinBox{border:1px solid #ccc;font-size:12px;}"
                              ".QSpinBox:hover{border:1px solid #007acc}"
-                             ".QSpinBox::up-button{background:#EEEEF2;margin-right:1px}"
+                             ".QSpinBox::up-button{background:#EEEEF2;}"
                              ".QSpinBox::up-button:hover{background:#c9def5;}"
                              ".QSpinBox::up-button:pressed{background:#007acc;}"
-                             ".QSpinBox::down-button{background:#EEEEF2;margin-right:1px}"
+                             ".QSpinBox::down-button{background:#EEEEF2;}"
                              ".QSpinBox::down-button:hover{background:#c9def5;}"
                              ".QSpinBox::down-button:pressed{background:#007acc;}"
                              ".QSpinBox::up-arrow{image:url(:/Resource/icons/GlyphUp_16x.svg);width:14px;height:14px;}"

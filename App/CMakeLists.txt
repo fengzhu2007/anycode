@@ -249,6 +249,14 @@ add_library(App SHARED
         components/grid_view.h components/grid_view.cpp
         panes/server_manage/site_quick_manager_dialog.h panes/server_manage/site_quick_manager_dialog.cpp panes/server_manage/site_quick_manager_dialog.ui
         components/password_edit.h components/password_edit.cpp
+        modules/import_export/import_export_dialog.h modules/import_export/import_export_dialog.cpp modules/import_export/import_export_dialog.ui
+        modules/import_export/select_widget.h modules/import_export/select_widget.cpp modules/import_export/select_widget.ui
+        modules/import_export/project_widget.h modules/import_export/project_widget.cpp modules/import_export/project_widget.ui
+        modules/import_export/export_widget.h modules/import_export/export_widget.cpp modules/import_export/export_widget.ui
+        modules/import_export/export_to_widget.h modules/import_export/export_to_widget.cpp modules/import_export/export_to_widget.ui
+        modules/import_export/select_tree_model.h modules/import_export/select_tree_model.cpp
+        modules/import_export/import_select_widget.h modules/import_export/import_select_widget.cpp modules/import_export/import_select_widget.ui
+        modules/import_export/import_widget.h modules/import_export/import_widget.cpp modules/import_export/import_widget.ui
 
 
 

@@ -96,5 +96,6 @@
         <file>Resource/icons/NetworkStatusWarning_16x.svg</file>
         <file>Resource/icons/Visible_16x.svg</file>
         <file>Resource/icons/CloakOrHide_16x.svg</file>
+        <file>Resource/icons/LibrarySettings_16x.svg</file>
     </qresource>
 </RCC>

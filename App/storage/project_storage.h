@@ -31,6 +31,18 @@ namespace ady {
                 {"cvs_password",cvs_password},
             };
         }
+
+        void fromJson(const QJsonObject& json){
+            this->id = json.find("id")->toVariant().toLongLong();
+            this->name = json.find("name")->toString();
+            this->path = json.find("path")->toString();
+            this->cvs = json.find("cvs")->toString();
+            this->cvs_url = json.find("cvs_url")->toString();
+            this->cvs_username = json.find("cvs_username")->toString();
+            this->cvs_password = json.find("cvs_password")->toString();
+            this->updatetime = json.find("updatetime")->toVariant().toLongLong();
+            this->datetime = json.find("datetime")->toVariant().toLongLong();
+        }
     };
 
     class ANYENGINE_EXPORT ProjectStorage : public Storage{

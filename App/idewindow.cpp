@@ -41,6 +41,7 @@
 #include "modules/help/update_dialog.h"
 #include "modules/options/options_dialog.h"
 #include "modules/addon/addon_manager_dialog.h"
+#include "modules/import_export/import_export_dialog.h"
 
 #include "components/statusbar/status_bar_view.h"
 #include "common.h"
@@ -138,6 +139,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
 
     //tool
     connect(ui->actionOptions,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionImport_And_Export,&QAction::triggered,this,&IDEWindow::onActionTriggered);
 
 
     //addon
@@ -440,6 +442,9 @@ void IDEWindow::onActionTriggered(){
     //tool
     }else if(sender==ui->actionOptions){
         OptionsDialog::open(this);
+
+    }else if(sender==ui->actionImport_And_Export){
+        ImportExportDialog::open(this);
     //addon
     }else if(sender==ui->actionAddon_Manage){
         AddonManagerDialog::open(this);

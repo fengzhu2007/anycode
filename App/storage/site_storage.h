@@ -44,6 +44,22 @@ namespace ady {
             };
         }
 
+        void fromJson(const QJsonObject& json){
+            this->id = json.find("id")->toVariant().toLongLong();
+            this->name = json.find("name")->toString();
+            this->host = json.find("host")->toString();
+            this->username = json.find("username")->toString();
+            this->password = json.find("password")->toString();
+            this->path = json.find("path")->toString();
+            this->pid = json.find("pid")->toInt(0);
+            this->type = json.find("type")->toString();
+            this->groupid = json.find("groupid")->toInt(0);
+            this->status = json.find("status")->toInt(0);
+            this->listorder = json.find("listorder")->toInt(0);
+            this->settings = json.find("settings")->toString();
+            this->datetime = json.find("datetime")->toVariant().toLongLong();
+        }
+
 
 
     };

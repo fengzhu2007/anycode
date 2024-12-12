@@ -5,6 +5,8 @@
 namespace ady {
     class ANYENGINE_EXPORT DES {
     public:
+        static QString encode(const QString& str,const QString& key,const QString& vt);
+        static QString decode(const QString& str,const QString& key,const QString& vt);
         static QString encode(const QString& str,const QString &key);
         static QString decode(const QString& str,const QString &key);
         static QString encode(const QString& str);
