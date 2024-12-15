@@ -22,6 +22,7 @@ namespace ady{
 
         static StatusBarView* getInstance();
         static StatusBarView* make(QWidget* parent);
+
     private:
         StatusBarView(QWidget* parent=nullptr);
 

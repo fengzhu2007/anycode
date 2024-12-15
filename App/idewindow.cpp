@@ -28,6 +28,7 @@
 #include "core/backend_thread.h"
 #include "core/layout_settings.h"
 #include "core/schedule/schedule.h"
+#include "core/extension/extension_engine.h"
 #include "modules/options/options_settings.h"
 #include "modules/options/environment_settings.h"
 #include "storage/project_storage.h"
@@ -79,12 +80,16 @@ IDEWindow::IDEWindow(QWidget *parent) :
     this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO,Type::M_OPEN_FILE_TRANSFTER,Type::M_OPEN_PANE});
     ui->setupUi(this);
 
+    this->setWindowIcon(QIcon(":/Resource/images/logo.icns"));
 
 
 
     //ui->statusbar->setFixedHeight(25);
     ui->statusbar->addWidget(StatusBarView::make(ui->statusbar),1);
     ui->statusbar->setContentsMargins({0,0,0,0});
+    qDebug()<<"status bar layout"<<ui->statusbar->layout()->margin();
+    ui->statusbar->layout()->setMargin(0);
+    ui->statusbar->layout()->setSpacing(0);
 
 
     this->resetupUi();
@@ -190,9 +195,11 @@ void IDEWindow::initView(){
 
 #elif defined(Q_OS_MAC)
 
-    QStringList arguments;
-    arguments << "-e" << QString("tell application \"Terminal\" to do script \"cd %1 && exec $SHELL\"").arg("./");
-    this->runExe("osascript",arguments);
+    ui->menuTool_T->addAction(QIcon(":/Resource/icons/ImmediateWindow_16x.svg"),tr("Terminal"),[this](){
+        QStringList arguments;
+        arguments <<QString("-a")<<QString("Terminal");
+        this->runExe("open",arguments);
+    });
 
 #elif defined(Q_OS_LINUX)
     QStringList arguments;
@@ -216,6 +223,8 @@ void IDEWindow::boot(){
     BackendThread::init()->start();
     CodeEditorManager::init(m_dockingPaneManager);
     Schedule::init(this);//init Schedule
+    //init js engine
+    ExtensionEngine::init(this);
 
 }
 
@@ -241,7 +250,7 @@ void IDEWindow::shutdown(){
     auto settings = LayoutSettings::getInstance(this);
     settings->setDockpanes(dockpanes);
     settings->setProjects(projects);
-    settings->saveToFile();
+    //settings->saveToFile();
     LayoutSettings::destory();
 
     wToastManager::destory();
@@ -460,7 +469,11 @@ void IDEWindow::onActionTriggered(){
     }else if(sender==ui->actionAbout){
         AboutDialog::open(this);
     }else if(sender==ui->actionDebug){
-        m_dockingPaneManager->dump();
+        //m_dockingPaneManager->dump();
+#ifdef Q_DEBUG
+
+#endif
+        ExtensionEngine::run(":/Resource/extensions/demo.js");
     }
 }
 

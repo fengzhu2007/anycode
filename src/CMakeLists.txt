@@ -9,6 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_MACOSX_BUNDLE TRUE)
+
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
@@ -31,8 +33,12 @@ set(ANYCODE_SOURCES
         main.cpp
 )
 
+
+
 if(WIN32)
   list(APPEND ANYCODE_CFILES copyright.rc)
+elseif(APPLE)
+    set(APP_ICON_PATH "${CMAKE_SOURCE_DIR}/src/logo.icns")
 endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -98,43 +104,9 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(AnyCode)
 endif()
 
-
-#add_custom_command(TARGET anycode PRE_BUILD
-##                   COMMAND rc /fo ${CMAKE_CURRENT_BINARY_DIR}/copyright.res
-#                   ${CMAKE_CURRENT_SOURCE_DIR}/copyright.rc)
-
-
-
-
-#include_directories(SYSTEM "libraries/SDL/include")
-#add_subdirectory("libraries/SDL")
-
-#include_directories(SYSTEM "libraries/fmt/include")
-#add_subdirectory("libraries/fmt")
-
-#add_subdirectory("libraries/glew/build/cmake")
-
-#include_directories(SYSTEM "libraries/glad/include")
-
-
-#add_subdirectory(subdir) 添加子cmake文件
-
-
-
-
-
-
-#anycode
-#set(ANYCODE_EXE_SOURCES
-#        src/main.cpp
-##)
-#add_executable(anycode ${ANYCODE_EXE_SOURCES})
-#target_link_libraries(anycode PRIVATE App)
-
-#if(WIN32)
-#    set_target_properties(anycode PROPERTIES WIN32_EXECUTABLE TRUE)
-#endif()
-
+if(APPLE)
+    file(COPY ${APP_ICON_PATH} DESTINATION ${CMAKE_BINARY_DIR}/AnyCode.app/Contents/Resources/)
+endif()
 
 
 

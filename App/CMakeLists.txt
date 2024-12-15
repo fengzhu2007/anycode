@@ -12,8 +12,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Xml Sql Gui Network Concurrent LinguistTools Svg)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Xml Sql Gui Network Concurrent LinguistTools Svg)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Qml)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Qml)
 
 include_directories(SYSTEM "../3party/bin/x64/include")
 
@@ -58,6 +58,7 @@ add_definitions(-DBUILD_TIME="${BUILD_TIME}")
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DQ_DEBUG)
 endif()
+
 
 
 
@@ -257,6 +258,7 @@ add_library(App SHARED
         modules/import_export/select_tree_model.h modules/import_export/select_tree_model.cpp
         modules/import_export/import_select_widget.h modules/import_export/import_select_widget.cpp modules/import_export/import_select_widget.ui
         modules/import_export/import_widget.h modules/import_export/import_widget.cpp modules/import_export/import_widget.ui
+        core/extension/extension_engine.h core/extension/extension_engine.cpp
 
 
 
@@ -278,7 +280,7 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt)
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Qml ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt)
 
 
 target_compile_definitions(App PRIVATE APP_LIBRARY)

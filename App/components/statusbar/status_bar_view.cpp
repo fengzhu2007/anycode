@@ -3,6 +3,10 @@
 #include "core/event_bus/type.h"
 #include "core/event_bus/event.h"
 #include "common/utils.h"
+#include <QStyleOption>
+#include <QPainter>
+#include <QStyle>
+#include <QResizeEvent>
 namespace ady{
 StatusBarView* StatusBarView::instance = nullptr;
 
@@ -13,9 +17,7 @@ StatusBarView* StatusBarView::instance = nullptr;
         this->reg();
         this->regMessageIds({Type::M_MESSAGE,Type::M_READY});
 
-#ifdef Q_OS_WIN
         this->setStyleSheet(QString::fromUtf8(".QLabel{color:white;}"));
-#endif
         ui->setupUi(this);
         m_isOnline = true;
         this->setReady();
