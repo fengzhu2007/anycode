@@ -2,9 +2,13 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDebug>
-
-
 #include "minizip/zip.h"
+#ifdef Q_OS_LINUX
+#include <sys/stat.h>
+#endif
+
+#define MAXFILENAME 255
+
 #ifdef _WIN32
         #define USEWIN32IOAPI
         #include "minizip/iowin32.h"
