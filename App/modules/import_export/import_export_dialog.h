@@ -23,10 +23,10 @@ public:
     };
     static ImportExportDialog* getInstance();
     static ImportExportDialog* open(QWidget* parent);
-    static QString encode(const QString& str);
-    static QString decode(const QString& str);
+
     ~ImportExportDialog();
     void initView();
+    void startup();
 
 public slots:
     void onClicked();

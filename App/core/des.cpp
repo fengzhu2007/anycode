@@ -17,36 +17,39 @@ QString DES::vt = "huUljjRv";
 
 
 QString DES::encode(const QString& str,const QString& key,const QString& vt){
-    char encrypted_buffer[256];
     DES_cblock k;
     DES_cblock vtKey;
     DES_key_schedule ks;
+
+
     DES_string_to_key(vt.toStdString().c_str(), &vtKey);
     DES_string_to_key(key.toStdString().c_str(), &k);
-    DES_set_key_unchecked((const_DES_cblock *)&k, &ks);
-    memset(encrypted_buffer, 0, sizeof(encrypted_buffer));
+
+
+    DES_set_key_unchecked(&k, &ks);
+
     QByteArray by;
-    int length = str.length();
-    std::string tmp;
-    tmp.assign(str.toStdString());
-    int padding = 0;
-    if(length % 8 > 0){
-        padding = 8 - (length / 8);
-        for(int i=0;i<padding;i++){
-            tmp.append("",1);
-        }
-    }
+    std::string tmp = str.toStdString();
+    int length = tmp.length();
+
+
+    int padding = (8 - length % 8) % 8;
+    tmp.append(padding, '\0');
+
+    unsigned char encrypted_buffer[256] = {0};
 
     DES_cbc_encrypt(reinterpret_cast<const unsigned char *>(tmp.c_str()),
-                    reinterpret_cast<unsigned char *>(encrypted_buffer),
-                    length + padding, &ks, &vtKey, DES_ENCRYPT);
-    by.append((const char *)encrypted_buffer,tmp.length());
+                    encrypted_buffer,
+                    tmp.length() + padding, &ks, &vtKey, DES_ENCRYPT);
+
+    by.append(reinterpret_cast<const char*>(encrypted_buffer), tmp.length() + padding);
+
     return by.toBase64();
 }
 QString DES::decode(const QString& str,const QString& key,const QString& vt){
-    DES_cblock       k = {0};
-    DES_cblock       vtKey = {0};
-    DES_key_schedule ks  ;
+    DES_cblock k = {0};
+    DES_cblock vtKey = {0};
+    DES_key_schedule ks;
 
     unsigned char encrypted_buffer[256] = {0};
     unsigned char decrypted_buffer[256] = {0};
@@ -56,30 +59,19 @@ QString DES::decode(const QString& str,const QString& key,const QString& vt){
 
     DES_set_key_unchecked(&k, &ks);
 
-    std::string decrypted;
+    QByteArray by = QByteArray::fromBase64(str.toUtf8());
 
-    memset(encrypted_buffer, 0, sizeof(encrypted_buffer));
-    memset(decrypted_buffer, 0, sizeof(decrypted_buffer));
+    int length = by.size();
+    memcpy(encrypted_buffer, by.data(), length);
 
-    QByteArray by = QByteArray::fromBase64(str.toLocal8Bit());
+    DES_cbc_encrypt(encrypted_buffer, decrypted_buffer, length, &ks, &vtKey, DES_DECRYPT);
 
-    const char* string = by.data();
-    int length = strlen(string);
+    std::string decrypted(reinterpret_cast<char*>(decrypted_buffer), length);
 
-    memcpy(encrypted_buffer, string, length);
-
-    DES_cbc_encrypt(encrypted_buffer, decrypted_buffer, length,
-                    &ks, &vtKey, DES_DECRYPT);
-
-    decrypted_buffer[length] = 0;
-
-    decrypted.assign(reinterpret_cast<char*>(decrypted_buffer));
-
-    /*size_t pos = decrypted.find_first_of(" ");
-      if (pos != std::string::npos) {
-          decrypted.erase(pos);
-      }*/
-
+    size_t pos = decrypted.find_first_of('\0');
+    if (pos != std::string::npos) {
+        decrypted.erase(pos);
+    }
     return QString::fromStdString(decrypted);
 }
 

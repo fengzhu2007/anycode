@@ -771,7 +771,7 @@ void ServerManagePane::onDropUpload(const QMimeData* data){
         }
     }
     if(filelist.size()>0)
-        if(MessageDialog::confirm(this,tr("Upload Confirm"),tr("Are you want to upload files to \n\"%1\"").arg(destination))==QMessageBox::Ok){
+        if(MessageDialog::confirm(this,tr("Upload Confirm"),tr("Are you want to upload files to \n\"%1\"").arg(destination))==QMessageBox::Yes){
             for(auto one:filelist){
                 instance->post(Type::M_UPLOAD,&one);
             }

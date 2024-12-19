@@ -15,7 +15,7 @@ QString AppOSS::global(){
                              ".ady--PasswordEdit:focus,.QLineEdit:focus,.ady--PasswordEdit:hover,.QLineEdit:hover{border:1px solid #007acc}"
 
 #ifdef Q_OS_WIN
-                             ".QSpinBox{border:1px solid #ccc;font-size:12px;}"
+                             ".QSpinBox{border:1px solid #ccc;font-size:12px;height:24px;}"
                              ".QSpinBox:hover{border:1px solid #007acc}"
                              ".QSpinBox::up-button{background:#EEEEF2;}"
                              ".QSpinBox::up-button:hover{background:#c9def5;}"
@@ -35,8 +35,8 @@ QString AppOSS::global(){
 
 QString AppOSS::options(){
     //201,222,245
-    return QString::fromUtf8(".QLineEdit{border:1px solid #ccc;height:22px;}"
-                             ".QLineEdit:focus{border:1px solid #007acc}"
+    return QString::fromUtf8(".QLineEdit,.QSpinBox{border:1px solid #ccc;height:22px;}"
+                             ".QLineEdit:focus,QSpinBox:focus{border:1px solid #007acc}"
                              ".QComoboBox{height:32px;}"
                              ".QListView{padding:0;border:1px solid #ccc;}"
                              ".QListView::item{height:30px;border:1px solid white; }"

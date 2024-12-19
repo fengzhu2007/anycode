@@ -21,6 +21,7 @@ namespace ady{
         void setCurrentProjectId(long long id);
         long long currentProjectId();
         void setOrigin(int i);
+        void startup();
 
 
     private:

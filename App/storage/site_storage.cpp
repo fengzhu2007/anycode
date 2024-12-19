@@ -49,6 +49,25 @@ SiteRecord SiteStorage::one(long long id,bool igoreCache){
     return record;
 }
 
+SiteRecord SiteStorage::one(long long pid,const QString& host,int port,const QString& username){
+    SiteRecord record;
+    QString sql = QString("SELECT * FROM [%1] WHERE [%2]=? AND [%3]=? AND [%4]=? AND [%5]=?").arg(TABLE_NAME).arg(COL_PID).arg(COL_HOST).arg(COL_USERNAME).arg(COL_PORT);
+    QSqlQuery query(DatabaseHelper::getDatabase()->get());
+    query.prepare(sql);
+    query.bindValue(0,pid);
+    query.bindValue(1,host);
+    query.bindValue(2,username);
+    query.bindValue(3,port);
+    bool ret = query.exec();
+    this->error = query.lastError();
+    if(ret && query.next()){
+        record = toRecord(query);
+    }else{
+        record.id = 0l;
+    }
+    return record;
+}
+
 QList<SiteRecord> SiteStorage::all(){
     QList<SiteRecord> lists;
     QString sql = QString("SELECT * FROM [%1] WHERE 1 ORDER BY [%2] DESC").arg(TABLE_NAME).arg(COL_LISTORDER);
@@ -171,7 +190,7 @@ bool SiteStorage::del(long long id)
     return ret;
 }
 
-bool SiteStorage::del_list(long long pid)
+bool SiteStorage::delList(long long pid)
 {
     auto list = this->list(pid);
     for(auto one:list){
@@ -181,6 +200,15 @@ bool SiteStorage::del_list(long long pid)
     QSqlQuery query(DatabaseHelper::getDatabase()->get());
     query.prepare(sql);
     query.bindValue(0,pid);
+    bool ret = query.exec();
+    this->error = query.lastError();
+    return ret;
+}
+
+bool SiteStorage::delAll(){
+    QString sql = QString("DELETE FROM [%1] WHERE 1=1").arg(TABLE_NAME);
+    QSqlQuery query(DatabaseHelper::getDatabase()->get());
+    query.prepare(sql);
     bool ret = query.exec();
     this->error = query.lastError();
     return ret;

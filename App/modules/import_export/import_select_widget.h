@@ -2,6 +2,7 @@
 #define IMPORT_SELECT_WIDGET_H
 
 #include <QWidget>
+#include <QAbstractButton>
 
 namespace Ui {
 class ImportSelectWidget;
@@ -17,9 +18,12 @@ public:
     ~ImportSelectWidget();
     void initView();
     int result();
+    QString filename();
+    QString directory();
 
 public slots:
     void onBrowser();
+    void onToggle(QAbstractButton *button);
 
 private:
     Ui::ImportSelectWidget *ui;

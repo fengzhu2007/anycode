@@ -35,6 +35,22 @@ ProjectRecord ProjectStorage::one(long long id){
     return record;
 }
 
+ProjectRecord ProjectStorage::one(const QString& name){
+    ProjectRecord record;
+    QString sql = QString("SELECT * FROM [%1] WHERE [%2]=?").arg(TABLE_NAME).arg(COL_NAME);
+    QSqlQuery query(DatabaseHelper::getDatabase()->get());
+    query.prepare(sql);
+    query.bindValue(0,name);
+    bool ret = query.exec();
+    this->error = query.lastError();
+    if(ret && query.next()){
+        record = toRecord(query);
+    }else{
+        record.id = 0l;
+    }
+    return record;
+}
+
 QList<ProjectRecord> ProjectStorage::all(){
     QList<ProjectRecord> lists;
     QString sql = QString("SELECT * FROM [%1] WHERE 1").arg(TABLE_NAME);
@@ -99,6 +115,15 @@ bool ProjectStorage::del(long long id)
     QSqlQuery query(DatabaseHelper::getDatabase()->get());
     query.prepare(sql);
     query.bindValue(0,id);
+    bool ret = query.exec();
+    this->error = query.lastError();
+    return ret;
+}
+
+bool ProjectStorage::delAll(){
+    QString sql = QString("DELETE FROM [%1] WHERE 1=1").arg(TABLE_NAME);
+    QSqlQuery query(DatabaseHelper::getDatabase()->get());
+    query.prepare(sql);
     bool ret = query.exec();
     this->error = query.lastError();
     return ret;

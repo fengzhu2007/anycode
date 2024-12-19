@@ -58,10 +58,12 @@ namespace ady {
 
         ProjectStorage();
         ProjectRecord one(long long id);
+        ProjectRecord one(const QString& name);
         QList<ProjectRecord> all();
         bool update(ProjectRecord record);
         long long insert(ProjectRecord record);
         bool del(long long id);
+        bool delAll();
     private:
         ProjectRecord toRecord(QSqlQuery& query);
 

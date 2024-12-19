@@ -259,6 +259,7 @@ add_library(App SHARED
         modules/import_export/import_select_widget.h modules/import_export/import_select_widget.cpp modules/import_export/import_select_widget.ui
         modules/import_export/import_widget.h modules/import_export/import_widget.cpp modules/import_export/import_widget.ui
         core/extension/extension_engine.h core/extension/extension_engine.cpp
+        modules/import_export/backup_restore.h modules/import_export/backup_restore.cpp
 
 
 

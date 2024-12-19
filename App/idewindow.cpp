@@ -225,7 +225,6 @@ void IDEWindow::boot(){
     Schedule::init(this);//init Schedule
     //init js engine
     ExtensionEngine::init(this);
-
 }
 
 void IDEWindow::delayBoot(){
@@ -250,7 +249,7 @@ void IDEWindow::shutdown(){
     auto settings = LayoutSettings::getInstance(this);
     settings->setDockpanes(dockpanes);
     settings->setProjects(projects);
-    //settings->saveToFile();
+    settings->saveToFile();
     LayoutSettings::destory();
 
     wToastManager::destory();
@@ -260,11 +259,8 @@ void IDEWindow::shutdown(){
     CodeEditorManager::destory();
     Subscriber::unReg();
 
-
     //destory file transfter model
     FileTransferModel::destory();
-
-
 }
 
 bool IDEWindow::onReceive(Event* e){

@@ -95,7 +95,7 @@ void NewProjectZeroWidget::onDeleteProject(int i){
             ProjectStorage db;
             db.del(one.id);
             SiteStorage siteStorage;
-            siteStorage.del_list(one.id);
+            siteStorage.delList(one.id);
             //this->initData();//refresh tree list
             model->itemRemoved(i);
         }

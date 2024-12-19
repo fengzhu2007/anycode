@@ -21,10 +21,12 @@ public:
 
 public slots:
     void onBrowser();
+    void onStateChanged(int state);
 
 private:
     SelectTreeModel* m_model;
     Ui::ImportWidget *ui;
+    QString m_path;
 };
 }
 #endif // IMPORT_WIDGET_H

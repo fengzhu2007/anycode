@@ -18,6 +18,7 @@ ImportSelectWidget::ImportSelectWidget(QWidget *parent)
     group->addButton(ui->overwriteOpt);
 
     connect(ui->browser,&QPushButton::clicked,this,&ImportSelectWidget::onBrowser);
+    connect(group,QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),this,&ImportSelectWidget::onToggle);
 
     this->initView();
 }
@@ -31,6 +32,7 @@ ImportSelectWidget::~ImportSelectWidget()
 void ImportSelectWidget::initView(){
     ui->filename->setText(APP_NAME+"-export-"+QDateTime::currentDateTime().toString("yyyyMMdd")+".json");
     ui->directory->setText(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+    this->onToggle(nullptr);
 }
 
 
@@ -41,9 +43,17 @@ void ImportSelectWidget::onBrowser(){
     }
 }
 
+void ImportSelectWidget::onToggle(QAbstractButton *button){
+    bool ret = ui->backupOpt->isChecked();
+    ui->filename->setEnabled(ret);
+    ui->directory->setEnabled(ret);
+    ui->browser->setEnabled(ret);
+}
+
 
 int ImportSelectWidget::result(){
     if(ui->backupOpt->isChecked()){
+
         return 0;
     }else if(ui->mergeOpt->isChecked()){
         return 1;
@@ -52,4 +62,13 @@ int ImportSelectWidget::result(){
     }
     return -1;
 }
+
+QString ImportSelectWidget::filename(){
+    return ui->filename->text();
+}
+
+QString ImportSelectWidget::directory(){
+    return ui->directory->text();
+}
+
 }

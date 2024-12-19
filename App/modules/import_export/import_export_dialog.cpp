@@ -6,6 +6,7 @@
 #include "import_select_widget.h"
 #include "import_widget.h"
 #include "core/des.h"
+#include "backup_restore.h"
 #include <w_toast.h>
 
 namespace ady{
@@ -42,6 +43,12 @@ ImportExportDialog::ImportExportDialog(QWidget *parent)
     connect(ui->cancel,&QPushButton::clicked,this,&ImportExportDialog::close);
 
     connect(ui->stackedWidget,&QStackedWidget::currentChanged,this,&ImportExportDialog::onCurrentChanged);
+    QString str = "i03Qzj19aJSiB6nDGSPW0hROYDpCn3";
+    QString enstr = BackupRestore::encode(str);
+    QString destr = BackupRestore::decode(enstr);
+    qDebug()<<str<<enstr<<destr;
+
+
 
     this->initView();
 
@@ -65,17 +72,11 @@ ImportExportDialog* ImportExportDialog::open(QWidget* parent){
         instance = new ImportExportDialog(parent);
         instance->setModal(true);
     }
+    instance->startup();
     instance->show();
     return instance;
 }
 
-QString ImportExportDialog::encode(const QString& str){
-    return DES::encode(str,key,vt);
-}
-
-QString ImportExportDialog::decode(const QString& str){
-    return DES::decode(str,key,vt);
-}
 
 void ImportExportDialog::initView(){
     d->widgets<<new SelectWidget(ui->stackedWidget);
@@ -86,6 +87,10 @@ void ImportExportDialog::initView(){
     for(auto widget:d->widgets){
         ui->stackedWidget->addWidget(widget);
     }
+}
+
+void ImportExportDialog::startup(){
+    ui->stackedWidget->setCurrentIndex(0);
 }
 
 void ImportExportDialog::onClicked(){

@@ -31,6 +31,7 @@ namespace ady {
                     {"id",id},
                     {"name",name},
                     {"host",host},
+                    {"port",port},
                     {"username",username},
                     {"password",password},
                     {"path",path},
@@ -48,6 +49,7 @@ namespace ady {
             this->id = json.find("id")->toVariant().toLongLong();
             this->name = json.find("name")->toString();
             this->host = json.find("host")->toString();
+            this->port = json.find("port")->toInt(0);
             this->username = json.find("username")->toString();
             this->password = json.find("password")->toString();
             this->path = json.find("path")->toString();
@@ -83,13 +85,15 @@ namespace ady {
 
         SiteStorage();
         SiteRecord one(long long id,bool igoreCache=false);
+        SiteRecord one(long long pid,const QString& host,int port,const QString& username);
         QList<SiteRecord> all();
         QList<SiteRecord> list(long long pid);
         QList<SiteRecord> list(long long pid,int status);
         bool update(SiteRecord record);
         long long insert(SiteRecord record);
         bool del(long long id);
-        bool del_list(long long pid);
+        bool delList(long long pid);
+        bool delAll();
     private:
         SiteRecord toRecord(QSqlQuery& query);
 

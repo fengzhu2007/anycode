@@ -65,6 +65,11 @@ void NewProjectWindow::setOrigin(int i){
     d->origin = i;
 }
 
+void NewProjectWindow::startup(){
+    if(ui->stackedWidget->currentIndex()!=0)
+        this->setCurrentIndex(0);
+}
+
 void NewProjectWindow::next(){
     int current = ui->stackedWidget->currentIndex();
     current += 1;
@@ -89,6 +94,7 @@ NewProjectWindow* NewProjectWindow::open(QWidget* parent){
     if(instance==nullptr){
         instance = new NewProjectWindow(parent);
     }
+    instance->startup();
     instance->setModal(true);
     instance->show();
     return instance;
