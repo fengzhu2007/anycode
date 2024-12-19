@@ -203,7 +203,7 @@ void IDEWindow::initView(){
 
 #elif defined(Q_OS_LINUX)
     QStringList arguments;
-    arguments << QString("--working-directory=%1").arg(directory);
+    arguments << QString("--working-directory=%1").arg("./");
     this->runExe("gnome-terminal",arguments);
 #endif
 }

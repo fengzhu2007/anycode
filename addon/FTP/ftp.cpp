@@ -1,6 +1,6 @@
 #include "ftp.h"
 #include "ftp_response.h"
-#include "transfer/Task.h"
+#include "transfer/task.h"
 #include "common/utils.h"
 #include "ftp_setting.h"
 #include <QFileInfo>

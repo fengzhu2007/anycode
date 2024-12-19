@@ -7,7 +7,7 @@
 #include <QCryptographicHash>
 #include "cos_response.h"
 #include "cos_list_object_response.h"
-#include "transfer/Task.h"
+#include "transfer/task.h"
 #include <openssl/hmac.h>
 #include <openssl/opensslconf.h>
 #include <locale.h>

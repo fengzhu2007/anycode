@@ -6,6 +6,7 @@
 #include "terminal_surface.h"
 #include <array>
 #include <vterm.h>
+#include <cmath>
 
 
 #include <QApplication>

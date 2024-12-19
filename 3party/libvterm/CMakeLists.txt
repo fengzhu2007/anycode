@@ -25,3 +25,6 @@ add_library(libvterm STATIC
     src/vterm_internal.h
 )
 
+if(LINUX)
+    target_compile_options(libvterm PRIVATE -fPIC)
+endif()

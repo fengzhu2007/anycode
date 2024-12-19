@@ -6,7 +6,7 @@
 #include <QMimeDatabase>
 #include <common/utils.h>
 #include "oss_response.h"
-#include "transfer/Task.h"
+#include "transfer/task.h"
 #include "oss_setting.h"
 #include <openssl/hmac.h>
 #include <openssl/opensslconf.h>
