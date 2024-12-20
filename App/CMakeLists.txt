@@ -12,8 +12,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Qml)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Qml)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Quick QuickWidgets QuickControls2)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Quick QuickWidgets QuickControls2)
+
+
 
 include_directories(SYSTEM "../3party/bin/x64/include")
 
@@ -260,6 +262,8 @@ add_library(App SHARED
         modules/import_export/import_widget.h modules/import_export/import_widget.cpp modules/import_export/import_widget.ui
         core/extension/extension_engine.h core/extension/extension_engine.cpp
         modules/import_export/backup_restore.h modules/import_export/backup_restore.cpp
+        core/quick_pane_impl.h core/quick_pane_impl.cpp
+        panes/quick/quick_pane.h panes/quick/quick_pane.cpp
 
 
 
@@ -281,10 +285,23 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Qml ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt)
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Qml Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Quick  Qt${QT_VERSION_MAJOR}::QuickWidgets Qt${QT_VERSION_MAJOR}::QuickControls2 ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt)
 
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt_import_qml_plugins(App)
+endif()
 
 target_compile_definitions(App PRIVATE APP_LIBRARY)
+
+
+
+include(GNUInstallDirs)
+install(TARGETS App
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+
 
 
 set(TRANSLATIONS

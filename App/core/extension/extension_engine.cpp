@@ -1,13 +1,17 @@
 #include "extension_engine.h"
 #include <QDebug>
+#include <QFile>
+#include <QTextStream>
+#include <QPushButton>
 
 
 namespace ady {
 ExtensionEngine* ExtensionEngine::instance = nullptr;
 ExtensionEngine::ExtensionEngine(QObject* parent):QJSEngine(parent) {
 
-
-
+    installExtensions(QJSEngine::AllExtensions);
+    //globalObject().setProperty("QPushButton", newQObject(new QPushButton()));
+    //qmlRegisterType();
 }
 
 ExtensionEngine::~ExtensionEngine(){
@@ -26,6 +30,7 @@ void ExtensionEngine::init(QObject* parent){
 }
 
 QJSValue ExtensionEngine::run(const QString& path){
+    qDebug()<<"run"<<path;
     auto result =  instance->importModule(path);
     if(result.isError()){
         qDebug() << "Error occurred!";
@@ -34,11 +39,16 @@ QJSValue ExtensionEngine::run(const QString& path){
         qDebug() << "Column number: " << result.property("columnNumber").toInt();
         qDebug() << "File name: " << result.property("fileName").toString();
         qDebug() << "Stack trace: " << result.property("stack").toString();
+
     }else{
         auto func = result.property("sum");
-        func.call({1,0});
-
+        auto rt = func.call({1,0});
+        qDebug()<<rt.toString()<<func.toString();
     }
+    auto parent = instance->parent();
+    delete instance;
+    instance = nullptr;
+    init(parent);
     return result;
 }
 

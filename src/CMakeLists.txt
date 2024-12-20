@@ -105,6 +105,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(AnyCode)
 endif()
 
+
 if(APPLE)
     file(COPY ${APP_ICON_PATH} DESTINATION ${CMAKE_BINARY_DIR}/AnyCode.app/Contents/Resources/)
 endif()

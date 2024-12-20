@@ -20,6 +20,8 @@
 #include "panes/file_transfer/file_transfer_model.h"
 #include "panes/terminal/terminal_pane.h"
 #include "panes/output/output_pane.h"
+#include "panes/quick/quick_pane.h"
+
 #include "panes/loader.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
@@ -469,7 +471,8 @@ void IDEWindow::onActionTriggered(){
 #ifdef Q_DEBUG
 
 #endif
-        ExtensionEngine::run(":/Resource/extensions/demo.js");
+        //ExtensionEngine::run("F:/react/index.js");
+        QuickPane::open(m_dockingPaneManager,true);
     }
 }
 
