@@ -134,6 +134,16 @@ bool AddonStorage::del(long long id)
     return ret;
 }
 
+bool AddonStorage::del(const QString& name){
+    QString sql = QString("DELETE FROM [%1] WHERE [%2]=?").arg(TABLE_NAME).arg(COL_TYPENAME);
+    QSqlQuery query(DatabaseHelper::getDatabase()->get());
+    query.prepare(sql);
+    query.bindValue(0,name);
+    bool ret = query.exec();
+    this->error = query.lastError();
+    return ret;
+}
+
 QMap<QString,QString> AddonStorage::dictionary()
 {
     QList<AddonRecord> lists = this->list(1);

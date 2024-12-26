@@ -14,7 +14,8 @@ public:
     static void start();
 
     void addFileAutoSave(int msec);
-    void addNetworkAutoClose(int msec);
+    void addNetworkAutoClose(int msec=300 * 1000);
+    void addNetworkStatusWatching(int msec=2 * 1000);
 
 public slots:
     void onTimeout();

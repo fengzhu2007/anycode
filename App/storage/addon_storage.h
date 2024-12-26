@@ -39,6 +39,7 @@ namespace ady {
         bool update(AddonRecord record);
         long long insert(AddonRecord record);
         bool del(long long id);
+        bool del(const QString& name);
         QMap<QString,QString> dictionary();
     private:
         AddonRecord toRecord(QSqlQuery& query);

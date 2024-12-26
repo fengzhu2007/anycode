@@ -51,6 +51,7 @@
 #include "app_oss.h"
 
 #include <w_toast.h>
+#include <w_window.h>
 
 
 #include <QLabel>
@@ -240,6 +241,8 @@ void IDEWindow::delayBoot(){
     }
     //add network auto close
     schedule->addNetworkAutoClose(5*60 * 1000);
+    //add network status watching
+    schedule->addNetworkStatusWatching(3 * 1000);
     Schedule::start();
 }
 
@@ -472,7 +475,11 @@ void IDEWindow::onActionTriggered(){
 
 #endif
         //ExtensionEngine::run("F:/react/index.js");
-        QuickPane::open(m_dockingPaneManager,true);
+        //QuickPane::open(m_dockingPaneManager,true);
+        //auto w = new wWindow(this);
+        //w->setMaximumSize({-1,-1});
+        //w->resize({400,300});
+        //w->show();
     }
 }
 
@@ -600,7 +607,6 @@ void IDEWindow::onRecentMenuShow(){
                 sender->insertAction(separator,action);
             }
         }
-
     }
 }
 
@@ -622,7 +628,6 @@ void IDEWindow::showEvent(QShowEvent* e){
     if(d->init==false){
         this->restoreFromSettings();
         d->init = true;
-
         this->delayBoot();
     }
 }
@@ -643,6 +648,28 @@ void IDEWindow::restoreFromSettings(){
         this->showMaximized();
         ResourceManagerPane::open(m_dockingPaneManager);
     }
+
+    //init client
+    auto callback = [](QDropEvent* e){
+        if (e->mimeData()->hasUrls()) {
+            QList<QUrl> urls = e->mimeData()->urls();
+            for(auto url:urls){
+                QString path =  url.toLocalFile();
+                QFileInfo fi(path);
+                if(fi.isFile()){
+                    auto data = OpenEditorData{path,0,0};
+                    Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&data);
+                }
+            }
+        }
+    };
+    auto workbench = m_dockingPaneManager->workbench();
+    auto clientCount = workbench->clientCount();
+    for(auto i=0;i<clientCount;i++){
+        auto client = workbench->client(i);
+        client->setDropCallback(callback);
+    }
+
 }
 
 void IDEWindow::restoreDockpanes(){

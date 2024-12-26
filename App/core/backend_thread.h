@@ -15,6 +15,7 @@ public:
         ReadFolderAndInsertFolder,
         QueryCommit,
         QueryDiff,
+        LocateFile,
 
         Custome
     };

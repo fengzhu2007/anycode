@@ -1,5 +1,5 @@
-#include "{TPL}Setting.h"
-#include "{TPL}SettingKey.h"
+#include "{tpl}_setting.h"
+#include "{tpl}_setting_key.h"
 #include <QJsonArray>
 #include <QJsonObject>
 namespace ady {

@@ -60,6 +60,8 @@ public:
     ResourceManagerModelItem* findProject(const QString& path);
     ResourceManagerModelItem* rootItem();
 
+    QModelIndex locate(const QString& path);
+
 
 
     //bool takeWatchDir(const QString& dir);
@@ -75,7 +77,8 @@ public slots:
 signals:
     void updateChildren(QFileInfoList list,const QString& parent,int action);
     void insertReady(const QModelIndex& parent,bool isFile);
-    void itemsChanged();
+    void itemsChanged(const QString& path);
+    void locateSuccess(const QString& path,bool recursion );
 private:
     ResourceManagerModel();
     void findAllExpend(ResourceManagerModelItem* item,QJsonArray& list);

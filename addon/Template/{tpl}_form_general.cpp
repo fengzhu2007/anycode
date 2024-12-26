@@ -1,6 +1,6 @@
-#include "{TPL}FormGeneral.h"
-#include "ui_{TPL}FormGeneral.h"
-#include "components/MessageDialog.h"
+#include "{tpl}_form_general.h"
+#include "ui_{tpl}_form_general.h"
+#include "components/message_dialog.h"
 #include <QDebug>
 namespace ady{
 

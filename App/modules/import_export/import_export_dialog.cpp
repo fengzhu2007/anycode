@@ -43,10 +43,7 @@ ImportExportDialog::ImportExportDialog(QWidget *parent)
     connect(ui->cancel,&QPushButton::clicked,this,&ImportExportDialog::close);
 
     connect(ui->stackedWidget,&QStackedWidget::currentChanged,this,&ImportExportDialog::onCurrentChanged);
-    QString str = "i03Qzj19aJSiB6nDGSPW0hROYDpCn3";
-    QString enstr = BackupRestore::encode(str);
-    QString destr = BackupRestore::decode(enstr);
-    qDebug()<<str<<enstr<<destr;
+
 
 
 

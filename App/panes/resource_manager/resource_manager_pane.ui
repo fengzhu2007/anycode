@@ -40,7 +40,7 @@
        <height>16</height>
       </size>
      </property>
-     <addaction name="actionHome"/>
+     <addaction name="actionOpen_Files"/>
      <addaction name="separator"/>
      <addaction name="actionRefresh"/>
      <addaction name="actionCollapse"/>
@@ -135,6 +135,21 @@
    </property>
    <property name="text">
     <string>Expand</string>
+   </property>
+  </action>
+  <action name="actionOpen_Files">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/ListFolderOpen_16x.svg</normaloff>:/Resource/icons/ListFolderOpen_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Open Files</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>

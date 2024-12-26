@@ -167,7 +167,7 @@ public:
 
 
 
-
+    void setOnline(bool status);
     void start(int num);
     void stop();
     void finish();//finish all thread

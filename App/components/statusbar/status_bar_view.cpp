@@ -2,6 +2,7 @@
 #include "ui_status_bar_view.h"
 #include "core/event_bus/type.h"
 #include "core/event_bus/event.h"
+#include "panes/file_transfer/file_transfer_model.h"
 #include "common/utils.h"
 #include <QStyleOption>
 #include <QPainter>
@@ -36,7 +37,6 @@ StatusBarView* StatusBarView::instance = nullptr;
 
     void StatusBarView::setNetworkStatus(bool isOnline)
     {
-
         if(m_isOnline!=isOnline){
             if(isOnline){
                 ui->network->setPixmap(QPixmap(QString::fromUtf8(":/Resource/icons/NetworkStatus_16x.svg")));
@@ -44,6 +44,11 @@ StatusBarView* StatusBarView::instance = nullptr;
             }else{
                 ui->network->setPixmap(QPixmap(QString::fromUtf8(":/Resource/icons/NetworkStatusWarning_16x.svg")));
                 ui->network->setToolTip(tr("Network:Error"));
+            }
+            //update file transfer status
+            auto instance = FileTransferModel::getInstance();
+            if(instance){
+                instance->setOnline(isOnline);
             }
         }
         m_isOnline = isOnline;

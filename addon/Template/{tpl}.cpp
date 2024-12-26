@@ -1,6 +1,6 @@
 #include "{tpl}.h"
-#include "{TPL}Response.h"
-#include "transfer/Task.h"
+#include "{tpl}response.h"
+#include "transfer/task.h"
 #include "utils.h"
 #include <QFileInfo>
 #include <QFile>

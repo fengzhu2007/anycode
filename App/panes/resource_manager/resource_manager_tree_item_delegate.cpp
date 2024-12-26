@@ -13,31 +13,6 @@
 #include <QApplication>
 #include <QDebug>
 namespace ady{
-class ItemEditorPrivate{
-public:
-    QModelIndex index;
-    QAbstractItemModel *model;
-};
-
-ItemEditor::ItemEditor(QWidget* parent,QAbstractItemModel *model,const QModelIndex& index):
-    QLineEdit(parent){
-    d = new ItemEditorPrivate;
-    d->index = index;
-    d->model = model;
-}
-
-ItemEditor::~ItemEditor(){
-    delete d;
-}
-
-void ItemEditor::keyPressEvent(QKeyEvent *event){
-    //qDebug()<<"ItemEditor keyPressEvent"<<event->key();
-    if (event->key() == Qt::Key_Escape) {
-        emit escapePressed(d->model,d->index);
-    } else {
-        QLineEdit::keyPressEvent(event);
-    }
-}
 
 
 

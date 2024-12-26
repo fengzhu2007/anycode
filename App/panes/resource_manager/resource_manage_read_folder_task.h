@@ -13,6 +13,8 @@ public:
     virtual bool exec() override;
     ResourceManagerModel* model();
     QString path();
+public:
+    static QString divider;
 private:
     ResourceManageReadFolderTaskPrivate* d;
 };

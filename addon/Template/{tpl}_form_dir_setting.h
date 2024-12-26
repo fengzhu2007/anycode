@@ -1,7 +1,7 @@
 #ifndef {TPL}FORMDIRSETTING_H
 #define {TPL}FORMDIRSETTING_H
-#include "{TPL}_global.h"
-#include "interface/FormPanel.h"
+#include "{tpl}_global.h"
+#include "interface/form_panel.h"
 namespace Ui{
     class {TPL}FormDirSettingUi;
 }

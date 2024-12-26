@@ -5,4 +5,4 @@ add_subdirectory(FTP)
 add_subdirectory(COS)
 add_subdirectory(OSS)
 add_subdirectory(SFTP)
-
+add_subdirectory(S3)

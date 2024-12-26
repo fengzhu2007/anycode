@@ -1,6 +1,6 @@
-#include "{TPL}FormDirSetting.h"
-#include "ui_{TPL}FormDirSetting.h"
-#include "{TPL}SettingKey.h"
+#include "{tpl}_form_dir_setting.h"
+#include "ui_{tpl}_form_dir_setting.h"
+#include "{tpl}_setting_key.h"
 #include <QJsonArray>
 #include <QJsonObject>
 

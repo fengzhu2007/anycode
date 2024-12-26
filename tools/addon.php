@@ -1,4 +1,5 @@
 <?php
+//cmd:  php addon.php -nXXXX 
 $argc = $_SERVER['argc'];
 $addonName = "";
 if($argc>1){
@@ -17,7 +18,6 @@ if($argc>1){
 	$addonName = str_replace(array(chr(13),chr(10)),'',$addonName);
 	fclose($handle);
 }
-//var_dump($addonName);
 $addonName = trim($addonName);
 if(!$addonName){
 	echo "Addon name invalid!";
@@ -63,22 +63,4 @@ listDir($rootDir.DIRECTORY_SEPARATOR.'Template',$dstDir,$addonName);
 
 echo "Addon create successfully!";
 
-/*$files = array(
-	'../UI/UI.h',
-	'../UI/UI.cpp',
-	'../UI/DialogUI.h',
-	'../UI/DialogUI.cpp',
-	'../storage/FavoriteStorage.cpp',
-	'../addon/AliOSS/UI/AliOSSUI.cpp',
-	'../addon/TencentCOS/UI/TencentCOSUI.cpp',
-	'../addon/SFTP/UI/SFTPUI.cpp',
-
-);
-foreach($files as $k=>$file){
-	$content = file_get_contents($file);
-	if($content){
-		$content = str_replace('wxT("_','_("',$content);
-		file_put_contents($file,$content);
-	}
-}*/
 ?>

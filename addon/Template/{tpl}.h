@@ -1,8 +1,8 @@
 #ifndef {TPL}_H
 #define {TPL}_H
 
-#include "{TPL}_global.h"
-#include "network/NetworkRequest.h"
+#include "{tpl}_global.h"
+#include "network/network_request.h"
 #include <QStringList>
 namespace ady {
 

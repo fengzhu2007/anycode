@@ -38,14 +38,7 @@ int requestConnect(void* ptr)
     ady::SiteRecord* record = (ady::SiteRecord*)ptr;
     if(record->type=="SFTP"){
         auto sftp = ady::NetworkManager::getInstance()->newRequest<ady::SFTP>();
-        sftp->setHost(record->host);
-        sftp->setPort(record->port);
-        sftp->setUsername(record->username);
-        sftp->setPassword(record->password);
-        /*qDebug()<<"username:"<<record->username;
-        qDebug()<<"port:"<<record->port;
-        qDebug()<<"host:"<<record->host;
-        qDebug()<<"password:"<<record->password;*/
+        sftp->init(*record);
 
         ady::SFTPResponse* response = (ady::SFTPResponse*)sftp->link();
         //response->debug();

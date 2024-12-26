@@ -3,6 +3,7 @@
 #include "file_auto_save_task.h"
 #include "network_auto_close_task.h"
 #include "network_rate_task.h"
+#include "network_status_task.h"
 #include <QTimer>
 #include <QDateTime>
 #include <QDebug>
@@ -14,16 +15,19 @@ public:
     QList<ScheduleTask*> queue;
     FileAutoSaveTask* file_auto_save_task;
     NetworkAutoCloseTask* network_auto_close_task;
+    NetworkStatusTask* network_status_task;
 
 };
 
 Schedule::Schedule(QObject* parent):QObject(parent) {
     d = new SchedulePrivate;
     d->file_auto_save_task = nullptr;
+    d->network_auto_close_task = nullptr;
+    d->network_status_task = nullptr;
+    //d->file_auto_save_task = nullptr;
     connect(&d->timer,&QTimer::timeout,this,&Schedule::onTimeout);
 
     d->timer.setInterval(1*1000);//1 second
-
     //add network rate task
     d->queue << new NetworkRateTask(1*1000);
     //d->timer.start();
@@ -68,7 +72,12 @@ void Schedule::addNetworkAutoClose(int msec){
     }else{
         d->network_auto_close_task->m_interval = msec;
     }
+}
 
+void Schedule::addNetworkStatusWatching(int msec){
+    if(d->network_status_task==nullptr){
+        d->queue<<(d->network_status_task = new NetworkStatusTask(msec));
+    }
 }
 
 void Schedule::onTimeout(){

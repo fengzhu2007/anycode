@@ -7,7 +7,7 @@ NetworkListen::NetworkListen(QObject* parent)
     :QObject(parent),
     NetworkRequest(curl_easy_init())
 {
-    m_isOnline = false;
+    m_isOnline = true;
 }
 
 
@@ -18,11 +18,11 @@ bool NetworkListen::execute(){
     this->setOption(CURLOPT_HEADER,0);
     CURLcode res = curl_easy_perform(this->curl);
     bool isOnline = res == CURLE_OK;
-    return isOnline;
-    /*if(m_isOnline!=isOnline){
+    if(m_isOnline!=isOnline){
         m_isOnline = isOnline;
         emit onlineStateChanged(isOnline);
-    }*/
+    }
+    return isOnline;
 }
 
 NetworkResponse* NetworkListen::customeAccess(const QString& name,QMap<QString,QVariant> data){

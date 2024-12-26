@@ -19,6 +19,7 @@ public:
     static CodeEditorManager* getInstance();
     static CodeEditorManager* init(DockingPaneManager* docking_manager=nullptr);
     static void destory();
+    static QStringList openedFiles();
     CodeEditorPane* get(const QString& path);
     QList<CodeEditorPane*> getAll(const QString& prefix);
     CodeEditorPane* current();

@@ -8,21 +8,6 @@
 
 namespace ady{
 
-class ItemEditorPrivate;
-class ItemEditor : public QLineEdit{
-    Q_OBJECT
-public:
-    ItemEditor(QWidget *parent,QAbstractItemModel *model,const QModelIndex& index);
-    ~ItemEditor();
-protected:
-    virtual void keyPressEvent(QKeyEvent *event) override ;
-signals:
-    void escapePressed(QAbstractItemModel *model,const QModelIndex& index);
-private:
-    ItemEditorPrivate* d;
-
-};
-
 
 
 class ResourceManagerTreeItemDelegate : public QItemDelegate

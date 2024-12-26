@@ -1,6 +1,6 @@
 #ifndef {TPL}RESPONSE_H
 #define {TPL}RESPONSE_H
-#include "network/NetworkResponse.h"
+#include "network/network_response.h"
 #include <QMap>
 namespace ady {
     class {TPL}Response : public NetworkResponse

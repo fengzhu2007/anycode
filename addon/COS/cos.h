@@ -30,7 +30,7 @@ public:
 
     explicit COS(CURL* curl,long long id=0);
     ~COS();
-    void init(const SiteRecord& info);
+    virtual void init(const SiteRecord& info)  override;
 
     virtual NetworkResponse* link() override;
     virtual NetworkResponse* unlink() override;

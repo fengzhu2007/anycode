@@ -39,14 +39,7 @@ int requestConnect(void* ptr)
     ady::SiteRecord* record = (ady::SiteRecord*)ptr;
     if(record->type=="COS"){
         auto cos = ady::NetworkManager::getInstance()->newRequest<ady::COS>();
-        cos->setHost(record->host);
-        cos->setPort(record->port);
-        cos->setUsername(record->username);
-        cos->setPassword(record->password);
-        /*qDebug()<<"username:"<<record->username;
-        qDebug()<<"port:"<<record->port;
-        qDebug()<<"host:"<<record->host;
-        qDebug()<<"password:"<<record->password;*/
+        cos->init(*record);
 
         ady::COSResponse* response = (ady::COSResponse*)cos->link();
         response->debug();
@@ -76,4 +69,13 @@ int requestConnect(void* ptr)
 
 ady::NetworkRequest* initRequest(long long id){
     return ady::NetworkManager::getInstance()->newRequest<ady::COS>(id);
+}
+
+
+int install(){
+    return 0;
+}
+
+int uninstall(){
+    return 0;
 }

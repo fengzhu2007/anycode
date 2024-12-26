@@ -1,19 +1,12 @@
-#include "Export.h"
-#include "{TPL}Panel.h"
-#include "{TPL}FormGeneral.h"
-#include "{TPL}FormDirSetting.h"
-#include "network/NetworkManager.h"
+#include "export.h"
+#include "{tpl}_form_general.h"
+#include "{tpl}_form_dir_setting.h"
+#include "network/network_manager.h"
 #include "{tpl}.h"
-#include "storage/SiteStorage.h"
-#include "{TPL}Response.h"
+#include "storage/site_storage.h"
+#include "{tpl}_response.h"
 
 #include <QDebug>
-ady::Panel* getPanel(long long id,QWidget* parent,QString name)
-{
-    Q_UNUSED(name);
-    return new ady::{TPL}Panel(id,parent);
-}
-
 
 size_t getFormPanelSize(QString name)
 {

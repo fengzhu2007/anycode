@@ -6,6 +6,7 @@
 #include "core/event_bus/type.h"
 #include "components/message_dialog.h"
 #include "storage/recent_storage.h"
+#include "panes/resource_manager/resource_manager_opened_model.h"
 
 
 #include "texteditorsettings.h"
@@ -83,6 +84,10 @@ CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
         d->settings = new TextEditor::TextEditorSettings();
     }
     TextEditor::TextEditorEnvironment::init();
+
+    //init opened model
+    ResourceManagerOpenedModel::init(this);
+
 }
 
 CodeEditorManager::~CodeEditorManager(){
@@ -107,6 +112,16 @@ void CodeEditorManager::destory(){
         delete instance;
         instance = nullptr;
     }
+}
+
+QStringList CodeEditorManager::openedFiles(){
+    QStringList list;
+    if(instance!=nullptr){
+        for(auto one:instance->d->list){
+            list<<one->path();
+        }
+    }
+    return list;
 }
 
 CodeEditorPane* CodeEditorManager::get(const QString& path){
@@ -168,6 +183,8 @@ CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const
         const QJsonObject data = {{"path",path},{"line",line}};
         pane = CodeEditorPane::make(dockingManager,data);
         dockingManager->createPane(pane,DockingPaneManager::Center,true);
+        //add to open
+        ResourceManagerOpenedModel::getInstance()->appendItem(path);
     }else{
         //set pane to current
         pane->activeToCurrent();
@@ -187,7 +204,6 @@ CodeEditorPane* CodeEditorManager::open(const QString& path){
 void CodeEditorManager::append(CodeEditorPane* pane){
     QMutexLocker locker(&d->mutex);
     d->list.append(pane);
-
 }
 
 void CodeEditorManager::remove(CodeEditorPane* pane){
@@ -200,6 +216,7 @@ void CodeEditorManager::remove(CodeEditorPane* pane){
         d->current = nullptr;
     }
     d->list.removeOne(pane);
+    ResourceManagerOpenedModel::getInstance()->removeItem(path);
 }
 
 bool CodeEditorManager::readFileLines(const QString&path){
@@ -237,6 +254,7 @@ bool CodeEditorManager::rename(const QString& from,const QString& to){
     auto pane = this->get(from);
     if(pane!=nullptr){
         pane->rename(to);
+        ResourceManagerOpenedModel::getInstance()->updateItem(from,to);
         return true;
     }else{
         return false;
@@ -263,6 +281,7 @@ bool CodeEditorManager::onReceive(Event* e){
         auto pair = static_cast<QPair<QString,QString>*>(e->data());
         if(this->rename(pair->first,pair->second)){
             this->appendWatchFile(pair->second);
+            ResourceManagerOpenedModel::getInstance()->updateItem(pair->first,pair->second);
         }
         e->ignore();
         return true;
@@ -288,9 +307,12 @@ bool CodeEditorManager::onReceive(Event* e){
             prefix_n += "/";
         }
         QList<CodeEditorPane*> list = this->getAll(prefix);
+        auto instance = ResourceManagerOpenedModel::getInstance();
         foreach(auto one,list){
-            QString path = one->path().replace(prefix,prefix_n);
+            auto from = one->path();
+            QString path = from.replace(prefix,prefix_n);
             one->rename(path);
+            instance->updateItem(from,path);
             this->appendWatchFile(path);
         }
         e->ignore();
@@ -309,15 +331,19 @@ bool CodeEditorManager::onReceive(Event* e){
             if(container!=nullptr){
                 container->closePane(pane,true);
             }
+            ResourceManagerOpenedModel::getInstance()->removeItem(*data);
         }
     }else if(id==Type::M_DELETE_FOLDER){
         auto data = static_cast<QString*>(e->data());
         QList<CodeEditorPane*> list = this->getAll(*data);
+        auto instance = ResourceManagerOpenedModel::getInstance();
         foreach(auto pane,list){
             auto container = pane->container();
+            auto path = pane->path();
             if(container!=nullptr){
                 container->closePane(pane,true);
             }
+            instance->removeItem(path);
         }
     }
     return false;

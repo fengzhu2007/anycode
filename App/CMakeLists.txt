@@ -264,6 +264,8 @@ add_library(App SHARED
         modules/import_export/backup_restore.h modules/import_export/backup_restore.cpp
         core/quick_pane_impl.h core/quick_pane_impl.cpp
         panes/quick/quick_pane.h panes/quick/quick_pane.cpp
+        panes/resource_manager/resource_manager_opened_model.h panes/resource_manager/resource_manager_opened_model.cpp
+        panes/resource_manager/locate_file_task.h panes/resource_manager/locate_file_task.cpp
 
 
 

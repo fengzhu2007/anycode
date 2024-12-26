@@ -1,14 +1,14 @@
-import QtQuick 2.14
-import QtQuick.Controls 2.14
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 
-ApplicationWindow {
-    title: "My Application"
-    width: 640
-    height: 480
-    visible: true
-
+Item {
+    width:200
+    height:200
     Button {
-        text: "Push Me"
+        text: "Click Me"
         anchors.centerIn: parent
+        onClicked: {
+            console.log("Button clicked!")
+        }
     }
 }

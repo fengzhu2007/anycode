@@ -174,30 +174,6 @@ namespace ady {
         return lists;
     }
 
-    /*void COSResponse::parse()
-    {
-        if(!this->header.isEmpty()){
-            this->headers = this->header.split("\r\n");
-            int size = this->headers.size();
-            if(size>1){
-                int pos = this->headers[0].indexOf(" ");
-                if(pos>-1){
-                    this->networkErrorCode = this->headers[0].mid(pos+1,3).toInt();
-                    this->networkErrorMsg = this->headers[0].mid(this->headers[0].indexOf(" ",pos+1));
-                }
-                QStringList lists = this->headers[0].split(" ");
-                if(lists.size()==3){
-                    this->networkErrorCode = this->headers[size - 2].left(pos).toInt();
-                }
-                int pos = this->headers[size - 2].indexOf(" ");
-                if(pos>-1){
-                    this->networkErrorCode = this->headers[size - 2].left(pos).toInt();
-                    this->networkErrorMsg = this->headers[size - 2].right(pos+1);
-                }
-            }
-        }
-    }*/
-
     bool COSResponse::status()
     {
         return errorCode==0 && (networkErrorCode>=200 && networkErrorCode<300);

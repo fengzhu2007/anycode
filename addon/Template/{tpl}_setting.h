@@ -1,6 +1,6 @@
 #ifndef {TPL}SETTING_H
 #define {TPL}SETTING_H
-#include "storage/SiteSetting.h"
+#include "storage/site_setting.h"
 
 namespace ady {
 

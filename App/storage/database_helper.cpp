@@ -344,6 +344,20 @@ namespace ady {
                 query.bindValue(6, QDateTime::currentDateTime().toSecsSinceEpoch());
                 query.exec();
             }
+
+            {
+                QString sql = QString("INSERT INTO [%1] ([%2],[%3],[%4],[%5],[%6],[%7],[%8]) VALUES (?,?,?,?,?,?,?)").arg(AddonStorage::TABLE_NAME).arg(AddonStorage::COL_TITLE).arg(AddonStorage::COL_TYPENAME).arg(AddonStorage::COL_TYPELABEL).arg(AddonStorage::COL_FILE).arg(AddonStorage::COL_STATUS).arg(AddonStorage::COL_IS_SYSTEM).arg(COL_DATETIME);
+                QSqlQuery query(this->db);
+                query.prepare(sql);
+                query.bindValue(0, "Amazon S3");
+                query.bindValue(1, "S3");
+                query.bindValue(2, "S3");
+                query.bindValue(3, "S3/S3");
+                query.bindValue(4, 1);
+                query.bindValue(5, 1);
+                query.bindValue(6, QDateTime::currentDateTime().toSecsSinceEpoch());
+                query.exec();
+            }
         }
     }
 
@@ -403,7 +417,6 @@ namespace ady {
                                     [%8] INTEGER DEFAULT '0' NULL\
                                     )").arg(RecentStorage::TABLE_NAME).arg(COL_ID).arg(RecentStorage::COL_NAME).arg(RecentStorage::COL_PATH).arg(RecentStorage::COL_DATAID).arg(RecentStorage::COL_TYPE).arg(COL_DATETIME).arg(RecentStorage::COL_UPDATETIME);
             this->db.exec(sql);
-             //qDebug()<<sql<<this->db.lastError();
          }
      }
 

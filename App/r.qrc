@@ -99,5 +99,6 @@
         <file>Resource/icons/LibrarySettings_16x.svg</file>
         <file>Resource/images/logo.icns</file>
         <file>Resource/extension/pane.qml</file>
+        <file>Resource/icons/ListFolderOpen_16x.svg</file>
     </qresource>
 </RCC>

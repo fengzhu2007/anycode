@@ -310,6 +310,7 @@ public:
     QList<JobThread*> threads;
     QFileIconProvider* provider;
     FileTransferModel::State state;
+    bool online = true;
 
 };
 
@@ -1197,6 +1198,14 @@ void FileTransferModel::setItemFailed(long long siteid,long long id,const QStrin
     }
 }
 
+void FileTransferModel::setOnline(bool status){
+    QMutexLocker locker(&d->mutex);
+    d->online = status;
+    if(status){
+        d->cond.wakeAll();
+    }
+}
+
 void FileTransferModel::start(int num){
     QMutexLocker locker(&d->mutex);
     d->state = Running;
@@ -1253,7 +1262,7 @@ void FileTransferModel::abortJob(long long siteid){
 
 FileTransferModelItem* FileTransferModel::take(int siteid){
     QMutexLocker locker(&d->mutex);
-    if( d->root->childrenCount()==0 || d->state == FileTransferModel::Stop){
+    if( d->root->childrenCount()==0 || d->state == FileTransferModel::Stop || d->online==false){
         d->cond.wait(&d->mutex,5*1000);
     }
     FileTransferModelItem *item = nullptr;

@@ -33,6 +33,8 @@ public:
     static ResourceManagerPane* open(DockingPaneManager* dockingManager,bool active=false);
     static ResourceManagerPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 
+
+
 public slots:
     void onTreeItemExpanded(const QModelIndex& index);
     void onTreeItemCollapsed(const QModelIndex& index);
@@ -40,13 +42,16 @@ public slots:
     void onTreeItemDClicked(const QModelIndex& index);
     void onContextMenu(const QPoint& pos);
     void onInsertReady(const QModelIndex& ,bool isFile);
-    void onItemsChanged();
+    void onItemsChanged(const QString& path);
     void onActionTriggered();
     void onTopActionTriggered();
     void onUploadToSite();
     void onUploadToGroup();
     void onSearchFile(const QString& text);
     void onDropAddFolder(const QMimeData* data);
+    void onToggleOpend(bool checked);
+    void onOpenedSelected(const QModelIndex& index);
+    void onLocateSuccess(const QString& path,bool recursion=false);
 
 
 

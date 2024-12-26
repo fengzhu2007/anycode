@@ -112,7 +112,7 @@ NetworkResponse* COS::link()
     this->setOption(CURLOPT_NOBODY,1);
     QString url = "http://"+headers[HOST]+"/";
     url = this->fixUrl(url,params);
-   qDebug()<<"url:"<<url;
+    //qDebug()<<"url:"<<url;
     COSResponse* response = new  COSResponse(this->id);
     this->get(url,response);
     this->setOption(CURLOPT_NOBODY,0);

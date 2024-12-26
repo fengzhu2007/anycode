@@ -76,7 +76,7 @@ ResourceManagerModelItem* ResourceManagerModelItem::findChild(const QString& pat
         const QString oPath = one->path();
         if(oPath==path){
             return one;
-        }else if(path.startsWith(oPath)){
+        }else if(path.startsWith(oPath + "/")){
             Type type = one->type();
             if(type==ResourceManagerModelItem::Folder || type==ResourceManagerModelItem::Project){
                 auto ret = one->findChild(path);

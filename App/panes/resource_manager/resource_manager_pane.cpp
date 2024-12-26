@@ -4,6 +4,8 @@
 #include "resource_manager_model_item.h"
 #include "resource_manager_tree_item_delegate.h"
 #include "resource_manage_read_folder_task.h"
+#include "locate_file_task.h"
+#include "resource_manager_opened_model.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/type.h"
@@ -16,6 +18,7 @@
 #include "docking_pane_layout_item_info.h"
 #include "components/message_dialog.h"
 #include "panes/code_editor/code_editor_manager.h"
+#include "panes/code_editor/code_editor_pane.h"
 #include "panes/file_transfer/file_transfer_pane.h"
 #include "network/network_manager.h"
 #include "common/utils.h"
@@ -29,6 +32,7 @@
 #include <QUrl>
 #include <QMimeData>
 #include <QProcess>
+#include <QSplitter>
 #include <QDebug>
 
 
@@ -48,6 +52,11 @@ const QString ResourceManagerPane::PANE_GROUP = "ResourceManager";
 class ResourceManagerPanePrivate {
 public:
     ResourceManagerModel* model;
+    ResourceManagerOpenedModel* openedModel;
+    QTreeView* openedView;
+    QSplitter* splitter;
+
+
     //FolderReader* reader;
     QAction* actionNew_Folder;
     QAction* actionNew_File;
@@ -82,13 +91,11 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     this->setWindowTitle(tr("Resource Manager"));
     this->setStyleSheet("QToolBar{border:0px;}"
                         "QTreeView{border:0;background-color:#f5f5f5}"
-                        ".ady--ResourceManagerPane>#widget{background-color:#EEEEF2}");
+                        ".ady--ResourceManagerPane>#widget{background-color:#EEEEF2}"
+                        ".QSplitterHandle{background-color:#dedede}");
 
     ui->treeView->setItemDelegate(new ResourceManagerTreeItemDelegate(ui->treeView));
     ui->treeView->setEditTriggers(QAbstractItemView::EditKeyPressed);
-
-   // ui->sear
-
     //init view
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView->addMimeType(MM_UPLOAD);
@@ -103,14 +110,20 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
 
     connect(ui->actionExpand,&QAction::triggered,this,&ResourceManagerPane::onTopActionTriggered);
     connect(ui->actionCollapse,&QAction::triggered,this,&ResourceManagerPane::onTopActionTriggered);
+    connect(ui->actionRefresh,&QAction::triggered,this,&ResourceManagerPane::onTopActionTriggered);
+    connect(ui->actionHome,&QAction::triggered,this,&ResourceManagerPane::onTopActionTriggered);
+    connect(ui->actionOpen_Files,&QAction::toggled,this,&ResourceManagerPane::onToggleOpend);
 
 
     d = new ResourceManagerPanePrivate;
     d->model = ResourceManagerModel::getInstance();
     ui->treeView->setModel(d->model);
+    d->openedView = nullptr;
+    d->splitter = nullptr;
 
     connect(d->model,&ResourceManagerModel::insertReady,this,&ResourceManagerPane::onInsertReady);
     connect(d->model,&ResourceManagerModel::itemsChanged,this,&ResourceManagerPane::onItemsChanged);
+    connect(d->model,&ResourceManagerModel::locateSuccess,this,&ResourceManagerPane::onLocateSuccess);
 
     connect(ui->comboBox,&SearchComboBox::search,this,&ResourceManagerPane::onSearchFile);
 
@@ -303,7 +316,11 @@ void ResourceManagerPane::readFolder(ResourceManagerModelItem* item,int action){
     if(!thread->isRunning()){
         thread->start();
     }
-    auto task = new ResourceManageReadFolderTask(d->model,item->path());
+    auto path = item->path();
+    if(item->openList().size()>0){
+        path += ResourceManageReadFolderTask::divider + item->openList().join(ResourceManageReadFolderTask::divider);
+    }
+    auto task = new ResourceManageReadFolderTask(d->model,path);
     if(action>-1){
         task->setType(action);
     }
@@ -451,31 +468,24 @@ void ResourceManagerPane::onInsertReady(const QModelIndex& parent,bool isFile){
     ui->treeView->editIndex(index);
 }
 
-void ResourceManagerPane::onItemsChanged(){
+void ResourceManagerPane::onItemsChanged(const QString& path){
     auto item = d->model->rootItem();
     int count = item->childrenCount();
     for(int i=0;i<count;i++){
         auto proj = item->childAt(i);
+        auto node = proj->findChild(path);
         auto list = proj->openList();
         if(list.size()>0){
-            const QString path = list.at(0);
-            if(proj->path() ==  path){
+            if(proj->path() == path){
                 QModelIndex index = d->model->toIndex(proj);
                 ui->treeView->expand(index);
                 proj->removeOpenList(path);
-                list = proj->openList();
             }
-            if(list.size()>0)
-            {
-                const QString path = list.at(0);
-                auto child = proj->findChild(path);
-                if(child!=nullptr){
-                    QModelIndex index = d->model->toIndex(child);
-                    ui->treeView->expand(index);
-                }
+            if(node!=nullptr){
+                QModelIndex index = d->model->toIndex(node);
+                ui->treeView->expand(index);
                 proj->removeOpenList(path);
             }
-            return ;
         }
     }
 }
@@ -700,6 +710,13 @@ void ResourceManagerPane::onTopActionTriggered(){
         ui->treeView->collapseAll();
     }else if(sender==ui->actionExpand){
         ui->treeView->expandAll();
+    }else if(sender==ui->actionRefresh){
+        //file loaction
+        auto pane = CodeEditorManager::getInstance()->current();
+        if(pane!=nullptr){
+            auto path = pane->path();
+            this->onLocateSuccess(path,true);
+        }
     }
 }
 
@@ -719,10 +736,9 @@ void ResourceManagerPane::onUploadToSite(){
 
             auto index = list.at(0);
             auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
-
-            UploadData data{item->pid(),siteid,item->type()==ResourceManagerModelItem::File,item->path()};//not set dest ,should match remote
+            //not set dest ,should match remote
+            UploadData data{item->pid(),siteid,item->type()==ResourceManagerModelItem::File,item->path(),{}};
             instance->post(Type::M_UPLOAD,&data);
-
         }
 
     }
@@ -751,6 +767,69 @@ void ResourceManagerPane::onDropAddFolder(const QMimeData* data){
                 record.name = fi.fileName();
                 Publisher::getInstance()->post(Type::M_OPEN_PROJECT,(void*)&record);
             }
+        }
+    }
+}
+
+void ResourceManagerPane::onToggleOpend(bool checked){
+    auto widget = this->centerWidget();
+    if(checked){
+        //open
+        if(d->splitter==nullptr){
+            d->splitter = new QSplitter(Qt::Vertical,widget);
+        }
+        ui->treeView->setParent(d->splitter);
+        d->splitter->insertWidget(0,ui->treeView);
+        if(d->openedView==nullptr){
+            d->openedView = new QTreeView(d->splitter);
+            d->openedView->setItemDelegate(new ResourceManagerOpenedItemDelegate(d->openedView));
+            d->openedView->setHeaderHidden(true);
+            connect(d->openedView,&QTreeView::clicked,this,&ResourceManagerPane::onOpenedSelected);
+            d->openedModel = ResourceManagerOpenedModel::getInstance();
+            d->openedView->setModel(d->openedModel);
+            d->openedModel->setDataSource(CodeEditorManager::openedFiles());
+            d->splitter->addWidget(d->openedView);
+        }
+        ui->verticalLayout->addWidget(d->splitter,1);
+        d->splitter->setSizes({1,1});
+        d->splitter->show();
+    }else{
+        //close
+        ui->treeView->setParent(widget);
+        ui->verticalLayout->addWidget(ui->treeView,1);
+        if(d->splitter!=nullptr){
+            ui->verticalLayout->removeWidget(d->splitter);
+            d->splitter->hide();
+        }
+    }
+}
+
+void ResourceManagerPane::onOpenedSelected(const QModelIndex& index){
+    int row = index.row();
+    auto item = d->openedModel->itemAt(row);
+    Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&item.second);
+}
+
+void ResourceManagerPane::onLocateSuccess(const QString& path,bool recursion){
+    auto index = d->model->locate(path);
+    if(index.isValid()){
+        auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
+        auto type = item->type();
+        if(type==ResourceManagerModelItem::File){
+            //ok
+            //expanded
+            //auto parent = d->model->toIndex(item->parent());
+            auto parent = index.parent();
+            while(parent.isValid() && ui->treeView->isExpanded(parent)==false){
+                ui->treeView->setExpanded(parent,true);
+                parent = parent.parent();
+            }
+            ui->treeView->selectionModel()->select(index,QItemSelectionModel::ClearAndSelect);
+            ui->treeView->scrollTo(index, QAbstractItemView::PositionAtCenter);
+        }else{
+            //read folder to find path
+            if(recursion)
+                BackendThread::getInstance()->appendTask(new LocateFileTask(d->model,item->path(),path));
         }
     }
 }

@@ -46,6 +46,17 @@ QIcon ResourceManageIconProvider::icon(ResourceManagerModelItem* item){
     }
 }
 
+QIcon ResourceManageIconProvider::icon(const QString& suffix){
+    auto ext = suffix.toLower();
+    if(m_cachelist.contains(ext)){
+        return m_cachelist.find(ext).value();
+    }else{
+        auto icon = provider->icon(QFileInfo("."+ext));
+        m_cachelist.insert(ext,icon);
+        return icon;
+    }
+}
+
 ResourceManageIconProvider::ResourceManageIconProvider():m_projectIcon(":/Resource/icons/DocumentsFolder_16x.svg"),
     m_folderIcon(":/Resource/icons/FolderClosed_16x.svg")
 {

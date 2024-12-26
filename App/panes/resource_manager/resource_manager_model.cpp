@@ -372,7 +372,7 @@ void ResourceManagerModel::onUpdateChildren(QFileInfoList list,const QString& pa
             emit insertReady(parent,false);
         }
     }
-    emit itemsChanged();
+    emit itemsChanged(parent);
 }
 
 void ResourceManagerModel::appendItems(QFileInfoList list,ResourceManagerModelItem* parent){
@@ -474,6 +474,49 @@ ResourceManagerModelItem* ResourceManagerModel::findProject(const QString& path)
 
 ResourceManagerModelItem* ResourceManagerModel::rootItem(){
     return d->root;
+}
+
+QModelIndex ResourceManagerModel::locate(const QString& path){
+    auto find = [](ResourceManagerModelItem *parent,const QString& path,bool *ok){
+        int total = parent->childrenCount();
+        *ok = false;
+        if(total>0){
+            for(int i=0;i<total;i++){
+                auto one = parent->childAt(i);
+                auto type = one->type();
+                if(type==ResourceManagerModelItem::File && path==one->path()){
+                    *ok = true;
+                    return one;
+                }else if((type==ResourceManagerModelItem::Folder || type==ResourceManagerModelItem::Project ) && path.startsWith(one->path()+"/")){
+                    *ok = true;
+                    return one;
+                }
+            }
+        }else if(parent->expanded()==false){
+            //unkown children
+            *ok = true;
+        }
+        return (ResourceManagerModelItem*)nullptr;
+    };
+
+    //auto children = d->root->d->
+    auto item = d->root;
+    while(true){
+        bool ok = false;
+        auto next = find(item,path,&ok);
+        if(next==nullptr){
+            if(ok){
+                //read folder
+                return createIndex(item->row(),0,item);
+            }else{
+                break;
+            }
+        }else if(next->type()==ResourceManagerModelItem::File){
+            return createIndex(next->row(),0,next);
+        }
+        item = next;
+    }
+    return {};
 }
 
 QJsonArray ResourceManagerModel::toJson(){

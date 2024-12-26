@@ -2,6 +2,7 @@
 #include "resource_manager_model.h"
 #include <QDir>
 namespace ady{
+QString ResourceManageReadFolderTask::divider = "|";
 
 class ResourceManageReadFolderTaskPrivate{
 public:
@@ -25,13 +26,17 @@ bool ResourceManageReadFolderTask::exec(){
     int type = this->type();
     auto model = this->model();
     auto path = this->path();
-    QDir dir(path);
-    if (!dir.exists()) {
-        return false;
-    }
-    QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name|QDir::DirsFirst|QDir::IgnoreCase);
-    if(model!=nullptr){
-        emit model->updateChildren(list,path,type);
+    auto list = path.split(divider);
+    list = QStringList(QSet<QString>(list.begin(), list.end()).toList());
+    for(auto one:list){
+        QDir dir(one);
+        if (!dir.exists()) {
+            return false;
+        }
+        QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name|QDir::DirsFirst|QDir::IgnoreCase);
+        if(model!=nullptr){
+            emit model->updateChildren(list,one,type);
+        }
     }
     return true;
 }

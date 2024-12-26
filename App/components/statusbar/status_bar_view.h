@@ -13,7 +13,7 @@ namespace ady{
 
         ~StatusBarView();
         bool networkStatus();
-        void setNetworkStatus(bool isOnline);
+
         void showMessage(const QString& message);
         QString currentMessage();
         virtual bool onReceive(Event* e) override;//event bus receive callback
@@ -22,6 +22,9 @@ namespace ady{
 
         static StatusBarView* getInstance();
         static StatusBarView* make(QWidget* parent);
+
+    public slots:
+        void setNetworkStatus(bool isOnline);
 
     private:
         StatusBarView(QWidget* parent=nullptr);

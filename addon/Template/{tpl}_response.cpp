@@ -1,5 +1,5 @@
-#include "{TPL}Response.h"
-#include "{TPL}Parse.h"
+#include "{tpl}_response.h"
+#include "{tpl}_parse.h"
 #include <QDebug>
 namespace ady {
     {TPL}Response::{TPL}Response()

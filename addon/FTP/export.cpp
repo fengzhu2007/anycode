@@ -37,14 +37,7 @@ int requestConnect(void* ptr)
     ady::SiteRecord* record = (ady::SiteRecord*)ptr;
     if(record->type=="FTP"){
         auto ftp = ady::NetworkManager::getInstance()->newRequest<ady::FTP>();
-        ftp->setHost(record->host);
-        ftp->setPort(record->port);
-        ftp->setUsername(record->username);
-        ftp->setPassword(record->password);
-        /*qDebug()<<"username:"<<record->username;
-        qDebug()<<"port:"<<record->port;
-        qDebug()<<"host:"<<record->host;
-        qDebug()<<"password:"<<record->password;*/
+        ftp->init(*record);
 
         ady::FTPResponse* response = (ady::FTPResponse*)ftp->link();
         //response->debug();
