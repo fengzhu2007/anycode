@@ -12,6 +12,7 @@ ExtensionEngine::ExtensionEngine(QObject* parent):QJSEngine(parent) {
     installExtensions(QJSEngine::AllExtensions);
     //globalObject().setProperty("QPushButton", newQObject(new QPushButton()));
     //qmlRegisterType();
+    //qmlRegisterType<ExtensionEngine>("MyNamespace", 1, 0, "ExtensionEngine");
 }
 
 ExtensionEngine::~ExtensionEngine(){
