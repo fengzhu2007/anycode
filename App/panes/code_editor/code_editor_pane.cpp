@@ -45,11 +45,10 @@ public:
     bool scrollBarVisible=false;
     QString mineType;
 
-
 };
 
 CodeEditorPane::CodeEditorPane(QWidget *parent)
-    :DockingPane(parent),ui(new Ui::CodeEditorPane)
+    :Editor(Editor::CodeEditor,parent),ui(new Ui::CodeEditorPane)
 {
     d = new CodeEditorPanePrivate;
     d->id = CodeEditorPane::SN;

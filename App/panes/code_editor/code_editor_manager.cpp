@@ -7,7 +7,7 @@
 #include "components/message_dialog.h"
 #include "storage/recent_storage.h"
 #include "panes/resource_manager/resource_manager_opened_model.h"
-
+#include "editor.h"
 
 #include "texteditorsettings.h"
 //#include "core/actionmanager/actionmanager.h"
@@ -36,14 +36,15 @@ CodeEditorManager* CodeEditorManager::instance = nullptr;
 
 class CodeEditorManagerPrivate{
 public:
-    QList<CodeEditorPane*> list;
+    QList<Editor*> list;
     QMutex mutex;
     DockingPaneManager* docking_manager;
     QFileSystemWatcher *watcher;
     TextEditor::TextEditorSettings* settings;
 
     TextEditor::DocumentContentCompletionProvider provider;
-    CodeEditorPane* current = nullptr;
+    //CodeEditorPane* current = nullptr;
+    Editor* current = nullptr;
     CodeEditorView* editor;
 
     QAction *undoAction = nullptr;
@@ -124,7 +125,7 @@ QStringList CodeEditorManager::openedFiles(){
     return list;
 }
 
-CodeEditorPane* CodeEditorManager::get(const QString& path){
+Editor* CodeEditorManager::get(const QString& path){
     if(path.isEmpty()){
         return nullptr;
     }
@@ -137,8 +138,8 @@ CodeEditorPane* CodeEditorManager::get(const QString& path){
     return nullptr;
 }
 
-QList<CodeEditorPane*> CodeEditorManager::getAll(const QString& prefix){
-    QList<CodeEditorPane*> list;
+QList<Editor*> CodeEditorManager::getAll(const QString& prefix){
+    QList<Editor*> list;
     QMutexLocker locker(&d->mutex);
     foreach(auto one,d->list){
         if(one->path().startsWith(prefix)){
@@ -148,18 +149,21 @@ QList<CodeEditorPane*> CodeEditorManager::getAll(const QString& prefix){
     return list;
 }
 
-CodeEditorPane* CodeEditorManager::current(){
+Editor* CodeEditorManager::current(){
     return d->current;
 }
 
-void CodeEditorManager::setCurrent(CodeEditorPane* pane){
+void CodeEditorManager::setCurrent(Editor* pane){
     d->current = pane;
 }
 
 QTextDocument* CodeEditorManager::currentDoc(){
     QMutexLocker locker(&d->mutex);
     if(d->current!=nullptr){
-        return d->current->editor()->document();
+        auto pane = dynamic_cast<CodeEditorPane*>(d->current);
+        if(pane!=nullptr && pane->editor()!=nullptr){
+            return pane->editor()->document();
+        }
     }
     return nullptr;
 }
@@ -172,13 +176,14 @@ QMap<QString,QTextDocument*> CodeEditorManager::docData(){
         if(path.isEmpty()){
             path = one->windowTitle();
         }
-        data.insert(path,one->editor()->document());
+        if(one->editor()!=nullptr && one->editor()->document()!=nullptr)
+            data.insert(path,one->editor()->document());
     }
     return data;
 }
 
 CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const QString& path,int line,int column){
-    auto pane = this->get(path);
+    auto pane = dynamic_cast<CodeEditorPane*>(this->get(path));
     if(pane==nullptr){
         const QJsonObject data = {{"path",path},{"line",line}};
         pane = CodeEditorPane::make(dockingManager,data);
@@ -290,7 +295,7 @@ bool CodeEditorManager::onReceive(Event* e){
         if(data->endsWith("/")==false){
             data->append("/");
         }
-        QList<CodeEditorPane*> list = this->getAll(*data);
+        auto list = this->getAll(*data);
         foreach(auto one,list){
             this->removeWatchFile(one->path());
         }
@@ -306,7 +311,7 @@ bool CodeEditorManager::onReceive(Event* e){
         if(prefix_n.endsWith("/")==false){
             prefix_n += "/";
         }
-        QList<CodeEditorPane*> list = this->getAll(prefix);
+        QList<Editor*> list = this->getAll(prefix);
         auto instance = ResourceManagerOpenedModel::getInstance();
         foreach(auto one,list){
             auto from = one->path();
@@ -335,7 +340,7 @@ bool CodeEditorManager::onReceive(Event* e){
         }
     }else if(id==Type::M_DELETE_FOLDER){
         auto data = static_cast<QString*>(e->data());
-        QList<CodeEditorPane*> list = this->getAll(*data);
+        auto list = this->getAll(*data);
         auto instance = ResourceManagerOpenedModel::getInstance();
         foreach(auto pane,list){
             auto container = pane->container();

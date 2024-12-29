@@ -36,3 +36,6 @@
 [submodule "texteditor"]
 	path = texteditor
 	url = https://github.com/fengzhu2007/texteditor.git
+[submodule "react-qt"]
+	path = react-qt
+	url = https://github.com/fengzhu2007/react-qt

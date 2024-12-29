@@ -20,7 +20,6 @@
 #include "panes/file_transfer/file_transfer_model.h"
 #include "panes/terminal/terminal_pane.h"
 #include "panes/output/output_pane.h"
-#include "panes/quick/quick_pane.h"
 
 #include "panes/loader.h"
 #include "core/event_bus/event.h"
@@ -474,7 +473,7 @@ void IDEWindow::onActionTriggered(){
 #ifdef Q_DEBUG
 
 #endif
-        //ExtensionEngine::run("F:/react/index.js");
+        //ExtensionEngine::run(":/Resource/extension/test.js");
         //QuickPane::open(m_dockingPaneManager,true);
         //auto w = new wWindow(this);
         //w->setMaximumSize({-1,-1});

@@ -124,7 +124,7 @@ VersionControlPane::VersionControlPane(QWidget *parent)
     connect(ui->actionSynchronous_Deletion,&QAction::triggered,this,&VersionControlPane::onActionTriggered);
 
 
-    //this->initView();
+    this->initView();
 }
 
 

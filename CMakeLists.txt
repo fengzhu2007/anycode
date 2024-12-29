@@ -25,7 +25,7 @@ add_subdirectory(texteditor)
 #add_subdirectory(3party/qscintilla/src)
 add_subdirectory(dockingpane)
 add_subdirectory(wRect)
-#add_subdirectory(react-qt)
+add_subdirectory(react-qt)
 
 add_subdirectory(App)
 

@@ -12,8 +12,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Quick QuickWidgets QuickControls2)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Quick QuickWidgets QuickControls2)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Quick)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Quick)
 
 
 
@@ -23,6 +23,7 @@ include_directories(SYSTEM "../libsvnpp/include")
 include_directories(SYSTEM "../dockingpane/src")
 include_directories(SYSTEM "../wRect/src")
 include_directories(SYSTEM "../texteditor")
+include_directories(SYSTEM "../react-qt/src")
 include_directories(SYSTEM "../3party/qscintilla/src")
 include_directories(SYSTEM "../3party/libvterm/include")
 include_directories(SYSTEM "../3party/libptyqt")
@@ -263,9 +264,10 @@ add_library(App SHARED
         core/extension/extension_engine.h core/extension/extension_engine.cpp
         modules/import_export/backup_restore.h modules/import_export/backup_restore.cpp
         core/quick_pane_impl.h core/quick_pane_impl.cpp
-        panes/quick/quick_pane.h panes/quick/quick_pane.cpp
+
         panes/resource_manager/resource_manager_opened_model.h panes/resource_manager/resource_manager_opened_model.cpp
         panes/resource_manager/locate_file_task.h panes/resource_manager/locate_file_task.cpp
+        panes/code_editor/editor.h panes/code_editor/editor.cpp
 
 
 
@@ -287,7 +289,7 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Qml Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Quick  Qt${QT_VERSION_MAJOR}::QuickWidgets Qt${QT_VERSION_MAJOR}::QuickControls2 ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt)
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Qml Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Quick ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt)
 
 
 if(QT_VERSION_MAJOR EQUAL 6)

@@ -3,6 +3,7 @@
 #include "global.h"
 #include "docking_pane.h"
 #include "code_editor_view.h"
+#include "editor.h"
 //#include "core/event_bus/subscriber.h"
 namespace Ui{
 class CodeEditorPane;
@@ -13,7 +14,7 @@ class DockingPaneManager;
 class CodeEditor;
 class LineNumberArea;
 class CodeEditorPanePrivate;
-class ANYENGINE_EXPORT CodeEditorPane : public DockingPane
+class ANYENGINE_EXPORT CodeEditorPane : public Editor
 {
     Q_OBJECT
 public:
@@ -37,22 +38,20 @@ public:
     virtual void doAction(int a) override;
 
     //virtual bool onReceive(Event* e) override;//event bus receive callback
-    void rename(const QString& name);
-    void autoSave();
+    void rename(const QString& name) override;
+    void autoSave() override;
     bool readFile(const QString& path);
     bool writeFile(const QString& path,bool autoSave=false);
-    QString path();
+    QString path() override;//editor
     bool isModified() const;
     //CodeEditor* editor();
     CodeEditorView* editor();
 
-    int fileState();
-    void setFileState(int state);
-    void invokeFileState();
-
-    bool isModification();
-
-    void reload();
+    int fileState() override;
+    void setFileState(int state) override;
+    void invokeFileState() override;
+    bool isModification() override;
+    void reload() override;
 
 
 

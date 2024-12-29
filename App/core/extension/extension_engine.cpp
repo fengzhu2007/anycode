@@ -3,6 +3,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QPushButton>
+//#include <plugin.h>
+
 
 
 namespace ady {
@@ -10,9 +12,8 @@ ExtensionEngine* ExtensionEngine::instance = nullptr;
 ExtensionEngine::ExtensionEngine(QObject* parent):QJSEngine(parent) {
 
     installExtensions(QJSEngine::AllExtensions);
-    //globalObject().setProperty("QPushButton", newQObject(new QPushButton()));
-    //qmlRegisterType();
-    //qmlRegisterType<ExtensionEngine>("MyNamespace", 1, 0, "ExtensionEngine");
+    //react_qt::Plugin::install(this);
+
 }
 
 ExtensionEngine::~ExtensionEngine(){
@@ -32,6 +33,7 @@ void ExtensionEngine::init(QObject* parent){
 
 QJSValue ExtensionEngine::run(const QString& path){
     qDebug()<<"run"<<path;
+    //auto result = instance->evaluate();
     auto result =  instance->importModule(path);
     if(result.isError()){
         qDebug() << "Error occurred!";
@@ -41,15 +43,7 @@ QJSValue ExtensionEngine::run(const QString& path){
         qDebug() << "File name: " << result.property("fileName").toString();
         qDebug() << "Stack trace: " << result.property("stack").toString();
 
-    }else{
-        auto func = result.property("sum");
-        auto rt = func.call({1,0});
-        qDebug()<<rt.toString()<<func.toString();
     }
-    auto parent = instance->parent();
-    delete instance;
-    instance = nullptr;
-    init(parent);
     return result;
 }
 
