@@ -40,12 +40,12 @@ public:
     //virtual bool onReceive(Event* e) override;//event bus receive callback
     void rename(const QString& name) override;
     void autoSave() override;
-    bool readFile(const QString& path);
+    bool readFile(const QString& path) override;
     bool writeFile(const QString& path,bool autoSave=false);
     QString path() override;//editor
     bool isModified() const;
     //CodeEditor* editor();
-    CodeEditorView* editor();
+    CodeEditorView* editor() override;
 
     int fileState() override;
     void setFileState(int state) override;

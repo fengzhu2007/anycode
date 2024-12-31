@@ -172,7 +172,6 @@
    <addaction name="separator"/>
    <addaction name="actionNew_Project"/>
    <addaction name="actionOpen_Project"/>
-   <addaction name="actionDebug"/>
   </widget>
   <action name="actionNew_Project">
    <property name="icon">

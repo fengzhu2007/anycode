@@ -27,7 +27,7 @@ include_directories(SYSTEM "../react-qt/src")
 include_directories(SYSTEM "../3party/qscintilla/src")
 include_directories(SYSTEM "../3party/libvterm/include")
 include_directories(SYSTEM "../3party/libptyqt")
-
+include_directories(SYSTEM "E:/php-src/Zend")
 
 
 #include_directories(SYSTEM "../3party/scintilla/qt/ScintillaEditBase")
@@ -268,6 +268,7 @@ add_library(App SHARED
         panes/resource_manager/resource_manager_opened_model.h panes/resource_manager/resource_manager_opened_model.cpp
         panes/resource_manager/locate_file_task.h panes/resource_manager/locate_file_task.cpp
         panes/code_editor/editor.h panes/code_editor/editor.cpp
+        panes/code_editor/code_lint.h panes/code_editor/code_lint.cpp
 
 
 

@@ -12,6 +12,7 @@
 #include <texteditorsettings.h>
 #include <tabsettings.h>
 #include <fontsettings.h>
+#include <w_toast.h>
 
 
 
@@ -213,7 +214,7 @@ QJsonObject CodeEditorPane::toJson(){
     QJsonObject data = {
         {"path",this->path()},
         {"mineType",d->mineType},
-        {"line",ui->editor->textCursor().block().blockNumber()+1}
+        {"line",ui->editor->firstVisibleBlockNumber()+1}
     };
     return {
         {"id",this->id()},
@@ -293,34 +294,22 @@ void CodeEditorPane::autoSave(){
 
 bool CodeEditorPane::readFile(const QString& path){
     auto doc = ui->editor->textDocumentPtr();
-    /*if(!doc){
-        doc = QSharedPointer<TextEditor::TextDocument>(new TextEditor::TextDocument(Core::Constants::K_DEFAULT_TEXT_EDITOR_ID));
-        d->editor->setTextDocument(doc);
-        static TextEditor::DocumentContentCompletionProvider basicSnippetProvider;
-        doc->setCompletionAssistProvider(&basicSnippetProvider);
-        //auto indenter = new TextEditor::TextIndenter(doc->document());
-        auto indenter = new Android::Internal::JavaIndenter(doc->document());
-        doc->setIndenter(indenter);
-    }*/
-
-    /*const QString charset = detectFileEncoding(path);
-    if(charset.isEmpty()){
-        //doc->setCodec(QTextCodec::codecForName(charset.toStdString().c_str()));
-    }else{
-        //doc->setCodec(QTextCodec::codecForName("UTF-8"));
-    }*/
-
     QString error;
     auto ret = doc->open(&error,Utils::FilePath::fromString(path),Utils::FilePath::fromString(path));
-    //qDebug()<<path<<doc->codec()->name();
+    if(ret!=Core::IDocument::OpenResult::Success){
+        wToast::showText(error);
+        return false;
+    }
     return true;
 }
 
 bool CodeEditorPane::writeFile(const QString& path,bool autoSave){
     QString error;
     auto ret = ui->editor->textDocument()->save(&error,Utils::FilePath::fromString(path),autoSave);
-    return true;
-    //return d->editor->writeFile(path);
+    if(ret==false){
+        wToast::showText(error);
+    }
+    return ret;
 }
 
 QString CodeEditorPane::path(){

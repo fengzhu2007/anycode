@@ -146,7 +146,7 @@
      <normaloff>:/Resource/icons/ListFolderOpen_16x.svg</normaloff>:/Resource/icons/ListFolderOpen_16x.svg</iconset>
    </property>
    <property name="text">
-    <string>Open Files</string>
+    <string>Opened Files</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

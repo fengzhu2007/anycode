@@ -212,7 +212,7 @@ void IDEWindow::initView(){
 
 IDEWindow::~IDEWindow()
 {
-    this->shutdown();
+
     delete d;
     delete ui;
     NetworkManager::destory();
@@ -248,12 +248,7 @@ void IDEWindow::delayBoot(){
 void IDEWindow::shutdown(){
     //save setting
     Schedule::stop();
-    auto dockpanes = m_dockingPaneManager->toJson();
-    auto projects = ResourceManagerModel::getInstance()->toJson();
-    auto settings = LayoutSettings::getInstance(this);
-    settings->setDockpanes(dockpanes);
-    settings->setProjects(projects);
-    settings->saveToFile();
+
     LayoutSettings::destory();
 
     wToastManager::destory();
@@ -629,6 +624,20 @@ void IDEWindow::showEvent(QShowEvent* e){
         d->init = true;
         this->delayBoot();
     }
+}
+
+void IDEWindow::closeEvent(QCloseEvent* e){
+    auto dockpanes = m_dockingPaneManager->toJson();
+    auto projects = ResourceManagerModel::getInstance()->toJson();
+    auto settings = LayoutSettings::getInstance(this);
+    settings->setDockpanes(dockpanes);
+    settings->setProjects(projects);
+    if(!m_dockingPaneManager->close()){
+        e->ignore();
+        return ;
+    }
+    settings->saveToFile();
+    this->shutdown();
 }
 
 void IDEWindow::restoreFromSettings(){

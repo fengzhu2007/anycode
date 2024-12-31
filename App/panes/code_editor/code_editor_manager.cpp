@@ -15,6 +15,8 @@
 //#include "snippets/snippetprovider.h"
 #include "displaysettings.h"
 
+#include "code_lint.h"
+
 
 #include <QFileInfo>
 #include <QMutex>
@@ -88,6 +90,8 @@ CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
 
     //init opened model
     ResourceManagerOpenedModel::init(this);
+
+    CodeLint::reload({});
 
 }
 

@@ -50,6 +50,7 @@ namespace ady{
     protected:
         //virtual void closeEvent(QCloseEvent *event) override;
         virtual void showEvent(QShowEvent* e) override;
+        virtual void closeEvent(QCloseEvent* e) override;
 
     private:
         void onOpenFindAndReplace(int mode,const QString& text,const QString& scope);
