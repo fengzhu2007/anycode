@@ -269,6 +269,8 @@ add_library(App SHARED
         panes/resource_manager/locate_file_task.h panes/resource_manager/locate_file_task.cpp
         panes/code_editor/editor.h panes/code_editor/editor.cpp
         panes/code_editor/code_lint.h panes/code_editor/code_lint.cpp
+        core/theme.h core/theme.cpp
+        themes/light_theme.h themes/light_theme.cpp
 
 
 

@@ -636,14 +636,16 @@ QString OSS::matchToPath(const QString& from,bool local){
 
 HttpParams OSS::signHeaders(const HttpParams& options)
 {
-    time_t rawtime;
+    /*time_t rawtime;
     struct tm * ptm;
     time ( &rawtime );
     ptm = gmtime ( &rawtime );
     char datetime [80];
     ::setlocale(LC_TIME,"C");
-    strftime (datetime,80,"%a, %d %b %G %T GMT",ptm);
-
+    strftime (datetime,80,"%a, %d %b %G %T GMT",ptm);*/
+    QDateTime now = QDateTime::currentDateTimeUtc();
+    QLocale englishLocale(QLocale::English);
+    QString datetime = englishLocale.toString(now, "ddd, dd MMM yyyy HH:mm:ss 'GMT'");//Sun, 05 Sep 2021 23:00:00 GMT
 
     HttpParams headers;
     headers[CONTENT_MD5] = "";
