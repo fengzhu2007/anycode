@@ -1,12 +1,12 @@
 # anycode
 
-文本编辑器，支持连接FTP,SFTP,阿里云OSS,腾讯云COS
+文本编辑器，支持远程文件管理：FTP,SFTP,阿里云OSS,腾讯云COS,亚马逊S3
 
-Text editor, supporting connection to FTP, SFTP, AliCloud OSS, Tencent Cloud COS
+Text editor, supporting connection to FTP, SFTP, AliCloud OSS, Tencent Cloud COS,Amazon S3
 
 ## 截屏
 
-![](./screens/anycode.png)  
+![](https://github.com/fengzhu2007/anycode/blob/dev/screen/anycode.png)  
 
 
 ## Windows 构建  
