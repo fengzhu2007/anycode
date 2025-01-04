@@ -47,7 +47,8 @@
 
 #include "components/statusbar/status_bar_view.h"
 #include "common.h"
-#include "app_oss.h"
+//#include "app_oss.h"
+#include "core/theme.h"
 
 #include <w_toast.h>
 #include <w_window.h>
@@ -75,7 +76,9 @@ IDEWindow::IDEWindow(QWidget *parent) :
     wMainWindow(parent),
     ui(new Ui::IDEWindow)
 {
-    this->setStyleSheet(AppOSS::global());
+
+    //this->setStyleSheet(AppOSS::global());
+    this->setStyleSheet(Theme::getInstance()->qss());
     d = new IDEWindowPrivate;
     qRegisterMetaType<QFileInfoList>("QFileInfoList");
     Subscriber::reg();
@@ -89,7 +92,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
     //ui->statusbar->setFixedHeight(25);
     ui->statusbar->addWidget(StatusBarView::make(ui->statusbar),1);
     ui->statusbar->setContentsMargins({0,0,0,0});
-    qDebug()<<"status bar layout"<<ui->statusbar->layout()->margin();
+    //qDebug()<<"status bar layout"<<ui->statusbar->layout()->margin();
     ui->statusbar->layout()->setMargin(0);
     ui->statusbar->layout()->setSpacing(0);
 
@@ -220,7 +223,7 @@ IDEWindow::~IDEWindow()
 
 
 void IDEWindow::boot(){
-    OptionsSettings::init();//init options settings
+    //OptionsSettings::init();//init options settings
     wToastManager::init(this);
     BackendThread::init()->start();
     CodeEditorManager::init(m_dockingPaneManager);

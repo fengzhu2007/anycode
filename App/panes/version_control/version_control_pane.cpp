@@ -22,6 +22,7 @@
 #include "core/event_bus/event_data.h"
 #include "storage/site_storage.h"
 #include "version_controller_thread.h"
+#include "core/theme.h"
 #include <memory>
 #include <QComboBox>
 #include <QLabel>
@@ -69,9 +70,16 @@ VersionControlPane::VersionControlPane(QWidget *parent)
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     this->setWindowTitle(tr("Version Control"));
+    auto theme = Theme::getInstance();
+    auto color = theme->color().name(QColor::HexRgb);
+    auto secondaryColor = theme->secondaryColor().name(QColor::HexRgb);
+    auto backgroundColor = theme->backgroundColor().name(QColor::HexRgb);
+    auto textColor = theme->textColor().name(QColor::HexRgb);
     this->setStyleSheet("QToolBar{border:0px;}"
-                        "QTreeView{border:0;background-color:#f5f5f5}"
-                        ".ady--ResourceManagerPane>#widget{background-color:#EEEEF2}");
+                        "QTreeView{border:0;background-color:"+backgroundColor+";color:"+textColor+";}"
+                        ".ady--ResourceManagerPane>#widget{background-color:"+color+"}");
+
+
     d->branch = new QLabel(ui->toolBar);
     d->label = new QLabel(ui->toolBar2);
     //d->label->hide();

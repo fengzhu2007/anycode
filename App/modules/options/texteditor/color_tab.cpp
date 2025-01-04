@@ -62,6 +62,13 @@ void ColorTab::apply(){
                 setting.setFontZoom(ui->zoom->value());
                 changed = true;
             }
+            auto scheme = setting.colorSchemeFileName().toString();
+            auto item = setting.schemeMap().at(ui->scheme->currentIndex());
+            if(scheme!=item.second){
+                setting.setColorSchemeFileName(Utils::FilePath::fromString(item.second));
+                changed = true;
+            }
+
             if(changed){
                 instance->setFontSettings(setting);
                 instance->fontSettingsChanged(setting);

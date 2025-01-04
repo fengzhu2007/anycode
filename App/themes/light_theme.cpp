@@ -15,7 +15,7 @@ public:
         color("#EEEEF2"),
         primaryColor("#007acc"),
         secondaryColor("#c9def5"),
-        backgroundColor(Qt::white),
+        backgroundColor("#f5f5f5"),
         textColor(Qt::black),
         primaryTextColor(Qt::white),
         secondaryTextColor(Qt::gray)
@@ -72,6 +72,29 @@ QColor LightTheme::secondaryTextColor(){
 
 DockingTheme* LightTheme::docking(){
     return nullptr;
+}
+QString LightTheme::qss(){
+    return QString::fromUtf8(".QStatusBar{background: #007acc;}"
+                             ".QStatusBar::item{border:0;}"
+                             ".ady--PasswordEdit,.QLineEdit{height:24px;border:1px solid #ccc;font-size:12px;}"
+                             ".ady--PasswordEdit:focus,.QLineEdit:focus,.ady--PasswordEdit:hover,.QLineEdit:hover{border:1px solid #007acc}"
+
+#ifdef Q_OS_WIN
+                             ".QSpinBox{border:1px solid #ccc;font-size:12px;height:24px;}"
+                             ".QSpinBox:hover{border:1px solid #007acc}"
+                             ".QSpinBox::up-button{background:#EEEEF2;}"
+                             ".QSpinBox::up-button:hover{background:#c9def5;}"
+                             ".QSpinBox::up-button:pressed{background:#007acc;}"
+                             ".QSpinBox::down-button{background:#EEEEF2;}"
+                             ".QSpinBox::down-button:hover{background:#c9def5;}"
+                             ".QSpinBox::down-button:pressed{background:#007acc;}"
+                             ".QSpinBox::up-arrow{image:url(:/Resource/icons/GlyphUp_16x.svg);width:14px;height:14px;}"
+                             ".QSpinBox::down-arrow{image:url(:/Resource/icons/GlyphDown_16x.svg);width:14px;height:14px;}"
+#else
+
+
+#endif
+                             ".QComboBox{height:24px}");
 }
 
 }

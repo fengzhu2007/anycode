@@ -88,6 +88,7 @@ QString EnvironmentSettings::name(){
 QList<QPair<QString,QString>> EnvironmentSettings::themes(){
     return {
             {"default","Default Light"},
+            {"dark","Dark"},
         };
 }
 

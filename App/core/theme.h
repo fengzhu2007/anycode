@@ -2,10 +2,12 @@
 #define THEME_H
 #include <QColor>
 #include <QString>
+#include "global.h"
+
 //#include <docking_theme.h>
 namespace ady{
 class DockingTheme;
-class Theme
+class ANYENGINE_EXPORT Theme
 {
 public:
     enum Style{
@@ -26,13 +28,18 @@ public:
 
     virtual DockingTheme* docking()=0;
 
+    virtual QString qss()=0;
+
     template<class T>
-    T* init(){
+    static Theme* init(){
         destory();//delete before
         instance = new T;
         return instance;
     }
     static void destory();
+    static Theme* getInstance(){
+        return instance;
+    }
 
 protected:
     Theme();

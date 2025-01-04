@@ -20,6 +20,7 @@
 #include "server_client_pane.h"
 #include "site_quick_manager_dialog.h"
 #include "common.h"
+#include "core/theme.h"
 #include <QMenu>
 #include <QThread>
 #include <QFileDialog>
@@ -50,9 +51,17 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     this->setWindowTitle(PANE_TITLE);
+
+    auto theme = Theme::getInstance();
+    auto color = theme->color().name(QColor::HexRgb);
+    auto secondaryColor = theme->secondaryColor().name(QColor::HexRgb);
+    auto backgroundColor = theme->backgroundColor().name(QColor::HexRgb);
+    auto textColor = theme->textColor().name(QColor::HexRgb);
+
+
     this->setStyleSheet("QToolBar{border:0px;}"
-                        "QTreeView{border:0;background-color:#f5f5f5}"
-                        ".ady--ServerManagePane>#widget{background-color:#EEEEF2}");
+                        "QTreeView{border:0;background-color:"+backgroundColor+";color:"+textColor+";}"
+                        ".ady--ServerManagePane>#widget{background-color:"+color+"}");
 
     d = new ServerManagePanePrivate;
 

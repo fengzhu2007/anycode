@@ -4,6 +4,7 @@
 //#include "mainwindow.h"
 //#include "dockwindow.h"
 #include "idewindow.h"
+#include "ide_application.h"
 #include <QDebug>
 #ifdef Q_OS_WIN
 #include <tchar.h>
@@ -86,7 +87,7 @@ int main(int argc, char *argv[])
     #endif
     #endif
 
-    QApplication a(argc, argv);
+    ady::IDEApplication a(argc, argv);
     QString dir = QCoreApplication::applicationDirPath();
     {
         QTranslator* translator = new QTranslator(&a);

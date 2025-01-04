@@ -1,14 +1,13 @@
-#ifndef LIGHT_THEME_H
-#define LIGHT_THEME_H
+#ifndef DARK_THEME_H
+#define DARK_THEME_H
 
 #include "core/theme.h"
-
 namespace ady{
-class LightThemePrivate;
-class ANYENGINE_EXPORT LightTheme : public Theme
+class DarkThemePrivate;
+class ANYENGINE_EXPORT DarkTheme : public Theme
 {
 public:
-    virtual ~LightTheme()  override;
+    virtual ~DarkTheme()  override;
     virtual QString name() override;
     virtual Style style() override;
     virtual QColor color()  override;//default color
@@ -24,13 +23,12 @@ public:
 
     virtual QString qss() override;
 private:
-    LightTheme();
+    DarkTheme();
 
 
 private:
-    LightThemePrivate* d;
+    DarkThemePrivate* d;
     friend class Theme;
 };
 }
-
-#endif // LIGHT_THEME_H
+#endif // DARK_THEME_H

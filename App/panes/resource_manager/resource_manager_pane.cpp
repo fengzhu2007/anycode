@@ -23,6 +23,7 @@
 #include "network/network_manager.h"
 #include "common/utils.h"
 #include "common.h"
+#include "core/theme.h"
 #include <QMenu>
 #include <QAction>
 #include <QClipboard>
@@ -89,10 +90,16 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     this->setWindowTitle(tr("Resource Manager"));
+    auto theme = Theme::getInstance();
+    auto color = theme->color().name(QColor::HexRgb);
+    auto secondaryColor = theme->secondaryColor().name(QColor::HexRgb);
+    auto backgroundColor = theme->backgroundColor().name(QColor::HexRgb);
+    auto textColor = theme->textColor().name(QColor::HexRgb);
+
     this->setStyleSheet("QToolBar{border:0px;}"
-                        "QTreeView{border:0;background-color:#f5f5f5}"
-                        ".ady--ResourceManagerPane>#widget{background-color:#EEEEF2}"
-                        ".QSplitterHandle{background-color:#dedede}");
+                        "QTreeView{border:0;background-color:"+backgroundColor+";color:"+textColor+";}"
+                        ".ady--ResourceManagerPane>#widget{background-color:"+color+"}"
+                        ".QSplitterHandle{background-color:"+secondaryColor+"}");
 
     ui->treeView->setItemDelegate(new ResourceManagerTreeItemDelegate(ui->treeView));
     ui->treeView->setEditTriggers(QAbstractItemView::EditKeyPressed);
