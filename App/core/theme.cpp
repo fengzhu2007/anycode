@@ -20,4 +20,8 @@ void Theme::destory(){
     }
 }
 
+void Theme::setup(QApplication& app){
+
+}
+
 }

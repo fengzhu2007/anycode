@@ -32,9 +32,7 @@ OutputPane::OutputPane(QWidget *parent):DockingPane(parent),ui(new Ui::OutputPan
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     this->setWindowTitle(tr("Output"));
-    this->setStyleSheet("QToolBar{border:0px;}"
-                        ".ady--OutputPane>#widget{background-color:#EEEEF2}"
-                        ".ady--OutputPane QTextBrowser{border:0;background-color:#E6E7E8;}");
+    this->setStyleSheet("QToolBar{border:0px;}");
 
     d = new OutputPanePrivate;
 

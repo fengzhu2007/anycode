@@ -14,6 +14,7 @@ IDEApplication::IDEApplication(int &argc, char **argv):QApplication(argc,argv) {
     }else{
         Theme::init<LightTheme>();
     }
+    Theme::getInstance()->setup(*this);
 }
 
 IDEApplication::~IDEApplication(){

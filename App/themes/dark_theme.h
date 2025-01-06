@@ -21,7 +21,10 @@ public:
 
     virtual DockingTheme* docking() override;
 
+    virtual void setup(QApplication& app) override;
     virtual QString qss() override;
+
+
 private:
     DarkTheme();
 

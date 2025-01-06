@@ -2,6 +2,7 @@
 #define THEME_H
 #include <QColor>
 #include <QString>
+#include <QApplication>
 #include "global.h"
 
 //#include <docking_theme.h>
@@ -29,6 +30,8 @@ public:
     virtual DockingTheme* docking()=0;
 
     virtual QString qss()=0;
+
+    virtual void setup(QApplication& app);
 
     template<class T>
     static Theme* init(){

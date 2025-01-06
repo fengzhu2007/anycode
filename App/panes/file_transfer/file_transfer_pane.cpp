@@ -38,9 +38,7 @@ FileTransferPane::FileTransferPane(QWidget *parent) :
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     this->setWindowTitle(tr("File Transfer"));
-    this->setStyleSheet("QToolBar{border:0px;}"
-                        "QTreeView{border:0;background-color:#f5f5f5}"
-                        ".ady--FileTransferPane>#widget{background-color:#EEEEF2}");
+    this->setStyleSheet("QToolBar{border:0px;}");
 
 
 

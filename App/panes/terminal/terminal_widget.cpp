@@ -8,6 +8,7 @@
 #include <ptyqt.h>
 #include <array>
 #include "w_toast.h"
+#include "core/theme.h"
 namespace ady{
 
 
@@ -32,9 +33,12 @@ TerminalWidget::TerminalWidget(const QString& executable,const QString& workingD
     for(int i=0;i<20;i++){
         colors[i] = this->toQColor(i);
     }
+    auto theme = Theme::getInstance();
+
     //custome
-    colors[Background] = QColor{"#f5f5f5"};//background
-    colors[Selection] = QColor{"#DBDBDC"};//selection background
+    colors[Foreground] = theme->textColor();
+    colors[Background] = theme->backgroundColor();//background
+    colors[Selection] = theme->secondaryTextColor();//selection background
     this->setColors(colors);
 
 }

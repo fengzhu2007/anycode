@@ -100,5 +100,19 @@
         <file>Resource/images/logo.icns</file>
         <file>Resource/extension/test.js</file>
         <file>Resource/icons/ListFolderOpen_16x.svg</file>
+        <file>Resource/icons/dark/GlyphDown_16x.svg</file>
+        <file>Resource/icons/dark/GlyphDownActive_16x.svg</file>
+        <file>Resource/icons/dark/GlyphDownHover_16x.svg</file>
+        <file>Resource/icons/dark/GlyphLeft_16x.svg</file>
+        <file>Resource/icons/dark/GlyphLeftActive_16x.svg</file>
+        <file>Resource/icons/dark/GlyphLeftHover_16x.svg</file>
+        <file>Resource/icons/dark/GlyphRight_16x.svg</file>
+        <file>Resource/icons/dark/GlyphRightActive_16x.svg</file>
+        <file>Resource/icons/dark/GlyphRightHover_16x.svg</file>
+        <file>Resource/icons/dark/GlyphUp_16x.svg</file>
+        <file>Resource/icons/dark/GlyphUpActive_16x.svg</file>
+        <file>Resource/icons/dark/GlyphUpHover_16x.svg</file>
+        <file>Resource/icons/dark/CollapseLeft_16x.svg</file>
+        <file>Resource/icons/dark/ExpandDown_16x.svg</file>
     </qresource>
 </RCC>

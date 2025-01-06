@@ -33,6 +33,9 @@ void ResourceManagerTreeItemDelegate::paint(QPainter *painter, const QStyleOptio
     doLayout(option, &checkRect, &pixmapRect, &textRect, false);
 
 
+
+
+
     //draw background
     if (opt.state & QStyle::State_Selected) {
 
