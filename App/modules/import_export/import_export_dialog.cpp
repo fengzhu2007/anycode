@@ -7,6 +7,7 @@
 #include "import_widget.h"
 #include "core/des.h"
 #include "backup_restore.h"
+#include "core/theme.h"
 #include <w_toast.h>
 
 namespace ady{
@@ -28,7 +29,9 @@ ImportExportDialog::ImportExportDialog(QWidget *parent)
     , ui(new Ui::ImportExportDialog)
 {
 
-    this->setStyleSheet(QString::fromUtf8("#footer,#header{background:#f5f5f5}"));
+    auto theme = Theme::getInstance();
+    auto color = theme->secondaryColor().name(QColor::HexRgb);
+    this->setStyleSheet(("#footer,#header{background:"+color+"}"));
     //this->setStyleSheet(".wDialog{background:red}");
     ui->setupUi(this);
 

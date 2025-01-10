@@ -112,7 +112,9 @@
         <file>Resource/icons/dark/GlyphUp_16x.svg</file>
         <file>Resource/icons/dark/GlyphUpActive_16x.svg</file>
         <file>Resource/icons/dark/GlyphUpHover_16x.svg</file>
-        <file>Resource/icons/dark/CollapseLeft_16x.svg</file>
-        <file>Resource/icons/dark/ExpandDown_16x.svg</file>
+        <file>Resource/icons/dark/Collapse_16x.svg</file>
+        <file>Resource/icons/dark/CollapseHover_16x.svg</file>
+        <file>Resource/icons/dark/Expand_16x.svg</file>
+        <file>Resource/icons/dark/ExpandHover_16x.svg</file>
     </qresource>
 </RCC>

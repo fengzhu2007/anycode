@@ -52,6 +52,8 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
     this->setCenterWidget(widget);
     this->setWindowTitle(PANE_TITLE);
 
+    this->setStyleSheet("QTreeView{border:0;}");
+
     auto theme = Theme::getInstance();
     auto color = theme->color().name(QColor::HexRgb);
     auto secondaryColor = theme->secondaryColor().name(QColor::HexRgb);
@@ -59,9 +61,7 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
     auto textColor = theme->textColor().name(QColor::HexRgb);
 
 
-    this->setStyleSheet("QToolBar{border:0px;}"
-                        "QTreeView{border:0;background-color:"+backgroundColor+";color:"+textColor+";}"
-                        ".ady--ServerManagePane>#widget{background-color:"+color+"}");
+    this->setStyleSheet("QToolBar{border:0px;}");
 
     d = new ServerManagePanePrivate;
 

@@ -20,6 +20,7 @@
 #include "panes/code_editor/code_editor_manager.h"
 #include "panes/code_editor/code_editor_pane.h"
 #include "panes/file_transfer/file_transfer_pane.h"
+#include "components/list_item_delegate.h"
 #include "network/network_manager.h"
 #include "common/utils.h"
 #include "common.h"
@@ -108,6 +109,8 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     ui->treeView->addMimeType(MM_UPLOAD);
     ui->treeView->setSupportDropFile(true);
     ui->treeView->setDragDropMode(QAbstractItemView::DragDrop);
+
+    ui->comboBox->setItemDelegate(new ListItemDelegate(ui->comboBox));
 
     connect(ui->treeView,&QTreeView::customContextMenuRequested, this, &ResourceManagerPane::onContextMenu);
     connect(ui->treeView,&QTreeView::expanded,this,&ResourceManagerPane::onTreeItemExpanded);

@@ -45,9 +45,7 @@ FindReplacePane::FindReplacePane(QWidget *parent) :
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     this->setWindowTitle(tr("Search Results"));
-    this->setStyleSheet("QToolBar{border:0px;}"
-                        "QTreeView{border:0;background-color:#f5f5f5}"
-                        ".ady--FindReplacePane>#widget{background-color:#EEEEF2}");
+    this->setStyleSheet("QToolBar{border:0px;}");
 
     auto model = new SearchResultModel(ui->treeView);
     auto delegate = new SearchResultItemDelegate(1,ui->treeView);

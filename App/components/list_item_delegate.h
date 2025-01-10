@@ -8,6 +8,7 @@ class ListItemDelegate : public QStyledItemDelegate
 {
 public:
     explicit ListItemDelegate(int height,QObject *parent = nullptr);
+    explicit ListItemDelegate(QObject *parent = nullptr);
     virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 private:
     int m_height;

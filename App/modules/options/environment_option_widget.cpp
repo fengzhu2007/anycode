@@ -6,6 +6,8 @@
 #include "components/list_item_delegate.h"
 #include "options_settings.h"
 #include "environment_settings.h"
+#include "options_dialog.h"
+#include "texteditor/color_tab.h"
 
 namespace ady{
 
@@ -24,6 +26,7 @@ EnvironmentOptionWidget::EnvironmentOptionWidget(QWidget *parent)
     ui->theme->view()->setItemDelegate(new ListItemDelegate(22,ui->theme));
     ui->language->view()->setItemDelegate(new ListItemDelegate(22,ui->language));
 
+
     this->initView();
 }
 
@@ -36,7 +39,7 @@ QString EnvironmentOptionWidget::name(){
     return EnvironmentSettings::name();
 }
 
-void EnvironmentOptionWidget::apply(){
+void EnvironmentOptionWidget::apply(int *state){
     auto instance = OptionsSettings::getInstance();
     auto setting = instance->environmentSettings();
     bool changed = false;
@@ -48,6 +51,7 @@ void EnvironmentOptionWidget::apply(){
             if(setting.m_theme!=one.first){
                 setting.m_theme = one.first;
                 changed = true;
+                *state |= OptionWidget::Restart;//need restart application
             }
         }
     }
@@ -59,6 +63,7 @@ void EnvironmentOptionWidget::apply(){
             if(setting.m_language!=one.first){
                 setting.m_language = one.first;
                 changed = true;
+                *state |= OptionWidget::Restart;//need restart application
             }
         }
     }
@@ -119,6 +124,31 @@ void EnvironmentOptionWidget::initView(){
     ui->auto_save_interval->setValue(setting.m_autoSaveInterval);
     ui->texteditor_file_limit->setValue(setting.m_texteditorFileLimit);
 
+    //
+    connect(ui->theme,QOverload<int>::of(&QComboBox::currentIndexChanged),this,&EnvironmentOptionWidget::onThemeChanged);
+
+
+}
+
+void EnvironmentOptionWidget::onThemeChanged(int index){
+    if(index==0){
+        //light
+    }else{
+        //dark
+    }
+    auto themes = EnvironmentSettings::themes();
+    auto theme = themes.at(index);
+    auto instance = OptionsSettings::getInstance();
+    auto setting = instance->environmentSettings();
+    auto dialog = static_cast<OptionsDialog*>(parentWidget()->parentWidget());
+    //qDebug()<<"dialog"<<dialog;
+    const QString name = QLatin1String("");
+    if(setting.m_theme!=theme.first){
+        //change theme
+        dialog->notifyChanged(ColorTab::themeNameKey,index);
+    }else{
+        dialog->notifyChanged(ColorTab::themeNameKey,-1 - index);
+    }
 }
 
 }

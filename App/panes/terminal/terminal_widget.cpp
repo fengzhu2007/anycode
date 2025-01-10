@@ -44,6 +44,7 @@ TerminalWidget::TerminalWidget(const QString& executable,const QString& workingD
 }
 
 TerminalWidget::~TerminalWidget(){
+    isDestory = true;
     if(d->process!=nullptr){
         d->process->kill();
         delete d->process;
@@ -67,7 +68,6 @@ void TerminalWidget::onReadReady(){
 }
 
 void TerminalWidget::onProcessClose(){
-    qDebug()<<"onProcessClose:";
     if(d->process){
 
 
@@ -76,20 +76,29 @@ void TerminalWidget::onProcessClose(){
 
 void TerminalWidget::showEvent(QShowEvent* e){
     TerminalView::showEvent(e);
-    if(d->process==nullptr){
-        d->process = PtyQt::createPtyProcess(IPtyProcess::AutoPty);
-        QSize size = this->geometry().size();
 
-        auto list = QProcessEnvironment::systemEnvironment().toStringList();
-        bool ret = d->process->startProcess(d->executable,{},d->workingDir,list,size.width(),size.height());
-        if(ret){
-            connect(d->process->notifier(),&QIODevice::readyRead,this,&TerminalWidget::onReadReady);
-            connect(d->process->notifier(),&QIODevice::aboutToClose,this,&TerminalWidget::onProcessClose);
-
-        }else{
-            wToast::showText(tr("Start Failed,Error:%1").arg(d->process->lastError()));
+    QTimer::singleShot(0,[this]{
+        if(isDestory){
+            return ;
         }
-    }
+        if(d->process==nullptr){
+            d->process = PtyQt::createPtyProcess(IPtyProcess::AutoPty);
+            QSize size = this->geometry().size();
+            auto list = QProcessEnvironment::systemEnvironment().toStringList();
+            bool ret = d->process->startProcess(d->executable,{},d->workingDir,list,size.width(),size.height());
+            if(ret){
+                connect(d->process->notifier(),&QIODevice::readyRead,this,&TerminalWidget::onReadReady);
+                connect(d->process->notifier(),&QIODevice::aboutToClose,this,&TerminalWidget::onProcessClose);
+            }else{
+                wToast::showText(tr("Start Failed,Error:%1").arg(d->process->lastError()));
+            }
+        }
+
+    });
+
+
+
+
 }
 
 bool TerminalWidget::event(QEvent *event){

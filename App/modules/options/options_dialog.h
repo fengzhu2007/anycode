@@ -19,6 +19,8 @@ public:
 
     void setCurrentIndex(int row);
 
+    void notifyChanged(const QString& name,const QVariant& value);
+
 protected:
     void keyPressEvent(QKeyEvent *e);
 

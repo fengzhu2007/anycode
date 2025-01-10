@@ -18,11 +18,15 @@ public:
     virtual ~EnvironmentOptionWidget() override;
 
     virtual QString name() override;
-    virtual void apply() override;
+    virtual void apply(int *state) override;
     virtual void initValue(const QJsonObject& value) override;
     virtual QJsonObject toJson() override;
 
+
     void initView();
+
+public slots:
+    void onThemeChanged(int index);
 
 private:
     Ui::EnvironmentOptionWidget *ui;

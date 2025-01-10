@@ -12,7 +12,7 @@ class ANYENGINE_EXPORT Theme
 {
 public:
     enum Style{
-        Light,
+        Light=0,
         Dark
     };
     virtual ~Theme();
@@ -26,6 +26,8 @@ public:
     virtual QColor textColor()=0;
     virtual QColor primaryTextColor()=0;
     virtual QColor secondaryTextColor()=0;
+
+    virtual QColor borderColor()=0;
 
     virtual DockingTheme* docking()=0;
 

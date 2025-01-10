@@ -14,7 +14,7 @@ OptionWidget::~OptionWidget(){
 }
 
 
-void OptionWidget::apply(){
+void OptionWidget::apply(int *state){
 
 }
 
@@ -24,6 +24,11 @@ void OptionWidget::initValue(const QJsonObject& value){
 
 QJsonObject OptionWidget::toJson(){
     return {};
+}
+
+void OptionWidget::notifyChanged(const QString& name,const QVariant& value){
+    Q_UNUSED(name);
+    Q_UNUSED(value);
 }
 
 }

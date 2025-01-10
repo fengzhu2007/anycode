@@ -28,7 +28,7 @@ QString GeneralTab::name(){
     return QLatin1String("general");
 }
 
-void GeneralTab::apply(){
+void GeneralTab::apply(int *state){
     auto instance = TextEditor::TextEditorSettings::instance();
     if(instance!=nullptr){
         {

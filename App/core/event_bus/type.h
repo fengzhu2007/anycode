@@ -55,6 +55,9 @@ public:
     static const QString M_MESSAGE;
     static const QString M_READY;
 
+    //window
+    static const QString M_RESTART;
+
     //output
     enum OutputLevel{
         Text=0,

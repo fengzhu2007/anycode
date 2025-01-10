@@ -69,11 +69,8 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     this->setWindowTitle(d->site.name);
-    this->setStyleSheet("QToolBar{border:0px;}"
-                        "QTreeView{border:0;background-color:#f5f5f5}"
-                        "QListView{border:0;background-color:#f5f5f5}"
-                        "QListView::item{ margin: 20px;}"
-                        ".ady--ServerClientPane>#widget{background-color:#EEEEF2}");
+    this->setStyleSheet("QListView,QTreeView{border:0;}"
+                        "QListView::item{ margin: 20px;}");
 
 
 

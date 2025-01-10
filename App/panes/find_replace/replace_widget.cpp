@@ -2,6 +2,8 @@
 #include "ui_replace_widget.h"
 #include "find_replace_dialog.h"
 #include "search_scope_model.h"
+#include "components/list_item_delegate.h"
+
 #include <QFileDialog>
 #include <QDebug>
 namespace ady{
@@ -32,6 +34,13 @@ ReplaceWidget::ReplaceWidget(QWidget *parent) :
     ui->exclusion->setModel(dialog->exclusionModel());
     ui->filePattern->setCurrentIndex(0);
     ui->exclusion->setCurrentIndex(0);
+
+    ui->find->setItemDelegate(new ListItemDelegate(ui->find));
+    ui->replace->setItemDelegate(new ListItemDelegate(ui->filePattern));
+    ui->searchScope->setItemDelegate(new ListItemDelegate(ui->searchScope));
+    ui->exclusion->setItemDelegate(new ListItemDelegate(ui->exclusion));
+    ui->filePattern->setItemDelegate(new ListItemDelegate(ui->filePattern));
+
 }
 
 ReplaceWidget::~ReplaceWidget()

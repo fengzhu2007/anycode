@@ -9,18 +9,26 @@
 #include <extraencodingsettings.h>
 #include <fontsettings.h>
 #include "components/list_item_delegate.h"
+#include "../option_widget.h"
+#include "../options_settings.h"
+#include "../environment_settings.h"
 
 
 namespace ady{
+
+const QString ColorTab::themeNameKey = "texteditor::theme";
+
 class ColorTabPrivate{
 public :
     int zoom;
+    QList<QPair<QString,QString>> themeData;
 };
 
 ColorTab::ColorTab(QWidget *parent)
     : OptionTab(parent)
     , ui(new Ui::ColorTab)
 {
+    d = new ColorTabPrivate;
     ui->setupUi(this);
 
     this->setWindowTitle(tr("Font And Color"));
@@ -37,12 +45,13 @@ ColorTab::ColorTab(QWidget *parent)
 ColorTab::~ColorTab()
 {
     delete ui;
+    delete d;
 }
 QString ColorTab::name(){
     return QLatin1String("general");
 }
 
-void ColorTab::apply(){
+void ColorTab::apply(int *state){
     auto instance = TextEditor::TextEditorSettings::instance();
     if(instance!=nullptr){
         {
@@ -63,10 +72,14 @@ void ColorTab::apply(){
                 changed = true;
             }
             auto scheme = setting.colorSchemeFileName().toString();
-            auto item = setting.schemeMap().at(ui->scheme->currentIndex());
+
+
+
+            auto item = d->themeData.at(ui->scheme->currentIndex());
             if(scheme!=item.second){
                 setting.setColorSchemeFileName(Utils::FilePath::fromString(item.second));
                 changed = true;
+                *state |= OptionWidget::Restart;//need restart application
             }
 
             if(changed){
@@ -87,6 +100,32 @@ QJsonObject ColorTab::toJson(){
     return {};
 }
 
+void ColorTab::notifyChanged(const QString& name,const QVariant& value){
+    auto instance = TextEditor::TextEditorSettings::instance();
+    auto setting = instance->fontSettings();
+    auto scheme = setting.colorSchemeFileName().toString();
+    qDebug()<<"value"<<value;
+    if(name==themeNameKey){
+        if(value==-1){
+            //resetore light
+            d->themeData = TextEditor::FontSettings::schemeMap(0);
+            this->resetThemeList(scheme);
+        }else if(value==-2){
+            //restore dark
+            d->themeData = TextEditor::FontSettings::schemeMap(1);
+            this->resetThemeList(scheme);
+        }else if(value==0){
+            //light
+            d->themeData = TextEditor::FontSettings::schemeMap(0);
+            this->resetThemeList();
+        }else if(value==1){
+            //dark
+            d->themeData = TextEditor::FontSettings::schemeMap(1);
+            this->resetThemeList();
+        }
+    }
+}
+
 void ColorTab::initView(){
     auto instance = TextEditor::TextEditorSettings::instance();
     if(instance!=nullptr){
@@ -96,9 +135,11 @@ void ColorTab::initView(){
             ui->fontSize->setValue(setting.fontSize());
             ui->zoom->setValue(setting.fontZoom());
 
-            auto data = TextEditor::FontSettings::schemeMap();
+            auto environment_settings = OptionsSettings::getInstance()->environmentSettings();
+
+            d->themeData = TextEditor::FontSettings::schemeMap(environment_settings.m_theme==QLatin1String("dark")?1:0);
             int i = 0;
-            for(auto one:data){
+            for(auto one:d->themeData){
                 ui->scheme->addItem(one.first,one.second);
                 if(one.second==setting.colorSchemeFileName().toString()){
                     ui->scheme->setCurrentIndex(i);
@@ -118,9 +159,24 @@ void ColorTab::initView(){
 
 }
 
+void ColorTab::resetThemeList(const QString& value){
+    auto instance = TextEditor::TextEditorSettings::instance();
+    auto setting = instance->fontSettings();
+    ui->scheme->clear();
+    int i = 0;
+    for(auto one:d->themeData){
+        ui->scheme->addItem(one.first,one.second);
+        if((value.isEmpty()==false && value==one.second)){
+            ui->scheme->setCurrentIndex(i);
+        }
+        i++;
+    }
+    if(value.isEmpty())
+        ui->scheme->setCurrentIndex(0);
+}
+
 void ColorTab::onFontChanged(const QFont& font){
     ui->editor->setFont(font);
-    //ui->editor->setFamily(font.family());
 }
 
 void ColorTab::onValueChanged(int value){
@@ -134,10 +190,9 @@ void ColorTab::onValueChanged(int value){
 }
 
 void ColorTab::onSchemeChanged(int index){
-    auto data = TextEditor::FontSettings::schemeMap();
-    QString name  = data.first().first;
-    if(index>=0 && index<data.size()){
-        name = data.at(index).first;
+    QString name  = d->themeData.first().first;
+    if(index>=0 && index<d->themeData.size()){
+        name = d->themeData.at(index).first;
     }
     ui->editor->setColorScheme(name);
 }

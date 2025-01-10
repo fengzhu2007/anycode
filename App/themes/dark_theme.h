@@ -19,6 +19,8 @@ public:
     virtual QColor primaryTextColor()  override;
     virtual QColor secondaryTextColor()  override;
 
+    virtual QColor borderColor() override;
+
     virtual DockingTheme* docking() override;
 
     virtual void setup(QApplication& app) override;

@@ -13,7 +13,7 @@ OptionTab::~OptionTab(){
 
 }
 
-void OptionTab::apply(){
+void OptionTab::apply(int *state){
 
 }
 
@@ -24,6 +24,11 @@ void OptionTab::initValue(const QJsonObject& value){
 
 QJsonObject OptionTab::toJson(){
     return {};
+}
+
+void OptionTab::notifyChanged(const QString& name,const QVariant& value){
+    Q_UNUSED(name);
+    Q_UNUSED(value);
 }
 
 }

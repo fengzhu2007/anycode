@@ -2,6 +2,8 @@
 #include "ui_find_widget.h"
 #include "find_replace_dialog.h"
 #include "search_scope_model.h"
+#include "components/list_item_delegate.h"
+
 #include <QFileDialog>
 #include <QDebug>
 namespace ady {
@@ -31,6 +33,11 @@ FindWidget::FindWidget(QWidget *parent) :
     ui->filePattern->setCurrentIndex(0);
     ui->exclusion->setCurrentIndex(0);
     ui->find->setFocus();
+
+    ui->find->setItemDelegate(new ListItemDelegate(ui->find));
+    ui->searchScope->setItemDelegate(new ListItemDelegate(ui->searchScope));
+    ui->exclusion->setItemDelegate(new ListItemDelegate(ui->exclusion));
+    ui->filePattern->setItemDelegate(new ListItemDelegate(ui->filePattern));
 
 }
 

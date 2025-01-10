@@ -78,11 +78,13 @@ IDEWindow::IDEWindow(QWidget *parent) :
 {
 
     //this->setStyleSheet(AppOSS::global());
-    this->setStyleSheet(Theme::getInstance()->qss());
+    //qDebug()<<Theme::getInstance()->qss();
+    auto theme = Theme::getInstance();
+    this->setStyleSheet(theme->qss());
     d = new IDEWindowPrivate;
     qRegisterMetaType<QFileInfoList>("QFileInfoList");
     Subscriber::reg();
-    this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO,Type::M_OPEN_FILE_TRANSFTER,Type::M_OPEN_PANE});
+    this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO,Type::M_OPEN_FILE_TRANSFTER,Type::M_OPEN_PANE,Type::M_RESTART});
     ui->setupUi(this);
 
     this->setWindowIcon(QIcon(":/Resource/images/logo.icns"));
@@ -100,7 +102,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
     this->resetupUi();
 
     ui->toolBar->setFixedHeight(32);
-    m_dockingPaneManager = new DockingPaneManager(this);
+    m_dockingPaneManager = new DockingPaneManager(this,theme->style()==Theme::Light?DockingTheme::Light:DockingTheme::Dark);
     auto w = m_dockingPaneManager->widget();
     auto workbench = m_dockingPaneManager->workbench();
     workbench->setContentsMargins(0,0,0,6);
@@ -295,6 +297,9 @@ bool IDEWindow::onReceive(Event* e){
     }else if(e->id()==Type::M_OPEN_PANE){
         auto one = static_cast<QString*>(e->data());
         PaneLoader::open(m_dockingPaneManager,*one,{});
+    }else if(e->id()==Type::M_RESTART){
+        qDebug()<<"restart";
+        this->restart();
     }
     return false;
 }

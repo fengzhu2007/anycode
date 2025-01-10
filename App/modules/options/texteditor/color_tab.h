@@ -17,11 +17,15 @@ public:
     ~ColorTab();
 
     virtual QString name() override;
-    virtual void apply() override;
+    virtual void apply(int *state) override;
     virtual void initValue(const QJsonObject& value) override;
     virtual QJsonObject toJson() override;
+    virtual void notifyChanged(const QString& name,const QVariant& value) override;
 
     void initView();
+
+private:
+    void resetThemeList(const QString& value={});
 
 
 public slots:
@@ -33,6 +37,9 @@ public slots:
 private:
     Ui::ColorTab *ui;
     ColorTabPrivate* d;
+
+public:
+    static const QString themeNameKey;
 };
 }
 #endif // COLOR_TAB_H

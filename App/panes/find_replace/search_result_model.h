@@ -109,6 +109,8 @@ private:
                   const QRect &rect, const QModelIndex &index) const;
 
     QString m_tabString;
+    QColor m_lineNumberBackground;
+    QColor m_selectedBackground;
 };
 
 

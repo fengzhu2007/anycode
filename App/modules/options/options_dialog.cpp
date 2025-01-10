@@ -1,16 +1,16 @@
 #include "options_dialog.h"
 #include "ui_options_dialog.h"
 #include "options_model.h"
-#include "addon_loader.h"
 #include "app_oss.h"
-
 #include "environment_option_widget.h"
 #include "texteditor_option_widget.h"
-
 #include "storage/common_storage.h"
-
+#include "components/message_dialog.h"
+#include "core/event_bus/publisher.h"
+#include "core/event_bus/type.h"
 #include <QJsonDocument>
 #include <QKeyEvent>
+#include <QDebug>
 
 static int Version = 1;
 static QString Name = "AnyCode Options";
@@ -77,6 +77,12 @@ void OptionsDialog::setCurrentIndex(int row){
     ui->label->setText(widget->windowTitle());
 }
 
+void OptionsDialog::notifyChanged(const QString& name,const QVariant& value){
+    for(auto one:d->list){
+        one->notifyChanged(name,value);
+    }
+}
+
 void OptionsDialog::keyPressEvent(QKeyEvent *e){
     if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
         e->ignore();
@@ -93,10 +99,10 @@ void OptionsDialog::onActivate(const QModelIndex& index){
 
 void OptionsDialog::onSave(){
     QJsonObject options = {};
+    int state = 0;
     for(auto one:d->list){
-        one->apply();
+        one->apply(&state);
         options.insert(one->name(),one->toJson());
-
     }
     QJsonObject data = {
             {"version",Version},
@@ -105,9 +111,15 @@ void OptionsDialog::onSave(){
     };
     QJsonDocument doc;
     doc.setObject(data);
-    //qDebug()<<doc.toJson();
     CommonStorage().replace(CommonStorage::OPTIONS,doc.toJson());
 
+    if((state&OptionWidget::Restart)==OptionWidget::Restart){
+        //restart application
+        if(MessageDialog::confirm(this,tr("Restart required"),tr("The settings are modified and need to be restarted to take effect; Restart now?"))==QMessageBox::Yes){
+            Publisher::getInstance()->post(Type::M_RESTART);
+            return ;
+        }
+    }
     this->close();
 }
 

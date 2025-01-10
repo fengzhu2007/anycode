@@ -140,10 +140,7 @@ public:
 ListView::ListView(QWidget* parent)
     :QScrollArea(parent)
 {
-    this->setStyleSheet(""
-                        ".ady--ListView>QWidget#qt_scrollarea_viewport>.QWidget{background-color:white;}"
-                        "ady--ListViewItem[state='1']{background-color:#d9e0f8}"
-                        "ady--ListViewItem:hover{background-color:#c9def5}");
+
     d = new ListViewPrivate();
     QWidget* widget = this->widget();
     if(widget==nullptr){

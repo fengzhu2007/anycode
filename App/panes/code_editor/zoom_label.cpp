@@ -1,5 +1,5 @@
 #include "zoom_label.h"
-
+#include "core/theme.h"
 #include <QStringListModel>
 #include <QMouseEvent>
 #include <QMenu>
@@ -9,8 +9,10 @@ namespace ady{
 static int zooms[] = {20,50,70,100,150,200,400};
 
 ZoomLabel::ZoomLabel(QWidget* parent):QLabel(parent) {
-    this->setStyleSheet(QLatin1String("QLabel{padding:0 8px}"
-                                      "QLabel::hover{background:#C9DEF5;border:1px solid #007acc;}"));
+    auto theme = Theme::getInstance();
+    auto secondaryColor = theme->secondaryColor().name(QColor::HexRgb);
+    this->setStyleSheet("QLabel{padding:0 8px}"
+                                      "QLabel::hover{background:"+secondaryColor+";border:1px solid #007acc;}");
 }
 
 

@@ -20,9 +20,10 @@ public:
 
 
     virtual QString name() override;
-    virtual void apply() override;
+    virtual void apply(int *state) override;
     virtual void initValue(const QJsonObject& value) override;
     virtual QJsonObject toJson() override;
+    virtual void notifyChanged(const QString& name,const QVariant& value) override;
 
     void initView();
 

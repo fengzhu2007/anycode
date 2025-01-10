@@ -1,5 +1,5 @@
 #include "app_oss.h"
-
+#include "core/theme.h"
 
 
 namespace ady{
@@ -9,7 +9,7 @@ QString AppOSS::global(){
 
 
 
-    return QString::fromUtf8(".QStatusBar{background: #007acc;}"
+    /*return QString::fromUtf8(".QStatusBar{background: #007acc;}"
                              ".QStatusBar::item{border:0;}"
                              ".ady--PasswordEdit,.QLineEdit{height:24px;border:1px solid #ccc;font-size:12px;}"
                              ".ady--PasswordEdit:focus,.QLineEdit:focus,.ady--PasswordEdit:hover,.QLineEdit:hover{border:1px solid #007acc}"
@@ -29,19 +29,21 @@ QString AppOSS::global(){
 
 
 #endif
-                             ".QComboBox{height:24px}");
+                             ".QComboBox{height:24px}");*/
+    return {};
 }
 
 
 QString AppOSS::options(){
     //201,222,245
-    return QString::fromUtf8(".QLineEdit,.QSpinBox{border:1px solid #ccc;height:22px;}"
-                             ".QLineEdit:focus,QSpinBox:focus{border:1px solid #007acc}"
-                             ".QComoboBox{height:32px;}"
-                             ".QListView{padding:0;border:1px solid #ccc;}"
-                             ".QListView::item{height:30px;border:1px solid white; }"
-                             ".QListView::item:hover{border:1px solid #c9def5;background-color:#c9def5 }"
-                             ".QListView::item:selected{border:1px solid #007acc;background-color:#007acc;color:#fff;}"
+    auto theme = Theme::getInstance();
+    auto primaryColor = theme->primaryColor().name(QColor::HexRgb);
+    auto secondaryColor = theme->secondaryColor().name(QColor::HexRgb);
+    auto textColor = theme->textColor().name(QColor::HexRgb);
+    return (".QListView{border:1px solid "+secondaryColor+"}"
+            ".QListView::item{height:30px; }"
+                             ".QListView::item:hover{border:1px solid "+secondaryColor+";background-color:"+secondaryColor+" }"
+                             ".QListView::item:selected{border:1px solid "+primaryColor+";background-color:"+primaryColor+";color:"+textColor+";}"
                              ".QTabBar::tab{height:24px}");
 }
 

@@ -57,8 +57,7 @@ CodeEditorPane::CodeEditorPane(QWidget *parent)
     widget->setObjectName("widget");
     ui->setupUi(widget);
     this->setCenterWidget(widget);
-    this->setStyleSheet(".ady--CodeEditorPane>#widget{background-color:#f5f5f5}"
-                        ".ady--CodeEditorPane>#widget>#infoBar>QLabel{padding:0 2px;}");
+    this->setStyleSheet(".ady--CodeEditorPane>#widget>#infoBar>QLabel{padding:0 2px;}");
 
     CodeEditorManager::getInstance()->append(this);
     CodeEditorPane::SN += 1;
@@ -200,7 +199,7 @@ void CodeEditorPane::save(bool rename){
 }
 
 void CodeEditorPane::contextMenu(const QPoint& pos){
-    QMenu contextMenu;
+    QMenu contextMenu(this);
     auto instance = CodeEditorManager::getInstance();
     if(instance!=nullptr){
         instance->tabContextMenu(this,&contextMenu);

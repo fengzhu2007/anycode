@@ -11,9 +11,10 @@ public:
     virtual ~OptionTab();
 
     virtual QString name()=0;
-    virtual void apply();
+    virtual void apply(int *state);
     virtual void initValue(const QJsonObject& value);
     virtual QJsonObject toJson();
+    virtual void notifyChanged(const QString& name,const QVariant& value);
 
 
 };

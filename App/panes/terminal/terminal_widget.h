@@ -36,6 +36,7 @@ private:
 
 private:
     TerminalWidgetPrivate* d;
+    bool isDestory = false;
 
 
 };

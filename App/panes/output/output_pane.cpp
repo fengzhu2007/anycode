@@ -4,6 +4,8 @@
 #include "core/event_bus/type.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/event_data.h"
+#include "core/theme.h"
+#include "components/list_item_delegate.h"
 #include <QAction>
 
 namespace ady{
@@ -32,7 +34,8 @@ OutputPane::OutputPane(QWidget *parent):DockingPane(parent),ui(new Ui::OutputPan
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     this->setWindowTitle(tr("Output"));
-    this->setStyleSheet("QToolBar{border:0px;}");
+    this->setStyleSheet("QToolBar{border:0px;}"
+                        "QTextBrowser{border:0;background-color:"+Theme::getInstance()->backgroundColor().name(QColor::HexRgb)+";}");
 
     d = new OutputPanePrivate;
 
@@ -40,6 +43,8 @@ OutputPane::OutputPane(QWidget *parent):DockingPane(parent),ui(new Ui::OutputPan
     connect(ui->actionClear,&QAction::triggered,this,&OutputPane::onActionTriggered);
     connect(ui->actionAuto_Wrapping,&QAction::triggered,this,&OutputPane::onActionTriggered);
     connect(ui->source,QOverload<int>::of(&QComboBox::currentIndexChanged),this,&OutputPane::onIndexChanged);
+
+    ui->source->setItemDelegate(new ListItemDelegate(ui->source));
 
 
     this->initView();

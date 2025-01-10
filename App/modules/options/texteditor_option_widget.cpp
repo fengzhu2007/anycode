@@ -37,9 +37,9 @@ QString TextEditorOptionWidget::name(){
     return QLatin1String("texteditor");
 }
 
-void TextEditorOptionWidget::apply(){
+void TextEditorOptionWidget::apply(int *state){
     for(auto one:d->list){
-        one->apply();
+        one->apply(state);
     }
 }
 
@@ -51,6 +51,12 @@ void TextEditorOptionWidget::initValue(const QJsonObject& value){
 
 QJsonObject TextEditorOptionWidget::toJson() {
     return TextEditor::TextEditorSettings::instance()->toJson();
+}
+
+void TextEditorOptionWidget::notifyChanged(const QString& name,const QVariant& value){
+    for(auto one:d->list){
+        one->notifyChanged(name,value);
+    }
 }
 
 void TextEditorOptionWidget::initView(){

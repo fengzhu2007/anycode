@@ -1,4 +1,5 @@
 #include "search_result_model.h"
+#include "core/theme.h"
 #include <QPainter>
 #include <QApplication>
 #include <QPalette>
@@ -307,6 +308,12 @@ SearchResultItemDelegate::SearchResultItemDelegate(int tabWidth, QObject *parent
     : QItemDelegate(parent)
 {
     setTabWidth(tabWidth);
+
+    auto theme = Theme::getInstance();
+    this->m_lineNumberBackground = theme->secondaryColor();
+    this->m_selectedBackground = theme->primaryColor();
+
+
 }
 
 const int lineNumberAreaHorizontalPadding = 4;
@@ -446,7 +453,7 @@ QSize SearchResultItemDelegate::sizeHint(const QStyleOptionViewItem &option,
     const QRect textMaxRect(0, 0, INT_MAX / 256, height);
     const QRect textLayoutRect = textRectangle(nullptr, textMaxRect, info.option.font, text);
     const QRect textRect(info.textRect.x(), info.textRect.y(), textLayoutRect.width(), height);
-    const QRect layoutRect = info.checkRect | info.pixmapRect | info.lineNumberRect | textRect;
+    //const QRect layoutRect = info.checkRect | info.pixmapRect | info.lineNumberRect | textRect;
     //return QSize(layoutRect.x(), layoutRect.y()) + layoutRect.size();
     return QSize(0, height);
 }
@@ -470,9 +477,9 @@ int SearchResultItemDelegate::drawLineNumber(QPainter *painter, const QStyleOpti
         cg = QPalette::Disabled;
 
     if(isSelected){
-        painter->fillRect(lineNumberAreaRect.adjusted(-lineNumberAreaRect.left(),0,0,0),QColor(147,195,233));
+        painter->fillRect(lineNumberAreaRect.adjusted(-lineNumberAreaRect.left(),0,0,0),this->m_selectedBackground);
     }else{
-        painter->fillRect(lineNumberAreaRect,QColor(221,221,221));
+        painter->fillRect(lineNumberAreaRect,this->m_lineNumberBackground);
     }
 
     QStyleOptionViewItem opt = option;
@@ -555,8 +562,8 @@ void SearchResultItemDelegate::drawText(QPainter *painter,
     QStyleOptionViewItem baseOption = option;
     baseOption.state &= ~QStyle::State_Selected;
     if (isSelected) {
-        painter->fillRect(beforeHighlightRect.adjusted(0, 0, textMargin, 0),QColor(147,195,233));
-        painter->fillRect(afterHighlightRect.adjusted(textMargin, 0, textMargin, 0),QColor(147,195,233));
+        painter->fillRect(beforeHighlightRect.adjusted(0, 0, textMargin, 0),this->m_selectedBackground);
+        painter->fillRect(afterHighlightRect.adjusted(textMargin, 0, textMargin, 0),this->m_selectedBackground);
     }
     const QColor highlightBackground =
         index.model()->data(index, SearchResultModel::ResultHighlightBackgroundColor).value<QColor>();
@@ -568,8 +575,8 @@ void SearchResultItemDelegate::drawText(QPainter *painter,
     QStyleOptionViewItem noHighlightOpt = baseOption;
     noHighlightOpt.rect = beforeHighlightRect;
     noHighlightOpt.textElideMode = Qt::ElideNone;
-    //if (isSelected)
-        //noHighlightOpt.palette.setColor(QPalette::Text, noHighlightOpt.palette.color(cg, QPalette::HighlightedText));
+    if (isSelected)
+        noHighlightOpt.palette.setColor(QPalette::Text, noHighlightOpt.palette.color(cg, QPalette::HighlightedText));
     QItemDelegate::drawDisplay(painter, noHighlightOpt, beforeHighlightRect, textBefore);
 
     // Highlight text

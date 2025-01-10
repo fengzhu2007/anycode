@@ -3,13 +3,14 @@
 namespace ady{
 class LightThemePrivate{
 public:
-    QColor color;
-    QColor primaryColor;
-    QColor secondaryColor;
-    QColor backgroundColor;
-    QColor textColor;
-    QColor primaryTextColor;
-    QColor secondaryTextColor;
+    const QColor color;
+    const QColor primaryColor;
+    const QColor secondaryColor;
+    const QColor backgroundColor;
+    const QColor textColor;
+    const QColor primaryTextColor;
+    const QColor secondaryTextColor;
+    const QColor borderColor;
 
     LightThemePrivate():
         color("#EEEEF2"),
@@ -18,7 +19,8 @@ public:
         backgroundColor("#f5f5f5"),
         textColor(Qt::black),
         primaryTextColor(Qt::white),
-        secondaryTextColor(Qt::gray)
+        secondaryTextColor(Qt::gray),
+        borderColor("#ccc")
     {
 
     }
@@ -70,6 +72,10 @@ QColor LightTheme::secondaryTextColor(){
     return d->secondaryTextColor;
 }
 
+QColor LightTheme::borderColor(){
+    return d->borderColor;
+}
+
 DockingTheme* LightTheme::docking(){
     return nullptr;
 }
@@ -78,6 +84,10 @@ QString LightTheme::qss(){
                              ".QStatusBar::item{border:0;}"
                              ".ady--PasswordEdit,.QLineEdit{height:24px;border:1px solid #ccc;font-size:12px;}"
                              ".ady--PasswordEdit:focus,.QLineEdit:focus,.ady--PasswordEdit:hover,.QLineEdit:hover{border:1px solid #007acc}"
+                             ".ady--ListView>QWidget#qt_scrollarea_viewport>.QWidget{background-color:white;}"
+                             "ady--ListViewItem[state='1']{background-color:#d9e0f8}"
+                             "ady--ListViewItem:hover{background-color:#c9def5}"
+                             "QTreeView{border:0;background:#f5f5f5}"
 
 #ifdef Q_OS_WIN
                              ".QSpinBox{border:1px solid #ccc;font-size:12px;height:24px;}"

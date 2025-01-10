@@ -91,7 +91,7 @@ CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
     //init opened model
     ResourceManagerOpenedModel::init(this);
 
-    CodeLint::reload({});
+    //CodeLint::reload({});
 
 }
 
