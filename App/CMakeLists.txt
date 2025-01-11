@@ -273,6 +273,7 @@ add_library(App SHARED
         themes/light_theme.h themes/light_theme.cpp
         themes/dark_theme.h themes/dark_theme.cpp
         ide_application.h ide_application.cpp
+        panes/code_editor/cmdlint/php_lint.h panes/code_editor/cmdlint/php_lint.cpp
 
 
 

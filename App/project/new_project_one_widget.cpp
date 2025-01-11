@@ -2,7 +2,9 @@
 #include "ui_new_project_one_widget.h"
 #include "new_project_window.h"
 #include "storage/project_storage.h"
-#include "w_toast.h"
+#include <w_toast.h>
+#include "components/list_item_delegate.h"
+#include "core/theme.h"
 #include <QFileDialog>
 #include <QDir>
 #include <QStyleOption>
@@ -22,6 +24,13 @@ NewProjectOneWidget::NewProjectOneWidget(QWidget *parent) :
 {
     d = new NewProjectOneWidgetPrivate;
 
+
+    auto theme = Theme::getInstance();
+    auto backgroundColor = theme->backgroundColor().name(QColor::HexRgb);
+
+    this->setStyleSheet((
+                                         "#footer{background-color:"+backgroundColor+"}"));
+
     ui->setupUi(this);
 
     NewProjectWindow* window = (NewProjectWindow*)this->parentWidget()->parentWidget();
@@ -31,8 +40,7 @@ NewProjectOneWidget::NewProjectOneWidget(QWidget *parent) :
 
     ui->cvs->addItems(QStringList{QString::fromUtf8("Git"),QString::fromUtf8("SVN"),});
     ui->cvs->setCurrentIndex(-1);
-
-
+    ui->cvs->setItemDelegate(new ListItemDelegate(ui->cvs));
 
     this->initData();
 }

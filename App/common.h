@@ -2,8 +2,8 @@
 #define COMMON_H
 #include <QObject>
 const QString APP_NAME = QObject::tr("AnyCode");
-const QString APP_VERSION = QObject::tr("0.9.0 Beta");
-const int APP_VERSIONID = 1;
+const QString APP_VERSION = QObject::tr("1.0.0");
+const int APP_VERSIONID = 2;
 const QString APP_URL = QLatin1String("https://www.anycode.xyz/");
 const QString APP_PROJECT_URL = QLatin1String("https://github.com/fengzhu2007/anycode");
 const QString APP_DONATE_URL = QLatin1String("https://www.anycode.xyz/donate");

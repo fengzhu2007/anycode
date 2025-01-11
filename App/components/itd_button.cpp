@@ -21,11 +21,7 @@ public:
 ITDButton::ITDButton(QWidget* parent)
     :QFrame(parent)
 {
-    this->setStyleSheet("ady--ITDButton{background-color:#eeebeb;border:1px solid #eeebeb;}"
-                        "ady--ITDButton[state='hover']{background-color:#c9def5}"
-                        "ady--ITDButton QLabel#title{font-size:16px;color:#333}"
-                        "ady--ITDButton QLabel#description{font-size:12px;color:#999}"
-                        "ady--ITDButton QLabel#icon{width:32px;height:32px;}");
+
     d = new ITDButtonPrivate;
     d->icon = new QLabel(this);
     d->icon->setObjectName("icon");
@@ -35,7 +31,7 @@ ITDButton::ITDButton(QWidget* parent)
     d->description->setObjectName("description");
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->addSpacing(20);
-    layout->setContentsMargins(0,10,20,10);
+    layout->setContentsMargins(0,17,20,17);
     this->setLayout(layout);
 
     QVBoxLayout* vLayout = new QVBoxLayout();

@@ -11,9 +11,10 @@
 #include "interface/form_panel.h"
 #include "components/message_dialog.h"
 #include "components/list_item_delegate.h"
-#include "w_toast.h"
+#include <w_toast.h>
 #include "core/event_bus/type.h"
 #include "core/event_bus/publisher.h"
+#include "core/theme.h"
 #include <QStyleOption>
 #include <QPainter>
 #include <QPushButton>
@@ -34,10 +35,17 @@ NewProjectTwoWidget::NewProjectTwoWidget(QWidget *parent) :
     ui(new Ui::NewProjectTwoWidget)
 {
     d = new NewProjectTwoWidgetPrivate;
-    this->setStyleSheet(QString::fromUtf8("QTabWidget::pane{border:0;border-top:1px solid #ccc}"
+
+    auto theme = Theme::getInstance();
+    auto backgroundColor = theme->backgroundColor().name(QColor::HexRgb);
+    auto borderColor = theme->borderColor().name(QColor::HexRgb);
+
+    this->setStyleSheet(("QTabWidget::pane{border:0;border-top:1px solid "+borderColor+"}"
                                           "QAbstractScrollArea>QWidget{background:transparent}"
-                                          ".QTabWidget::pane{border-top:1px solid #ccc;margin-top:-1px}"
-                                        ".QTabBar::tab{height:28px}"));
+                                          ".QTabWidget::pane{border-top:1px solid "+borderColor+";margin-top:-1px}"
+                                        ".QTabBar::tab{height:28px}"
+                                          "QLabel#label{padding-left:22px;}"
+                                          "#footer{background-color:"+backgroundColor+"}"));
     ui->setupUi(this);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 

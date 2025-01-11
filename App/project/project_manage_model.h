@@ -31,6 +31,7 @@ private:
 
 class ProjectManageModelPrivate;
 class ANYENGINE_EXPORT ProjectManageModel : public ListViewModel{
+    Q_OBJECT
 public:
     ProjectManageModel(ListView* parent);
     virtual int count() override;
@@ -39,6 +40,8 @@ public:
     void setDataSource(QList<ProjectRecord> list);
     ProjectRecord itemAt(int i);
 
+signals:
+    void editClicked(int i);
 private:
     ProjectManageModelPrivate* d;
 

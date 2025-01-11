@@ -7,8 +7,11 @@
 #include "panes/resource_manager/resource_manager_model.h"
 #include "components/message_dialog.h"
 #include "storage/recent_storage.h"
+#include "code_lint.h"
 
 #include <textdocument.h>
+#include <textdocumentlayout.h>
+#include <textmark.h>
 #include <texteditorsettings.h>
 #include <tabsettings.h>
 #include <fontsettings.h>
@@ -28,6 +31,7 @@
 #include <QDesktopServices>
 #include <QTextCodec>
 #include <QTimer>
+#include <QProcess>
 #include <QDebug>
 
 
@@ -104,6 +108,9 @@ void CodeEditorPane::initView(){
 
     //ui->charset->setText(QLatin1String("UTF-8"));
     this->updateInfoBar();
+
+
+    ui->editor->setMarksVisible(true);
 
 }
 
@@ -307,6 +314,12 @@ bool CodeEditorPane::writeFile(const QString& path,bool autoSave){
     auto ret = ui->editor->textDocument()->save(&error,Utils::FilePath::fromString(path),autoSave);
     if(ret==false){
         wToast::showText(error);
+    }else{
+        //check Semantic
+        auto info = CodeLint::checking(path);
+        if(info.level==CodeErrorInfo::Error){
+            //mark error
+        }
     }
     return ret;
 }
@@ -459,6 +472,20 @@ void CodeEditorPane::showEvent(QShowEvent* e){
             this->invokeFileState();
         });
     }
+
+    /*QTimer::singleShot(1000,[this]{
+        //TextEditor::TextDocument::
+        TextEditor::TextBlockUserData *userData = TextEditor::TextDocumentLayout::userData(ui->editor->document()->firstBlock());
+        if (userData){
+            auto mark = new TextEditor::TextMark(Utils::FilePath::fromString(this->path()),1,"11");
+            mark->setIcon(QIcon(":/Resource/icons/Backwards_16x.svg"));
+            mark->setBaseTextDocument(this->editor()->textDocument());
+            mark->setDefaultToolTip(tr("error1111"));
+            //mark->setLineAnnotation("errorrrrrrr");
+            //mark->setVisible(true);
+            userData->addMark(mark);
+        }
+    });*/
 }
 
 void CodeEditorPane::resizeEvent(QResizeEvent* e){

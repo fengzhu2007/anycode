@@ -5,6 +5,7 @@
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/type.h"
+#include "core/theme.h"
 #include <QDebug>
 namespace ady {
 OpenProjectWindow* OpenProjectWindow::instance=nullptr;
@@ -12,8 +13,12 @@ OpenProjectWindow::OpenProjectWindow(QWidget* parent)
     :wDialog(parent),
      ui(new Ui::OpenProjectWindow)
 {
-    this->setStyleSheet("QPushButton{height:22px}"
-                        "QScrollArea{border:0;}");
+
+    auto theme = Theme::getInstance();
+    auto backgroundColor = theme->backgroundColor().name(QColor::HexRgb);
+    this->setStyleSheet("QPushButton{height:20px}"
+                        "QScrollArea{border:0;}"
+                        "#footer{background:"+backgroundColor+"}");
     ui->setupUi(this);
     this->resetupUi();
     connect(ui->okButton,&QPushButton::clicked,this,&OpenProjectWindow::onSelected);

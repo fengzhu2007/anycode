@@ -18,9 +18,9 @@ public:
 
 ProjectItemWidget::ProjectItemWidget(QWidget* parent)
     :ListViewItem(parent){
-    this->setStyleSheet("ady--ProjectItemWidget QLabel#description{color:#999}"
+    /*this->setStyleSheet("ady--ProjectItemWidget QLabel#description{color:#999}"
                         "ady--ProjectItemWidget QPushButton{padding:0;background-color:transparent;border:1px solid transparent;}"
-                        "ady--ProjectItemWidget QPushButton:hover{background-color:#e5f1fb;border:1px solid #007acc;}");
+                        "ady--ProjectItemWidget QPushButton:hover{background-color:#e5f1fb;border:1px solid #007acc;}");*/
     d = new ProjectItemWidgetPrivate;
     QHBoxLayout* layout = new QHBoxLayout();
     QVBoxLayout* vLayout = new QVBoxLayout();
@@ -85,8 +85,8 @@ ListViewItem* ProjectManageModel::item(int i){
     if(w==nullptr){
         w = new ProjectItemWidget(d->listview->widget());
         ListViewModel::addWidget(w);
-        NewProjectZeroWidget* widget = (NewProjectZeroWidget*)d->listview->parentWidget();
-        connect(w,&ProjectItemWidget::editClicked,widget,&NewProjectZeroWidget::onProjectEditClicked);
+        //NewProjectZeroWidget* widget = (NewProjectZeroWidget*)d->listview->parentWidget();
+        connect(w,&ProjectItemWidget::editClicked,this,&ProjectManageModel::editClicked);
     }
     ProjectRecord one = d->list.at(i);
     w->setTitle(one.name);
