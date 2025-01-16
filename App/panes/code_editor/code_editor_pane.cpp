@@ -11,10 +11,10 @@
 
 #include <textdocument.h>
 #include <textdocumentlayout.h>
-#include <textmark.h>
 #include <texteditorsettings.h>
 #include <tabsettings.h>
 #include <fontsettings.h>
+
 #include <w_toast.h>
 
 
@@ -111,7 +111,6 @@ void CodeEditorPane::initView(){
 
 
     ui->editor->setMarksVisible(true);
-
 }
 
 CodeEditorPane::~CodeEditorPane(){
@@ -305,6 +304,9 @@ bool CodeEditorPane::readFile(const QString& path){
     if(ret!=Core::IDocument::OpenResult::Success){
         wToast::showText(error);
         return false;
+    }else{
+        //checkSemantic
+        this->checkSemantic();
     }
     return true;
 }
@@ -316,10 +318,8 @@ bool CodeEditorPane::writeFile(const QString& path,bool autoSave){
         wToast::showText(error);
     }else{
         //check Semantic
-        auto info = CodeLint::checking(path);
-        if(info.level==CodeErrorInfo::Error){
-            //mark error
-        }
+        this->checkSemantic();
+
     }
     return ret;
 }
@@ -373,11 +373,31 @@ bool CodeEditorPane::isModification(){
 void CodeEditorPane::reload(){
     auto textDocument = ui->editor->textDocument();
     QString errorMsg;
-    textDocument->reload(&errorMsg);
+    bool ret = textDocument->reload(&errorMsg);
     if(!errorMsg.isEmpty()){
         qDebug()<<"reload error:"<<errorMsg;
     }
+    if(ret){
+        //code lint checking
+        this->checkSemantic();
+    }
     this->updateInfoBar();
+}
+
+void CodeEditorPane::checkSemantic(){
+    auto infolist = CodeLint::checking(ui->editor->textDocument());
+    auto editor = this->editor();
+    editor->clearSemanticError();//clear before
+    if(infolist.length()>0){
+        for(auto info:infolist){
+            if(info.level!=CodeErrorInfo::None){
+                //mark error
+                editor->addSemanticError(info.line,info.column,info.length,info.message);
+            }else{
+                editor->clearSemanticError();
+            }
+        }
+    }
 }
 
 CodeEditorPane* CodeEditorPane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
@@ -473,19 +493,7 @@ void CodeEditorPane::showEvent(QShowEvent* e){
         });
     }
 
-    /*QTimer::singleShot(1000,[this]{
-        //TextEditor::TextDocument::
-        TextEditor::TextBlockUserData *userData = TextEditor::TextDocumentLayout::userData(ui->editor->document()->firstBlock());
-        if (userData){
-            auto mark = new TextEditor::TextMark(Utils::FilePath::fromString(this->path()),1,"11");
-            mark->setIcon(QIcon(":/Resource/icons/Backwards_16x.svg"));
-            mark->setBaseTextDocument(this->editor()->textDocument());
-            mark->setDefaultToolTip(tr("error1111"));
-            //mark->setLineAnnotation("errorrrrrrr");
-            //mark->setVisible(true);
-            userData->addMark(mark);
-        }
-    });*/
+
 }
 
 void CodeEditorPane::resizeEvent(QResizeEvent* e){

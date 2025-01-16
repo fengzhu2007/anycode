@@ -1,14 +1,16 @@
 #ifndef PHP_LINT_H
 #define PHP_LINT_H
-#include "../code_lint.h"
+#include "interface/code_parse_lint.h"
 #include <QString>
-
+#include <QString>
 namespace ady{
-class PHPLint
+class PHPLint : public CodeParseLint
 {
 public:
-    PHPLint(const QString& path);
-    CodeErrorInfo parse();
+    PHPLint();
+    virtual QList<CodeErrorInfo> parse(const QString& source,const QString& path) override;
+private:
+    void command(const QString& path);
 private:
     QString m_output;
 };

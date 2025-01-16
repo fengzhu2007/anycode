@@ -484,7 +484,7 @@ void ServerManageModel::appendItems(QList<FileItem> list,ServerManageModelItem* 
     }
     int size = list.size();
     beginInsertRows(parentIndex,position,position + size);
-    qSort(list.begin(),list.end(),*d->sorting);
+    std::sort(list.begin(),list.end(),*d->sorting);
     for(auto one:list){
         //auto item = new ServerManageModelItem(one.)
         auto item = new ServerManageModelItem(one,parent);

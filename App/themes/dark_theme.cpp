@@ -88,15 +88,15 @@ void DarkTheme::setup(QApplication& app){
     darkPalette.setColor(QPalette::WindowText, d->textColor);
     darkPalette.setColor(QPalette::Base, d->color);
     darkPalette.setColor(QPalette::AlternateBase, d->secondaryColor);
-    darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
-    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+    darkPalette.setColor(QPalette::ToolTipBase, d->color);
+    darkPalette.setColor(QPalette::ToolTipText, d->textColor);
     darkPalette.setColor(QPalette::Text, d->textColor);
     darkPalette.setColor(QPalette::Button,Qt::black);
     darkPalette.setColor(QPalette::ButtonText, d->textColor);
     darkPalette.setColor(QPalette::BrightText, Qt::white);
     darkPalette.setColor(QPalette::Link, d->primaryColor);
 
-    darkPalette.setColor(QPalette::Highlight, d->primaryColor);
+    darkPalette.setColor(QPalette::Highlight, d->textColor);
     darkPalette.setColor(QPalette::HighlightedText, Qt::white);
 
     darkPalette.setColor(QPalette::Light,Qt::black);
@@ -203,7 +203,10 @@ QString DarkTheme::qss(){
                           ".QToolButton:hover{background-color:"+secondaryColor+";}"
                         ".QToolButton:pressed,.QToolButton:checked{background:"+primaryColor+";}"
                              "QToolButton[popupMode='1'] {padding-right: 14px;margin-top:4px;}"
-                             "QToolButton::menu-arrow{top:2px;}");
+                             "QToolButton::menu-arrow{top:2px;}"
+                             //texteditor
+                             ".Utils--FakeToolTip{background-color:"+backgroundColor+"}"
+                             "");
 }
 
 }

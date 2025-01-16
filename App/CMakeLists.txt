@@ -27,8 +27,9 @@ include_directories(SYSTEM "../react-qt/src")
 include_directories(SYSTEM "../3party/qscintilla/src")
 include_directories(SYSTEM "../3party/libvterm/include")
 include_directories(SYSTEM "../3party/libptyqt")
-include_directories(SYSTEM "E:/php-src/Zend")
-
+include_directories(SYSTEM "../3party/quickjs")
+include_directories(SYSTEM "../3party/tree-sitter/include")
+include_directories(SYSTEM "../3party/tree-sitter/language")
 
 #include_directories(SYSTEM "../3party/scintilla/qt/ScintillaEditBase")
 #include_directories(SYSTEM "../3party/scintilla/include")
@@ -274,6 +275,14 @@ add_library(App SHARED
         themes/dark_theme.h themes/dark_theme.cpp
         ide_application.h ide_application.cpp
         panes/code_editor/cmdlint/php_lint.h panes/code_editor/cmdlint/php_lint.cpp
+        #panes/code_editor/parselint/javascript/javascript_lint.h panes/code_editor/parselint/javascript/javascript_lint.cpp
+        panes/code_editor/parselint/json_lint.h panes/code_editor/parselint/json_lint.cpp
+        panes/code_editor/parselint/javascript_lint.h panes/code_editor/parselint/javascript_lint.cpp
+        #panes/code_editor/cmdlint/python_lint.h panes/code_editor/cmdlint/python_lint.cpp
+        panes/code_editor/parselint/python_lint.h panes/code_editor/parselint/python_lint.cpp
+        interface/code_parse_lint.h interface/code_parse_lint.cpp
+
+
 
 
 
@@ -295,7 +304,12 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Qml Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Quick ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt)
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Qml Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Quick ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt quickjs
+    tree-sitter
+    tree-sitter-json
+    tree-sitter-javascript
+    tree-sitter-python
+)
 
 
 if(QT_VERSION_MAJOR EQUAL 6)

@@ -53,7 +53,7 @@ public:
     bool isModification() override;
     void reload() override;
 
-
+    void checkSemantic();
 
     static CodeEditorPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 

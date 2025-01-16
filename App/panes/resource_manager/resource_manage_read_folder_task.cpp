@@ -27,7 +27,7 @@ bool ResourceManageReadFolderTask::exec(){
     auto model = this->model();
     auto path = this->path();
     auto list = path.split(divider);
-    list = QStringList(QSet<QString>(list.begin(), list.end()).toList());
+    list = QSet<QString>(list.begin(), list.end()).values();
     for(auto one:list){
         QDir dir(one);
         if (!dir.exists()) {

@@ -26,11 +26,15 @@ public:
     explicit CodeEditorView(QWidget* parent);
     ~CodeEditorView();
     void rename(const QString& name);
-    //void delayGoto(int line,int column=0);
+
+    void addSemanticError(int line,int column,int length,const QString& message);
+    void clearSemanticError();
 
 protected:
     virtual void contextMenuEvent(QContextMenuEvent *e) override;
     virtual void showEvent(QShowEvent *e) override;
+
+    void clearSemanticErrorMarks();
 
 private:
     CodeEditorViewPrivate* d;

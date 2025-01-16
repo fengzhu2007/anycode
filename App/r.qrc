@@ -116,5 +116,6 @@
         <file>Resource/icons/dark/CollapseHover_16x.svg</file>
         <file>Resource/icons/dark/Expand_16x.svg</file>
         <file>Resource/icons/dark/ExpandHover_16x.svg</file>
+        <file>Resource/icons/StatusCriticalError_16x.svg</file>
     </qresource>
 </RCC>

@@ -1,16 +1,20 @@
-#include "php_lint.h"
+#include "python_lint.h"
 #include <QProcess>
 #include <QDebug>
 namespace ady{
 
 
-PHPLint::PHPLint():CodeParseLint(){
+PythonLint::PythonLint(const QString& path){
+    QProcess process;
+    process.start("python", QStringList() << "-m py_compile" << path);
+    process.waitForFinished();
+    m_output = process.readAllStandardOutput();
+    QString error = process.readAllStandardError();
 
 }
 
 
-QList<CodeErrorInfo> PHPLint::parse(const QString& source,const QString& path){
-    this->command(path);//do command line
+QList<CodeErrorInfo> PythonLint::parse(){
     CodeErrorInfo info;
     if(!m_output.isEmpty() && m_output.startsWith("No")==false){
         //"\nParse error: syntax error, unexpected '$a' (T_VARIABLE), expecting ';' in D:/wamp/www/test/a.php on line 16\n"
@@ -65,12 +69,5 @@ QList<CodeErrorInfo> PHPLint::parse(const QString& source,const QString& path){
     return {info};
 }
 
-void PHPLint::command(const QString& path){
-    QProcess process;
-    process.start("php", QStringList() << "-l" << path);
-    process.waitForFinished();
-    m_output = process.readAllStandardOutput();
-    //QString error = process.readAllStandardError();
 }
 
-}
