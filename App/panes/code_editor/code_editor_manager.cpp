@@ -86,6 +86,7 @@ CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
     if(d->settings==nullptr){
         d->settings = new TextEditor::TextEditorSettings();
     }
+    CodeLint::init();//init code lint
     TextEditor::TextEditorEnvironment::init();
 
     //init opened model
@@ -98,6 +99,7 @@ CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
 CodeEditorManager::~CodeEditorManager(){
     Subscriber::unReg();
     TextEditor::TextEditorEnvironment::destory();
+    CodeLint::destory();
     delete d;
 }
 

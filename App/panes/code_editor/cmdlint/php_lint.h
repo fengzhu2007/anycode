@@ -8,7 +8,8 @@ class PHPLint : public CodeParseLint
 {
 public:
     PHPLint();
-    virtual QList<CodeErrorInfo> parse(const QString& source,const QString& path) override;
+    virtual void parse(const QString& source,const QString& path) override;
+    virtual QList<CodeErrorInfo> results() override;
 private:
     void command(const QString& path);
 private:

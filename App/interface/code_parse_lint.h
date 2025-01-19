@@ -6,7 +6,7 @@
 
 
 struct TSLanguage;
-
+struct TSNode;
 namespace ady {
 
 class ANYENGINE_EXPORT CodeErrorInfo{
@@ -40,8 +40,18 @@ public:
     virtual ~CodeParseLint();
     virtual void parse(const QString& source,const QString& path);
     virtual QList<CodeErrorInfo> results();
+
 protected:
-    void setup(TSLanguage* l);
+    void setup(const TSLanguage* l);
+    int row();
+    int col();
+    int length();
+    QString& message();
+    void setRow(int row);
+    void setCol(int col);
+    void setLength(int length);
+    void setMessage(const QString& message);
+    void walkErrors(const TSNode& node);
 
 private:
     CodeParseLintPrivate* d;

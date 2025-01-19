@@ -26,7 +26,7 @@ public:
     explicit CodeEditorView(QWidget* parent);
     ~CodeEditorView();
     void rename(const QString& name);
-
+    //line 0-base column 0-base
     void addSemanticError(int line,int column,int length,const QString& message);
     void clearSemanticError();
 

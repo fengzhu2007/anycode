@@ -122,9 +122,9 @@ QString DarkTheme::qss(){
     auto primaryColor = d->primaryColor.name(QColor::HexRgb);
     return (".QStatusBar{background: #007acc;}"
                              ".QStatusBar::item{border:0;}"
-                            "QPushButton{background:#3e3e40;border:1px solid #ccc;padding:4px 6px;margin:1px 6px;min-width:60px;}"
-                            "QPushButton:hover{border-color:"+primaryColor+"}"
-                             "QPushButton:pressed{background:"+primaryColor+";color:white;}"
+                            ".QPushButton{background:#3e3e40;border:1px solid #ccc;padding:4px 6px;margin:1px 6px;min-width:60px;}"
+                            ".QPushButton:hover{border-color:"+primaryColor+"}"
+                             ".QPushButton:pressed{background:"+primaryColor+";color:white;}"
                              "QGroupBox{color:"+textColor+";border:1px solid "+secondaryColor+";margin-top:2ex;padding-top:8px;}"
                             " QGroupBox::title {subcontrol-origin: margin;subcontrol-position: top left;left:10px;}"
                             "QTabBar::tab{background:"+backgroundColor+";}"

@@ -281,6 +281,9 @@ add_library(App SHARED
         #panes/code_editor/cmdlint/python_lint.h panes/code_editor/cmdlint/python_lint.cpp
         panes/code_editor/parselint/python_lint.h panes/code_editor/parselint/python_lint.cpp
         interface/code_parse_lint.h interface/code_parse_lint.cpp
+        panes/code_editor/parselint/css_lint.h panes/code_editor/parselint/css_lint.cpp
+        panes/code_editor/parselint/html_lint.h panes/code_editor/parselint/html_lint.cpp
+        panes/code_editor/parselint/typescript_lint.h panes/code_editor/parselint/typescript_lint.cpp
 
 
 
@@ -309,6 +312,11 @@ target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJ
     tree-sitter-json
     tree-sitter-javascript
     tree-sitter-python
+    tree-sitter-css
+    tree-sitter-html
+    tree-sitter-typescript
+    tree-sitter-cpp
+
 )
 
 

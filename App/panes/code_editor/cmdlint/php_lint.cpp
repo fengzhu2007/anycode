@@ -9,13 +9,15 @@ PHPLint::PHPLint():CodeParseLint(){
 }
 
 
-QList<CodeErrorInfo> PHPLint::parse(const QString& source,const QString& path){
+void PHPLint::parse(const QString& source,const QString& path){
     this->command(path);//do command line
+}
+
+QList<CodeErrorInfo> PHPLint::results(){
     CodeErrorInfo info;
     if(!m_output.isEmpty() && m_output.startsWith("No")==false){
         //"\nParse error: syntax error, unexpected '$a' (T_VARIABLE), expecting ';' in D:/wamp/www/test/a.php on line 16\n"
         //No syntax errors detected in D:/wamp/www/test/a.php\n
-        qDebug()<<m_output;
         int index = 0;
         int state = 0;
         const int CONTENT = 1;
@@ -55,7 +57,10 @@ QList<CodeErrorInfo> PHPLint::parse(const QString& source,const QString& path){
                 if(!ch.isNumber()){
                     //number is end
                     QString number = m_output.mid(start,index - start);
-                    info.line = number.toInt();
+                    info.line = number.toInt() - 1;
+                    if(info.line<0){
+                        info.line = 0;
+                    }
                     break;
                 }
             }
@@ -70,6 +75,7 @@ void PHPLint::command(const QString& path){
     process.start("php", QStringList() << "-l" << path);
     process.waitForFinished();
     m_output = process.readAllStandardOutput();
+    qDebug()<<m_output<<process.readAllStandardError();
     //QString error = process.readAllStandardError();
 }
 

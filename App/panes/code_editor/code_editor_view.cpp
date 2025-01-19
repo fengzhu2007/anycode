@@ -66,17 +66,17 @@ void CodeEditorView::rename(const QString& name){
 
 void CodeEditorView::addSemanticError(int line,int column,int length,const QString& message){
     //this->clearSemanticErrorMarks();
-        if(line<1){
+        if(line<0){
             return ;
         }
         if(length==0){
             auto doc = this->document();
-            if(column>0){
+            if(column>1){
                 column -= 1;
             }
-            length = doc->findBlockByLineNumber(line - 1).length() - column;
-
+            length = doc->findBlockByLineNumber(line).length() - column;
         }
+        line += 1;
         auto textDocument = this->textDocument();
         auto mark = new TextEditor::TextMark(textDocument->filePath(),line,TextEditor::Constants::SEMANTIC_ERROR_ID);
         mark->setIcon(QIcon(":/Resource/icons/StatusCriticalError_16x.svg"));
@@ -100,6 +100,10 @@ void CodeEditorView::addSemanticError(int line,int column,int length,const QStri
         textDocument->addMark(mark);
         auto highlighter = textDocument->syntaxHighlighter();
         //int line, int column, int length, int kind
+        if(column<=0){
+            column = 1;
+        }
+        //qDebug()<<"length:"<<length<<column<<line;
         TextEditor::HighlightingResult hlr(line,column,length,TextEditor::C_ERROR);
         QHash<int, QTextCharFormat> kindToFormat;
         QList<TextEditor::HighlightingResult> results;
