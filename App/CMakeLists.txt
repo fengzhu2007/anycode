@@ -12,8 +12,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Quick)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Quick)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg)
 
 
 
@@ -262,7 +262,7 @@ add_library(App SHARED
         modules/import_export/select_tree_model.h modules/import_export/select_tree_model.cpp
         modules/import_export/import_select_widget.h modules/import_export/import_select_widget.cpp modules/import_export/import_select_widget.ui
         modules/import_export/import_widget.h modules/import_export/import_widget.cpp modules/import_export/import_widget.ui
-        core/extension/extension_engine.h core/extension/extension_engine.cpp
+        #core/extension/extension_engine.h core/extension/extension_engine.cpp
         modules/import_export/backup_restore.h modules/import_export/backup_restore.cpp
         core/quick_pane_impl.h core/quick_pane_impl.cpp
 
@@ -284,6 +284,8 @@ add_library(App SHARED
         panes/code_editor/parselint/css_lint.h panes/code_editor/parselint/css_lint.cpp
         panes/code_editor/parselint/html_lint.h panes/code_editor/parselint/html_lint.cpp
         panes/code_editor/parselint/typescript_lint.h panes/code_editor/parselint/typescript_lint.cpp
+        panes/code_editor/parselint/xml_lint.h panes/code_editor/parselint/xml_lint.cpp
+        panes/code_editor/parselint/cpp_lint.h panes/code_editor/parselint/cpp_lint.cpp
 
 
 
@@ -307,7 +309,7 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Qml Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Quick ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt quickjs
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg   ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt
     tree-sitter
     tree-sitter-json
     tree-sitter-javascript
@@ -316,6 +318,9 @@ target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJ
     tree-sitter-html
     tree-sitter-typescript
     tree-sitter-cpp
+    tree-sitter-xml
+    tree-sitter-dtd
+    tree-sitter-php
 
 )
 

@@ -5,8 +5,8 @@ add_subdirectory(html)
 add_subdirectory(python)
 add_subdirectory(typescript)
 add_subdirectory(cpp)
-
-
+add_subdirectory(xml)
+add_subdirectory(php)
 
 
 

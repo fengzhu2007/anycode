@@ -29,7 +29,7 @@
 #include "core/backend_thread.h"
 #include "core/layout_settings.h"
 #include "core/schedule/schedule.h"
-#include "core/extension/extension_engine.h"
+//#include "core/extension/extension_engine.h"
 #include "modules/options/options_settings.h"
 #include "modules/options/environment_settings.h"
 #include "storage/project_storage.h"
@@ -231,7 +231,7 @@ void IDEWindow::boot(){
     CodeEditorManager::init(m_dockingPaneManager);
     Schedule::init(this);//init Schedule
     //init js engine
-    ExtensionEngine::init(this);
+    //ExtensionEngine::init(this);
 }
 
 void IDEWindow::delayBoot(){

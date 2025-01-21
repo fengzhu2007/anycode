@@ -12,8 +12,10 @@ public:
     virtual QList<CodeErrorInfo> results() override;
 private:
     void command(const QString& path);
+    bool executeFound();
 private:
     QString m_output;
+    static QString executePath;
 };
 }
 #endif // PHP_LINT_H
