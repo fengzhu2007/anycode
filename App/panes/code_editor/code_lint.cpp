@@ -39,6 +39,7 @@ void CodeLint::init(){
         instance->registerParser<CSSLint>("css");
         instance->registerParser<CPPLint>("cpp");
         instance->registerParser<XMLLint>("xml");
+        instance->registerParser<XMLLint>("svg");
     }
 }
 
@@ -77,8 +78,10 @@ QList<CodeErrorInfo> CodeLint::checking(TextEditor::TextDocument* textDocument,c
         }
     }
     return {};
+}
 
-
+void CodeLint::settingsChanged(){
+    PHPLint::settingsChanged();
 }
 
 }

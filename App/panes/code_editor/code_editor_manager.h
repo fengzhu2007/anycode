@@ -12,10 +12,13 @@
 #include <QTextDocument>
 #include <QMenu>
 namespace ady{
+using EditorFactoryFunc = std::function<Editor*(const QJsonObject&)>;
+
 class DockingPaneManager;
 class CodeEditorPane;
 class CodeEditorView;
 class Editor;
+class LanguageSettings;
 class CodeEditorManagerPrivate;
 class ANYENGINE_EXPORT CodeEditorManager : public QObject,public Subscriber
 {
@@ -33,8 +36,10 @@ public:
     QTextDocument* currentDoc();
     QMap<QString,QTextDocument*> docData();
 
-    CodeEditorPane* open(DockingPaneManager* dockingManager,const QString& path,int line=0,int column=0);
-    CodeEditorPane* open(const QString& path);
+    //CodeEditorPane* open(DockingPaneManager* dockingManager,const QString& path,int line=0,int column=0);
+    //CodeEditorPane* open(const QString& path);
+
+    Editor* open(const QString& path,const QString& localPath={},const QString& extension={});
 
     template<class T>
     T* CodeEditorManager::open(DockingPaneManager* dockingManager,const QString& path){
@@ -54,8 +59,16 @@ public:
         return pane;
     }
 
-    void append(CodeEditorPane* pane);
-    void remove(CodeEditorPane* pane);
+    template <typename T>
+    void registerEditor(const QString& suffix){
+        auto docking = this->dockingManager();
+        m_factoryList[suffix] = [docking](const QJsonObject& data){
+            return T::make(docking,data);
+        };
+    }
+
+    void append(Editor* pane);
+    void remove(Editor* pane);
     bool readFileLines(const QString&path);
     void appendToEditor(const QString& path,const QString& text);
     bool appendWatchFile(const QString& path);
@@ -66,21 +79,24 @@ public:
     virtual bool onReceive(Event*) override;
 
     void editorContextMenu(CodeEditorView* editor,QMenu* contextMenu);
-    void tabContextMenu(CodeEditorPane* pane,QMenu* contextMenu);
-
+    void tabContextMenu(Editor* pane,QMenu* contextMenu);
+    DockingPaneManager* dockingManager();
 
 public slots:
     void onFileChanged(const QString &path);
     void onEditorActionTrigger(bool checked=false);
     void onTabActionTrigger();
+    void onLanguageSettingChanged(const LanguageSettings& setting);
 
 private:
     CodeEditorManager(DockingPaneManager* docking_manager);
+    void initEditors();
 
 
 private:
     static CodeEditorManager* instance;
     CodeEditorManagerPrivate* d;
+    std::map<QString,EditorFactoryFunc> m_factoryList;
 };
 
 }

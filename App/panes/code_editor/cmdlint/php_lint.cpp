@@ -1,18 +1,18 @@
 #include "php_lint.h"
+#include "modules/options/options_settings.h"
+#include "modules/options/language_settings.h"
 #include <tree_sitter/api.h>
 #include <php/tree-sitter-php.h>
 #include <QProcess>
 #include <QStandardPaths>
+#include <QFile>
 #include <QDebug>
 namespace ady{
 QString PHPLint::executePath = {};
 
 PHPLint::PHPLint():CodeParseLint(){
     if(executePath.isEmpty()){
-        executePath = QStandardPaths::findExecutable("php");
-    }
-    if(executePath.isEmpty()){
-        executePath = QLatin1String("NotFound");
+        this->initExecutePath();
     }
     if(!this->executeFound()){
         this->setup(tree_sitter_php());
@@ -101,6 +101,37 @@ void PHPLint::command(const QString& path){
 
 bool PHPLint::executeFound(){
     return !executePath.startsWith("NotFound");
+}
+
+void PHPLint::initExecutePath(){
+    auto instance = OptionsSettings::getInstance();
+
+    if(instance!=nullptr){
+         qDebug()<<"111111";
+        auto setting = instance->languageSettings();
+        if(setting.m_phpCmdChecking){
+
+            if(setting.m_phpCmdPath.isEmpty()==false){
+                bool ret = QFile::exists(setting.m_phpCmdPath);
+                if(ret){
+                    executePath = setting.m_phpCmdPath;
+                    //php cmd file exists  using it;
+                    return ;
+                }
+            }
+        }else{
+            executePath = QLatin1String("NotFound");
+            return ;
+        }
+    }
+    executePath = QStandardPaths::findExecutable("php");
+    if(executePath.isEmpty()){
+        executePath = QLatin1String("NotFound");
+    }
+}
+
+void PHPLint::settingsChanged(){
+    executePath.clear();
 }
 
 }

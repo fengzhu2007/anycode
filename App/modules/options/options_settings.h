@@ -4,9 +4,11 @@
 #include <QJsonObject>
 namespace ady{
 class EnvironmentSettings;
+class LanguageSettings;
 class OptionsSettingsPrivate;
-class OptionsSettings
+class OptionsSettings : public QObject
 {
+    Q_OBJECT
 public:
     enum Option{
         Theme=0,
@@ -30,6 +32,12 @@ public:
 
     EnvironmentSettings& environmentSettings();
     void setEnvironmentSettings(const EnvironmentSettings& setting);
+    LanguageSettings& languageSettings();
+    void setLanguageSettings(const LanguageSettings& setting);
+
+signals:
+    void languageChanged(const LanguageSettings&);
+
 private:
     OptionsSettings();
 

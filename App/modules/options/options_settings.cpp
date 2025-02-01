@@ -1,9 +1,11 @@
 #include "options_settings.h"
 #include "storage/common_storage.h"
 #include "environment_settings.h"
+#include "language_settings.h"
 #include <texteditorsettings.h>
 
 static const char environmentKey[] = "environment";
+static const char languageKey[] = "language";
 
 
 namespace ady{
@@ -13,8 +15,7 @@ OptionsSettings* OptionsSettings::instance = nullptr;
 class OptionsSettingsPrivate{
 public:
     EnvironmentSettings environmentSettings;
-
-
+    LanguageSettings languageSettings;
     QJsonObject data;
 
     QString empty_string;
@@ -23,13 +24,16 @@ public:
 };
 
 
-OptionsSettings::OptionsSettings() {
+OptionsSettings::OptionsSettings():QObject() {
     d = new OptionsSettingsPrivate;
     d->data = CommonStorage().options();
     auto options = d->data.find("options")->toObject();
 
     if(options.contains(environmentKey)){
         d->environmentSettings.fromJson(options.find(environmentKey)->toObject());
+    }
+    if(options.contains(languageKey)){
+        d->languageSettings.fromJson(options.find(languageKey)->toObject());
     }
     {
         const QString nameKey = TextEditor::TextEditorSettings::name();
@@ -102,6 +106,18 @@ void OptionsSettings::setEnvironmentSettings(const EnvironmentSettings& setting)
         return ;
     }
     d->environmentSettings = setting;
+}
+
+LanguageSettings& OptionsSettings::languageSettings(){
+    return d->languageSettings;
+}
+
+void OptionsSettings::setLanguageSettings(const LanguageSettings& setting){
+    if(d->languageSettings==setting){
+        return ;
+    }
+    d->languageSettings = setting;
+    emit languageChanged(d->languageSettings);
 }
 
 }

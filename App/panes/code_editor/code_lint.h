@@ -27,6 +27,7 @@ public:
     static CodeLint* getInstance();
     static QList<CodeErrorInfo> checking(const QString& path,const QString& extension={});
     static QList<CodeErrorInfo> checking(TextEditor::TextDocument* textDocument,const QString& extension={});
+    static void settingsChanged();
 
 private:
     CodeLint();

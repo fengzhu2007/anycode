@@ -10,9 +10,11 @@ public:
     PHPLint();
     virtual void parse(const QString& source,const QString& path) override;
     virtual QList<CodeErrorInfo> results() override;
+    static void settingsChanged();
 private:
     void command(const QString& path);
     bool executeFound();
+    void initExecutePath();
 private:
     QString m_output;
     static QString executePath;

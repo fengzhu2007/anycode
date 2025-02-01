@@ -273,8 +273,17 @@ bool IDEWindow::onReceive(Event* e){
         auto one = e->toJsonOf<OpenEditorData>().toObject();
         const QString path = one.find("path")->toString();
         if(!path.isEmpty()){
-            CodeEditorManager::getInstance()->open(m_dockingPaneManager,path,one.find("line")->toInt(0),
-                    one.find("column")->toInt(0));
+            /*CodeEditorManager::getInstance()->open(m_dockingPaneManager,path,one.find("line")->toInt(0),
+                    one.find("column")->toInt(0));*/
+            auto instance = CodeEditorManager::getInstance();
+            auto pane = instance->open(path);
+            auto editor = pane->editor();
+            if(editor){
+                auto line = one.find("line")->toInt(0);
+                auto column = one.find("column")->toInt(0);
+                editor->gotoLine(line,column);
+                editor->setFocus();
+            }
             e->ignore();
             return true;
         }
@@ -346,7 +355,7 @@ void IDEWindow::onActionTriggered(){
     }else if(sender==ui->actionNew_Project){
         NewProjectWindow::open(this);
     }else if(sender==ui->actionNew_File){
-        CodeEditorManager::getInstance()->open(m_dockingPaneManager,"");
+        CodeEditorManager::getInstance()->open("");
     }else if(sender==ui->actionSave_S || sender==ui->actionSave_As_A){
         //save
         //save as
@@ -486,7 +495,7 @@ void IDEWindow::onActionTriggered(){
 }
 
 void IDEWindow::onOpenFile(const QString& path){
-    CodeEditorManager::getInstance()->open(m_dockingPaneManager,path);
+    CodeEditorManager::getInstance()->open(path);
 }
 void IDEWindow::onOpenFolder(const QString& path){
     ProjectRecord record;

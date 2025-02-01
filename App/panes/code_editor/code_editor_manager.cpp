@@ -4,7 +4,7 @@
 #include "docking_pane_container.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/type.h"
-#include "components/message_dialog.h"
+//#include "components/message_dialog.h"
 #include "storage/recent_storage.h"
 #include "panes/resource_manager/resource_manager_opened_model.h"
 #include "editor.h"
@@ -14,8 +14,10 @@
 #include "codeassist/documentcontentcompletion.h"
 //#include "snippets/snippetprovider.h"
 #include "displaysettings.h"
+#include "modules/options/options_settings.h"
 
 #include "code_lint.h"
+#include "../image_editor/image_editor_pane.h"
 
 
 #include <QFileInfo>
@@ -72,6 +74,8 @@ public:
     QAction* floatTabAction=nullptr;
 
 
+
+
 };
 
 CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
@@ -92,7 +96,13 @@ CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
     //init opened model
     ResourceManagerOpenedModel::init(this);
 
-    //CodeLint::reload({});
+    auto instance = OptionsSettings::getInstance();
+    connect(instance,&OptionsSettings::languageChanged,this,&CodeEditorManager::onLanguageSettingChanged);
+
+
+    //init register editor
+    this->initEditors();
+
 
 }
 
@@ -188,7 +198,7 @@ QMap<QString,QTextDocument*> CodeEditorManager::docData(){
     return data;
 }
 
-CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const QString& path,int line,int column){
+/*CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const QString& path,int line,int column){
     auto pane = dynamic_cast<CodeEditorPane*>(this->get(path));
     if(pane==nullptr){
         const QJsonObject data = {{"path",path},{"line",line}};
@@ -210,14 +220,43 @@ CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const
 
 CodeEditorPane* CodeEditorManager::open(const QString& path){
     return this->open(d->docking_manager,path);
+}*/
+
+Editor* CodeEditorManager::open(const QString& path,const QString& localPath,const QString& extension){
+    auto realPath = localPath.isEmpty()?path:localPath;
+    auto pane = this->get(realPath);
+    if(pane==nullptr){
+        QFileInfo fi(realPath);
+        const QString suffix = extension.isEmpty()?fi.suffix().toLower():extension.toLower();
+        for(auto one:m_factoryList){
+            if(one.first==suffix){
+                const QJsonObject data = {{"path",realPath}};
+                pane = one.second(data);
+                break;
+            }
+        }
+        if(pane==nullptr){
+            const QJsonObject data = {{"path",realPath},{"line",0}};
+            pane = CodeEditorPane::make(d->docking_manager,data);
+        }
+        d->docking_manager->createPane(pane,DockingPaneManager::Center,true);
+        //add to open
+        ResourceManagerOpenedModel::getInstance()->appendItem(realPath);
+    }else{
+        pane->activeToCurrent();
+    }
+    if(realPath.isEmpty()==false){
+        RecentStorage().add(RecentStorage::File,realPath);//add to recent
+    }
+    return pane;
 }
 
-void CodeEditorManager::append(CodeEditorPane* pane){
+void CodeEditorManager::append(Editor* pane){
     QMutexLocker locker(&d->mutex);
     d->list.append(pane);
 }
 
-void CodeEditorManager::remove(CodeEditorPane* pane){
+void CodeEditorManager::remove(Editor* pane){
     const QString path = pane->path();
     if(!path.isEmpty()){
         d->watcher->removePath(path);
@@ -474,6 +513,9 @@ void CodeEditorManager::onTabActionTrigger(){
     }
 }
 
+void CodeEditorManager::onLanguageSettingChanged(const LanguageSettings& setting){
+    CodeLint::settingsChanged();
+}
 
 void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextMenu){
     if(d->undoAction==nullptr){
@@ -546,7 +588,7 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
 }
 
 
-void CodeEditorManager::tabContextMenu(CodeEditorPane* pane,QMenu* contextMenu){
+void CodeEditorManager::tabContextMenu(Editor* pane,QMenu* contextMenu){
     if(d->saveAction==nullptr){
         d->saveAction = new QAction(QIcon(":/Resource/icons/Save_16x.svg"),tr("Save(&S)"),this);
         d->closeAction = new QAction(tr("Close(&C)"),this);
@@ -576,4 +618,16 @@ void CodeEditorManager::tabContextMenu(CodeEditorPane* pane,QMenu* contextMenu){
     contextMenu->addSeparator();
     contextMenu->addAction(d->floatTabAction);
 }
+
+DockingPaneManager* CodeEditorManager::dockingManager(){
+    return d->docking_manager;
+}
+
+void CodeEditorManager::initEditors(){
+    this->registerEditor<ImageEditorPane>("png");
+    this->registerEditor<ImageEditorPane>("gif");
+    this->registerEditor<ImageEditorPane>("jpg");
+    this->registerEditor<ImageEditorPane>("jpeg");
+}
+
 }

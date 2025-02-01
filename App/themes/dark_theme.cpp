@@ -96,7 +96,7 @@ void DarkTheme::setup(QApplication& app){
     darkPalette.setColor(QPalette::BrightText, Qt::white);
     darkPalette.setColor(QPalette::Link, d->primaryColor);
 
-    darkPalette.setColor(QPalette::Highlight, d->textColor);
+    darkPalette.setColor(QPalette::Highlight, d->primaryColor);
     darkPalette.setColor(QPalette::HighlightedText, Qt::white);
 
     darkPalette.setColor(QPalette::Light,Qt::black);
@@ -135,7 +135,7 @@ QString DarkTheme::qss(){
                                "QComboBox::down-arrow{image:url(:/Resource/icons/dark/GlyphDown_16x.svg);background-color:"+secondaryColor+";}"
                                "QComboBox::drop-down:hover{background-color:"+backgroundColor+";border-color:"+backgroundColor+";}"
                                "QComboBox::down-arrow:hover{image:url(:/Resource/icons/dark/GlyphDownHover_16x.svg);background-color:"+backgroundColor+";}"
-                             ".ady--PasswordEdit,.QLineEdit{background:#333337;height:24px;border:1px solid "+secondaryColor+";font-size:12px;}"
+                             ".ady--PasswordEdit,.QLineEdit{background:#333337;height:24px;border:1px solid "+secondaryColor+";}"
                              ".ady--PasswordEdit:focus,.QLineEdit:focus,.ady--PasswordEdit:hover,.QLineEdit:hover,.QComoboBox:focus,.QComoboBox:hover{border:1px solid #007acc}"
                                ".ady--PasswordEdit:disabled,QLineEdit:disabled,QComboBox:disabled,QPushButton:disabled{background:#555;color:#c3c3c3}"
 

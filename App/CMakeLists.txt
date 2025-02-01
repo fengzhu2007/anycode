@@ -286,6 +286,15 @@ add_library(App SHARED
         panes/code_editor/parselint/typescript_lint.h panes/code_editor/parselint/typescript_lint.cpp
         panes/code_editor/parselint/xml_lint.h panes/code_editor/parselint/xml_lint.cpp
         panes/code_editor/parselint/cpp_lint.h panes/code_editor/parselint/cpp_lint.cpp
+        components/file_selector.h components/file_selector.cpp
+        modules/options/language_settings.h modules/options/language_settings.cpp
+        modules/options/language_option_widget.h modules/options/language_option_widget.cpp
+        modules/options/language/php_tab.h modules/options/language/php_tab.cpp
+        modules/options/language_option_widget.ui
+        modules/options/language/php_tab.ui
+        panes/image_editor/image_editor_pane.h panes/image_editor/image_editor_pane.cpp
+        panes/image_editor/image_editor_pane.ui
+        panes/image_editor/image_view.h panes/image_editor/image_view.cpp
 
 
 
