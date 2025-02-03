@@ -29,6 +29,7 @@ void ZoomLabel::mousePressEvent(QMouseEvent *e){
     for(int i=0;i<length;i++){
         int zoom = zooms[i];
         contextMenu.addAction(tr("%1%").arg(zooms[i]),[this,zoom]{
+            this->setZoom(zoom);
             emit selected(zoom);
         });
     }

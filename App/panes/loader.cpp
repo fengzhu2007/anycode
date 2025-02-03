@@ -3,6 +3,7 @@
 #include "docking_pane_manager.h"
 #include "panes/resource_manager/resource_manager_pane.h"
 #include "panes/code_editor/code_editor_pane.h"
+#include "panes/code_editor/code_editor_manager.h"
 #include "panes/version_control/version_control_pane.h"
 #include "panes/file_transfer/file_transfer_pane.h"
 #include "panes/find_replace/find_replace_pane.h"
@@ -33,6 +34,10 @@ DockingPane* PaneLoader::init(DockingPaneManager* dockingManager,const QString& 
         pane = TerminalPane::make(dockingManager,data);
     }else if(group == OutputPane::PANE_GROUP){
         pane = OutputPane::make(dockingManager,data);
+    }else{
+        //other editor
+        pane = CodeEditorManager::makePane(group,data);
+
     }
     return pane;
 }

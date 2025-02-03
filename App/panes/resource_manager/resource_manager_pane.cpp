@@ -330,6 +330,7 @@ void ResourceManagerPane::readFolder(ResourceManagerModelItem* item,int action){
     if(item->openList().size()>0){
         path += ResourceManageReadFolderTask::divider + item->openList().join(ResourceManageReadFolderTask::divider);
     }
+    //qDebug()<<"path:"<<path;
     auto task = new ResourceManageReadFolderTask(d->model,path);
     if(action>-1){
         task->setType(action);

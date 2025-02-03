@@ -11,6 +11,7 @@ class DockingPaneManager;
 class ImageEditorPanePrivate;
 class ANYENGINE_EXPORT ImageEditorPane  : public Editor
 {
+    Q_OBJECT
 public:
     explicit ImageEditorPane(QWidget *parent = nullptr);
     ~ImageEditorPane();
@@ -40,6 +41,7 @@ public:
 
     static ImageEditorPane* make(DockingPaneManager* dockingManager,const QJsonObject& data={});
 
+    void onZoom(int zoom);
 
 public:
     static const QString PANE_ID;

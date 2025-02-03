@@ -40,6 +40,7 @@ public:
     //CodeEditorPane* open(const QString& path);
 
     Editor* open(const QString& path,const QString& localPath={},const QString& extension={});
+    static DockingPane* makePane(const QString& group,const QJsonObject& data);
 
     template<class T>
     T* CodeEditorManager::open(DockingPaneManager* dockingManager,const QString& path){
@@ -62,7 +63,7 @@ public:
     template <typename T>
     void registerEditor(const QString& suffix){
         auto docking = this->dockingManager();
-        m_factoryList[suffix] = [docking](const QJsonObject& data){
+        m_factoryList[{suffix,T::PANE_GROUP}] = [docking](const QJsonObject& data){
             return T::make(docking,data);
         };
     }
@@ -96,7 +97,7 @@ private:
 private:
     static CodeEditorManager* instance;
     CodeEditorManagerPrivate* d;
-    std::map<QString,EditorFactoryFunc> m_factoryList;
+    std::map<QPair<QString,QString>,EditorFactoryFunc> m_factoryList;
 };
 
 }

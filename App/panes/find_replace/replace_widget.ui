@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>446</width>
-    <height>312</height>
+    <width>540</width>
+    <height>351</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,6 +19,12 @@
    </property>
    <item>
     <widget class="QComboBox" name="find">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>28</height>
+      </size>
+     </property>
      <property name="editable">
       <bool>true</bool>
      </property>
@@ -29,6 +35,12 @@
    </item>
    <item>
     <widget class="QComboBox" name="replace">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>28</height>
+      </size>
+     </property>
      <property name="editable">
       <bool>true</bool>
      </property>
@@ -126,6 +138,12 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>28</height>
+        </size>
+       </property>
       </widget>
      </item>
      <item>
@@ -183,6 +201,12 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>28</height>
+        </size>
+       </property>
        <property name="editable">
         <bool>true</bool>
        </property>
@@ -215,6 +239,12 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>28</height>
+        </size>
        </property>
        <property name="editable">
         <bool>true</bool>

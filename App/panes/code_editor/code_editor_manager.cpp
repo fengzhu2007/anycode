@@ -229,7 +229,7 @@ Editor* CodeEditorManager::open(const QString& path,const QString& localPath,con
         QFileInfo fi(realPath);
         const QString suffix = extension.isEmpty()?fi.suffix().toLower():extension.toLower();
         for(auto one:m_factoryList){
-            if(one.first==suffix){
+            if(one.first.first==suffix){
                 const QJsonObject data = {{"path",realPath}};
                 pane = one.second(data);
                 break;
@@ -247,6 +247,19 @@ Editor* CodeEditorManager::open(const QString& path,const QString& localPath,con
     }
     if(realPath.isEmpty()==false){
         RecentStorage().add(RecentStorage::File,realPath);//add to recent
+    }
+    return pane;
+}
+
+DockingPane* CodeEditorManager::makePane(const QString& group,const QJsonObject& data){
+    //auto pane = this->get(path);
+    DockingPane* pane=nullptr;
+    for(auto one:instance->m_factoryList){
+        if(one.first.second==group){
+            //const QJsonObject data = {{"path",path}};
+            pane = one.second(data);
+            break;
+        }
     }
     return pane;
 }
