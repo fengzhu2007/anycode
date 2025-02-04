@@ -10,7 +10,7 @@ AboutDialog* AboutDialog::instance = nullptr;
         this->resetupUi();
         ui->appName->setText(APP_NAME + " " + APP_VERSION);
         ui->appBuild->setText(tr("Build:%1").arg(BUILD_TIME));
-        ui->qtVersion->setText(tr("Qt:%1").arg(QT_VERSION_STR));
+        ui->qtVersion->setText(tr("Qt:%1,Compiler:%2").arg(QT_VERSION_STR).arg(COMPILER_INFO));
         ui->appUrl->setText(tr("Home Page:<a href=\"%1\">%2</a>").arg(APP_URL).arg(APP_URL));
         ui->appUrl->setOpenExternalLinks(true);
 

@@ -25,13 +25,14 @@ void ResourceManageTreeView::editIndex(const QModelIndex& index){
 }
 
 void ResourceManageTreeView::closeEditor(QWidget *editor, QAbstractItemDelegate::EndEditHint hint){
-    if(d->index.isValid()){
+    /*if(d->index.isValid()){
         auto item = static_cast<ResourceManagerModelItem*>(d->index.internalPointer());
         if(item->path().isEmpty()){
             static_cast<ResourceManagerModel*>(this->model())->removeItem(item);
         }
         d->index = {};
-    }
+    }*/
+    d->index = {};
     QAbstractItemView::closeEditor(editor,hint);
 }
 

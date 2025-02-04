@@ -2,6 +2,8 @@
 #include "ui_image_editor_pane.h"
 #include "../code_editor/code_editor_pane.h"
 #include "../code_editor/code_editor_manager.h"
+#include "components/message_dialog.h"
+#include "docking_pane_container.h"
 #include "image_view.h"
 namespace ady{
 
@@ -39,6 +41,11 @@ ImageEditorPane::ImageEditorPane(QWidget *parent):Editor(ImageEditor,parent),ui(
 }
 
 ImageEditorPane::~ImageEditorPane(){
+    auto manager = CodeEditorManager::getInstance();
+    if(manager!=nullptr){
+        manager->remove(this);
+    }
+    delete ui;
     delete d;
 }
 
@@ -137,17 +144,41 @@ bool ImageEditorPane::isModification(){
     return false;
 }
 
+
+
 int ImageEditorPane::fileState(){
     return d->state;
 }
 void ImageEditorPane::setFileState(int state){
-
+    d->state |= state;
 }
+
 void ImageEditorPane::invokeFileState(){
-
+    if((d->state & CodeEditorPane::Deleted)==CodeEditorPane::Deleted){
+        const QString path = this->path();
+        if(!QFileInfo::exists(path)){
+            if(MessageDialog::confirm(this,tr("The file \"%1\" is no longer there. \nDo you want to keep it?").arg(path))==QMessageBox::No){
+                //close pane
+                auto container = this->container();
+                if(container!=nullptr){
+                    container->closePane(this);
+                }
+                return ;
+            }
+        }
+        d->state &= (~CodeEditorPane::Deleted);
+    }else if((d->state & CodeEditorPane::Changed)==CodeEditorPane::Changed){
+        const QString path = this->path();
+        if(MessageDialog::confirm(this,tr("\"%1\" \nThis file has been modified by another program.\n Reload?").arg(path))==QMessageBox::Yes){
+            this->reload();
+        }
+        d->state &= (~CodeEditorPane::Changed);
+    }
 }
-void ImageEditorPane::reload(){
 
+
+void ImageEditorPane::reload(){
+    this->readFile(d->path);
 }
 
 CodeEditorView* ImageEditorPane::editor(){

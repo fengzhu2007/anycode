@@ -688,6 +688,7 @@ void ResourceManagerPane::onActionTriggered(){
                 instance->post(new Event(Type::M_WILL_RENAME_FILE,(void*)&path));
                 if(QFile::moveToTrash(one->path())){
                     instance->post(new Event(Type::M_DELETE_FILE,(void*)&pair));
+                    d->model->removeItem(one);
                 }else{
                     instance->post(new Event(Type::M_RENAMED_FILE,(void*)&pair));
                 }
@@ -697,6 +698,7 @@ void ResourceManagerPane::onActionTriggered(){
                 instance->post(new Event(Type::M_WILL_RENAME_FOLDER,(void*)&path));
                 if(QFile::moveToTrash(one->path())){
                     instance->post(new Event(Type::M_DELETE_FOLDER,(void*)&path));
+                    d->model->removeItem(one);
                 }else{
                     foreach(auto one,list){
                         d->model->appendWatchDirectory(one);

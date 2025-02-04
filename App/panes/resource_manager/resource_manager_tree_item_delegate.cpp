@@ -1,6 +1,7 @@
 #include "resource_manager_tree_item_delegate.h"
 #include "resource_manager_model_item.h"
 #include "resource_manager_model.h"
+#include "resource_manage_tree_view.h"
 #include "w_toast.h"
 #include <QTimer>
 #include <QLineEdit>
@@ -95,15 +96,15 @@ void ResourceManagerTreeItemDelegate::setModelData(QWidget *editor, QAbstractIte
         QString text = lineEdit->text();
         auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
         const QString path = item->path();
-        //qDebug()<<"text:"<<text;
+        qDebug()<<"text:"<<text;
         if(text.isEmpty()){
             if(path.isEmpty()){
                 //remove index
                 static_cast<ResourceManagerModel*>(model)->removeItem(item);
             }else{
                 QTimer::singleShot(0, [index, editor]() {
-                    auto treeView = static_cast<QTreeView*>(editor->parentWidget()->parentWidget());
-                    treeView->edit(index);
+                    auto treeView = static_cast<ResourceManageTreeView*>(editor->parentWidget()->parentWidget());
+                    treeView->editIndex(index);
                 });
             }
         }else{
@@ -115,9 +116,10 @@ void ResourceManagerTreeItemDelegate::setModelData(QWidget *editor, QAbstractIte
                 if(fi.exists()){
                     wToast::showText(tr("'%1' already exist.").arg(text));
                     QTimer::singleShot(0, [index, editor]() {
-                        auto treeView = static_cast<QTreeView*>(editor->parentWidget()->parentWidget());
-                        treeView->edit(index);
+                        auto treeView = static_cast<ResourceManageTreeView*>(editor->parentWidget()->parentWidget());
+                        treeView->editIndex(index);
                     });
+
                     return ;
                 }
             }

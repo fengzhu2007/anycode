@@ -641,6 +641,8 @@ void CodeEditorManager::initEditors(){
     this->registerEditor<ImageEditorPane>("gif");
     this->registerEditor<ImageEditorPane>("jpg");
     this->registerEditor<ImageEditorPane>("jpeg");
+    this->registerEditor<ImageEditorPane>("webp");
+    this->registerEditor<ImageEditorPane>("bmp");
 }
 
 }

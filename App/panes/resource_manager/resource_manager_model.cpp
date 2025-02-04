@@ -120,6 +120,7 @@ bool ResourceManagerModel::setData(const QModelIndex &index, const QVariant &val
                     if(!fi.absoluteDir().mkdir(name)){
                         return false;
                     }
+
                 }else{
                     return false;
                 }

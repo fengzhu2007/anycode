@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>420</width>
-    <height>240</height>
+    <width>520</width>
+    <height>279</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -66,7 +66,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
-      <number>10</number>
+      <number>12</number>
      </property>
      <item>
       <spacer name="verticalSpacer">

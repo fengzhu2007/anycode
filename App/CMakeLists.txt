@@ -12,6 +12,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 
 
+set(COMPILER_INFO "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION} ${CMAKE_SYSTEM_PROCESSOR}")
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg)
 
@@ -338,7 +340,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_import_qml_plugins(App)
 endif()
 
-target_compile_definitions(App PRIVATE APP_LIBRARY)
+target_compile_definitions(App PRIVATE APP_LIBRARY COMPILER_INFO="${COMPILER_INFO}")
 
 
 
