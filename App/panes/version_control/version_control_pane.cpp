@@ -32,6 +32,7 @@
 #include <QMenu>
 #include <QDesktopServices>
 #include <QClipboard>
+#include <QTimer>
 #include <QDebug>
 namespace ady{
 
@@ -291,8 +292,11 @@ void VersionControlPane::onUpdateCommit(int rid,void* list){
         auto model = static_cast<CommitModel*>(ui->commitListView->model());
         int count = model->rowCount();
         model->appendList(*commits);
-        if(count==0 && d->repo->error().code==0){
-            this->queryDiff({},{});//workding dir status
+        if((count==0 && d->repo->error().code==0)){
+            //first query commit
+            QTimer::singleShot(100,[this](){
+                this->queryDiff({},{});//workding dir status
+            });
         }
     }
     delete commits;
@@ -605,6 +609,8 @@ void VersionControlPane::onFinished(){
     //d->thread->wait();
     d->thread->deleteLater();
     d->thread = nullptr;
+
+
 }
 
 void VersionControlPane::onUploadToSite(){

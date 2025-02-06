@@ -134,6 +134,7 @@ void ReplaceWidget::onSearchScopeChanged(int i){
 void ReplaceWidget::showEvent(QShowEvent* e){
     QWidget::showEvent(e);
     ui->find->setFocus();
+    ui->findNext->setDefault(true);
 }
 
 }

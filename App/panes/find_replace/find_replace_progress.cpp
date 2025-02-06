@@ -202,6 +202,7 @@ void FindReplaceProgress::run(){
 
     if(!this->isInterruptionRequested()){
         if(d->mode == SearcnOnly){
+            //qDebug()<<"search count"<<d->searchFileCount;
             emit searchResult(d->list,d->matchFileCount,d->searchFileCount);
         }else{
             //emit replaceResult(d->list,d->matchFileCount,d->searchFileCount);
@@ -267,13 +268,13 @@ void FindReplaceProgress::searchFile(const QString& path){
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return ;
     }
-    QByteArray data = file.read(1024);
+    /*QByteArray data = file.read(1024);
     for (char byte : data) {
         if (byte < 0x09 || (byte > 0x0D && byte < 0x20) || byte == 0x7F) {
             file.close();
             return ;
         }
-    }
+    }*/
     d->searchFileCount += 1;
     bool matched = false;
     file.seek(0);

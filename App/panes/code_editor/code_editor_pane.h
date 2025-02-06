@@ -26,7 +26,7 @@ public:
 
     explicit CodeEditorPane(QWidget *parent = nullptr);
     void initView();
-    virtual ~CodeEditorPane();
+    virtual ~CodeEditorPane() override;
     virtual QString id() override;
     virtual QString group() override;
     virtual QString description() override;

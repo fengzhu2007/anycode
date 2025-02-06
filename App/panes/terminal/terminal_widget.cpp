@@ -50,6 +50,7 @@ TerminalWidget::~TerminalWidget(){
         delete d->process;
     }
     delete d;
+    d = nullptr;
 }
 
 
@@ -77,7 +78,7 @@ void TerminalWidget::onProcessClose(){
 void TerminalWidget::showEvent(QShowEvent* e){
     TerminalView::showEvent(e);
 
-    QTimer::singleShot(0,[this]{
+    QTimer::singleShot(100,[this]{
         if(isDestory){
             return ;
         }

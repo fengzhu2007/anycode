@@ -23,7 +23,7 @@ OpenProjectWindow::OpenProjectWindow(QWidget* parent)
     this->resetupUi();
     connect(ui->okButton,&QPushButton::clicked,this,&OpenProjectWindow::onSelected);
     connect(ui->cancelButton,&QPushButton::clicked,this,&OpenProjectWindow::close);
-    this->initData();
+
 }
 
 OpenProjectWindow::~OpenProjectWindow(){
@@ -46,6 +46,11 @@ OpenProjectWindow* OpenProjectWindow::open(QWidget* parent){
     instance->setModal(true);
     instance->show();
     return instance;
+}
+
+void OpenProjectWindow::showEvent(QShowEvent* e){
+    wDialog::showEvent(e);
+    this->initData();
 }
 
 void OpenProjectWindow::onSelected()

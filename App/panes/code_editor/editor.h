@@ -17,7 +17,7 @@ public:
         Custome
     };
     Editor(Type type,QWidget *parent = nullptr);
-    virtual ~Editor();
+    virtual ~Editor() override;
     Type type();
     virtual QString path()=0;
     virtual void rename(const QString& nname)=0;

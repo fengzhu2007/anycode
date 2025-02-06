@@ -63,7 +63,7 @@ static void findErrors(const TSNode node,QString* error,int *row,int *col){
         *error = QString::fromUtf8(string);
         QString nodeType = QString::fromUtf8(type);
 
-        qDebug()<<"error"<<string;
+        //qDebug()<<"error"<<string;
         free(string);
 
 

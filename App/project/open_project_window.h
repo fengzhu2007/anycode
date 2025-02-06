@@ -15,6 +15,9 @@ namespace ady {
         void initData();
         static OpenProjectWindow* open(QWidget* parent);
 
+    protected:
+        void showEvent(QShowEvent* e) override;
+
     private:
         explicit OpenProjectWindow(QWidget* parent);
 

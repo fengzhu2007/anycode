@@ -510,6 +510,7 @@ void CodeEditorManager::onTabActionTrigger(){
         int count  = container->paneCount();
         int pos = 0;
         for(int i=0;i<count;i++){
+            qDebug()<<"close index"<<pos<<container->paneCount();
             if(!container->closePane(pos)){
                 pos += 1;
             }
