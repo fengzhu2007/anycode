@@ -63,6 +63,7 @@ public:
     QAction* actionNew_Folder;
     QAction* actionNew_File;
     QAction* actionOpen_Folder;
+    QAction* actionAdd_Folder_To_Workspace;
     QAction* actionOpen_File;
     QAction* actionClose_Project;
     QAction* actionFind;
@@ -151,7 +152,8 @@ ResourceManagerPane::~ResourceManagerPane()
 void ResourceManagerPane::initView(){
     d->actionNew_Folder = new QAction(QIcon(":/Resource/icons/NewFileCollection_16x.svg"),tr("New Folder"),this);
     d->actionNew_File = new QAction(QIcon(":/Resource/icons/NewFile_16x.svg"),tr("New File"),this);
-    d->actionOpen_Folder = new QAction(QIcon(":/Resource/icons/OpenFolder_16x.svg"),tr("Open Folder"),this);
+    d->actionOpen_Folder = new QAction(QIcon(":/Resource/icons/FolderBrowserDialogControl_16x.svg"),tr("Open Folder"),this);
+    d->actionAdd_Folder_To_Workspace = new QAction(QIcon(":/Resource/icons/OpenFolder_16x.svg"),tr("Add Folder to Workspace"),this);
     d->actionOpen_File = new QAction(QIcon(":/Resource/icons/OpenFile_16x.svg"),tr("Open File"),this);
     d->actionClose_Project = new QAction(tr("Close Project"),this);
     d->actionFind = new QAction(QIcon(":/Resource/icons/SearchFolderClosed_16x.svg"),tr("Find In Folder"),this);
@@ -173,6 +175,7 @@ void ResourceManagerPane::initView(){
     connect(d->actionNew_Folder,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionNew_File,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionOpen_Folder,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
+    connect(d->actionAdd_Folder_To_Workspace,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionOpen_File,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionClose_Project,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionFind,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
@@ -382,7 +385,10 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
     QModelIndexList list = ui->treeView->selectionModel()->selectedRows();
     QModelIndex index = ui->treeView->indexAt(pos);
     if(!index.isValid()){
-        return ;
+        if(list.size()==0){
+            return ;
+        }
+        index = list.at(0);
     }
     auto one = static_cast<ResourceManagerModelItem*>(index.internalPointer());
     ResourceManagerModelItem::Type type = one->type();
@@ -419,6 +425,7 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionFind);
         contextMenu.addSeparator();
+        contextMenu.addAction(d->actionAdd_Folder_To_Workspace);
         contextMenu.addAction(d->actionClose_Project);
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionCopy_Path);
@@ -445,6 +452,8 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
         contextMenu.addAction(d->actionRename);
         contextMenu.addAction(d->actionDelete);
         contextMenu.addSeparator();
+        contextMenu.addAction(d->actionAdd_Folder_To_Workspace);
+        contextMenu.addSeparator();
         contextMenu.addAction(d->actionCopy_Path);
     }else if(type==ResourceManagerModelItem::File){
         contextMenu.addAction(d->actionOpen_File);
@@ -463,6 +472,8 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionRename);
         contextMenu.addAction(d->actionDelete);
+        contextMenu.addSeparator();
+        contextMenu.addAction(d->actionAdd_Folder_To_Workspace);
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionCopy_Path);
     }else{
@@ -526,7 +537,21 @@ void ResourceManagerPane::onActionTriggered(){
             one->setExpanded(true);
         }
     }else if(sender==d->actionOpen_Folder){
-        QDesktopServices::openUrl(QFileInfo(one->path()).absoluteDir().absolutePath());
+        if(one->type()==ResourceManagerModelItem::File){
+            QDesktopServices::openUrl(QFileInfo(one->path()).path());
+        }else{
+            QDesktopServices::openUrl(one->path());
+        }
+    }else if(sender==d->actionAdd_Folder_To_Workspace){
+        QString path = QFileDialog::getExistingDirectory(this, tr("Select Folder"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+        if(!path.isEmpty()){
+            ProjectRecord record;
+            record.path = path;
+            QFileInfo fi(path);
+            record.name = fi.fileName();
+            Publisher::getInstance()->post(Type::M_OPEN_PROJECT,(void*)&record);
+        }
+
     }else if(sender==d->actionOpen_File){
         //QString path = one->path();
         auto data = OpenEditorData{one->path(),0,0};
@@ -684,6 +709,9 @@ void ResourceManagerPane::onActionTriggered(){
             const QString path = one->path();
             QPair<QString,QString> pair = {path,path};
             ResourceManagerModelItem::Type type = one->type();
+            QFileInfo fi(path);
+            const QString parentPath = fi.path();
+            QStringList parentList = d->model->takeWatchDirectory(parentPath,false);//remove parent dir watcher
             if(type==ResourceManagerModelItem::File){
                 instance->post(new Event(Type::M_WILL_RENAME_FILE,(void*)&path));
                 if(QFile::moveToTrash(one->path())){
@@ -692,6 +720,7 @@ void ResourceManagerPane::onActionTriggered(){
                 }else{
                     instance->post(new Event(Type::M_RENAMED_FILE,(void*)&pair));
                 }
+
             }else if(type==ResourceManagerModelItem::Folder){
                 //remove watch
                 QStringList list = d->model->takeWatchDirectory(path,true);
@@ -700,11 +729,16 @@ void ResourceManagerPane::onActionTriggered(){
                     instance->post(new Event(Type::M_DELETE_FOLDER,(void*)&path));
                     d->model->removeItem(one);
                 }else{
+                    //folder delete faild ;restore dir watcher
                     foreach(auto one,list){
                         d->model->appendWatchDirectory(one);
                     }
                     instance->post(new Event(Type::M_RENAMED_FOLDER,(void*)&pair));
                 }
+            }
+            //restore parent dir watcher
+            foreach(auto one,parentList){
+                d->model->appendWatchDirectory(one);
             }
         }
     }else if(sender==d->actionClose_Project){

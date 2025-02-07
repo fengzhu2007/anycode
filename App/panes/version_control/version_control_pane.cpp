@@ -705,13 +705,21 @@ void VersionControlPane::compressZipPackage(bool selected){
 }
 
 void VersionControlPane::uploadFiles(long long siteid,const QStringList& files){
-    if(files.size()>0){
+    //check files exists
+    QStringList list;
+    for(auto one:files){
+        if(QFileInfo::exists(one)){
+            list<<one;
+        }
+    }
+    if(list.size()>0){
+
         auto instance = Publisher::getInstance();
         QString paneGroup = FileTransferPane::PANE_GROUP;
         instance->post(Type::M_OPEN_PANE,&paneGroup);
 
 
-        UploadData data{d->current_pid,siteid,true,files.join("|"),{}};//not set dest ,should match remote
+        UploadData data{d->current_pid,siteid,true,list.join("|"),{}};//not set dest ,should match remote
         instance->post(Type::M_UPLOAD,&data);
     }
 }

@@ -347,7 +347,7 @@ void IDEWindow::onActionTriggered(){
     if(sender==ui->actionOpen_Project){
         OpenProjectWindow::open(this);
     }else if(sender==ui->actionOpen_Folder){
-        QString dir = QFileDialog::getExistingDirectory(this, tr("Open Folder"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+        QString dir = QFileDialog::getExistingDirectory(this, tr("Select Folder"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
         this->onOpenFolder(dir);
     }else if(sender==ui->actionOpen_File){
         QString path = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("All Files (*.*)"));

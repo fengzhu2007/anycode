@@ -527,7 +527,7 @@ QJsonArray ResourceManagerModel::toJson(){
     for(int i=0;i<count;i++){
         auto child = d->root->childAt(i);
         QJsonArray list;
-        qDebug()<<"path:"<<child->path()<<child->state();
+        //qDebug()<<"path:"<<child->path()<<child->state();
         if(child->state() == ResourceManagerModelItem::Expand){
             list << child->path();
             this->findAllExpend(child,list);
