@@ -34,9 +34,12 @@ void OpenProjectWindow::initData()
 {
     ProjectStorage projectStorage;
     QList<ProjectRecord>lists = projectStorage.all();
-    auto model = new ProjectSelectModel(ui->listView);
+    auto model = static_cast<ProjectSelectModel*>(ui->listView->model());
+    if(model==nullptr){
+        model = new ProjectSelectModel(ui->listView);
+        ui->listView->setModel(model);
+    }
     model->setDataSource(lists);
-    ui->listView->setModel(model);
 }
 
 OpenProjectWindow* OpenProjectWindow::open(QWidget* parent){

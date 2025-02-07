@@ -59,7 +59,9 @@ ProjectSelectModel::ProjectSelectModel(ListView* parent)
 }
 
 ListViewItem* ProjectSelectModel::item(int i){
+
     ProjectSelectItemWidget* w = (ProjectSelectItemWidget*)ListViewModel::item(i);
+     qDebug()<<"item i"<<i<<w<<this;
     if(w==nullptr){
         w = new ProjectSelectItemWidget(this->listView()->widget());
         ListViewModel::addWidget(w);
