@@ -61,6 +61,7 @@
 #include <QProcess>
 #include <QDesktopServices>
 #include <QLayout>
+#include <QFontDatabase>
 #include <QDebug>
 
 namespace ady{
@@ -235,6 +236,8 @@ void IDEWindow::boot(){
 }
 
 void IDEWindow::delayBoot(){
+    //add font
+    QFontDatabase::addApplicationFont(":/Resource/fonts/SourceCodePro-Regular.ttf");
     //call from show event
     //init Schedule task
     auto settings = OptionsSettings::getInstance();

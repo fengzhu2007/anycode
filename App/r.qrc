@@ -118,5 +118,6 @@
         <file>Resource/icons/dark/ExpandHover_16x.svg</file>
         <file>Resource/icons/StatusCriticalError_16x.svg</file>
         <file>Resource/icons/FolderBrowserDialogControl_16x.svg</file>
+        <file>Resource/fonts/SourceCodePro-Regular.ttf</file>
     </qresource>
 </RCC>

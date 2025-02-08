@@ -14,6 +14,7 @@
 #include "../environment_settings.h"
 
 
+
 namespace ady{
 
 const QString ColorTab::themeNameKey = "texteditor::theme";
