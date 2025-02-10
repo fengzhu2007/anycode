@@ -5,6 +5,11 @@ ScheduleTask::ScheduleTask(int msec):m_interval(msec) {
 
 }
 
+ScheduleTask::~ScheduleTask(){
+
+
+}
+
 void ScheduleTask::doing(){
 
 

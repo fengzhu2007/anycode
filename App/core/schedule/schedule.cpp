@@ -87,8 +87,16 @@ void Schedule::onTimeout(){
             one->doing();
             one->execute();
             one->done();
+            if(one->isOnce()){
+                d->queue.removeOne(one);
+                delete one;
+            }
         }
     }
+}
+
+void Schedule::addTask(ScheduleTask* task){
+    d->queue<<task;
 }
 
 

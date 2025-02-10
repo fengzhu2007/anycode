@@ -2,6 +2,7 @@
 #define SCHEDULE_H
 #include <QObject>
 namespace ady{
+class ScheduleTask;
 class SchedulePrivate;
 class Schedule : public QObject
 {
@@ -16,6 +17,8 @@ public:
     void addFileAutoSave(int msec);
     void addNetworkAutoClose(int msec=300 * 1000);
     void addNetworkStatusWatching(int msec=2 * 1000);
+
+    void addTask(ScheduleTask* task);
 
 public slots:
     void onTimeout();

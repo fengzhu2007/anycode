@@ -488,6 +488,8 @@ void ResourceManagerPane::onInsertReady(const QModelIndex& parent,bool isFile){
     auto model = static_cast<ResourceManagerModel*>(ui->treeView->model());
     QModelIndex index = model->insertItem(one,isFile?ResourceManagerModelItem::File:ResourceManagerModelItem::Folder);
     ui->treeView->editIndex(index);
+    ui->treeView->selectionModel()->select(index,QItemSelectionModel::ClearAndSelect);
+    ui->treeView->scrollTo(index, QAbstractItemView::PositionAtCenter);
 }
 
 void ResourceManagerPane::onItemsChanged(const QString& path){

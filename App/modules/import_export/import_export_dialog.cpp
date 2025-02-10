@@ -30,7 +30,7 @@ ImportExportDialog::ImportExportDialog(QWidget *parent)
 {
 
     auto theme = Theme::getInstance();
-    auto color = theme->secondaryColor().name(QColor::HexRgb);
+    auto color = theme->secondaryBackgroundColor().name(QColor::HexRgb);
     this->setStyleSheet(("#footer,#header{background:"+color+"}"));
     //this->setStyleSheet(".wDialog{background:red}");
     ui->setupUi(this);
@@ -47,12 +47,7 @@ ImportExportDialog::ImportExportDialog(QWidget *parent)
 
     connect(ui->stackedWidget,&QStackedWidget::currentChanged,this,&ImportExportDialog::onCurrentChanged);
 
-
-
-
     this->initView();
-
-
 }
 
 ImportExportDialog::~ImportExportDialog()

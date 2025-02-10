@@ -106,6 +106,7 @@
      <string>&amp;Tool</string>
     </property>
     <addaction name="separator"/>
+    <addaction name="actionCertificate_Querier"/>
     <addaction name="actionImport_And_Export"/>
     <addaction name="actionOptions"/>
    </widget>
@@ -553,6 +554,15 @@
   <action name="actionImport_And_Export">
    <property name="text">
     <string>Import And Export...</string>
+   </property>
+  </action>
+  <action name="actionCertificate_Querier">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Certificate_16x.svg</normaloff>:/Resource/icons/Certificate_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Certificate Querier</string>
    </property>
   </action>
  </widget>

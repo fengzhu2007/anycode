@@ -15,6 +15,7 @@ public:
     virtual QColor primaryColor()  override;
     virtual QColor secondaryColor()  override;
     virtual QColor backgroundColor()  override;
+    virtual QColor secondaryBackgroundColor() override;
 
     virtual QColor textColor()  override;
     virtual QColor primaryTextColor()  override;

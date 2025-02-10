@@ -8,6 +8,7 @@ public:
     const QColor primaryColor;
     const QColor secondaryColor;
     const QColor backgroundColor;
+    const QColor secondaryBackgroundColor;
     const QColor textColor;
     const QColor primaryTextColor;
     const QColor secondaryTextColor;
@@ -18,6 +19,7 @@ public:
         primaryColor("#007acc"),
         secondaryColor("#494949"),
         backgroundColor("#252526"),
+        secondaryBackgroundColor("#494949"),
         textColor("#efefef"),
         primaryTextColor(Qt::white),
         secondaryTextColor(Qt::gray),
@@ -59,6 +61,10 @@ QColor DarkTheme::secondaryColor(){
 
 QColor DarkTheme::backgroundColor(){
     return d->backgroundColor;
+}
+
+QColor DarkTheme::secondaryBackgroundColor(){
+    return d->secondaryBackgroundColor;
 }
 
 QColor DarkTheme::textColor(){

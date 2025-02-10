@@ -22,6 +22,7 @@ public:
     virtual QColor primaryColor()=0;
     virtual QColor secondaryColor()=0;
     virtual QColor backgroundColor()=0;
+    virtual QColor secondaryBackgroundColor() =0;
 
     virtual QColor textColor()=0;
     virtual QColor primaryTextColor()=0;
