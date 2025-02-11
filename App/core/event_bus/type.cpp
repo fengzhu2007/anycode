@@ -43,6 +43,11 @@ const QString Type::M_SITE_DELETED = "SiteDeleted";
 const QString Type::M_MESSAGE = "Message";
 const QString Type::M_READY = "Ready";
 
+const QString Type::M_SSL_RESULT = "SSLResult";
+const QString Type::M_SSL_ERROR = "SSLError";
+
+
+
 const QString Type::M_RESTART = "Restart";
 
 

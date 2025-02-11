@@ -18,9 +18,13 @@ public:
 
 public slots:
     void onQuery();
+    void onOneReady(const QString& domain,const QJsonObject& data);
+    void onOneError(const QString& domain,const QString& errorMsg);
+    void onFinish();
 
 private:
     explicit SSLQueryDialog(QWidget* parent=nullptr);
+    QDateTime parseDateTime(const QString& dateTimeString);
 private:
     Ui::SSLQueryDialog* ui;
     SSLQueryDialogPrivate* d;

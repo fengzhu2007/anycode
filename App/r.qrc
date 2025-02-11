@@ -120,5 +120,6 @@
         <file>Resource/icons/FolderBrowserDialogControl_16x.svg</file>
         <file>Resource/fonts/SourceCodePro-Regular.ttf</file>
         <file>Resource/icons/Certificate_16x.svg</file>
+        <file>Resource/icons/AddWebService_16x.svg</file>
     </qresource>
 </RCC>

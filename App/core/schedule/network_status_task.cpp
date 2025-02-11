@@ -24,6 +24,7 @@ void NetworkStatusTask::execute(){
     QtConcurrent::run([this](){
         m_listen->execute();
     });
+
 }
 
 

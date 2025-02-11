@@ -2,20 +2,26 @@
 #define SSL_QUERY_TASK_H
 #include "core/schedule/schedule_task.h"
 #include <QString>
+#include <QJsonObject>
 #include <QStringList>
 
 namespace ady{
 
-class SSLQueryTask : public ScheduleTask
+class SSLQueryDialog;
+class SSLQuerier;
+class SSLQueryTask :  public ScheduleTask
 {
 public:
     SSLQueryTask(const QStringList& list);
     virtual void execute() override;
     ~SSLQueryTask() override;
+    inline SSLQuerier* querier(){
+        return m_querier;
+    }
 
 private:
     QStringList m_sitelist;
-
+    SSLQuerier* m_querier;
     friend class Schedule;
 };
 

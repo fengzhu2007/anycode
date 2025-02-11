@@ -55,6 +55,10 @@ public:
     static const QString M_MESSAGE;
     static const QString M_READY;
 
+    //ssl query
+    static const QString M_SSL_RESULT;
+    static const QString M_SSL_ERROR;
+
     //window
     static const QString M_RESTART;
 
