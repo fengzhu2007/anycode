@@ -17,6 +17,7 @@ public:
     static SSLQueryDialog* open(QWidget* parent);
 
 public slots:
+    void onActionTrigger();
     void onQuery();
     void onOneReady(const QString& domain,const QJsonObject& data);
     void onOneError(const QString& domain,const QString& errorMsg);
@@ -25,6 +26,7 @@ public slots:
 private:
     explicit SSLQueryDialog(QWidget* parent=nullptr);
     QDateTime parseDateTime(const QString& dateTimeString);
+    void queryDomains(const QStringList& sites);
 private:
     Ui::SSLQueryDialog* ui;
     SSLQueryDialogPrivate* d;

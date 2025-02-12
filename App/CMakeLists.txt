@@ -297,10 +297,10 @@ add_library(App SHARED
         panes/image_editor/image_editor_pane.h panes/image_editor/image_editor_pane.cpp
         panes/image_editor/image_editor_pane.ui
         panes/image_editor/image_view.h panes/image_editor/image_view.cpp
-        extensions/ssl_query/ssl_query_dialog.h extensions/ssl_query/ssl_query_dialog.cpp extensions/ssl_query/ssl_query_dialog.ui
-        extensions/ssl_query/ssl_query_task.h extensions/ssl_query/ssl_query_task.cpp
-        extensions/ssl_query/ssl_querier.h extensions/ssl_query/ssl_querier.cpp
-        extensions/ssl_query/query_result_model.h extensions/ssl_query/query_result_model.cpp
+        tools/ssl_query/ssl_query_dialog.h tools/ssl_query/ssl_query_dialog.cpp tools/ssl_query/ssl_query_dialog.ui
+        tools/ssl_query/ssl_query_task.h tools/ssl_query/ssl_query_task.cpp
+        tools/ssl_query/ssl_querier.h tools/ssl_query/ssl_querier.cpp
+        tools/ssl_query/query_result_model.h tools/ssl_query/query_result_model.cpp
 
 
 

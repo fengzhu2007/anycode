@@ -28,8 +28,11 @@ bool SSLQuerier::execute(){
         QString url = "https://"+one;
         this->setOption(CURLOPT_URL,url.toStdString().c_str());
         CURLcode res = curl_easy_perform(this->curl);
+        //qDebug()<<"url"<<url<<res;
         if(!res){
             this->parseCertInfo(one);
+        }else{
+            emit oneError(one,"Request error");
         }
     }
     emit finish();

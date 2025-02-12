@@ -45,7 +45,7 @@
 #include "modules/addon/addon_manager_dialog.h"
 #include "modules/import_export/import_export_dialog.h"
 
-#include "extensions/ssl_query/ssl_query_dialog.h"
+#include "tools/ssl_query/ssl_query_dialog.h"
 
 #include "components/statusbar/status_bar_view.h"
 #include "common.h"
@@ -154,7 +154,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
 
     //tool
 
-    connect(ui->actionCertificate_Querier,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionSSL_Querier,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionOptions,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionImport_And_Export,&QAction::triggered,this,&IDEWindow::onActionTriggered);
 
@@ -468,7 +468,7 @@ void IDEWindow::onActionTriggered(){
         pane->activeToCurrent();
 
     //tool
-    }else if(sender==ui->actionCertificate_Querier){
+    }else if(sender==ui->actionSSL_Querier){
         SSLQueryDialog::open(this);
     }else if(sender==ui->actionOptions){
         OptionsDialog::open(this);

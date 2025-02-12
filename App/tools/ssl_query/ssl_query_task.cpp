@@ -9,7 +9,9 @@ SSLQueryTask::SSLQueryTask(const QStringList& list):ScheduleTask(0),m_sitelist(l
 
 void SSLQueryTask::execute(){
     auto querier = this->m_querier;
+    qDebug()<<"execute";
     QtConcurrent::run([querier](){
+        qDebug()<<"run";
         querier->execute();
     });
 }

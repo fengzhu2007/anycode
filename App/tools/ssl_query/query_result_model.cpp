@@ -1,14 +1,39 @@
 #include "query_result_model.h"
+#include <QColor>
+#include <QDateTime>
 #include <QDebug>
 
 namespace ady{
 class QueryResultModelPrivate{
 public:
     QList<QueryResult> list;
+    QDateTime current;
+};
+
+
+class ResultSorting final{
+public:
+    ResultSorting(QueryResultModel::Column col,bool asc){
+        this->col = col;
+        this->asc = asc;
+    }
+    bool operator()(QueryResult& a,QueryResult& b)
+    {
+        if(this->asc){
+            return a.expireDate > b.expireDate;
+        }else{
+            return a.expireDate < b.expireDate;
+        }
+        return true;
+    }
+private:
+    bool asc;
+    int col;
 };
 
 QueryResultModel::QueryResultModel(QObject *parent):QAbstractTableModel(parent) {
     d = new QueryResultModelPrivate();
+    d->current = QDateTime::currentDateTime();
 }
 
 QueryResultModel::~QueryResultModel(){
@@ -34,6 +59,23 @@ QVariant QueryResultModel::data(const QModelIndex &index, int role) const {
             return item.expireDate.toString("yyyy-MM-dd hh:mm");
         }else if(index.column() == ErrorMsg){
             return item.errorMsg;
+        }
+    }else if(role==Qt::ForegroundRole){
+        if(index.column() == ErrorMsg || index.column() == ExpireDate ){
+            const auto &item = d->list.at(index.row());
+            if(item.expireDate.isValid()){
+                //if(item.expireDate.)
+                int ret = d->current.secsTo(item.expireDate);
+                if(ret<0){
+                    //expired
+                    return QColor(Qt::red);
+                }else if(ret < 10 * 86400){
+                    //will expired
+                    return QColor(Qt::darkYellow);
+                }
+            }else{
+                return QColor(Qt::red);
+            }
         }
     }
     return QVariant();
@@ -71,6 +113,10 @@ void QueryResultModel::setDataSource(const QList<QueryResult>& list){
     endResetModel();
 }
 
+void QueryResultModel::clear(){
+    this->setDataSource({});
+}
+
 void QueryResultModel::appendItem(const QueryResult& item){
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     d->list.append(item);
@@ -102,6 +148,37 @@ void QueryResultModel::updateItem(const QueryResult& item){
             return ;
         }
     }
+}
+
+QueryResult QueryResultModel::itemAt(int row){
+    return d->list.at(row);
+}
+
+QModelIndexList QueryResultModel::search(const QString& text){
+    QModelIndexList list;
+    for(int i=0;i<d->list.size();i++){
+        auto item = d->list.at(i);
+        if(item.domain.contains(text)){
+            list << createIndex(i,Domain);
+        }
+    }
+    return list;
+}
+
+void QueryResultModel::sortAll(){
+    if(d->list.size()>0){
+        beginResetModel();
+        qSort(d->list.begin(),d->list.end(),ResultSorting(ExpireDate,false));
+        endResetModel();
+    }
+}
+
+QStringList QueryResultModel::allDomains(){
+    QStringList list;
+    for(auto one:d->list){
+        list <<one.domain;
+    }
+    return list;
 }
 
 

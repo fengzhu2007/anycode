@@ -33,11 +33,19 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     void setDataSource(const QList<QueryResult>& list);
+    void clear();
 
     void appendItem(const QueryResult& item);
     void removeItem(const QueryResult& item);
     void removeItem(const QString& domain);
     void updateItem(const QueryResult& item);
+
+    QueryResult itemAt(int row);
+
+    QModelIndexList search(const QString& text);
+    void sortAll();
+
+    QStringList allDomains();
 
 
 private:
