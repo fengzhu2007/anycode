@@ -16,7 +16,8 @@ namespace ady {
             FTP=0,
             OSS,
             COS,
-            SFTP
+            SFTP,
+            S3
         };
         static AddonLoader* getInstance();
         bool loadFile(const QString& file);

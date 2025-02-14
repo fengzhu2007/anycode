@@ -29,53 +29,17 @@ static void findErrors(const TSNode node,QString* error,int *row,int *col){
     auto ret = ts_node_is_error(node);
     if(!ret){
         ret = ts_node_is_missing(node);
-    }else{
-        /*int count = ts_node_child_count(node);
-        qDebug()<<"count"<<count;
-        if(count>0){
-            for(int i=0;i<count;i++){
-                auto child = ts_node_child(node,i);
-                if(ts_node_is_error(child)){
-                    TSPoint start = ts_node_start_point(child);
-                    *row = start.row;
-                    *col = start.column;
-                    auto string = ts_node_string(child);
-                    auto type = ts_node_type(child);
-                    *error = QString::fromUtf8(string);
-                    QString nodeType = QString::fromUtf8(type);
-                    free(string);
-
-                    qDebug()<<"error2"<<*error<<*row<<*col<<nodeType;
-                    return ;
-                }
-            }
-        }*/
     }
-    //auto ret = ts_node_is_missing(node);
     if(ret){
         TSPoint start = ts_node_start_point(node);
         *row = start.row;
         *col = start.column;
         auto string = ts_node_string(node);
         auto type = ts_node_type(node);
-        //auto startByte = ts_node_start_byte(node);
-        //auto endByte = ts_node_end_byte(node);
         *error = QString::fromUtf8(string);
         QString nodeType = QString::fromUtf8(type);
-
-        //qDebug()<<"error"<<string;
         free(string);
-
-
     }else{
-        /*auto ret = ts_node_is_error(node);
-        if(ret){
-            auto type = ts_node_type(node);
-            auto string = ts_node_string(node);
-            auto nodeString = QString::fromUtf8(string);
-            qDebug()<<"error"<<type<<nodeString;
-            free(string);
-        }*/
         //find children
         int count = ts_node_child_count(node);
         if(count>0){
@@ -87,6 +51,15 @@ static void findErrors(const TSNode node,QString* error,int *row,int *col){
                 }
             }
         }
+    }
+}
+
+
+static void walkAll(const TSNode node){
+    int count = ts_node_child_count(node);
+    qDebug()<<"type"<<ts_node_type(node);
+    for(int i=0;i<count;i++){
+        walkAll(ts_node_child(node,i));
     }
 }
 
@@ -104,6 +77,7 @@ void CodeParseLint::parse(const QString& source,const QString& path){
         );
     if(tree){
         TSNode root_node = ts_tree_root_node(tree);
+        //walkAll(root_node);
         bool ret = ts_node_has_error(root_node);
         if(ret){
             //row col 0-base

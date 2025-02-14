@@ -337,6 +337,8 @@ target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJ
     tree-sitter-xml
     tree-sitter-dtd
     tree-sitter-php
+    tree-sitter-php_only
+    tree-sitter-embedded-template
 
 )
 

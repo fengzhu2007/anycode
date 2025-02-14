@@ -37,3 +37,4 @@ macro(add_parser name)
 endmacro()
 
 add_subdirectory(php tree-sitter-php)
+add_subdirectory(php_only tree-sitter-php_only)

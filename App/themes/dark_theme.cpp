@@ -157,10 +157,11 @@ QString DarkTheme::qss(){
                              ".QSpinBox::down-arrow{image:url(:/Resource/icons/dark/GlyphDown_16x.svg);width:14px;height:14px;}"
                                 ".QSpinBox::down-arrow:hover{image:url(:/Resource/icons/dark/GlyphDownHover_16x.svg);}"
                              "QTreeView{border:0;background-color:"+backgroundColor+";color:"+textColor+";}"
+                            "QTreeView::item:selected{background:"+primaryColor+";color:"+textColor+"}"
                             "QTreeView::branch:has-children:open{image: url(':/Resource/icons/dark/Expand_16x.svg');border-image:none;}"
                             "QTreeView::branch:has-children:closed{image: url(':/Resource/icons/dark/Collapse_16x.svg');border-image:none;}"
-                                                        "QTreeView::branch:has-children:open:hover{image: url(':/Resource/icons/dark/ExpandHover_16x.svg');}"
-                                                        "QTreeView::branch:has-children:closed:hover{image: url(':/Resource/icons/dark/CollapseHover_16x.svg');}"
+                            "QTreeView::branch:has-children:open:hover{image: url(':/Resource/icons/dark/ExpandHover_16x.svg');}"
+                            "QTreeView::branch:has-children:closed:hover{image: url(':/Resource/icons/dark/CollapseHover_16x.svg');}"
 
 
                         ".ady--ListView>QWidget#qt_scrollarea_viewport>.QWidget{background-color:"+color+";}"

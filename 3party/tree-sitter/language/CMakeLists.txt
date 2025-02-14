@@ -7,7 +7,7 @@ add_subdirectory(typescript)
 add_subdirectory(cpp)
 add_subdirectory(xml)
 add_subdirectory(php)
-
+add_subdirectory(template)
 
 
 

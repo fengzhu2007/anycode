@@ -85,6 +85,8 @@ namespace ady {
             file = QString::fromUtf8("COS/COS");
         }else if(name==SFTP){
             file = QString::fromUtf8("SFTP/SFTP");
+        }else if(name==S3){
+            file = QString::fromUtf8("S3/S3");
         }else{
             return false;
         }
