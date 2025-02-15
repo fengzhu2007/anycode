@@ -11,6 +11,7 @@
 #include "panes/server_manage/server_client_pane.h"
 #include "panes/terminal/terminal_pane.h"
 #include "panes/output/output_pane.h"
+#include "panes/sql/sql_pane.h"
 
 namespace ady{
 
@@ -37,7 +38,6 @@ DockingPane* PaneLoader::init(DockingPaneManager* dockingManager,const QString& 
     }else{
         //other editor
         pane = CodeEditorManager::makePane(group,data);
-
     }
     return pane;
 }

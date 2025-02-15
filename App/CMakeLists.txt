@@ -301,6 +301,8 @@ add_library(App SHARED
         tools/ssl_query/ssl_query_task.h tools/ssl_query/ssl_query_task.cpp
         tools/ssl_query/ssl_querier.h tools/ssl_query/ssl_querier.cpp
         tools/ssl_query/query_result_model.h tools/ssl_query/query_result_model.cpp
+        panes/sql/sql_pane.h panes/sql/sql_pane.cpp panes/sql/sql_pane.ui
+        interface/sql_querier.h interface/sql_querier.cpp
 
 
 

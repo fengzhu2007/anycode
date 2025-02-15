@@ -17,7 +17,7 @@ else()
   list(REMOVE_ITEM TS_SOURCE_FILES "${PROJECT_SOURCE_DIR}/src/lib.c")
 endif()
 
-add_library(tree-sitter STATIC ${TS_SOURCE_FILES})
+add_library(tree-sitter STATIC  ${TS_SOURCE_FILES})
 
 target_include_directories(tree-sitter PRIVATE src src/wasm include)
 
@@ -86,3 +86,4 @@ target_compile_definitions(tree-sitter PRIVATE _POSIX_C_SOURCE=200112L _DEFAULT_
 
 
 add_subdirectory(language)
+

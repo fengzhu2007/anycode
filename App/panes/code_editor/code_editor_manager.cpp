@@ -14,6 +14,7 @@
 #include "codeassist/documentcontentcompletion.h"
 //#include "snippets/snippetprovider.h"
 #include "displaysettings.h"
+#include <texteditorenvironment.h>
 #include "modules/options/options_settings.h"
 
 #include "code_lint.h"

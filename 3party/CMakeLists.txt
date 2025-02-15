@@ -3,7 +3,7 @@ if(WIN32)
 endif()
 add_subdirectory(libvterm)
 add_subdirectory(libptyqt)
-add_subdirectory(quickjs)
+#add_subdirectory(quickjs)
 add_subdirectory(tree-sitter)
 
 

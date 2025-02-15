@@ -12,6 +12,7 @@ public:
     enum Type{
         CodeEditor,
         ImageEditor,
+        SQLManager,
 
 
         Custome

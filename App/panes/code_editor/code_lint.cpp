@@ -54,10 +54,7 @@ CodeLint* CodeLint::getInstance(){
     return instance;
 }
 
-
-
 QList<CodeErrorInfo> CodeLint::checking(const QString& path,const QString& extension){
-
     return {};
 }
 

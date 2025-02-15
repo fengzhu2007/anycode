@@ -1,8 +1,8 @@
 # anycode
 
-文本编辑器，支持远程文件管理：FTP,SFTP,阿里云OSS,腾讯云COS,亚马逊S3
+文本编辑器，版本管理，快速定位修改文件。支持远程文件管理：FTP,SFTP,阿里云OSS,腾讯云COS,亚马逊S3
 
-Text editor, supporting connection to FTP, SFTP, AliCloud OSS, Tencent Cloud COS,Amazon S3
+Text editor,version management, quickly locate and modify files. supporting connection to FTP, SFTP, AliCloud OSS, Tencent Cloud COS,Amazon S3
 
 ## 截屏
 
@@ -48,6 +48,8 @@ Qt Creator  编译生成之后将Qt 依赖库和插件库（iconengines，imagef
 
 ## 参考网站
 
+https://github.com/tree-sitter/tree-sitter
+
 https://www.freedesktop.org/wiki/Software/uchardet/  
 
 https://github.com/KDE/syntax-highlighting  
@@ -56,7 +58,6 @@ https://github.com/KDE/syntax-highlighting
 https://www.riverbankcomputing.com/static/Docs/QScintilla/classQsciScintilla.html  
 
 https://astyle.sourceforge.net/  
-
 
 
 https://github.com/geoffstevens8/best-light-themes-pack?tab=readme-ov-file

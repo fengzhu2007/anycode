@@ -19,6 +19,20 @@ namespace ady {
             SFTP,
             S3
         };
+        enum ExportType{
+            Default = 1,
+            RemoteConnector=Default,//remote connector like ftp,sftp
+            OptionCategory = Default<<1,
+            CodeLint = Default<<2,
+            CodeAutoComplate = Default<<3,
+            Pane = Default<<4,
+            Editor = Default<<5,
+            Menu = Default<<6,
+        };
+        enum OptionCategory{
+
+        };
+
         static AddonLoader* getInstance();
         bool loadFile(const QString& file);
         bool load(AddonName name);
