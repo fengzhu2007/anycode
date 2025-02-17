@@ -17,6 +17,8 @@ public:
     };
     explicit TerminalWidget(const QString& executable,const QString& workingDir,QWidget* parent);
     ~TerminalWidget();
+    QString& workingDir() const;
+    QString& executablePath() const;
 
 
     virtual qint64 writeToPty(const QByteArray &data) override;

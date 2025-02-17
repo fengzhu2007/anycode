@@ -68,6 +68,7 @@ public:
     QAction* actionClose_Project;
     QAction* actionFind;
     QAction* actionOpen_Terminal;
+    QAction* actionOpen_Embedded_Terminal;
     QAction* actionCopy;
     QAction* actionCut;
     QAction* actionPaste;
@@ -158,6 +159,7 @@ void ResourceManagerPane::initView(){
     d->actionClose_Project = new QAction(tr("Close Project"),this);
     d->actionFind = new QAction(QIcon(":/Resource/icons/SearchFolderClosed_16x.svg"),tr("Find In Folder"),this);
     d->actionOpen_Terminal = new QAction(QIcon(":/Resource/icons/ImmediateWindow_16x.svg"),tr("Open Terminal"),this);
+    d->actionOpen_Embedded_Terminal = new QAction(QIcon(":/Resource/icons/ImmediateWindow_16x.svg"),tr("Open Embedded Terminal"),this);
     d->actionCopy = new QAction(QIcon(":/Resource/icons/Copy_16x.svg"),tr("Copy"),this);
     d->actionCut = new QAction(QIcon(":/Resource/icons/Cut_16x.svg"),tr("Cut"),this);
     d->actionPaste = new QAction(QIcon(":/Resource/icons/Paste_16x.svg"),tr("Paste"),this);
@@ -180,6 +182,7 @@ void ResourceManagerPane::initView(){
     connect(d->actionClose_Project,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionFind,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionOpen_Terminal,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
+    connect(d->actionOpen_Embedded_Terminal,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionCopy,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionPaste,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionRename,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
@@ -412,6 +415,8 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
         contextMenu.addAction(d->actionNew_Folder);
         contextMenu.addAction(d->actionOpen_Folder);
         contextMenu.addAction(d->actionOpen_Terminal);
+        contextMenu.addAction(d->actionOpen_Embedded_Terminal);
+
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionPaste);
         contextMenu.addSeparator();
@@ -434,6 +439,7 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
         contextMenu.addAction(d->actionNew_Folder);
         contextMenu.addAction(d->actionOpen_Folder);
         contextMenu.addAction(d->actionOpen_Terminal);
+        contextMenu.addAction(d->actionOpen_Embedded_Terminal);
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionCut);
         contextMenu.addAction(d->actionCopy);
@@ -458,6 +464,7 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
     }else if(type==ResourceManagerModelItem::File){
         contextMenu.addAction(d->actionOpen_File);
         contextMenu.addAction(d->actionOpen_Terminal);
+        contextMenu.addAction(d->actionOpen_Embedded_Terminal);
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionCut);
         contextMenu.addAction(d->actionCopy);
@@ -582,9 +589,13 @@ void ResourceManagerPane::onActionTriggered(){
 #else
         qWarning("Unsupported OS");
 #endif
-
-
-
+    }else if(sender==d->actionOpen_Embedded_Terminal){
+        QString directory = one->path();
+        if(one->type()==ResourceManagerModelItem::File){
+            QFileInfo fi(directory);
+            directory = fi.absoluteDir().absolutePath();
+        }
+        Publisher::getInstance()->post(Type::M_OPEN_TERMINAL,&directory);
     }else if(sender==d->actionCut){
         QMimeData *mimeData = new QMimeData;
         QList<QUrl> urls;

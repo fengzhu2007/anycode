@@ -107,7 +107,6 @@ void PHPLint::initExecutePath(){
     auto instance = OptionsSettings::getInstance();
 
     if(instance!=nullptr){
-         qDebug()<<"111111";
         auto setting = instance->languageSettings();
         if(setting.m_phpCmdChecking){
 

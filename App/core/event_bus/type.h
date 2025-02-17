@@ -62,6 +62,9 @@ public:
     //window
     static const QString M_RESTART;
 
+    //terminal
+    static const QString M_OPEN_TERMINAL;
+
     //output
     enum OutputLevel{
         Text=0,

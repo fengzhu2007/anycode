@@ -64,6 +64,7 @@ FindReplacePane::FindReplacePane(QWidget *parent) :
 
 FindReplacePane::~FindReplacePane()
 {
+    Subscriber::unReg();
     delete ui;
     delete d;
     instance = nullptr;

@@ -53,6 +53,14 @@ TerminalWidget::~TerminalWidget(){
     d = nullptr;
 }
 
+QString& TerminalWidget::workingDir() const {
+    return d->workingDir;
+}
+
+QString& TerminalWidget::executablePath() const {
+    return d->executable;
+}
+
 
 qint64 TerminalWidget::writeToPty(const QByteArray &data){
     if(d->process!=nullptr){

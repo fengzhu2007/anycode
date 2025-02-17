@@ -26,7 +26,57 @@ CodeParseLint::~CodeParseLint(){
 
 
 static void findErrors(const TSNode node,QString* error,int *row,int *col){
-    auto ret = ts_node_is_error(node);
+    //qDebug()<<"node"<<ts_node_type(node)<<ts_node_string(node);
+    auto ret = ts_node_is_missing(node);
+    if(ret){
+        TSPoint start = ts_node_start_point(node);
+        *row = start.row;
+        *col = start.column;
+        auto string = ts_node_string(node);
+        auto type = ts_node_type(node);
+        *error = QString::fromUtf8(string);
+        QString nodeType = QString::fromUtf8(type);
+        free(string);
+    }else{
+        ret = ts_node_is_error(node);
+        int count = ts_node_child_count(node);
+        //qDebug()<<"count"<<count;
+        if(ret){
+            if(count==0){
+                TSPoint start = ts_node_start_point(node);
+                *row = start.row;
+                *col = start.column;
+                auto string = ts_node_string(node);
+                auto type = ts_node_type(node);
+                *error = QString::fromUtf8(string);
+                QString nodeType = QString::fromUtf8(type);
+                free(string);
+                return;
+            }
+             for(int i=0;i<count;i++){
+                 auto child = ts_node_child(node,i);
+                 findErrors(child,error,row,col);
+                 if((*error).isEmpty()==false){
+                     break;
+                 }
+             }
+        }else{
+            //walk all children if has children
+            if(count>0){
+                for(int i=0;i<count;i++){
+                    auto child = ts_node_child(node,i);
+                    findErrors(child,error,row,col);
+                    if((*error).isEmpty()==false){
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    /*auto ret = ts_node_is_error(node);
     if(!ret){
         ret = ts_node_is_missing(node);
     }
@@ -35,6 +85,7 @@ static void findErrors(const TSNode node,QString* error,int *row,int *col){
         *row = start.row;
         *col = start.column;
         auto string = ts_node_string(node);
+        qDebug()<<"string"<<string;
         auto type = ts_node_type(node);
         *error = QString::fromUtf8(string);
         QString nodeType = QString::fromUtf8(type);
@@ -51,7 +102,7 @@ static void findErrors(const TSNode node,QString* error,int *row,int *col){
                 }
             }
         }
-    }
+    }*/
 }
 
 
@@ -97,6 +148,8 @@ QList<CodeErrorInfo> CodeParseLint::results(){
             errorMsg = QString::fromUtf8("Syntax error");
         }else if(errorMsg.startsWith("MISSING")){
             errorMsg = errorMsg.replace("MISSING","Missing");
+        }else if(errorMsg.startsWith("UNEXPECTED")){
+            errorMsg = errorMsg.replace("UNEXPECTED","Unexpected");
         }
         list << CodeErrorInfo(CodeErrorInfo::Error,d->row,d->col,0,errorMsg);
     }

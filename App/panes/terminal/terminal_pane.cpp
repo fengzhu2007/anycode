@@ -2,6 +2,8 @@
 #include "ui_terminal_pane.h"
 #include "docking_pane_layout_item_info.h"
 #include "terminal_widget.h"
+#include "core/event_bus/type.h"
+#include "core/event_bus/event.h"
 #include "tab_style.h"
 #include <QToolButton>
 #include <QMenu>
@@ -22,14 +24,15 @@ const QString TerminalPane::PANE_GROUP = "Terminal";
 class TerminalPanePrivate{
 public:
     QToolButton* add;
-
+    QString currentPath;
+    QString currentExecutable;
 };
 
 
 
-TerminalPane::TerminalPane(QWidget *parent):DockingPane(parent),ui(new Ui::TerminalPane) {
+TerminalPane::TerminalPane(QWidget *parent,const QString& executable,const QString& workingDir):DockingPane(parent),ui(new Ui::TerminalPane) {
     Subscriber::reg();
-    this->regMessageIds({});
+    this->regMessageIds({Type::M_OPEN_TERMINAL});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -40,16 +43,18 @@ TerminalPane::TerminalPane(QWidget *parent):DockingPane(parent),ui(new Ui::Termi
                         "QTabWidget::pane{border:0px solid red}");
 
     d = new TerminalPanePrivate;
+    d->currentExecutable = executable;
+    d->currentPath = workingDir;
+    //qDebug()<<"TerminalPane"<<d->currentExecutable<<d->currentPath;
 
     connect(ui->actionAdd,&QAction::triggered,this,&TerminalPane::onActionTriggered);
     connect(ui->actionRemove,&QAction::triggered,this,&TerminalPane::onActionTriggered);
     connect(ui->actionClear,&QAction::triggered,this,&TerminalPane::onActionTriggered);
     connect(ui->actionZoom_In,&QAction::triggered,this,&TerminalPane::onActionTriggered);
     connect(ui->actionZoom_Out,&QAction::triggered,this,&TerminalPane::onActionTriggered);
-
+    connect(ui->tabWidget,&QTabWidget::currentChanged,this,&TerminalPane::onCurrentChanged);
 
     TerminalPane::toExecutableList();//init
-
 
 
     this->initView();
@@ -68,15 +73,13 @@ void TerminalPane::initView(){
     d->add->setDefaultAction(ui->actionAdd);
     ui->toolBar->insertWidget(ui->actionRemove,d->add);
 
-
-
     if(executablelist.size()==0){
         d->add->setEnabled(false);
     }else if(executablelist.size()>1){
         d->add->setPopupMode(QToolButton::MenuButtonPopup);
         QMenu* menu = new QMenu(d->add);
         for(auto one:executablelist){
-            TerminalPane::Type type = one.type;
+            TerminalPane::TerminalType type = one.type;
             menu->addAction(one.icon,one.name,[this,type]{
                 this->newTermnal(type,QLatin1String("."));
             });
@@ -86,7 +89,16 @@ void TerminalPane::initView(){
     int count = ui->tabWidget->count();
     if(count==0){
         //init first tab
-        this->newTermnal(TerminalPane::Unkown,QLatin1String("."));
+        if(d->currentPath.isEmpty()){
+            d->currentPath = QLatin1String(".");
+        }
+        //qDebug()<<"executable"<<d->currentExecutable<<d->currentPath;
+        if(!d->currentExecutable.isEmpty()){
+            this->newTermnal(d->currentExecutable,d->currentPath);
+        }else{
+            this->newTermnal(TerminalPane::Unkown,d->currentPath);
+        }
+
     }
 }
 
@@ -100,11 +112,27 @@ QString TerminalPane::group(){
 }
 
 bool TerminalPane::onReceive(Event* e) {
-
+    if(e->id()==Type::M_OPEN_TERMINAL){
+        auto workingDir = static_cast<QString*>(e->data());
+        this->newTermnal(Unkown,*workingDir);
+        return true;
+    }
     return false;
 }
 
-void TerminalPane::newTermnal(TerminalPane::Type type,const QString& workingDir){
+QJsonObject TerminalPane::toJson() {
+    QJsonObject data = {
+        {"currentExecutable",d->currentExecutable},
+        {"currentPath",d->currentPath},
+    };
+    return {
+        {"id",this->id()},
+        {"group",this->group()},
+        {"data",data}
+    };
+}
+
+void TerminalPane::newTermnal(TerminalPane::TerminalType type,const QString& workingDir){
     QString executable;
     for(auto one:executablelist){
         if(type==one.type || type==TerminalPane::Unkown){
@@ -113,13 +141,17 @@ void TerminalPane::newTermnal(TerminalPane::Type type,const QString& workingDir)
         }
     }
     if(executable.isEmpty()==false){
-        QFileInfo fi(executable);
-        const QString name = fi.baseName();
-        auto tab = new TerminalWidget(executable,workingDir,ui->tabWidget);
-        ui->tabWidget->addTab(tab,name);
-        ui->tabWidget->setCurrentWidget(tab);
-        this->updateToolBar();
+        this->newTermnal(executable,workingDir);
     }
+}
+
+void TerminalPane::newTermnal(const QString& excutablePath,const QString& workingDir){
+    QFileInfo fi(excutablePath);
+    const QString name = fi.baseName();
+    auto tab = new TerminalWidget(excutablePath,workingDir,ui->tabWidget);
+    ui->tabWidget->addTab(tab,name);
+    ui->tabWidget->setCurrentWidget(tab);
+    this->updateToolBar();
 
 }
 
@@ -134,7 +166,11 @@ TerminalPane* TerminalPane::open(DockingPaneManager* dockingManager,bool active)
 
 TerminalPane* TerminalPane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
     if(instance==nullptr){
-        instance = new TerminalPane(dockingManager->widget());
+        //const QString& executable,const QString& workingDir
+
+        auto executable = data.find("currentExecutable")->toString();
+        auto workingDir = data.find("currentPath")->toString();
+        instance = new TerminalPane(dockingManager->widget(),executable,workingDir);
         return instance;
     }
     return nullptr;
@@ -165,11 +201,15 @@ void TerminalPane::onActionTriggered(){
     }
 }
 
+void TerminalPane::onCurrentChanged(int index){
+    auto widget = static_cast<TerminalWidget*>(ui->tabWidget->widget(index));
+    d->currentPath = widget->workingDir();
+    d->currentExecutable = widget->executablePath();
+}
+
 void TerminalPane::updateToolBar(){
     ui->actionRemove->setEnabled(ui->tabWidget->count()>1);
 }
-
-
 
 QList<TerminalPane::Excutable> TerminalPane::toExecutableList(){
     if(executablelist.size()==0){

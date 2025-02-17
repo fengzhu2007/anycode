@@ -50,6 +50,8 @@ const QString Type::M_SSL_ERROR = "SSLError";
 
 const QString Type::M_RESTART = "Restart";
 
+const QString Type::M_OPEN_TERMINAL = "OpenTerminal";
+
 
 
 

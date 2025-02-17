@@ -17,14 +17,14 @@ class TerminalPanePrivate;
 class ANYENGINE_EXPORT TerminalPane : public DockingPane , public Subscriber
 {
 public:
-    enum Type{
+    enum TerminalType{
         Unkown=0,
         Cmd,
         PowerShell,
         Shell
     };
     struct Excutable{
-        TerminalPane::Type type;
+        TerminalPane::TerminalType type;
         QIcon icon;
         QString name;
         QString executable;
@@ -36,8 +36,10 @@ public:
     virtual QString id() override;
     virtual QString group() override;
     virtual bool onReceive(Event* e) override;//event bus receive callback
+    virtual QJsonObject toJson() override;
 
-    void newTermnal(TerminalPane::Type type,const QString& workingDir);
+    void newTermnal(TerminalPane::TerminalType type,const QString& workingDir);
+    void newTermnal(const QString& excutablePath,const QString& workingDir);
 
 
     static TerminalPane* open(DockingPaneManager* dockingManager,bool active=false);
@@ -47,9 +49,10 @@ public:
 
 public slots:
     void onActionTriggered();
+    void onCurrentChanged(int index);
 
 private:
-    explicit TerminalPane(QWidget *parent = nullptr);
+    explicit TerminalPane(QWidget *parent = nullptr,const QString& executable={},const QString& workingDir={});
     void updateToolBar();
 
 
