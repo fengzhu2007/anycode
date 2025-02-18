@@ -386,10 +386,10 @@
      <normaloff>:/Resource/icons/SelectAll_16x.svg</normaloff>:/Resource/icons/SelectAll_16x.svg</iconset>
    </property>
    <property name="text">
-    <string>Select All(&amp;A)</string>
+    <string>Select All(&amp;A)	Ctl+A</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+A</string>
+   <property name="toolTip">
+    <string>Select All(A)</string>
    </property>
   </action>
   <action name="actionResource_Manage">

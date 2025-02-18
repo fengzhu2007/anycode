@@ -254,6 +254,10 @@ void IDEWindow::delayBoot(){
     schedule->addNetworkAutoClose(5*60 * 1000);
     //add network status watching
     schedule->addNetworkStatusWatching(3 * 1000);
+    //add ssl query notifiy
+    schedule->addSSLQuery();
+
+
     Schedule::start();
 }
 
@@ -517,7 +521,12 @@ void IDEWindow::onSearch(const QString& text,int flags,bool hightlight){
     auto pane = this->currentEditorPane();
     if(pane!=nullptr){
         auto editor = pane->editor();
-        editor->findText(text,flags,hightlight);
+        if(editor){
+            auto ret = editor->findText(text,flags,hightlight);
+            if(!ret){
+                wToast::showText(tr("Text \"%1\" not found").arg(text));
+            }
+        }
     }
 }
 

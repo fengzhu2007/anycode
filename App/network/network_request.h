@@ -62,7 +62,7 @@ namespace ady {
         virtual NetworkResponse* chmod(const QString& dst,int mode) ;
         virtual NetworkResponse* del(const QString& dst);
 
-        virtual QString matchToPath(const QString& from,bool local);
+        virtual QString matchToPath(const QString& from,bool is_file,bool local);
 
         virtual void autoClose(long long current);
 

@@ -18,6 +18,8 @@ public:
     void addNetworkAutoClose(int msec=300 * 1000);
     void addNetworkStatusWatching(int msec=2 * 1000);
 
+    void addSSLQuery();
+
     void addTask(ScheduleTask* task);
 
 public slots:

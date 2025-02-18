@@ -58,7 +58,7 @@ public:
 
 
     virtual NetworkResponse* customeAccess(const QString& name,QMap<QString,QVariant> data) override;
-    virtual QString matchToPath(const QString& from,bool local) override;
+    virtual QString matchToPath(const QString& from,bool is_file,bool local) override;
 
 
     inline void setDefaultDir(const QString& dir){m_rootPath = dir;}

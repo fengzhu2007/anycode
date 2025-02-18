@@ -93,7 +93,8 @@ void ReplaceWidget::onClicked(){
     }else if(sender==ui->replaceOne){
         dialog->replace(before,after,bit,hightlight);
     }else if(sender==ui->replaceAll){
-        dialog->replaceAll(before,after,ui->searchScope->currentText(),bit,ui->filePattern->currentText(),ui->exclusion->currentText());
+        QString scope = dialog->searchScodeModel()->value(ui->searchScope->currentIndex());
+        dialog->replaceAll(before,after,scope,bit,ui->filePattern->currentText(),ui->exclusion->currentText());
         dialog->close();
     }else{
         return ;

@@ -172,8 +172,9 @@ namespace ady {
         return nullptr;
     }
 
-    QString NetworkRequest::matchToPath(const QString& from,bool local){
+    QString NetworkRequest::matchToPath(const QString& from,bool is_file,bool local){
         Q_UNUSED(from);
+        Q_UNUSED(is_file);
         Q_UNUSED(local);
         return from;
     }

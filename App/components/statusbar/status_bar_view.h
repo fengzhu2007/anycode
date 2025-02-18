@@ -23,8 +23,10 @@ namespace ady{
         static StatusBarView* getInstance();
         static StatusBarView* make(QWidget* parent);
 
+
     public slots:
         void setNetworkStatus(bool isOnline);
+        void onToggleNotification();
 
     private:
         StatusBarView(QWidget* parent=nullptr);

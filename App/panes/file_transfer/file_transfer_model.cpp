@@ -353,6 +353,18 @@ FileTransferModel::FileTransferModel(QObject *parent)
 
 }
 
+void FileTransferModel::synchronousFromResourceManage(){
+    auto model = ResourceManagerModel::getInstance();
+    if(model!=nullptr){
+        auto root = model->rootItem();
+        int count = root->childrenCount();
+        for(int i=0;i<count;i++){
+            auto one = root->childAt(i);
+            this->openProject(one->pid(),one->title(),one->path());
+        }
+    }
+}
+
 FileTransferModel::~FileTransferModel(){
     this->finish();//finish all thread
 
@@ -561,11 +573,12 @@ void FileTransferModel::insertFrontAndRemove(long long siteid,long long id,QFile
             const QString remotePath = site->destination();
             for(int i=0;i<length;i++){
                 QFileInfo fi = list.at(i);
+                bool is_file = fi.isFile();
                 const QString source = fi.absoluteFilePath();
                 QString destination;
                 if(source.startsWith(projectPath)){
                     QString rSource = source.mid(projectPath.length());
-                    QString rDest = req->matchToPath(rSource,true);
+                    QString rDest = req->matchToPath(rSource,is_file,true);
                     if(rDest.isEmpty()){
                         qDebug()<<"upload igore path:"<<source;
                         continue;
@@ -628,11 +641,12 @@ void FileTransferModel::insertFrontAndRemove(long long siteid,long long id,QList
             const QString remotePath = site->destination();//remote path
             for(int i=0;i<length;i++){
                 auto one = list.at(i);
+                bool is_file = one.type==FileItem::File;
                 QString source;
                 const QString destination = one.path;//remote absolute path
                 if(destination.startsWith(remotePath)){
                     QString rDest = destination.mid(remotePath.length());
-                    QString rSource = req->matchToPath(rDest,false);
+                    QString rSource = req->matchToPath(rDest,is_file,false);
                     if(rSource.isEmpty()){
                         qDebug()<<"download igore path:"<<destination;
                         continue;
@@ -1008,7 +1022,7 @@ void FileTransferModel::addUploadJob(QJsonObject data){
                     for(auto source:sourcelist){
                         if(source.startsWith(projectPath)){
                             QString rSource = source.mid(projectPath.length());
-                            QString rDest = req->matchToPath(rSource,true);
+                            QString rDest = req->matchToPath(rSource,is_file,true);
                             if(rDest.isEmpty()){
                                 continue;
                             }
@@ -1085,7 +1099,7 @@ void FileTransferModel::addDownloadJob(QJsonObject data){
                 const QString remotePath = site->destination();//site remote path
                 if(remote.startsWith(remotePath)){
                     QString rRemote = remote.mid(remotePath.length());
-                    QString rLocal = req->matchToPath(rRemote,true);
+                    QString rLocal = req->matchToPath(rRemote,is_file,true);
                     if(rLocal.isEmpty()){
                         return ;
                     }

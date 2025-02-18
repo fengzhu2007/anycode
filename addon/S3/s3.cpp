@@ -644,8 +644,9 @@ static bool orMatches(const QList<QRegularExpression> &exprList, const QString &
     return ret;
 }
 
-QString S3::matchToPath(const QString& from,bool local){
-    if(local && from.endsWith("/")==false){
+QString S3::matchToPath(const QString& from,bool is_file,bool local){
+    //qDebug()<<"from"<<from<<local;
+    if(local && is_file){
         //file
         if(m_filters.size()>0 && orMatches(m_filters,from)==false){
             return {};

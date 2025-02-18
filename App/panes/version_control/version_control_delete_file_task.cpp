@@ -33,7 +33,7 @@ bool VersionControlDeleteFileTask::exec() {
     if(req!=nullptr){
         auto instance = VersionControlPane::getInstance();
         for(auto file:d->files){
-            const QString remote = req->matchToPath(file,true);
+            const QString remote = req->matchToPath(file,true,true);
             if(!remote.isEmpty()){
                 auto response = req->del(remote);
                 QMetaObject::invokeMethod(instance,"onOutput", Qt::AutoConnection,Q_ARG(NetworkResponse*,response));
@@ -42,7 +42,6 @@ bool VersionControlDeleteFileTask::exec() {
         return true;
     }
     return false;
-
 }
 
 

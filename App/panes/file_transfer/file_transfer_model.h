@@ -178,6 +178,8 @@ public:
 
     FileTransferModelItem* find(long long id,bool project=false);//find server
 
+    void synchronousFromResourceManage();
+
 signals:
     void notifyProgress(long long siteid,long long id,float progress);
 

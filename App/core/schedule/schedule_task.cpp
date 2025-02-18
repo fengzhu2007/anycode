@@ -1,7 +1,7 @@
 #include "schedule_task.h"
 #include <QDateTime>
 namespace ady{
-ScheduleTask::ScheduleTask(int msec):m_interval(msec) {
+ScheduleTask::ScheduleTask(int msec,int delay):m_interval(msec),m_delay(delay) {
 
 }
 

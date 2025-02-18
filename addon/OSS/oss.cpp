@@ -591,8 +591,8 @@ static bool orMatches(const QList<QRegularExpression> &exprList, const QString &
 }
 
 
-QString OSS::matchToPath(const QString& from,bool local){
-    if(local && from.endsWith("/")==false){
+QString OSS::matchToPath(const QString& from,bool is_file,bool local){
+    if(local && is_file){
         //file
         if(m_filters.size()>0 && orMatches(m_filters,from)==false){
             return {};

@@ -12,12 +12,16 @@ class SSLQuerier;
 class SSLQueryTask :  public ScheduleTask
 {
 public:
-    SSLQueryTask(const QStringList& list);
+    SSLQueryTask(const QStringList& list,long long delay=0);
     virtual void execute() override;
     ~SSLQueryTask() override;
     inline SSLQuerier* querier(){
         return m_querier;
     }
+
+public:
+    static long long DELAY;
+    static QString SSL_QUERIER_KEY;
 
 private:
     QStringList m_sitelist;

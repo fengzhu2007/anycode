@@ -32,6 +32,7 @@ public slots:
 
 private:
     FileTransferPane(QWidget *parent = nullptr);
+    void scrollToCurrent();
 
 public:
     static const QString PANE_ID;

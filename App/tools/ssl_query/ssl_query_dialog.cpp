@@ -14,7 +14,6 @@
 
 namespace ady{
 
-static QString SSL_QUERIER_KEY = "ssl_querier_domains";
 
 SSLQueryDialog* SSLQueryDialog::instance = nullptr;
 class SSLQueryDialogPrivate{
@@ -82,7 +81,7 @@ void SSLQueryDialog::onActionTrigger(){
             this->queryDomains({text});
 
             auto domains = d->model->allDomains();
-            CommonStorage().replace(SSL_QUERIER_KEY,domains.join(","));//save
+            CommonStorage().replace(SSLQueryTask::SSL_QUERIER_KEY,domains.join(","));//save
         }else{
             wToast::showText(tr("Invalid domain"));
         }
@@ -111,7 +110,7 @@ void SSLQueryDialog::onActionTrigger(){
             }
             auto domains = d->model->allDomains();
 
-            CommonStorage().replace(SSL_QUERIER_KEY,domains.join(","));//save
+            CommonStorage().replace(SSLQueryTask::SSL_QUERIER_KEY,domains.join(","));//save
         }
     }else if(sender==ui->actionRefresh_All){
         d->model->clear();
@@ -120,10 +119,8 @@ void SSLQueryDialog::onActionTrigger(){
 }
 
 void SSLQueryDialog::onQuery(){
-    //CommonStorage().replace(SSL_QUERIER_KEY,domains.join(","));//get
-    auto r = CommonStorage().one(SSL_QUERIER_KEY);
+    auto r = CommonStorage().one(SSLQueryTask::SSL_QUERIER_KEY);
     if(!r.value.isEmpty()){
-        //QStringList sites = {"www.guzheng.cn","www.hqgq.com","www.guoqinwang.com","m.guzheng.cn","www.baidu.com"};
         QStringList sites = r.value.split(",");
         this->queryDomains(sites);
     }

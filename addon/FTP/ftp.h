@@ -35,7 +35,7 @@ public:
     virtual NetworkResponse* rename(const QString& src,const QString& dst) override;
     virtual NetworkResponse* chmod(const QString& dst,int mode) override;
 
-    virtual QString matchToPath(const QString& from,bool local) override;
+    virtual QString matchToPath(const QString& from,bool is_file,bool local) override;
     virtual void autoClose(long long current) override;
 
 

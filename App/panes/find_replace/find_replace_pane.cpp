@@ -138,9 +138,39 @@ void FindReplacePane::runSearch(const QString& text,const QString& scope,int fla
 void FindReplacePane::runReplace(const QString& before,const QString& after,const QString& scope,int flags, const QString& filter,const QString& exclusion){
     this->stop();
     if(d->list.size()==0){
+        //qDebug()<<"scope"<<scope;
+        FindReplaceProgress* progress = nullptr;
+        if(scope==":"){
+            //current
+            auto instance = CodeEditorManager::getInstance();
+            if(instance==nullptr){
+                return ;
+            }
+            auto pane = instance->current();
+            if(pane==nullptr){
+                return ;
+            }
+            auto doc = pane->editor()->document();
+            QString path = pane->path();
+            if(path.isEmpty()){
+                path = pane->windowTitle();
+            }
+            progress = new FindReplaceProgress(FindReplaceProgress::SearchAndReplace,before,after,flags,path,doc,filter,exclusion);
+        }else if(scope=="::"){
+            //opened
+            auto instance = CodeEditorManager::getInstance();
+            auto data = instance->docData();
+            if(data.size()==0){
+                return ;
+            }
+            progress = new FindReplaceProgress(FindReplaceProgress::SearchAndReplace,before,after,flags,data,filter,exclusion);
+        }else{
+            //file or folder
+            progress = new FindReplaceProgress(FindReplaceProgress::SearchAndReplace,before,after,flags,scope,filter,exclusion);
+        }
+
         ui->actionStop->setEnabled(true);
         ui->widget->start();
-        auto progress = new FindReplaceProgress(FindReplaceProgress::SearchAndReplace,before,after,flags,scope,filter,exclusion);
         d->list << progress;
         connect(progress,&QThread::finished,progress,&QThread::deleteLater);
         connect(progress,&QThread::finished,this,&FindReplacePane::onSearchEnd);
@@ -150,7 +180,6 @@ void FindReplacePane::runReplace(const QString& before,const QString& after,cons
 
         auto dialog = ReplaceAllProgressDialog::open(this);
         connect(dialog,&QDialog::finished,this,&FindReplacePane::onReplaceAllFinished);
-        //qDebug()<<"FindReplacePane::runReplace";
 
     }
 }

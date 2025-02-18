@@ -85,7 +85,6 @@ QList<CodeErrorInfo> PHPLint::results(){
         }
         return {info};
     }else{
-        qDebug()<<"php parse";
         return CodeParseLint::results();
     }
 }

@@ -4,6 +4,7 @@
 #include "core/event_bus/event.h"
 #include "panes/file_transfer/file_transfer_model.h"
 #include "common/utils.h"
+#include <w_badge.h>
 #include <QStyleOption>
 #include <QPainter>
 #include <QStyle>
@@ -23,6 +24,14 @@ StatusBarView* StatusBarView::instance = nullptr;
         m_isOnline = true;
         this->setReady();
         this->setRate({-1,-1});
+
+        auto label = new QLabel(ui->notification);
+        label->setPixmap(QPixmap(QString::fromUtf8(":/Resource/icons/NotificationAlert_16x.svg")));
+        ui->notification->setCentralWidget(label);
+        //ui->notification->setCount(99);
+
+        connect(ui->notification,&wBadge::clicked,this,&StatusBarView::onToggleNotification);
+
     }
 
     StatusBarView::~StatusBarView(){
@@ -52,6 +61,10 @@ StatusBarView* StatusBarView::instance = nullptr;
             }
         }
         m_isOnline = isOnline;
+    }
+
+    void StatusBarView::onToggleNotification(){
+        qDebug()<<"onToggleNotification";
     }
 
     void StatusBarView::showMessage(const QString& message)

@@ -433,8 +433,9 @@ namespace ady {
         return this->sendCommand(command);
     }
 
-    QString FTP::matchToPath(const QString& from,bool local){
+    QString FTP::matchToPath(const QString& from,bool is_file,bool local){
         //from is relative path like: path1/path2/file.html
+        Q_UNUSED(is_file);
         if(m_dirMapping.size()>0){
             QString ret;
             if(local){

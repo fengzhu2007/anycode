@@ -40,9 +40,10 @@ FileTransferPane::FileTransferPane(QWidget *parent) :
     this->setWindowTitle(tr("File Transfer"));
     this->setStyleSheet("QToolBar{border:0px;}");
 
+    auto instance = FileTransferModel::getInstance();
+    instance->synchronousFromResourceManage();
 
-
-    ui->treeView->setModel(FileTransferModel::getInstance());
+    ui->treeView->setModel(instance);
     ui->treeView->setTextElideMode(Qt::ElideLeft);
     ui->treeView->setColumnWidth(FileTransferModel::Name,240);
     ui->treeView->setColumnWidth(FileTransferModel::FileSize,100);
@@ -99,6 +100,7 @@ bool FileTransferPane::onReceive(Event* e) {
         if(data.isEmpty()==false){
             auto model = static_cast<FileTransferModel*>(ui->treeView->model());
             model->addUploadJob(data);
+            this->scrollToCurrent();
         }
         return true;
     }else if(id==Type::M_DOWNLOAD){
@@ -107,6 +109,7 @@ bool FileTransferPane::onReceive(Event* e) {
         if(data.isEmpty()==false){
             auto model = static_cast<FileTransferModel*>(ui->treeView->model());
             model->addDownloadJob(data);
+            this->scrollToCurrent();
         }
         return true;
     }else if(id==Type::M_OPEN_PROJECT){
@@ -257,6 +260,26 @@ void FileTransferPane::onActionTriggered(){
     }
 }
 
+void FileTransferPane::scrollToCurrent(){
+    //qDebug()<<"scrollToCurrent";
+    auto model = static_cast<FileTransferModel*>(ui->treeView->model());
+    //find first has task site index
+    int count = model->rowCount();
+    for(int i=0;i<count;i++){
+        auto parent = model->index(i,FileTransferModel::Name);
+        int siteCount = model->rowCount(parent);
+        for(int j=0;j<siteCount;j++){
+            auto index = model->index(j,FileTransferModel::Name,parent);
+            if(model->rowCount(index)>0){
+                //auto item = static_cast<FileTransferModelItem*>(index.internalPointer());
+                //qDebug()<<"scrollToCurrent"<<index.row()<<item->name();
+                ui->treeView->scrollTo(model->index(0,FileTransferModel::Name,index));
+                return ;
+            }
+        }
+    }
+}
+
 FileTransferPane* FileTransferPane::open(DockingPaneManager* dockingManager,bool active){
     if(instance==nullptr){
         instance = new FileTransferPane(dockingManager->widget());
@@ -273,5 +296,7 @@ FileTransferPane* FileTransferPane::make(DockingPaneManager* dockingManager,cons
     }
     return nullptr;
 }
+
+
 
 }

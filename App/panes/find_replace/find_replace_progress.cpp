@@ -209,6 +209,7 @@ void FindReplaceProgress::run(){
             //replace all
             //emit searchResult(d->list,d->matchFileCount,d->searchFileCount);
             this->replaceAll(d->after,*d->list,false);
+            qDebug()<<"opend files"<<d->openedFiles;
             emit replaceOpendFiles(d->openedFiles,d->before,d->after,d->flags,d->replaceCount,d->replaceFiles);
         }
     }else{

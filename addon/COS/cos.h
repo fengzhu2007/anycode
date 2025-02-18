@@ -46,7 +46,7 @@ public:
     NetworkResponse* del(const QString& bucket,const QString& dst);
 
     virtual NetworkResponse* customeAccess(const QString& name,QMap<QString,QVariant> data) override;
-    virtual QString matchToPath(const QString& from,bool local) override;
+    virtual QString matchToPath(const QString& from,bool is_file,bool local) override;
 
     inline void setDefaultDir(QString dir){m_rootPath = dir;}
 

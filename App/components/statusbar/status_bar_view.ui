@@ -134,8 +134,32 @@
      </property>
     </widget>
    </item>
+   <item>
+    <widget class="wBadge" name="notification">
+     <property name="minimumSize">
+      <size>
+       <width>20</width>
+       <height>25</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>wBadge</class>
+   <extends>QFrame</extends>
+   <header location="global">w_badge.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../r.qrc"/>
  </resources>

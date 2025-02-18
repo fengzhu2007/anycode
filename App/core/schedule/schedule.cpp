@@ -4,6 +4,8 @@
 #include "network_auto_close_task.h"
 #include "network_rate_task.h"
 #include "network_status_task.h"
+#include "tools/ssl_query/ssl_query_task.h"
+#include "storage/common_storage.h"
 #include <QTimer>
 #include <QDateTime>
 #include <QDebug>
@@ -16,6 +18,7 @@ public:
     FileAutoSaveTask* file_auto_save_task;
     NetworkAutoCloseTask* network_auto_close_task;
     NetworkStatusTask* network_status_task;
+    long long start_time;//m second
 
 };
 
@@ -24,6 +27,7 @@ Schedule::Schedule(QObject* parent):QObject(parent) {
     d->file_auto_save_task = nullptr;
     d->network_auto_close_task = nullptr;
     d->network_status_task = nullptr;
+    d->start_time = QDateTime::currentDateTime().toMSecsSinceEpoch();
     //d->file_auto_save_task = nullptr;
     connect(&d->timer,&QTimer::timeout,this,&Schedule::onTimeout);
 
@@ -80,10 +84,19 @@ void Schedule::addNetworkStatusWatching(int msec){
     }
 }
 
+void Schedule::addSSLQuery(){
+    auto r = CommonStorage().one(SSLQueryTask::SSL_QUERIER_KEY);
+    if(!r.value.isEmpty()){
+        QStringList sites = r.value.split(",");
+        d->queue << (new SSLQueryTask(sites,SSLQueryTask::DELAY));
+    }
+}
+
 void Schedule::onTimeout(){
     long long mtime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    long long duration = mtime - d->start_time;
     for(auto one:d->queue){
-        if(one->isShouldExecute(mtime)){
+        if(one->isShouldExecute(mtime,duration)){
             one->doing();
             one->execute();
             one->done();
