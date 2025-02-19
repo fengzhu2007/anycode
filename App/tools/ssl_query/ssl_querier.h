@@ -2,7 +2,7 @@
 #define SSL_QUERIER_H
 #include "network/network_request.h"
 #include <QObject>
-
+#include <QDateTime>
 
 namespace ady{
 class NetworkResponse;
@@ -16,6 +16,7 @@ public:
     virtual NetworkResponse* customeAccess(const QString& name,QMap<QString,QVariant> data) override;
     bool execute();
 
+    static QDateTime parseDateTime(const QString& dateTimeString);
 private:
     void parseCertInfo(const QString& domain);
 
@@ -27,6 +28,7 @@ signals:
 private:
     QStringList m_sitelist;
     SSLQueryCallback* m_callback;
+    int m_errorCount;
 
 };
 

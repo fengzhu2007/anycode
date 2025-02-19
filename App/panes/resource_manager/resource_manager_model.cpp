@@ -322,7 +322,8 @@ ResourceManagerModelItem* ResourceManagerModel::appendItem(ProjectRecord* projec
     int position = d->root->childrenCount();
     beginInsertRows(QModelIndex(),position,position);
     d->root->appendItem(item);
-    d->watcher->addPath(project->path);
+    //d->watcher->addPath(project->path);
+    this->appendWatchDirectory(project->path);
     endInsertRows();
     //d->root->dump("insert");
     return item;
@@ -437,10 +438,12 @@ void ResourceManagerModel::removeItem(ResourceManagerModelItem* item){
 }
 
 void ResourceManagerModel::appendWatchDirectory(const QString& path){
+    //qDebug()<<"addpath"<<path;
     d->watcher->addPath(path);
 }
 
 void ResourceManagerModel::removeWatchDirectory(const QString& path){
+    //qDebug()<<"removepath"<<path;
     d->watcher->removePath(path);
 }
 

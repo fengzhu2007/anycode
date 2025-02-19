@@ -577,6 +577,8 @@ void IDEWindow::onOpenFindAndReplace(int mode,const QString& text,const QString&
     }
     if(!scope.isEmpty()){
         dialog->setSearchScope(scope);
+    }else{
+        dialog->setSearchScope(":");//set current document scope
     }
 }
 

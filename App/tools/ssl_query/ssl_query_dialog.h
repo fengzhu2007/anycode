@@ -25,7 +25,6 @@ public slots:
 
 private:
     explicit SSLQueryDialog(QWidget* parent=nullptr);
-    QDateTime parseDateTime(const QString& dateTimeString);
     void queryDomains(const QStringList& sites);
 private:
     Ui::SSLQueryDialog* ui;

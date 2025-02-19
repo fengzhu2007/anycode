@@ -333,8 +333,13 @@ void ResourceManagerPane::readFolder(ResourceManagerModelItem* item,int action){
         thread->start();
     }
     auto path = item->path();
-    if(item->openList().size()>0){
-        path += ResourceManageReadFolderTask::divider + item->openList().join(ResourceManageReadFolderTask::divider);
+    auto list = item->openList();
+    if(list.size()>0){
+
+        path += ResourceManageReadFolderTask::divider + list.join(ResourceManageReadFolderTask::divider);
+        for(auto one:list){
+            d->model->appendWatchDirectory(one);
+        }
     }
     //qDebug()<<"path:"<<path;
     auto task = new ResourceManageReadFolderTask(d->model,path);

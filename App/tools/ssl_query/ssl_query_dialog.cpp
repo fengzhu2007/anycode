@@ -128,8 +128,8 @@ void SSLQueryDialog::onQuery(){
 
 void SSLQueryDialog::onOneReady(const QString& domain,const QJsonObject& data){
     QString format = "MMM d hh:mm:ss yyyy 'GMT'";
-    auto startDate = parseDateTime(data.find("StartDate")->toString());
-    auto expireDate = parseDateTime(data.find("ExpireDate")->toString());
+    auto startDate = SSLQuerier::parseDateTime(data.find("StartDate")->toString());
+    auto expireDate = SSLQuerier::parseDateTime(data.find("ExpireDate")->toString());
     QueryResult result{domain,startDate,expireDate};
     d->model->updateItem(result);
 }
@@ -148,35 +148,7 @@ void SSLQueryDialog::onFinish(){
     d->model->sortAll();
 }
 
-QDateTime SSLQueryDialog::parseDateTime(const QString& dateTimeString){
-    QStringList parts = dateTimeString.simplified().split(' ');
-    if (parts.size() == 5) {
-        QString monthStr = parts[0]; // "Jul"
-        int day = parts[1].toInt();  // 8
-        QString timeStr = parts[2];  // "01:41:02"
-        int year = parts[3].toInt(); // 2024
-        QString timeZone = parts[4]; // "GMT"
-        QMap<QString, int> monthMap = {
-            {"Jan", 1}, {"Feb", 2}, {"Mar", 3}, {"Apr", 4},
-            {"May", 5}, {"Jun", 6}, {"Jul", 7}, {"Aug", 8},
-            {"Sep", 9}, {"Oct", 10}, {"Nov", 11}, {"Dec", 12}
-        };
-        int month = monthMap.value(monthStr, -1);
-        if (month != -1) {
-            QStringList timeParts = timeStr.split(':');
-            if (timeParts.size() == 3) {
-                int hour = timeParts[0].toInt();
-                int minute = timeParts[1].toInt();
-                int second = timeParts[2].toInt();
-                QDate date(year, month, day);
-                QTime time(hour, minute, second);
-                QDateTime dateTime(date, time,Qt::UTC);
-                return dateTime;
-            }
-        }
-    }
-    return {};
-}
+
 
 void SSLQueryDialog::queryDomains(const QStringList& sites){
     auto instance = Schedule::getInstance();

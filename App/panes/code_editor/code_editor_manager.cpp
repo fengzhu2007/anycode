@@ -557,7 +557,8 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
         d->cutAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_X));
         d->pasteAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
         d->selectAllAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_A));
-        d->autoFormatAction->setShortcut(QKeySequence(Qt::CTRL + Qt::ALT + Qt::Key_F));
+        d->autoFormatAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_F));
+        //d->autoFormatAction->setShortcutContext(Qt::ApplicationShortcut);
 
         connect(d->undoAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
         connect(d->redoAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);

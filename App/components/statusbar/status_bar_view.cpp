@@ -17,7 +17,7 @@ StatusBarView* StatusBarView::instance = nullptr;
         ui(new Ui::StatusBarView)
     {
         this->reg();
-        this->regMessageIds({Type::M_MESSAGE,Type::M_READY});
+        this->regMessageIds({Type::M_MESSAGE,Type::M_READY,Type::M_NEW_NOTIFICATION});
 
         this->setStyleSheet(QString::fromUtf8(".QLabel{color:white;}"));
         ui->setupUi(this);
@@ -86,6 +86,10 @@ StatusBarView* StatusBarView::instance = nullptr;
         }else if(id==Type::M_READY){
             this->setReady();
             return true;
+        }else if(id==Type::M_NEW_NOTIFICATION){
+            auto count = static_cast<int*>(e->data());
+            //qDebug()<<"new notification"<<(*count);
+            ui->notification->setCount(ui->notification->count() + (*count));
         }
         return false;
     }

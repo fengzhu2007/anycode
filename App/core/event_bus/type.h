@@ -65,6 +65,9 @@ public:
     //terminal
     static const QString M_OPEN_TERMINAL;
 
+    //notification
+    static const QString M_NEW_NOTIFICATION;
+
     //output
     enum OutputLevel{
         Text=0,

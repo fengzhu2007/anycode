@@ -187,6 +187,7 @@ void FindReplaceProgress::run(){
             auto pane = instance->get(d->folder);
             if(pane!=nullptr){
                 this->searchDocument(pane->editor()->document(),d->folder);
+                d->searchFileCount += 1;
             }else{
                 if(d->regular){
                     this->searchFileRegExp(d->folder);
@@ -209,7 +210,7 @@ void FindReplaceProgress::run(){
             //replace all
             //emit searchResult(d->list,d->matchFileCount,d->searchFileCount);
             this->replaceAll(d->after,*d->list,false);
-            qDebug()<<"opend files"<<d->openedFiles;
+            //qDebug()<<"opend files"<<d->openedFiles;
             emit replaceOpendFiles(d->openedFiles,d->before,d->after,d->flags,d->replaceCount,d->replaceFiles);
         }
     }else{
@@ -235,8 +236,8 @@ void FindReplaceProgress::searchFolder(const QString& folder){
                 auto pane = instance->get(path);
                 if(pane!=nullptr){
                     this->searchDocument(pane->editor()->document(),path);
+                    d->searchFileCount += 1;
                 }else{
-
                     if(d->regular){
                         this->searchFileRegExp(path);
                     }else{
