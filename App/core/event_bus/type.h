@@ -67,6 +67,8 @@ public:
 
     //notification
     static const QString M_NEW_NOTIFICATION;
+    static const QString M_NOTIFICATION;
+    static const QString M_TOGGLE_NOTIFICATION;
 
     //output
     enum OutputLevel{

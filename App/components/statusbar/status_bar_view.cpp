@@ -1,8 +1,10 @@
 #include "status_bar_view.h"
 #include "ui_status_bar_view.h"
+#include "core/event_bus/publisher.h"
 #include "core/event_bus/type.h"
 #include "core/event_bus/event.h"
 #include "panes/file_transfer/file_transfer_model.h"
+#include "panes/notification/notification_pane.h"
 #include "common/utils.h"
 #include <w_badge.h>
 #include <QStyleOption>
@@ -64,7 +66,8 @@ StatusBarView* StatusBarView::instance = nullptr;
     }
 
     void StatusBarView::onToggleNotification(){
-        qDebug()<<"onToggleNotification";
+        //qDebug()<<"onToggleNotification";
+        Publisher::getInstance()->post(Type::M_TOGGLE_NOTIFICATION);
     }
 
     void StatusBarView::showMessage(const QString& message)
@@ -88,8 +91,14 @@ StatusBarView* StatusBarView::instance = nullptr;
             return true;
         }else if(id==Type::M_NEW_NOTIFICATION){
             auto count = static_cast<int*>(e->data());
-            //qDebug()<<"new notification"<<(*count);
             ui->notification->setCount(ui->notification->count() + (*count));
+        }else if(id==Type::M_NOTIFICATION){
+            QJsonObject json = e->toJsonOf<NotificationData>().toObject();
+            NotificationData data;
+            data.fromJson(json);
+            ui->notification->setCount(ui->notification->count() +1 );
+            NotificationPane::notify(data);
+            return true;
         }
         return false;
     }

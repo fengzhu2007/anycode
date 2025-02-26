@@ -303,6 +303,10 @@ add_library(App SHARED
         tools/ssl_query/query_result_model.h tools/ssl_query/query_result_model.cpp
         panes/sql/sql_pane.h panes/sql/sql_pane.cpp panes/sql/sql_pane.ui
         interface/sql_querier.h interface/sql_querier.cpp
+        panes/notification/notification_pane.h panes/notification/notification_pane.cpp panes/notification/notification_pane.ui
+        panes/notification/notification_card.h panes/notification/notification_card.cpp
+        panes/notification/notification_model.h panes/notification/notification_model.cpp
+        panes/notification/notification_card.ui
 
 
 

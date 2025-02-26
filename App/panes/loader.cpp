@@ -12,6 +12,7 @@
 #include "panes/terminal/terminal_pane.h"
 #include "panes/output/output_pane.h"
 #include "panes/sql/sql_pane.h"
+#include "panes/notification/notification_pane.h"
 
 namespace ady{
 
@@ -35,6 +36,8 @@ DockingPane* PaneLoader::init(DockingPaneManager* dockingManager,const QString& 
         pane = TerminalPane::make(dockingManager,data);
     }else if(group == OutputPane::PANE_GROUP){
         pane = OutputPane::make(dockingManager,data);
+    }else if(group == NotificationPane::PANE_GROUP){
+        pane = NotificationPane::make(dockingManager,data);
     }else{
         //other editor
         pane = CodeEditorManager::makePane(group,data);
@@ -58,6 +61,8 @@ DockingPane* PaneLoader::open(DockingPaneManager* dockingManager,const QString& 
         pane = TerminalPane::open(dockingManager,true);
     }else if(group == OutputPane::PANE_GROUP){
         pane = OutputPane::open(dockingManager,true);
+    }else if(group == NotificationPane::PANE_GROUP){
+        pane = NotificationPane::open(dockingManager,true);
     }
     return pane;
 }

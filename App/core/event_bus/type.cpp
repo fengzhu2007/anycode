@@ -53,6 +53,8 @@ const QString Type::M_RESTART = "Restart";
 const QString Type::M_OPEN_TERMINAL = "OpenTerminal";
 
 const QString Type::M_NEW_NOTIFICATION = "NewNotification";
+const QString Type::M_NOTIFICATION = "Notification";
+const QString Type::M_TOGGLE_NOTIFICATION = "ToggleNotification";
 
 
 Type::Type()

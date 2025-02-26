@@ -125,5 +125,32 @@ struct ANYENGINE_EXPORT OutputData{
     }
 };
 
+
+struct ANYENGINE_EXPORT NotificationData{
+    QString type;
+    QString title;
+    QString description;
+    QString time;
+    QJsonObject data;
+    QJsonObject toJson(){
+        return {
+            {"type",type},
+            {"title",title},
+            {"description",description},
+            {"time",time},
+            {"data",data},
+        };
+    }
+
+    void fromJson(const QJsonObject& data){
+        this->type = data.find("type")->toString();
+        this->title = data.find("title")->toString();
+        this->description = data.find("description")->toString();
+        this->time = data.find("time")->toString();
+        this->data = data.find("data")->toObject();
+    }
+
+};
+
 }
 #endif // EVENT_DATA_H

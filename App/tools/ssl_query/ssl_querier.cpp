@@ -68,6 +68,8 @@ void SSLQuerier::parseCertInfo(const QString& domain){
                     if(ret < 5*86400){
                         //less than 5 days
                         m_errorCount += 1;
+
+
                     }
                 }
             }

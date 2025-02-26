@@ -20,6 +20,7 @@
 #include "panes/file_transfer/file_transfer_model.h"
 #include "panes/terminal/terminal_pane.h"
 #include "panes/output/output_pane.h"
+#include "panes/notification/notification_pane.h"
 
 #include "panes/loader.h"
 #include "core/event_bus/event.h"
@@ -87,7 +88,8 @@ IDEWindow::IDEWindow(QWidget *parent) :
     d = new IDEWindowPrivate;
     qRegisterMetaType<QFileInfoList>("QFileInfoList");
     Subscriber::reg();
-    this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO,Type::M_OPEN_FILE_TRANSFTER,Type::M_OPEN_PANE,Type::M_RESTART});
+    this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO,Type::M_OPEN_FILE_TRANSFTER,Type::M_OPEN_PANE,Type::M_RESTART,
+Type::M_TOGGLE_NOTIFICATION});
     ui->setupUi(this);
 
     this->setWindowIcon(QIcon(":/Resource/images/logo.icns"));
@@ -318,8 +320,18 @@ bool IDEWindow::onReceive(Event* e){
         auto one = static_cast<QString*>(e->data());
         PaneLoader::open(m_dockingPaneManager,*one,{});
     }else if(e->id()==Type::M_RESTART){
-        qDebug()<<"restart";
+        //qDebug()<<"restart";
         this->restart();
+    }else if(e->id()==Type::M_TOGGLE_NOTIFICATION){
+        auto instance = NotificationPane::getInstance();
+        if(instance){
+            //close
+            //instance->close();
+        }else{
+            //show
+            auto pane = NotificationPane::open(m_dockingPaneManager,true);
+            pane->activeToCurrent();
+        }
     }
     return false;
 }
