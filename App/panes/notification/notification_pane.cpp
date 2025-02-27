@@ -34,7 +34,12 @@ NotificationPane::NotificationPane(QWidget *parent)
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     this->setWindowTitle(tr("Notification"));
+    QString borderColor = Theme::getInstance()->borderColor().name(QColor::HexRgb);
     this->setStyleSheet("QToolBar{border:0px;}"
+                        ".ady--NotificationCard{border:1px solid "+borderColor+";"
+                                        "border-radius:5px;background:"+Theme::getInstance()->secondaryBackgroundColor().name(QColor::HexRgb)+"}"
+                        ".ady--NotificationCard #title{font-weight:bold;}"
+                        ".ady--NotificationCard #description{color:#999}"
                         ".ady--ListView{border:0}"
                         ".ady--ListView>QWidget#qt_scrollarea_viewport>.QWidget{border:0;background-color:"+Theme::getInstance()->backgroundColor().name(QColor::HexRgb)+";}");
 
@@ -45,6 +50,8 @@ NotificationPane::NotificationPane(QWidget *parent)
     ui->listview->setModel(d->model);
     d->model->setDataSource(list);
     connect(ui->actionClear_All,&QAction::triggered,this,&NotificationPane::onActionTriggered);
+
+
 }
 
 NotificationPane::~NotificationPane()
@@ -100,6 +107,8 @@ NotificationPane* NotificationPane::open(DockingPaneManager* dockingManager,bool
 NotificationPane* NotificationPane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
     if(instance==nullptr){
         instance = new NotificationPane(dockingManager->widget());
+        //NotificationPane::notify({"Notification","标题","详细","2022-01-02"});
+        //NotificationPane::notify({"Notification","标题2","详细2","2022-01-02"});
         return instance;
     }
     return nullptr;

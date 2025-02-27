@@ -19,7 +19,7 @@ StatusBarView* StatusBarView::instance = nullptr;
         ui(new Ui::StatusBarView)
     {
         this->reg();
-        this->regMessageIds({Type::M_MESSAGE,Type::M_READY,Type::M_NEW_NOTIFICATION});
+        this->regMessageIds({Type::M_MESSAGE,Type::M_READY,Type::M_NOTIFICATION});
 
         this->setStyleSheet(QString::fromUtf8(".QLabel{color:white;}"));
         ui->setupUi(this);
@@ -93,11 +93,13 @@ StatusBarView* StatusBarView::instance = nullptr;
             auto count = static_cast<int*>(e->data());
             ui->notification->setCount(ui->notification->count() + (*count));
         }else if(id==Type::M_NOTIFICATION){
+            //qDebug()<<"M_NOTIFICATION";
             QJsonObject json = e->toJsonOf<NotificationData>().toObject();
             NotificationData data;
             data.fromJson(json);
             ui->notification->setCount(ui->notification->count() +1 );
             NotificationPane::notify(data);
+            //NotificationPane::notify({"Notification","标题","详细","2022-01-02"});
             return true;
         }
         return false;

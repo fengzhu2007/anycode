@@ -16,6 +16,9 @@ public:
     explicit NotificationCard(QWidget *parent = nullptr);
     virtual void init(const NotificationData& data);
 
+protected:
+    virtual void paintEvent(QPaintEvent *e) override;
+
 private:
     NotificationCardPrivate* d;
 };

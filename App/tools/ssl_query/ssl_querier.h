@@ -23,7 +23,12 @@ private:
 signals:
     void oneReady(const QString& domain,const QJsonObject& data);
     void oneError(const QString& domain,const QString& errorMsg);
+    void notify(const QString& domain,const QString& expireDate);
     void finish();
+
+public slots:
+    void onNotify(const QString& domain,const QString& expireDate);
+
 
 private:
     QStringList m_sitelist;

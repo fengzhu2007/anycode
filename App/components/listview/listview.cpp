@@ -81,6 +81,9 @@ void ListViewContentLayout::setGeometry(const QRect &rect)
     for(int i=0;i<n;i++){
         QLayoutItem* item = itemAt(i);
         QSize size = item->widget()->sizeHint();
+        auto maxSize = item->widget()->maximumSize();
+        size.setHeight(std::min(size.height(),maxSize.height()));
+        size.setWidth(std::min(size.width(),maxSize.width()));
         item->widget()->show();
         h = size.height();
         item->setGeometry(QRect(x,y,w,h));
@@ -98,6 +101,7 @@ QSize ListViewContentLayout::sizeHint() const
     for(int i=0;i<n;i++){
         QLayoutItem* item = itemAt(i);
         QSize size = item->sizeHint();
+
         h += size.height();
         h+= sp;
         if(w<size.width()){
@@ -207,6 +211,9 @@ void ListView::render(){
             w->hide();
         }
         layout->update();
+        if(n==0){
+            this->resizeEmptyWidget();
+        }
     }
 }
 
@@ -296,8 +303,11 @@ void ListView::mouseReleaseEvent(QMouseEvent *e){
 
 void ListView::resizeEvent(QResizeEvent *event){
     QScrollArea::resizeEvent(event);
+    this->resizeEmptyWidget();
+}
+
+void ListView::resizeEmptyWidget(){
     if(d->model!=nullptr && d->model->count()==0){
-        //show empty state widget
         QWidget* w = d->model->emptyWidget();
         if(w && w->isHidden()==false){
             QRect rc = this->geometry();

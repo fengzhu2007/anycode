@@ -48,8 +48,12 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent *e) override;
     virtual void resizeEvent(QResizeEvent *event) override;
 
+
 signals:
     void itemClicked(int i);
+
+private:
+    void resizeEmptyWidget();
 
 private:
     ListViewPrivate* d;

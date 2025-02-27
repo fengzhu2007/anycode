@@ -2,7 +2,9 @@
 #include "ssl_query_task.h"
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/type.h"
+#include "core/event_bus/event_data.h"
 #include <QJsonObject>
+#include <QDateTime>
 #include <QDebug>
 
 namespace ady{
@@ -12,6 +14,8 @@ SSLQuerier::SSLQuerier(const QStringList& list,QObject* parent)
     NetworkRequest(curl_easy_init()),m_sitelist(list)
 {
     m_errorCount = 0;
+
+    connect(this,&SSLQuerier::notify,this,&SSLQuerier::onNotify);
 }
 
 SSLQuerier::~SSLQuerier(){
@@ -39,7 +43,6 @@ bool SSLQuerier::execute(){
         }
     }
     emit finish();
-    Publisher::getInstance()->post(Type::M_NEW_NOTIFICATION,(&m_errorCount));
     this->deleteLater();
     return true;
 }
@@ -63,13 +66,14 @@ void SSLQuerier::parseCertInfo(const QString& domain){
                     json.insert("StartDate",data.mid(11));
                 }else if(data.startsWith("Expire date:")){
                     QDateTime datetime = parseDateTime(data.mid(12));
+                    auto ExpireDate = data.mid(12);
                     json.insert("ExpireDate",data.mid(12));
                     int ret = current.secsTo(datetime);
                     if(ret < 5*86400){
                         //less than 5 days
                         m_errorCount += 1;
 
-
+                        emit notify(domain,ExpireDate);
                     }
                 }
             }
@@ -107,6 +111,12 @@ QDateTime SSLQuerier::parseDateTime(const QString& dateTimeString){
         }
     }
     return {};
+}
+
+void SSLQuerier::onNotify(const QString& domain,const QString& expireDate){
+    QDateTime current = QDateTime::currentDateTime();
+    NotificationData data{"SSL",tr("Certificate expiration reminder"),tr("The expiration time of the SSL certificate for the %1 domain name is %2, please note!").arg(domain).arg(expireDate),current.toString("MM-dd HH:mm"),{}};
+    Publisher::getInstance()->post(Type::M_NOTIFICATION,&data);
 }
 
 

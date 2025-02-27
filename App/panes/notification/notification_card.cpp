@@ -1,7 +1,7 @@
 #include "notification_card.h"
 #include "ui_notification_card.h"
-
-
+#include <QStyleOption>
+#include <QPainter>
 namespace ady{
 
 class NotificationCardPrivate{
@@ -27,5 +27,12 @@ void NotificationCard::init(const NotificationData& data){
     d->ui->time->setText(data.time);
 }
 
+void NotificationCard::paintEvent(QPaintEvent *e){
+    Q_UNUSED(e);
+    QStyleOption opt;
+    opt.init(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Frame, &opt, &p, this);
+}
 
 }
