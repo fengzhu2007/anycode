@@ -87,7 +87,7 @@ ResourceManagerPane::ResourceManagerPane(QWidget *parent) :
     ui(new Ui::ResourceManagerPane)
 {
     Subscriber::reg();
-    this->regMessageIds({Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT,Type::M_FILE_CHANGED,Type::M_SITE_ADDED,Type::M_SITE_UPDATED,Type::M_SITE_DELETED});
+    this->regMessageIds({Type::M_OPEN_PROJECT,Type::M_CLOSE_PROJECT,Type::M_FILE_CHANGED,Type::M_SITE_ADDED,Type::M_SITE_UPDATED,Type::M_SITE_DELETED,Type::M_RESOURCE_LOCATION});
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
@@ -323,6 +323,8 @@ bool ResourceManagerPane::onReceive(Event* e){
         if(id!=0){
             d->sites.remove(id);
         }
+    }else if(id==Type::M_RESOURCE_LOCATION){
+        this->locationFile();
     }
     return false;
 }
@@ -777,11 +779,8 @@ void ResourceManagerPane::onTopActionTriggered(){
         ui->treeView->expandAll();
     }else if(sender==ui->actionRefresh){
         //file loaction
-        auto pane = CodeEditorManager::getInstance()->current();
-        if(pane!=nullptr){
-            auto path = pane->path();
-            this->onLocateSuccess(path,true);
-        }
+        this->locationFile();
+
     }
 }
 
@@ -929,6 +928,14 @@ void ResourceManagerPane::closeProject(ResourceManagerModelItem* item){
                 instance->remove(one.id);
             }
         }
+    }
+}
+
+void ResourceManagerPane::locationFile(){
+    auto pane = CodeEditorManager::getInstance()->current();
+    if(pane!=nullptr){
+        auto path = pane->path();
+        this->onLocateSuccess(path,true);
     }
 }
 

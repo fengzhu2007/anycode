@@ -60,6 +60,7 @@ private:
     QMenu* attchUploadMenu(QMenu* parent,long long id);
 
     void closeProject(ResourceManagerModelItem* item);
+    void locationFile();
 
 public:
     static const QString PANE_ID;

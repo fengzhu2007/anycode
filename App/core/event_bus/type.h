@@ -70,6 +70,8 @@ public:
     static const QString M_NOTIFICATION;
     static const QString M_TOGGLE_NOTIFICATION;
 
+    static const QString M_RESOURCE_LOCATION;
+
     //output
     enum OutputLevel{
         Text=0,

@@ -56,6 +56,8 @@ const QString Type::M_NEW_NOTIFICATION = "NewNotification";
 const QString Type::M_NOTIFICATION = "Notification";
 const QString Type::M_TOGGLE_NOTIFICATION = "ToggleNotification";
 
+const QString Type::M_RESOURCE_LOCATION = "ResourceLocation";
+
 
 Type::Type()
 {

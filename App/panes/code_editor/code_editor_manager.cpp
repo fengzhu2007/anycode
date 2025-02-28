@@ -2,6 +2,7 @@
 #include "code_editor_pane.h"
 #include "docking_pane_manager.h"
 #include "docking_pane_container.h"
+#include "core/event_bus/publisher.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/type.h"
 //#include "components/message_dialog.h"
@@ -172,6 +173,7 @@ Editor* CodeEditorManager::current(){
 
 void CodeEditorManager::setCurrent(Editor* pane){
     d->current = pane;
+    Publisher::getInstance()->post(Type::M_RESOURCE_LOCATION);
 }
 
 QTextDocument* CodeEditorManager::currentDoc(){
