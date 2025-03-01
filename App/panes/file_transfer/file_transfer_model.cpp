@@ -1097,9 +1097,10 @@ void FileTransferModel::addDownloadJob(QJsonObject data){
             if(req!=nullptr){
                 const QString projectPath = proj->source() + "/";
                 const QString remotePath = site->destination();//site remote path
+                //qDebug()<<remote<<remotePath;
                 if(remote.startsWith(remotePath)){
                     QString rRemote = remote.mid(remotePath.length());
-                    QString rLocal = req->matchToPath(rRemote,is_file,true);
+                    QString rLocal = req->matchToPath(rRemote,is_file,false);
                     if(rLocal.isEmpty()){
                         return ;
                     }

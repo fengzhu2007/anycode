@@ -240,7 +240,8 @@ NetworkResponse* OSS::upload(Task* task)
             HttpParams options;
             options[BUCKET] = m_bucket;
             options[METHOD] = "PUT";
-            options[OBJECT] = remote;
+            options[OBJECT] = (remote);
+            qDebug()<<"options[OBJECT]"<<options[OBJECT];
             QMimeDatabase db;
             QMimeType mime = db.mimeTypeForFile(local);
             QString fileMimeType = mime.name();
@@ -257,13 +258,16 @@ NetworkResponse* OSS::upload(Task* task)
             }
             lists.push_back("Expect:");
             this->addHeader(lists);
+
             //qDebug()<<"header:"<<lists;
             //QString url = "http://"+options[HOST]+"/"+this->escape(options[OBJECT]);
             QString url = "http://"+options[HOST];
             if(!options[OBJECT].startsWith("/")){
                 url += QLatin1String("/");
             }
+            //url += this->escape(options[OBJECT]);
             url += this->escape(options[OBJECT]);
+            qDebug()<<"url"<<url<<options[OBJECT];
             OSSResponse* response = new  OSSResponse(this->id);
             this->setOption(CURLOPT_URL,url.toStdString().c_str());
             this->setOption(CURLOPT_POST,0);
@@ -374,7 +378,6 @@ NetworkResponse* OSS::download(Task* task)
             }
             url += this->escape(options[OBJECT]);
             OSSResponse* response = new  OSSResponse(this->id);
-
 
             this->setOption(CURLOPT_URL,url.toStdString().c_str());
             this->setOption(CURLOPT_POST,0);
@@ -603,8 +606,8 @@ QString OSS::matchToPath(const QString& from,bool is_file,bool local){
         if(local){
             //local to remote
             for(auto one:m_dirMapping){
-                const QString localPath = one.first;//like  path1/path2/
-                const QString remotePath = one.second;//like path3/path4/
+                const QString localPath = one.first.startsWith("/")?one.first.mid(1):one.first;//like  path1/path2/
+                const QString remotePath = one.second.startsWith("/")?one.second.mid(1):one.second;//like path3/path4/
                 if(from.startsWith(localPath)){
                     ret = remotePath + from.mid(localPath.length());
                     break;
@@ -615,11 +618,12 @@ QString OSS::matchToPath(const QString& from,bool is_file,bool local){
             }
         }else{
             //remote to local
+
             for(auto one:m_dirMapping){
-                const QString localPath = one.first;//like  path1/path2/
-                const QString remotePath = one.second;//like path3/path4/
+                const QString localPath =  one.first.startsWith("/")?one.first.mid(1):one.first;//like  path1/path2/
+                const QString remotePath = one.second.startsWith("/")?one.second.mid(1):one.second;//like path3/path4/
                 if(from.startsWith(remotePath)){
-                    ret = localPath + from.mid(localPath.length());
+                    ret = localPath + from.mid(remotePath.length());
                     break;
                 }
             }
@@ -627,6 +631,10 @@ QString OSS::matchToPath(const QString& from,bool is_file,bool local){
                 ret = from;
             }
         }
+        if(ret.startsWith("/")){
+            ret = ret.mid(1);
+        }
+
         return ret;//new relative path
     }else{
         return from;
@@ -686,12 +694,13 @@ HttpParams OSS::signHeaders(const HttpParams& options)
         if(!options[OBJECT].startsWith("/")){
             signableResource += "/";
         }
-        signableResource += this->escape(options[OBJECT]);
+        signableResource += (options[OBJECT]);
     }
 
     //GET\n\napplication/octet-stream\nWed, 29 Mar 2023 02:08:48 GMT\n
     //GET\n\napplication/octet-stream\nWed, 29 Mar 2023 02:08:48 GMT\n/qnsapp123/statics/
     string_to_sign += signableResource;
+    //qDebug()<<"string_to_sign"<<string_to_sign;
     //qDebug()<<"data:"<<options;
     //qDebug()<<"sign:"<<string_to_sign.toUtf8();
     HMAC_CTX *ctx = HMAC_CTX_new();

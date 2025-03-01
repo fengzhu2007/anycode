@@ -477,8 +477,8 @@ namespace ady {
             if(local){
                 //local to remote
                 for(auto one:m_dirMapping){
-                    const QString localPath = one.first;//like  path1/path2/
-                    const QString remotePath = one.second;//like path3/path4/
+                    const QString localPath =  one.first.startsWith("/")?one.first.mid(1):one.first;//like  path1/path2/
+                    const QString remotePath = one.second.startsWith("/")?one.second.mid(1):one.second;//like path3/path4/
                     if(from.startsWith(localPath)){
                         ret = remotePath + from.mid(localPath.length());
                         break;
@@ -490,16 +490,19 @@ namespace ady {
             }else{
                 //remote to local
                 for(auto one:m_dirMapping){
-                    const QString localPath = one.first;//like  path1/path2/
-                    const QString remotePath = one.second;//like path3/path4/
+                    const QString localPath =  one.first.startsWith("/")?one.first.mid(1):one.first;//like  path1/path2/
+                    const QString remotePath = one.second.startsWith("/")?one.second.mid(1):one.second;//like path3/path4/
                     if(from.startsWith(remotePath)){
-                        ret = localPath + from.mid(localPath.length());
+                        ret = localPath + from.mid(remotePath.length());
                         break;
                     }
                 }
                 if(ret.isEmpty()){
                     ret = from;
                 }
+            }
+            if(ret.startsWith("/")){
+                ret = ret.mid(1);
             }
             return ret;//new relative path
         }else{

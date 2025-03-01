@@ -69,7 +69,7 @@ QVariant QueryResultModel::data(const QModelIndex &index, int role) const {
                 if(ret<0){
                     //expired
                     return QColor(Qt::red);
-                }else if(ret < 10 * 86400){
+                }else if(ret < 5 * 86400){
                     //will expired
                     return QColor(Qt::darkYellow);
                 }

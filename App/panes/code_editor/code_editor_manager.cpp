@@ -53,6 +53,8 @@ public:
     Editor* current = nullptr;
     CodeEditorView* editor;
 
+    bool tabChanged = true;
+
     QAction *undoAction = nullptr;
     QAction *redoAction = nullptr;
     QAction *copyAction = nullptr;
@@ -85,6 +87,7 @@ CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
     Subscriber::reg();
     this->regMessageIds({Type::M_WILL_RENAME_FILE,Type::M_RENAMED_FILE,Type::M_WILL_RENAME_FOLDER,Type::M_RENAMED_FOLDER,Type::M_RELOAD_FILE,Type::M_DELETE_FILE,Type::M_DELETE_FOLDER});
     d = new CodeEditorManagerPrivate;
+    d->tabChanged = true;
     d->docking_manager = docking_manager;
     d->watcher = new QFileSystemWatcher(this);
     connect(d->watcher,&QFileSystemWatcher::fileChanged,this,&CodeEditorManager::onFileChanged);
@@ -173,7 +176,9 @@ Editor* CodeEditorManager::current(){
 
 void CodeEditorManager::setCurrent(Editor* pane){
     d->current = pane;
-    Publisher::getInstance()->post(Type::M_RESOURCE_LOCATION);
+    if(d->tabChanged)
+        Publisher::getInstance()->post(Type::M_RESOURCE_LOCATION);
+    d->tabChanged = true;
 }
 
 QTextDocument* CodeEditorManager::currentDoc(){
@@ -226,6 +231,7 @@ CodeEditorPane* CodeEditorManager::open(const QString& path){
 }*/
 
 Editor* CodeEditorManager::open(const QString& path,const QString& localPath,const QString& extension){
+    d->tabChanged = false;//manual open
     auto realPath = localPath.isEmpty()?path:localPath;
     auto pane = this->get(realPath);
     if(pane==nullptr){
