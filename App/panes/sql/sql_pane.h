@@ -22,11 +22,11 @@ public:
     virtual QString group() override;
     virtual QString description() override;
     virtual void activation() override;
-    virtual void save(bool rename) override;
+    virtual bool save(bool rename) override;
     virtual void contextMenu(const QPoint& pos) override;
     virtual QJsonObject toJson() override;
     virtual bool closeEnable() override;
-    virtual void doAction(int a) override;
+    virtual bool doAction(int a) override;
 
     void rename(const QString& name) override;
     void autoSave() override;

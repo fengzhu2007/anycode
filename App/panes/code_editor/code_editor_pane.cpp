@@ -139,7 +139,7 @@ void CodeEditorPane::activation(){
     CodeEditorManager::getInstance()->setCurrent(this);
 }
 
-void CodeEditorPane::save(bool rename){
+bool CodeEditorPane::save(bool rename){
     QString path = this->path();
     const QString source = path;
     bool tabRename = false;
@@ -153,7 +153,7 @@ void CodeEditorPane::save(bool rename){
         tabRename = true;
     }
     if (path.isEmpty()) {
-        return ;
+        return false;
     }
     //save
 
@@ -163,11 +163,11 @@ void CodeEditorPane::save(bool rename){
     auto m = ResourceManagerModel::getInstance();
     auto list = m->takeWatchDirectory(fi.dir().absolutePath(),false);
 
-    if(this->writeFile(path)){
+    auto ret = this->writeFile(path);
+    if(ret){
         //rename tab title
         //this->setToolTip(path);
         if(tabRename){
-
             auto container = this->container();
             if(container!=nullptr){
                 int i = container->indexOf(this);
@@ -201,7 +201,7 @@ void CodeEditorPane::save(bool rename){
         m->appendWatchDirectory(list.at(0));
     }
     instance->appendWatchFile(path);
-
+    return ret;
 }
 
 void CodeEditorPane::contextMenu(const QPoint& pos){
@@ -230,22 +230,28 @@ QJsonObject CodeEditorPane::toJson(){
 
 bool CodeEditorPane::closeEnable(){
     if(d->modification){
-        auto ret = MessageDialog::confirm(this,tr("Save"),tr("Save file\n%1?").arg(path()),QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+        auto name = this->path();
+        if(name.isEmpty()){
+            //new file
+            name = this->windowTitle();
+        }
+
+        auto ret = MessageDialog::confirm(this,tr("Save"),tr("Save file\n%1?").arg(name),QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
         if(ret==QMessageBox::Cancel){
             return false;
         }
         if(ret==QMessageBox::Yes){
-            this->save(false);
+            return this->save(false);
         }
     }
     return true;
 }
 
-void CodeEditorPane::doAction(int a){
+bool CodeEditorPane::doAction(int a){
     if(a==DockingPane::Save){
-        this->save(false);
+        return this->save(false);
     }else if(a==DockingPane::SaveAs){
-        this->save(true);
+        return this->save(true);
     }else if(a==DockingPane::Redo){
 
         ui->editor->redo();
@@ -266,6 +272,7 @@ void CodeEditorPane::doAction(int a){
     }else if(a==DockingPane::Print){
         //ui->editor->print();
     }
+    return false;
 }
 
 void CodeEditorPane::rename(const QString& name){
@@ -294,7 +301,6 @@ void CodeEditorPane::autoSave(){
 
     }
     instance->appendWatchFile(path);
-
 }
 
 bool CodeEditorPane::readFile(const QString& path){

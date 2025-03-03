@@ -53,8 +53,8 @@ void SQLPane::activation() {
 
 }
 
-void SQLPane::save(bool rename) {
-
+bool SQLPane::save(bool rename) {
+    return false;
 }
 
 void SQLPane::contextMenu(const QPoint& pos) {
@@ -78,8 +78,8 @@ bool SQLPane::closeEnable() {
     return true;
 }
 
-void SQLPane::doAction(int a) {
-
+bool SQLPane::doAction(int a) {
+    return false;
 }
 
 void SQLPane::rename(const QString& name) {

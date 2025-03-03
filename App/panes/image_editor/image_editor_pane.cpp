@@ -86,8 +86,8 @@ void ImageEditorPane::activation() {
     CodeEditorManager::getInstance()->setCurrent(this);
 }
 
-void ImageEditorPane::save(bool rename) {
-
+bool ImageEditorPane::save(bool rename) {
+    return false;
 }
 
 void ImageEditorPane::contextMenu(const QPoint& pos) {
@@ -116,8 +116,8 @@ bool ImageEditorPane::closeEnable() {
     return true;
 }
 
-void ImageEditorPane::doAction(int a) {
-
+bool ImageEditorPane::doAction(int a) {
+    return false;
 }
 
 bool ImageEditorPane::readFile(const QString& path){
