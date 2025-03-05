@@ -13,6 +13,7 @@
 #include "core/backend_thread.h"
 #include "storage/project_storage.h"
 #include "storage/site_storage.h"
+#include "storage/group_storage.h"
 #include "storage/recent_storage.h"
 #include "docking_pane_manager.h"
 #include "docking_pane_layout_item_info.h"
@@ -384,8 +385,10 @@ void ResourceManagerPane::onTreeItemDClicked(const QModelIndex& index){
         auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
         if(item->type()==ResourceManagerModelItem::File){
             //QString path = item->path();
-            auto data = OpenEditorData{item->path(),0,0};
+            auto data = OpenEditorData{item->path(),0,0,false};
             Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&data);
+
+            this->showStatusMessage(item->pid(),item->path());
         }
     }
 }
@@ -570,8 +573,11 @@ void ResourceManagerPane::onActionTriggered(){
 
     }else if(sender==d->actionOpen_File){
         //QString path = one->path();
-        auto data = OpenEditorData{one->path(),0,0};
+        auto data = OpenEditorData{one->path(),0,0,false};
         Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&data);
+
+        this->showStatusMessage(one->pid(),one->path());
+
     }else if(sender==d->actionOpen_Terminal){
 
         QProcess process;
@@ -788,31 +794,62 @@ void ResourceManagerPane::onUploadToSite(){
     auto sender = static_cast<QAction*>(this->sender());
     auto v = sender->data();
     bool ok = false;
-    int siteid = v.toInt(&ok);
+    long long siteid = v.toLongLong(&ok);
     if(ok){
-        auto list = ui->treeView->selectionModel()->selectedRows();
-        if(list.size()>0){
-
-            //open file transfer
-            auto instance = Publisher::getInstance();
-            QString paneGroup = FileTransferPane::PANE_GROUP;
-            instance->post(Type::M_OPEN_PANE,&paneGroup);
-
-            auto index = list.at(0);
-            auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
-            //not set dest ,should match remote
-            UploadData data{item->pid(),siteid,item->type()==ResourceManagerModelItem::File,item->path(),{}};
-            instance->post(Type::M_UPLOAD,&data);
-        }
-
+        this->uploadSelectedFile(siteid);
     }
-
 }
 
 void ResourceManagerPane::onUploadToGroup(){
     auto sender = static_cast<QAction*>(this->sender());
-    auto data = sender->data();
+    auto v = sender->data().toString();
+    QStringList list = v.split(":");
+    if(list.size()==2){
+        bool ok = false;
+        long long pid = list.at(0).toLongLong(&ok);
+        if(ok){
+            long long groupid = list.at(1).toLongLong(&ok);
+            if(ok){
+                for(auto one:d->sites){
+                    if(one.pid==pid && one.groupid == groupid){
+                        this->uploadSelectedFile(one.id);
+                    }
+                }
+            }
+        }
+    }
 }
+
+void ResourceManagerPane::onUploadToAll(){
+    auto sender = static_cast<QAction*>(this->sender());
+    auto v = sender->data();
+    bool ok = false;
+    long long pid = v.toLongLong(&ok);
+    if(ok){
+        for(auto one:d->sites){
+            if(one.pid==pid){
+                this->uploadSelectedFile(one.id);
+            }
+        }
+    }
+}
+
+void ResourceManagerPane::uploadSelectedFile(long long siteid){
+    auto list = ui->treeView->selectionModel()->selectedRows();
+    if(list.size()>0){
+        //open file transfer
+        auto instance = Publisher::getInstance();
+        QString paneGroup = FileTransferPane::PANE_GROUP;
+        instance->post(Type::M_OPEN_PANE,&paneGroup);
+        auto index = list.at(0);
+        auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
+        //not set dest ,should match remote
+        UploadData data{item->pid(),siteid,item->type()==ResourceManagerModelItem::File,item->path(),{}};
+        instance->post(Type::M_UPLOAD,&data);
+    }
+}
+
+
 
 void ResourceManagerPane::onSearchFile(const QString& text){
     auto delegate = static_cast<ResourceManagerTreeItemDelegate*>(ui->treeView->itemDelegate());
@@ -871,7 +908,9 @@ void ResourceManagerPane::onToggleOpend(bool checked){
 void ResourceManagerPane::onOpenedSelected(const QModelIndex& index){
     int row = index.row();
     auto item = d->openedModel->itemAt(row);
-    Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&item.second);
+    //qDebug()<<"onOpenedSelected"<<item.second;
+    OpenEditorData data{item.second,0,0,true};
+    Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&data);
 }
 
 void ResourceManagerPane::onLocateSuccess(const QString& path,bool recursion){
@@ -895,11 +934,16 @@ void ResourceManagerPane::onLocateSuccess(const QString& path,bool recursion){
             if(recursion)
                 BackendThread::getInstance()->appendTask(new LocateFileTask(d->model,item->path(),path));
         }
+
+        //send message to statusbar for display project name
+        this->showStatusMessage(item->pid(),path);
     }
 }
 
 QMenu* ResourceManagerPane::attchUploadMenu(QMenu* parent,long long id){
     QMenu* uploadM = nullptr;
+    QList<long long>gids;
+    int total = 0;
     for(auto one:d->sites){
         if(one.pid==id){
             if(uploadM==nullptr){
@@ -908,8 +952,33 @@ QMenu* ResourceManagerPane::attchUploadMenu(QMenu* parent,long long id){
             }
             auto action = uploadM->addAction(QIcon(":/Resource/icons/RemoteServer_16x.svg"),one.name,this,SLOT(onUploadToSite()));
             action->setData(one.id);//site id
+            total += 1;
+            if(!gids.contains(one.groupid)){
+                gids.append(one.groupid);
+            }
         }
     }
+
+    if(total>1){
+        //upload group
+        QList<GroupRecord> grouplist = GroupStorage().list(id);
+        if(grouplist.size()>0){
+            uploadM->addSeparator();
+        }
+        for(auto one:grouplist){
+            if(gids.contains(one.id)){
+                auto action = uploadM->addAction(QIcon(":/Resource/icons/RemoteServer_16x.svg"),one.name,this,SLOT(onUploadToGroup()));
+                QString data = QString::fromUtf8("%1:%2").arg(id).arg(one.id);//projectid and groupid
+                action->setData(data);//
+            }
+        }
+        //upload all
+        uploadM->addSeparator();
+        auto action = uploadM->addAction(QIcon(":/Resource/icons/RemoteServer_16x.svg"),tr("All Sites"),this,SLOT(onUploadToAll()));
+         action->setData(id);//project id
+    }
+
+
     return uploadM;
 }
 
@@ -936,6 +1005,23 @@ void ResourceManagerPane::locationFile(){
     if(pane!=nullptr){
         auto path = pane->path();
         this->onLocateSuccess(path,true);
+    }
+}
+
+void ResourceManagerPane::showStatusMessage(long long id,const QString& path){
+    ResourceManagerModelItem* proj = nullptr;
+    if(id){
+        //find project name
+        proj = d->model->findProject(id);
+    }else{
+        //find project name by path previous
+        proj = d->model->findProjectPath(path);
+    }
+    if(proj!=nullptr){
+        QString title = proj->title();
+        Publisher::getInstance()->post(Type::M_MESSAGE,&title);
+    }else{
+        Publisher::getInstance()->post(Type::M_READY);
     }
 }
 

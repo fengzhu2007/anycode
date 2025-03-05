@@ -58,7 +58,11 @@ public:
 
     ResourceManagerModelItem* find(const QString& path);
     ResourceManagerModelItem* findProject(const QString& path);
+    ResourceManagerModelItem* findProjectPath(const QString& path);
+    ResourceManagerModelItem* findProject(long long id);
     ResourceManagerModelItem* rootItem();
+
+
 
     QModelIndex locate(const QString& path);
 

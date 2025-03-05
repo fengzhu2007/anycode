@@ -66,11 +66,12 @@ public:
     static const QString M_OPEN_TERMINAL;
 
     //notification
-    static const QString M_NEW_NOTIFICATION;
     static const QString M_NOTIFICATION;
     static const QString M_TOGGLE_NOTIFICATION;
 
     static const QString M_RESOURCE_LOCATION;
+
+    static const QString M_SHOW_PROJECT;
 
     //output
     enum OutputLevel{

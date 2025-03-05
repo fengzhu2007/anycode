@@ -89,9 +89,6 @@ StatusBarView* StatusBarView::instance = nullptr;
         }else if(id==Type::M_READY){
             this->setReady();
             return true;
-        }else if(id==Type::M_NEW_NOTIFICATION){
-            auto count = static_cast<int*>(e->data());
-            ui->notification->setCount(ui->notification->count() + (*count));
         }else if(id==Type::M_NOTIFICATION){
             //qDebug()<<"M_NOTIFICATION";
             QJsonObject json = e->toJsonOf<NotificationData>().toObject();

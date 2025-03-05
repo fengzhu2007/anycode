@@ -68,11 +68,13 @@ struct ANYENGINE_EXPORT OpenEditorData{
     QString path;
     int line=0;
     int column=0;
+    bool locate;
     QJsonObject toJson(){
         return {
             {"path",path},
             {"line",line},
-            {"column",column}
+            {"column",column},
+            {"locate",locate},
         };
     }
 };

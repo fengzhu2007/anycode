@@ -17,6 +17,7 @@
 #include "components/message_dialog.h"
 #include "zip/zip_archive.h"
 #include "storage/commit_storage.h"
+#include "storage/group_storage.h"
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/type.h"
 #include "core/event_bus/event_data.h"
@@ -414,8 +415,8 @@ void VersionControlPane::onActionTriggered(){
             auto item = model->at(one.row());
             const QString project_dir = d->repo->path();
             QString path = project_dir + "/" + item.path();
-            auto data = OpenEditorData{path,0,0};
-            Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&path);
+            auto data = OpenEditorData{path,0,0,true};
+            Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&data);
         }
     }else if(sender==ui->actionOpen_Folder){
         QModelIndexList indexlist = ui->diffListView->selectionModel()->selectedRows();
@@ -651,11 +652,53 @@ void VersionControlPane::onSynchronousToSite(){
     }
     this->deleteFiles(siteid,files);
 }
+
 void VersionControlPane::onUploadToGroup(){
-
+    auto action = static_cast<QAction*>(this->sender());
+    long long groupid = action->data().toLongLong();
+    auto model = static_cast<DiffFileModel*>(ui->diffListView->model());
+    auto list = ui->diffListView->selectionModel()->selectedRows();
+    QStringList files;
+    QString path = d->current_path;
+    if(!path.endsWith("/")){
+        path += "/";
+    }
+    for(auto one:list){
+        int row = one.row();
+        auto item = model->at(row);
+        files << path +item.path();
+    }
+    for(auto one:d->sites){
+        if(one.groupid==groupid){
+            this->uploadFiles(one.id,files);
+        }
+    }
 }
-void VersionControlPane::onSynchronousToGroup(){
 
+void VersionControlPane::onSynchronousToGroup(){
+    auto action = static_cast<QAction*>(this->sender());
+    long long groupid = action->data().toLongLong();
+    auto model = static_cast<DiffFileModel*>(ui->diffListView->model());
+    int total = model->rowCount();
+    QStringList files;
+    QString path = d->current_path;
+    if(!path.endsWith("/")){
+        path += "/";
+    }
+    for(int i=0;i<total;i++){
+        auto item = model->at(i);
+        if(item.status()==cvs::DiffFile::Deletion){
+            const QString file = path +item.path();
+            if(!QFileInfo::exists(file)){
+                files<<file;
+            }
+        }
+    }
+    for(auto one:d->sites){
+        if(one.groupid==groupid){
+            this->deleteFiles(one.id,files);
+        }
+    }
 }
 
 void VersionControlPane::onOutput(NetworkResponse* response){
@@ -749,6 +792,7 @@ void VersionControlPane::deleteFiles(long long siteid,const QStringList& files){
 
 QMenu* VersionControlPane::attchUploadMenu(int type,QMenu* parent){
     QMenu* uploadM = nullptr;
+    QList<long long>gids;
     for(auto one:d->sites){
         if(uploadM==nullptr){
             uploadM = new QMenu(parent);
@@ -760,6 +804,29 @@ QMenu* VersionControlPane::attchUploadMenu(int type,QMenu* parent){
         }else{
             auto action = uploadM->addAction(QIcon(":/Resource/icons/RemoteServer_16x.svg"),one.name,this,&VersionControlPane::onSynchronousToSite);
             action->setData(one.id);//site id
+        }
+        if(!gids.contains(one.groupid)){
+            gids.append(one.groupid);
+        }
+    }
+    if(d->sites.length()>1){
+        //add group
+        QList<GroupRecord> grouplist = GroupStorage().list(d->current_pid);
+        bool separator = false;
+        for(auto one:grouplist){
+            if(gids.contains(one.id)){
+                if(separator==false){
+                    uploadM->addSeparator();
+                    separator = true;
+                }
+                if(type==0){
+                    auto action = uploadM->addAction(QIcon(":/Resource/icons/RemoteServer_16x.svg"),one.name,this,&VersionControlPane::onUploadToGroup);
+                    action->setData(one.id);
+                }else{
+                    auto action = uploadM->addAction(QIcon(":/Resource/icons/RemoteServer_16x.svg"),one.name,this,&VersionControlPane::onSynchronousToGroup);
+                    action->setData(one.id);
+                }
+            }
         }
     }
     return uploadM;

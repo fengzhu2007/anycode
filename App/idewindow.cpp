@@ -297,6 +297,9 @@ bool IDEWindow::onReceive(Event* e){
                 editor->gotoLine(line,column);
                 editor->setFocus();
             }
+            if(one.find("locate")->toBool(false)){
+                Publisher::getInstance()->post(Type::M_RESOURCE_LOCATION);
+            }
             e->ignore();
             return true;
         }
@@ -713,7 +716,7 @@ void IDEWindow::restoreFromSettings(){
                 QString path =  url.toLocalFile();
                 QFileInfo fi(path);
                 if(fi.isFile()){
-                    auto data = OpenEditorData{path,0,0};
+                    auto data = OpenEditorData{path,0,0,false};
                     Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&data);
                 }
             }

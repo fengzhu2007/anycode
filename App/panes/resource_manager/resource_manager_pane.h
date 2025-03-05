@@ -47,6 +47,7 @@ public slots:
     void onTopActionTriggered();
     void onUploadToSite();
     void onUploadToGroup();
+    void onUploadToAll();
     void onSearchFile(const QString& text);
     void onDropAddFolder(const QMimeData* data);
     void onToggleOpend(bool checked);
@@ -54,13 +55,16 @@ public slots:
     void onLocateSuccess(const QString& path,bool recursion=false);
 
 
-
 private:
     ResourceManagerPane(QWidget *parent = nullptr);
     QMenu* attchUploadMenu(QMenu* parent,long long id);
+    void uploadSelectedFile(long long siteid);
 
     void closeProject(ResourceManagerModelItem* item);
     void locationFile();
+    void showStatusMessage(long long id,const QString& path);
+
+
 
 public:
     static const QString PANE_ID;

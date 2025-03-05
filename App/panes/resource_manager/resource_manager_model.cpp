@@ -476,6 +476,30 @@ ResourceManagerModelItem* ResourceManagerModel::findProject(const QString& path)
     return nullptr;
 }
 
+ResourceManagerModelItem* ResourceManagerModel::findProjectPath(const QString& path){
+    QMutexLocker locker(&(d->mutex));
+    int size = d->root->childrenCount();
+    for(int i=0;i<size;i++){
+        auto one = d->root->childAt(i);
+        if(one->pid()<=0 && path.startsWith(one->path() + "/")){
+            return one;
+        }
+    }
+    return nullptr;
+}
+
+ResourceManagerModelItem* ResourceManagerModel::findProject(long long id){
+    QMutexLocker locker(&(d->mutex));
+    int size = d->root->childrenCount();
+    for(int i=0;i<size;i++){
+        auto one = d->root->childAt(i);
+        if(one->pid()==id){
+            return one;
+        }
+    }
+    return nullptr;
+}
+
 ResourceManagerModelItem* ResourceManagerModel::rootItem(){
     return d->root;
 }

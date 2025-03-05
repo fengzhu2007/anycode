@@ -216,7 +216,7 @@ void FindReplacePane::onSearchResult(QList<SearchResultItem>* list,int matchFile
 void FindReplacePane::onSearchItemActivated(const QModelIndex& index){
     auto item = static_cast<SearchResultModelItem*>(index.internalPointer());
     if(item->type()==SearchResultModelItem::Line){
-        auto data = OpenEditorData{item->filePath(),item->line(),item->matchStart()};
+        auto data = OpenEditorData{item->filePath(),item->line(),item->matchStart(),true};
         Publisher::getInstance()->post(Type::M_OPEN_EDITOR,&data);
     }
 }
