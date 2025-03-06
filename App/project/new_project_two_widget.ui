@@ -125,7 +125,34 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="name"/>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLineEdit" name="name"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="importSite">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>26</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>45</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../r.qrc">
+             <normaloff>:/Resource/icons/Import_16x.svg</normaloff>:/Resource/icons/Import_16x.svg</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer_2">
@@ -294,6 +321,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../r.qrc"/>
+ </resources>
  <connections/>
 </ui>

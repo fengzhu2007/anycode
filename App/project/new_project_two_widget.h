@@ -25,6 +25,8 @@ public slots:
     void onDeleteSite(int i);
     void onSave();
     void showSiteContextMenu(const QPoint &pos);
+    void onOpenImportDialog();
+    void onImport(long long id);
 protected:
     virtual void paintEvent(QPaintEvent *e) override;
     virtual void showEvent(QShowEvent* e) override;

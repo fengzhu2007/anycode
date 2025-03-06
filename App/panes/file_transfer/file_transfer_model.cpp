@@ -1014,7 +1014,11 @@ void FileTransferModel::addUploadJob(QJsonObject data){
                 }else{
                     sourcelist << source;
                 }
-                auto req = NetworkManager::getInstance()->request(siteid);
+                auto instance = NetworkManager::getInstance();
+                auto req = instance->request(siteid);
+                if(req==nullptr){
+                    req = instance->initRequest(siteid,{});//new http client
+                }
                 if(req!=nullptr){
                     const QString projectPath = proj->source() + "/";
                     const QString remotePath = site->destination();

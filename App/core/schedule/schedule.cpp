@@ -35,6 +35,7 @@ Schedule::Schedule(QObject* parent):QObject(parent) {
     //add network rate task
     d->queue << new NetworkRateTask(1*1000);
     //d->timer.start();
+    qDebug()<<"Schedule init ";
 }
 
 Schedule::~Schedule(){
@@ -88,7 +89,6 @@ void Schedule::addSSLQuery(){
     auto r = CommonStorage().one(SSLQueryTask::SSL_QUERIER_KEY);
     if(!r.value.isEmpty()){
         QStringList sites = r.value.split(",");
-        //qDebug()<<"sites"<<sites
         d->queue << (new SSLQueryTask(sites,SSLQueryTask::DELAY));
     }
 }

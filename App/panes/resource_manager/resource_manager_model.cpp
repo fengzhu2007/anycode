@@ -7,6 +7,7 @@
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/type.h"
+#include "core/event_bus/event_data.h"
 #include "common.h"
 #include <QDir>
 #include <QFileInfo>
@@ -112,10 +113,11 @@ bool ResourceManagerModel::setData(const QModelIndex &index, const QVariant &val
                     file.close();
                     //open file to editor
                     auto instance = Publisher::getInstance();
-                    QJsonObject data = {
+                    /*QJsonObject data = {
                         {"path",fi.absoluteFilePath()},
-                    };
-                    instance->post(Type::M_OPEN_EDITOR,data);
+                    };*/
+                    OpenEditorData data{fi.absoluteFilePath(),0,0,true};
+                    instance->post(Type::M_OPEN_EDITOR,&data);
                 }else if(type==ResourceManagerModelItem::Folder){
                     if(!fi.absoluteDir().mkdir(name)){
                         return false;
@@ -358,17 +360,17 @@ void ResourceManagerModel::onUpdateChildren(QFileInfoList list,const QString& pa
     auto item = d->root->findChild(parent);
     if(item!=nullptr){
         if(action==BackendThreadTask::ReadFolder){
-            this->appendItems(list,item);
+            this->refreshItems(list,item);
 
         }else if(action==BackendThreadTask::RefreshFolder){
             this->refreshItems(list,item);
         }else if(action==BackendThreadTask::ReadFolderAndInsertFile){
-            this->appendItems(list,item);
+            this->refreshItems(list,item);
             //emit
             QModelIndex parent = createIndex(item->row(),0,item);
             emit insertReady(parent,true);
         }else if(action==BackendThreadTask::ReadFolderAndInsertFolder){
-            this->appendItems(list,item);
+            this->refreshItems(list,item);
             //emit
             QModelIndex parent = createIndex(item->row(),0,item);
             emit insertReady(parent,false);

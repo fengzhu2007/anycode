@@ -29,6 +29,12 @@
    </item>
    <item>
     <widget class="QLabel" name="description">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>60</height>
+      </size>
+     </property>
      <property name="text">
       <string/>
      </property>

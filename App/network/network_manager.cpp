@@ -57,33 +57,41 @@ public:
         auto loader = AddonLoader::getInstance();
         AddonStorage addonStorage;
         bool ret = false;
-        if(d->addons.contains(type)){
-            if(d->addons[type].isEmpty()==false){
-                ret = loader->loadFile(d->addons[type]);
+        QString name = type;
+        SiteStorage siteStorage;
+        SiteRecord record ;
+        if(type.isEmpty() && id>0){
+            //find
+            record = siteStorage.one(id);
+            if(!record.type.isEmpty()){
+                name = record.type;
+            }
+        }
+
+
+        if(d->addons.contains(name)){
+            if(d->addons[name].isEmpty()==false){
+                ret = loader->loadFile(d->addons[name]);
             }else{
                 ret = false;
             }
         }else{
-            AddonRecord record = addonStorage.one(type);
+            AddonRecord record = addonStorage.one(name);
             if(record.id>0){
                 ret = loader->loadFile(record.file);
                 d->addons.insert(record.name,record.file);
             }else{
-                d->addons.insert(type,"");
+                d->addons.insert(name,"");
             }
         }
         if(ret){
-
             auto req = loader->initRequest(id);
             //set password and host
-            if(id>0){
-                SiteStorage siteStorage;
-                SiteRecord record = siteStorage.one(id);
+            if(record.id>0){
+                req->init(record);
+            }else if(id>0){
+                record = siteStorage.one(id);
                 if(record.id>0){
-                    /*req->setHost(record.host);
-                    req->setPort(record.port);
-                    req->setUsername(record.username);
-                    req->setPassword(record.password);*/
                     req->init(record);
                 }
             }

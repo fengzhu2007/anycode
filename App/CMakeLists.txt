@@ -68,11 +68,24 @@ endif()
 
 
 
+
+
+
+
 set(RESOURCES
     r.qrc
 )
 
 qt5_add_resources(RESOURCE_ADDED ${RESOURCES})
+
+
+
+set(TS_FILES
+    translations/App_zh_CN.ts
+)
+
+qt5_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${TS_FILES} OPTIONS -source-language zh_CN -no-obsolete)
+
 
 
 set(SOURCES
@@ -88,6 +101,7 @@ endif()
 add_library(App SHARED
         ${RESOURCE_ADDED}
         ${SOURCES}
+        ${QM_FILES}
 
 
         common.h addon_loader.h addon_loader.cpp
@@ -307,26 +321,11 @@ add_library(App SHARED
         panes/notification/notification_card.h panes/notification/notification_card.cpp
         panes/notification/notification_model.h panes/notification/notification_model.cpp
         panes/notification/notification_card.ui
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        project/import_site_dialog.h project/import_site_dialog.cpp project/import_site_dialog.ui
 
 
 
 )
-
 
 
 
@@ -347,6 +346,9 @@ target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJ
     tree-sitter-embedded-template
 
 )
+
+
+
 
 
 if(QT_VERSION_MAJOR EQUAL 6)

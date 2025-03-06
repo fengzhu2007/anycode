@@ -96,7 +96,6 @@ void ResourceManagerTreeItemDelegate::setModelData(QWidget *editor, QAbstractIte
         QString text = lineEdit->text();
         auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());
         const QString path = item->path();
-        qDebug()<<"text:"<<text;
         if(text.isEmpty()){
             if(path.isEmpty()){
                 //remove index

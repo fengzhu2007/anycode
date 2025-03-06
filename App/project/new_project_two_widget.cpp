@@ -15,6 +15,8 @@
 #include "core/event_bus/type.h"
 #include "core/event_bus/publisher.h"
 #include "core/theme.h"
+
+#include "import_site_dialog.h"
 #include <QStyleOption>
 #include <QPainter>
 #include <QPushButton>
@@ -45,7 +47,8 @@ NewProjectTwoWidget::NewProjectTwoWidget(QWidget *parent) :
                                           ".QTabWidget::pane{border-top:1px solid "+borderColor+";margin-top:-1px}"
                                         ".QTabBar::tab{height:28px}"
                                           "QLabel#label{padding-left:22px;}"
-                                          "#footer{background-color:"+backgroundColor+"}"));
+                                          "#footer{background-color:"+backgroundColor+"}"
+                                             "#importSite{min-width:0;width:28px;}"));
     ui->setupUi(this);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -57,9 +60,11 @@ NewProjectTwoWidget::NewProjectTwoWidget(QWidget *parent) :
     connect(ui->tabWidget,&QTabWidget::currentChanged, this, &NewProjectTwoWidget::onAdjustHeight);
     connect(ui->save,&QPushButton::clicked,this,&NewProjectTwoWidget::onSave);
     connect(ui->listView, &QWidget::customContextMenuRequested, this, &NewProjectTwoWidget::showSiteContextMenu);
+    connect(ui->importSite,&QPushButton::clicked,this,&NewProjectTwoWidget::onOpenImportDialog);
 
     ui->type->setItemDelegate(new ListItemDelegate(24,ui->type));
     ui->group->setItemDelegate(new ListItemDelegate(24,ui->group));
+
 
 
     AddonStorage addonStorage;
@@ -300,6 +305,41 @@ void NewProjectTwoWidget::showSiteContextMenu(const QPoint &pos){
         contextMenu.exec(QCursor::pos());
 
     }
+}
+
+void NewProjectTwoWidget::onOpenImportDialog(){
+    auto dialog = ImportSiteDialog::open(this);
+    connect(dialog,&ImportSiteDialog::selected,this,&NewProjectTwoWidget::onImport);
+}
+
+void NewProjectTwoWidget::onImport(long long id){
+    auto dialog = static_cast<ImportSiteDialog*>(this->sender());
+    auto record = SiteStorage().one(id);
+    if(record.id){
+        for(int i=0;i<d->addons.length();i++){
+            if(d->addons[i].name==record.type){
+                ui->type->setCurrentIndex(i);
+                break;
+            }
+        }
+        for(int i=0;i<d->groups.length();i++){
+            if(d->groups[i].id==record.groupid){
+                ui->group->setCurrentIndex(i);
+                break;
+            }
+        }
+
+
+        QList<FormPanel*>::iterator iter = d->panels.begin();
+        while(iter!=d->panels.end()){
+            (*iter)->initFormData(record);
+            iter++;
+        }
+        ui->status->setChecked(record.status==1?true:false);
+        //set type disable
+        ui->type->setEnabled(false);
+    }
+    dialog->close();
 }
 
 void NewProjectTwoWidget::paintEvent(QPaintEvent *e){
