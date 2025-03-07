@@ -88,34 +88,6 @@ int main(int argc, char *argv[])
     #endif
 
     ady::IDEApplication a(argc, argv);
-    QString dir = QCoreApplication::applicationDirPath();
-    {
-        QTranslator* translator = new QTranslator(&a);
-        if(translator->load(dir + "/langs/App.zh_CN.qm")){
-            a.installTranslator(translator);
-        }
-    }
-    {
-        QTranslator* translator = new QTranslator(&a);
-        if(translator->load(dir + "/langs/qt_zh_CN.qm")){
-            a.installTranslator(translator);
-        }
-    }
-
-    {
-        QTranslator* translator = new QTranslator(&a);
-        if(translator->load(dir + "/langs/qt_help_zh_CN.qm")){
-            a.installTranslator(translator);
-        }
-    }
-    //QFont globalFont("Microsoft YaHei", 10);
-    //a.setFont(globalFont);
-    /*{
-        QTranslator* translator = new QTranslator(&a);
-        if(translator->load(dir + "/langs/qtbase_zh_TW.qm")){
-            a.installTranslator(translator);
-        }
-    }*/
 
     //ady::MainWindow w;
     ady::IDEWindow w;

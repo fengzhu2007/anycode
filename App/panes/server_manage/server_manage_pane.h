@@ -56,7 +56,7 @@ private:
 public:
     static const QString PANE_ID;
     static const QString PANE_GROUP;
-    static const QString PANE_TITLE;
+    //static const QString PANE_TITLE;
 
 private:
     Ui::ServerManagePane *ui;

@@ -29,6 +29,7 @@ public:
     ResourceManagerModelItem* root;
     ResourceManageIconProvider* iconProvider;
     QFileSystemWatcher *watcher;
+    QString currentPath;
     QMutex mutex;
 };
 
@@ -116,7 +117,9 @@ bool ResourceManagerModel::setData(const QModelIndex &index, const QVariant &val
                     /*QJsonObject data = {
                         {"path",fi.absoluteFilePath()},
                     };*/
-                    OpenEditorData data{fi.absoluteFilePath(),0,0,true};
+                    const QString path = fi.absoluteFilePath();
+                    this->setCurrentPath(path);
+                    OpenEditorData data{path,0,0,false};
                     instance->post(Type::M_OPEN_EDITOR,&data);
                 }else if(type==ResourceManagerModelItem::Folder){
                     if(!fi.absoluteDir().mkdir(name)){
@@ -361,7 +364,6 @@ void ResourceManagerModel::onUpdateChildren(QFileInfoList list,const QString& pa
     if(item!=nullptr){
         if(action==BackendThreadTask::ReadFolder){
             this->refreshItems(list,item);
-
         }else if(action==BackendThreadTask::RefreshFolder){
             this->refreshItems(list,item);
         }else if(action==BackendThreadTask::ReadFolderAndInsertFile){
@@ -545,6 +547,23 @@ QModelIndex ResourceManagerModel::locate(const QString& path){
             return createIndex(next->row(),0,next);
         }
         item = next;
+    }
+    return {};
+}
+
+void ResourceManagerModel::setCurrentPath(const QString& path){
+    d->currentPath = path;
+}
+
+QModelIndex ResourceManagerModel::currentItem(ResourceManagerModelItem* parent){
+    if(d->currentPath.isEmpty()==false){
+        int total = parent->childrenCount();
+        for(int i=0;i<total;i++){
+            auto child = parent->childAt(i);
+            if(child->path()==d->currentPath){
+                return createIndex(child->row(),0,child);
+            }
+        }
     }
     return {};
 }

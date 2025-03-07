@@ -874,15 +874,15 @@ for (let i = 0; i &lt; 3; i++) {
     </message>
     <message>
         <source>Browser</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">浏览</translation>
     </message>
     <message>
         <source>Select All</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">全选</translation>
     </message>
     <message>
         <source>Expand All</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">全部展开</translation>
     </message>
 </context>
 <context>
@@ -2160,7 +2160,7 @@ Last Modify:%3</source>
     </message>
     <message>
         <source>PowerShell</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">PowerShell</translation>
     </message>
     <message>
         <source>Terminal</source>
@@ -2362,98 +2362,98 @@ This file has been modified by another program.
     <name>ady::NewProjectTwoWidget</name>
     <message>
         <source>Are you want to delete selected site[%1]?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">是否确定删除选择的站点[%1]？</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">警告</translation>
     </message>
     <message>
         <source>Name required</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">名称不能为空</translation>
     </message>
     <message>
         <source>Type required</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">请选择类型</translation>
     </message>
     <message>
         <source>Group required</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">请选择分组</translation>
     </message>
     <message>
         <source>Save successful</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">保存成功</translation>
     </message>
     <message>
         <source>Save failed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">保存失败</translation>
     </message>
     <message>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">编辑</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">删除</translation>
     </message>
 </context>
 <context>
     <name>ady::NewProjectZeroWidget</name>
     <message>
         <source>New Project</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">新建项目</translation>
     </message>
     <message>
         <source>Create a new project</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">创建新项目</translation>
     </message>
     <message>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">编辑</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">删除</translation>
     </message>
     <message>
         <source>Are you want to delete selected project[%1] and sites?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">是否确定删除所选项目[%1]和其所有站点？</translation>
     </message>
 </context>
 <context>
     <name>ady::NotificationPane</name>
     <message>
         <source>Notification</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">通知</translation>
     </message>
 </context>
 <context>
     <name>ady::OpenProjectWindow</name>
     <message>
         <source>Please select project</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">请选择项目</translation>
     </message>
 </context>
 <context>
     <name>ady::OptionsDialog</name>
     <message>
         <source>Restart required</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">重启失败</translation>
     </message>
     <message>
         <source>The settings are modified and need to be restarted to take effect; Restart now?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">设置被修改，需要重新启动才能生效；现在重新启动？</translation>
     </message>
 </context>
 <context>
     <name>ady::OutputPane</name>
     <message>
         <source>Output</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">输出</translation>
     </message>
     <message>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">所有</translation>
     </message>
 </context>
 <context>
@@ -2467,352 +2467,356 @@ This file has been modified by another program.
     <name>ady::PermissionDialog</name>
     <message>
         <source>File/Folder:%1;%2 files, etc</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">文件/文件夹：:%1;%2 等。</translation>
     </message>
     <message>
         <source>File/Folder:%1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">文件/文件夹：%1</translation>
     </message>
 </context>
 <context>
     <name>ady::QueryResultModel</name>
     <message>
         <source>Domain</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">域名</translation>
     </message>
     <message>
         <source>Start Date</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">开始日期</translation>
     </message>
     <message>
         <source>Expire Date</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">截至日期</translation>
     </message>
     <message>
         <source>Status</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">状态</translation>
     </message>
 </context>
 <context>
     <name>ady::RemoteFileItemModel</name>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">名称</translation>
     </message>
     <message>
         <source>Size</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">文件大小</translation>
     </message>
     <message>
         <source>Modify Time</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">修改时间</translation>
     </message>
     <message>
         <source>Permission</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">权限</translation>
     </message>
 </context>
 <context>
     <name>ady::ReplaceWidget</name>
     <message>
         <source>Select Search Folder</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">选择搜索文件夹</translation>
     </message>
 </context>
 <context>
     <name>ady::ResourceManagerModel</name>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">名称</translation>
     </message>
 </context>
 <context>
     <name>ady::ResourceManagerPane</name>
     <message>
         <source>Resource Manager</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">资源管理器</translation>
     </message>
     <message>
         <source>New Folder</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">新建文件夹</translation>
     </message>
     <message>
         <source>New File</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">新建文件</translation>
     </message>
     <message>
         <source>Open Folder</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">打开文件夹</translation>
     </message>
     <message>
         <source>Add Folder to Workspace</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">添加文件夹到工作区</translation>
     </message>
     <message>
         <source>Open File</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">打开文件</translation>
     </message>
     <message>
         <source>Close Project</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">关闭项目</translation>
     </message>
     <message>
         <source>Find In Folder</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">在文件夹中查找</translation>
     </message>
     <message>
         <source>Open Terminal</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">打开终端</translation>
     </message>
     <message>
         <source>Open Embedded Terminal</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">打开内置终端</translation>
     </message>
     <message>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">复制</translation>
     </message>
     <message>
         <source>Cut</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">剪切</translation>
     </message>
     <message>
         <source>Paste</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">粘贴</translation>
     </message>
     <message>
         <source>Rename</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">重命名</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">删除</translation>
     </message>
     <message>
         <source>Copy Path</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">复制路径</translation>
     </message>
     <message>
         <source>Select Folder</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">选择文件夹</translation>
     </message>
     <message>
         <source>Delete Confirm</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">删除确认</translation>
     </message>
     <message>
         <source>Are you sure you want to delete the &apos;%1&apos;?
 You can restore this file from the Recycle Bin.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">是否确定删除文件“%1”
+您可以从回收站还原此文件。</translation>
     </message>
     <message>
         <source>Upload</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">上传</translation>
     </message>
     <message>
         <source>All Sites</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">所有站点</translation>
     </message>
     <message>
         <source>Close Confirm</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">关闭确认</translation>
     </message>
     <message>
         <source>Are you sure you want to close &apos;%1&apos;?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">是否确定关闭“%!”？</translation>
     </message>
 </context>
 <context>
     <name>ady::ResourceManagerTreeItemDelegate</name>
     <message>
         <source>&apos;%1&apos; already exist.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&apos;%1&apos; 已存在.</translation>
     </message>
 </context>
 <context>
     <name>ady::SSLQuerier</name>
     <message>
         <source>Certificate expiration reminder</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">证书到期提醒</translation>
     </message>
     <message>
         <source>The expiration time of the SSL certificate for the &lt;font color=&apos;#318DDE&apos;&gt;%1&lt;/font&gt; domain name is &lt;font color=&apos;#318DDE&apos;&gt;%2&lt;/font&gt;, please note!</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">域名&lt;font color=&apos;#318DDE&apos;&gt;%1&lt;/font&gt;的SSL证书到期时间为&lt;font color=&apos;#318DDE&apos;&gt;%2&lt;/font&gt;，请查收！</translation>
     </message>
 </context>
 <context>
     <name>ady::SSLQueryDialog</name>
     <message>
         <source>Invalid domain</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">无效域名</translation>
     </message>
     <message>
         <source>Are you sure you want to delete the selected domain(s)?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">是否确定删除选择的域名？</translation>
     </message>
 </context>
 <context>
     <name>ady::SearchResultModel</name>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">名称</translation>
     </message>
 </context>
 <context>
     <name>ady::SearchScopeModel</name>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">名称</translation>
     </message>
 </context>
 <context>
     <name>ady::SelectTreeModel</name>
     <message>
         <source>Title</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">标题</translation>
     </message>
     <message>
         <source>Open file failed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">打开文件失败</translation>
     </message>
 </context>
 <context>
     <name>ady::ServerClientPane</name>
     <message>
         <source>This operation is not supported</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">不支持此操作</translation>
     </message>
     <message>
         <source>Are you sure you want to delete the selected file?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">是否确定删除选择的文件？</translation>
     </message>
     <message>
         <source>Select Download To Folder</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">选择下载文件夹</translation>
     </message>
 </context>
 <context>
     <name>ady::ServerManageModel</name>
     <message>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">名称</translation>
     </message>
     <message>
         <source>Loading</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">加载中</translation>
     </message>
     <message>
         <source>Quick Connect</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">快捷连接</translation>
     </message>
 </context>
 <context>
     <name>ady::ServerManagePane</name>
     <message>
         <source>Server Manager</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">服务器管理</translation>
     </message>
     <message>
         <source>This operation is not supported.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">不支持此操作。</translation>
     </message>
     <message>
         <source>Select Download To Folder</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">选择下载文件夹</translation>
     </message>
     <message>
         <source>Are you want to download 
 &quot;%1&quot; 
 files to &quot;%2&quot;?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">是否上传
+“%1” 
+文件到“%2”？</translation>
     </message>
     <message>
         <source>Are you sure you want to delete the selected file?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">是否确定删除选择的文件？</translation>
     </message>
     <message>
         <source>Upload Confirm</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">上传确认</translation>
     </message>
     <message>
         <source>Are you want to upload files to 
 &quot;%1&quot;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">是否确定上传文件到 
+“%1”</translation>
     </message>
 </context>
 <context>
     <name>ady::ServerRequestThread</name>
     <message>
         <source>%1 files and directories deleted successfully, %2 files and directories deleted failed.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1个文件和目录删除成功，%2个文件和目录删除失败。</translation>
     </message>
     <message>
         <source>%1 files and directories permission changed successfully, %2 files and directories permission changed failed.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1个文件和目录权限修改成功，%2个文件和目录权限修改失败。</translation>
     </message>
 </context>
 <context>
     <name>ady::SiteQuickManagerDialog</name>
     <message>
         <source>Are you want to delete selected site[%1]?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">是否要删除所选网站[%1]？</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">警告</translation>
     </message>
     <message>
         <source>Name required</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">名称不能为空</translation>
     </message>
     <message>
         <source>Type required</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">请选择类型</translation>
     </message>
     <message>
         <source>Save failed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">保存失败</translation>
     </message>
 </context>
 <context>
     <name>ady::StartupPane</name>
     <message>
         <source>Startup</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">启动</translation>
     </message>
 </context>
 <context>
     <name>ady::StatusBarView</name>
     <message>
         <source>Network:OK</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">网络状态：正常</translation>
     </message>
     <message>
         <source>Network:Error</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">网络状态：异常</translation>
     </message>
     <message>
         <source>Ready</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">就绪</translation>
     </message>
     <message>
         <source>Upload:%1/s, Download:%2/s</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">上传：%1/s， 下载：%2/s</translation>
     </message>
 </context>
 <context>
     <name>ady::TerminalPane</name>
     <message>
         <source>Terminal</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">终端</translation>
     </message>
     <message>
         <source>Command Prompt</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">命令提示符</translation>
     </message>
     <message>
         <source>PowerShell</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">PowerShell</translation>
     </message>
     <message>
         <source>Bash</source>
@@ -2823,61 +2827,61 @@ files to &quot;%2&quot;?</source>
     <name>ady::TerminalWidget</name>
     <message>
         <source>Start Failed,Error:%1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">启动失败，错误：%1</translation>
     </message>
 </context>
 <context>
     <name>ady::TextEditorOptionWidget</name>
     <message>
         <source>TextEditor</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">文本编辑器</translation>
     </message>
 </context>
 <context>
     <name>ady::VersionControlPane</name>
     <message>
         <source>Version Control</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">版本控制</translation>
     </message>
     <message>
         <source>The version control system is not enabled in the current directory.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">当前目录未启用版本控制。</translation>
     </message>
     <message>
         <source>Branch:%1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">分支：%1</translation>
     </message>
     <message>
         <source>Working Dir</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">工作目录</translation>
     </message>
     <message>
         <source>Commit:%1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">提交：%1</translation>
     </message>
     <message>
         <source>Compare:%1 with %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">比较%1和%2</translation>
     </message>
     <message>
         <source>Are you sure compress the diff files to a zip archive?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">您确定要将差异文件压缩到zip存档吗？</translation>
     </message>
     <message>
         <source>Are you sure you want to clear all flags?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">是否确实要清除所有标志？</translation>
     </message>
     <message>
         <source>Compressed successfully</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">压缩成功</translation>
     </message>
     <message>
         <source>Upload To</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">上传到</translation>
     </message>
     <message>
         <source>Synchronous Deletion To</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">同步删除到</translation>
     </message>
 </context>
 <context>

@@ -5,6 +5,7 @@
 #include "themes/light_theme.h"
 #include "themes/dark_theme.h"
 #include <w_qss.h>
+#include <QTranslator>
 namespace ady{
 IDEApplication::IDEApplication(int &argc, char **argv):QApplication(argc,argv) {
 
@@ -18,6 +19,26 @@ IDEApplication::IDEApplication(int &argc, char **argv):QApplication(argc,argv) {
         wQSS::init(wQSS::Light);
     }
     Theme::getInstance()->setup(*this);
+
+    QString dir = QCoreApplication::applicationDirPath();
+    {
+        QTranslator* translator = new QTranslator(this);
+        if(translator->load(dir + QString("/translations/App_%1.qm").arg(settings.m_language))){
+            this->installTranslator(translator);
+        }
+    }
+    {
+        QTranslator* translator = new QTranslator(this);
+        if(translator->load(dir + QString("/translations/qt_%1.qm").arg(settings.m_language))){
+            this->installTranslator(translator);
+        }
+    }
+    {
+        QTranslator* translator = new QTranslator(this);
+        if(translator->load(dir + QString("/translations/qt_help_%1.qm").arg(settings.m_language))){
+            this->installTranslator(translator);
+        }
+    }
 }
 
 IDEApplication::~IDEApplication(){

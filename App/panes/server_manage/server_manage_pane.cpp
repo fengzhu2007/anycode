@@ -31,13 +31,14 @@ ServerManagePane* ServerManagePane::instance = nullptr;
 
 const QString ServerManagePane::PANE_ID = "ServerManager";
 const QString ServerManagePane::PANE_GROUP = "ServerManager";
-const QString ServerManagePane::PANE_TITLE = tr("Server Manager");
+//const QString ServerManagePane::PANE_TITLE = tr("Server Manager");
 
 
 
 class ServerManagePanePrivate{
 public:
     QList<ServerRequestThread*> list;
+    QString title;
 };
 
 ServerManagePane::ServerManagePane(QWidget *parent) :
@@ -50,7 +51,12 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
     widget->setObjectName("widget");
     ui->setupUi(widget);
     this->setCenterWidget(widget);
-    this->setWindowTitle(PANE_TITLE);
+
+
+    d = new ServerManagePanePrivate;
+    d->title = tr("Server Manager");
+
+    this->setWindowTitle(d->title);
 
     this->setStyleSheet("QTreeView{border:0;}");
 
@@ -63,7 +69,7 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
 
     this->setStyleSheet("QToolBar{border:0px;}");
 
-    d = new ServerManagePanePrivate;
+
 
     auto model = new ServerManageModel(ui->treeView);
 
@@ -713,7 +719,7 @@ void ServerManagePane::onThreadFinished(){
 void ServerManagePane::onOutput(const QString& message,int status){
     QJsonObject json = {
         {"level",status},
-        {"source",PANE_TITLE},
+        {"source",d->title},
         {"content",message}
     };
     Publisher::getInstance()->post(Type::M_OUTPUT,json);

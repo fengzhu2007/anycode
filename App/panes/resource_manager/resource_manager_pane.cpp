@@ -506,7 +506,7 @@ void ResourceManagerPane::onInsertReady(const QModelIndex& parent,bool isFile){
     QModelIndex index = model->insertItem(one,isFile?ResourceManagerModelItem::File:ResourceManagerModelItem::Folder);
     ui->treeView->editIndex(index);
     ui->treeView->selectionModel()->select(index,QItemSelectionModel::ClearAndSelect);
-    ui->treeView->scrollTo(index, QAbstractItemView::PositionAtCenter);
+    ui->treeView->scrollTo(index, QAbstractItemView::EnsureVisible);
 }
 
 void ResourceManagerPane::onItemsChanged(const QString& path){
@@ -526,6 +526,15 @@ void ResourceManagerPane::onItemsChanged(const QString& path){
                 QModelIndex index = d->model->toIndex(node);
                 ui->treeView->expand(index);
                 proj->removeOpenList(path);
+            }
+        }
+        if(node!=nullptr){
+            auto index = d->model->currentItem(node);
+            if(index.isValid()){
+
+                ui->treeView->selectionModel()->select(index,QItemSelectionModel::ClearAndSelect);
+                ui->treeView->scrollTo(index, QAbstractItemView::EnsureVisible);
+
             }
         }
     }
@@ -928,7 +937,7 @@ void ResourceManagerPane::onLocateSuccess(const QString& path,bool recursion){
                 parent = parent.parent();
             }
             ui->treeView->selectionModel()->select(index,QItemSelectionModel::ClearAndSelect);
-            ui->treeView->scrollTo(index, QAbstractItemView::PositionAtCenter);
+            ui->treeView->scrollTo(index, QAbstractItemView::EnsureVisible);
         }else{
             //read folder to find path
             if(recursion)
@@ -1004,6 +1013,7 @@ void ResourceManagerPane::locationFile(){
     auto pane = CodeEditorManager::getInstance()->current();
     if(pane!=nullptr){
         auto path = pane->path();
+        d->model->setCurrentPath(path);
         this->onLocateSuccess(path,true);
     }
 }

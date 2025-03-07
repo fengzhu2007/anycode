@@ -65,6 +65,8 @@ public:
 
 
     QModelIndex locate(const QString& path);
+    void setCurrentPath(const QString& path);
+    QModelIndex currentItem(ResourceManagerModelItem* parent);
 
 
 

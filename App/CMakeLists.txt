@@ -381,3 +381,9 @@ else()
 
 endif()
 
+#copy i18n files
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/App_zh_CN.qm        ${CMAKE_BINARY_DIR}/src/translations/App_zh_CN.qm
+    COMMENT "Copying file to binary directory"
+)
+
