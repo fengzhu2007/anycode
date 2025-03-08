@@ -244,6 +244,9 @@ void IDEWindow::boot(){
 void IDEWindow::delayBoot(){
     //add font
     QFontDatabase::addApplicationFont(":/Resource/fonts/SourceCodePro-Regular.ttf");
+
+    this->restoreFromSettings();
+
     //call from show event
     //init Schedule task
     auto settings = OptionsSettings::getInstance();
@@ -671,7 +674,7 @@ CodeEditorPane* IDEWindow::currentEditorPane(){
 void IDEWindow::showEvent(QShowEvent* e){
     wMainWindow::showEvent(e);
     if(d->init==false){
-        this->restoreFromSettings();
+
         d->init = true;
         this->delayBoot();
     }

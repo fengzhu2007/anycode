@@ -1783,6 +1783,10 @@ Please enter a new folder name.</source>
         <source>Float Tab(&amp;F)</source>
         <translation type="unfinished">悬浮标签页(&amp;F)</translation>
     </message>
+    <message>
+        <source>Test</source>
+        <translation type="unfinished">连接测试</translation>
+    </message>
 </context>
 <context>
     <name>ady::CodeEditorPane</name>

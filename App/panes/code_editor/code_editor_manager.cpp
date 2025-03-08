@@ -1,7 +1,9 @@
 #include "code_editor_manager.h"
 #include "code_editor_pane.h"
-#include "docking_pane_manager.h"
-#include "docking_pane_container.h"
+#include <docking_pane_manager.h>
+#include <docking_pane_container.h>
+#include <docking_workbench.h>
+#include <docking_pane_client.h>
 #include "core/event_bus/publisher.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/type.h"
@@ -77,6 +79,7 @@ public:
     QAction* openFolderAction=nullptr;
     QAction* floatTabAction=nullptr;
 
+    QAction* testAction=nullptr;
 
 
 
@@ -206,29 +209,6 @@ QMap<QString,QTextDocument*> CodeEditorManager::docData(){
     return data;
 }
 
-/*CodeEditorPane* CodeEditorManager::open(DockingPaneManager* dockingManager,const QString& path,int line,int column){
-    auto pane = dynamic_cast<CodeEditorPane*>(this->get(path));
-    if(pane==nullptr){
-        const QJsonObject data = {{"path",path},{"line",line}};
-        pane = CodeEditorPane::make(dockingManager,data);
-        dockingManager->createPane(pane,DockingPaneManager::Center,true);
-        //add to open
-        ResourceManagerOpenedModel::getInstance()->appendItem(path);
-    }else{
-        //set pane to current
-        pane->activeToCurrent();
-    }
-    pane->editor()->gotoLine(line,column);
-    pane->editor()->setFocus();
-    if(path.isEmpty()==false){
-        RecentStorage().add(RecentStorage::File,path);//add to recent
-    }
-    return pane;
-}
-
-CodeEditorPane* CodeEditorManager::open(const QString& path){
-    return this->open(d->docking_manager,path);
-}*/
 
 Editor* CodeEditorManager::open(const QString& path,const QString& localPath,const QString& extension){
     d->tabChanged = false;//manual open
@@ -248,7 +228,12 @@ Editor* CodeEditorManager::open(const QString& path,const QString& localPath,con
             const QJsonObject data = {{"path",realPath},{"line",0}};
             pane = CodeEditorPane::make(d->docking_manager,data);
         }
-        d->docking_manager->createPane(pane,DockingPaneManager::Center,true);
+        auto client = d->docking_manager->workbench()->client();
+        if(client){
+            d->docking_manager->insertPane(client->current()+1,pane,DockingPaneManager::Center,true);
+        }else{
+            d->docking_manager->createPane(pane,DockingPaneManager::Center,true);
+        }
         //add to open
         ResourceManagerOpenedModel::getInstance()->appendItem(realPath);
     }else{
@@ -490,6 +475,9 @@ void CodeEditorManager::onEditorActionTrigger(bool checked){
         auto ds = d->editor->displaySettings();
         ds.m_visualizeWhitespace = checked;
         d->editor->setDisplaySettings(ds);
+    }else if(sender==d->testAction){
+        //qDebug()<<d->editor->font();
+        d->editor->setFont(QFont("Source Code Pro", 10, QFont::Bold));
     }
 }
 
@@ -554,6 +542,10 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
         d->indentAction = new QAction(QIcon(":/Resource/icons/TextIndent_16x.svg"),tr("Indent Selection"),this);
         d->autoFormatAction = new QAction(QIcon(":/Resource/icons/FormatSelection_16x.svg"),tr("Auto Format"),this);
         d->addOrRemoveCommentAction = new QAction(QIcon(":/Resource/icons/CPPCommentCode_16x.svg"),tr("Add/Remove Comment"),this);
+#ifdef Q_DEBUG
+        d->testAction = new QAction(tr("Test"),this);
+        connect(d->testAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
+#endif
 
         d->visualizeWhitespaceAction->setCheckable(true);
         d->textWrappingAction->setCheckable(true);
@@ -609,6 +601,11 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
     contextMenu->addAction(d->autoFormatAction);
     contextMenu->addSeparator();
     contextMenu->addAction(d->addOrRemoveCommentAction);
+
+#ifdef Q_DEBUG
+    contextMenu->addAction(d->testAction);
+#endif
+
 }
 
 
