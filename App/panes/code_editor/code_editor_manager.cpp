@@ -18,6 +18,7 @@
 //#include "snippets/snippetprovider.h"
 #include "displaysettings.h"
 #include <texteditorenvironment.h>
+#include <textsuggestion.h>
 #include "modules/options/options_settings.h"
 
 #include "code_lint.h"
@@ -476,8 +477,24 @@ void CodeEditorManager::onEditorActionTrigger(bool checked){
         ds.m_visualizeWhitespace = checked;
         d->editor->setDisplaySettings(ds);
     }else if(sender==d->testAction){
-        //qDebug()<<d->editor->font();
-        d->editor->setFont(QFont("Source Code Pro", 10, QFont::Bold));
+
+        d->editor->textCursor().blockNumber();
+        auto textCursor = d->editor->textCursor();
+        int line = textCursor.blockNumber() + 1;
+        int column = textCursor.columnNumber();
+
+
+        qDebug()<<"cursor"<<line<<column;
+        QString text = "test3333333333";
+
+        QList<TextEditor::TextSuggestion::Data> suggestions;
+        Utils::Text::Range range{Utils::Text::Position{line,column}, Utils::Text::Position{line,column + text.length()}};
+        Utils::Text::Position pos{line,0 };//select from index
+        TextEditor::TextSuggestion::Data item{range,pos,text};
+        suggestions.append(item);
+
+        d->editor->insertSuggestion(std::make_unique<TextEditor::CyclicSuggestion>(suggestions, d->editor->document()));
+
     }
 }
 
