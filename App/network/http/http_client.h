@@ -19,6 +19,7 @@ namespace ady {
         virtual int access(NetworkResponse* response,bool body=true);
 
         HttpResponse* post(QString url,QMap<QString,QString> data = QMap<QString,QString>(),HttpResponse* response=nullptr);
+        HttpResponse* post(QString url,const QJsonObject& data,HttpResponse* response=nullptr);
         HttpResponse* get(QString url,HttpResponse* response=nullptr);
         void addFile(QString filepath,QString name);
         void addHeader(QStringList headers);

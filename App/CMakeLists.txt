@@ -322,6 +322,9 @@ add_library(App SHARED
         panes/notification/notification_model.h panes/notification/notification_model.cpp
         panes/notification/notification_card.ui
         project/import_site_dialog.h project/import_site_dialog.cpp project/import_site_dialog.ui
+        modules/ai/ai_request.h modules/ai/ai_request.cpp
+        modules/options/ai_settings.h modules/options/ai_settings.cpp
+        modules/options/ai_option_widget.h modules/options/ai_option_widget.cpp modules/options/ai_option_widget.ui
 
 
 

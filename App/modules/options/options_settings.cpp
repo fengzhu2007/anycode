@@ -2,6 +2,7 @@
 #include "storage/common_storage.h"
 #include "environment_settings.h"
 #include "language_settings.h"
+#include "ai_settings.h"
 #include <texteditorsettings.h>
 
 static const char environmentKey[] = "environment";
@@ -16,6 +17,7 @@ class OptionsSettingsPrivate{
 public:
     EnvironmentSettings environmentSettings;
     LanguageSettings languageSettings;
+    AISettings aiSettings;
     QJsonObject data;
 
     QString empty_string;
@@ -119,5 +121,17 @@ void OptionsSettings::setLanguageSettings(const LanguageSettings& setting){
     d->languageSettings = setting;
     emit languageChanged(d->languageSettings);
 }
+
+AISettings& OptionsSettings::aiSettings(){
+    return d->aiSettings;
+}
+
+void OptionsSettings::setAiSettings(const AISettings& setting){
+    if(d->aiSettings==setting){
+        return ;
+    }
+    d->aiSettings = setting;
+}
+
 
 }

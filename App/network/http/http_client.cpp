@@ -1,5 +1,8 @@
 #include "http_client.h"
 #include "http_response.h"
+#include <QJsonDocument>
+#include <QDebug>
+#include <iostream>
 namespace ady{
 
 HttpClient::HttpClient(long long id)
@@ -38,7 +41,6 @@ HttpResponse* HttpClient::post(QString url,QMap<QString,QString> data,HttpRespon
         chunk = curl_slist_append(chunk, header.toUtf8().constData());
     }
     this->setOption(CURLOPT_HTTPHEADER,chunk);
-    this->setOption(CURLOPT_URL,url.toUtf8().constData());
     if(response==nullptr){
         response = new HttpResponse;
     }
@@ -54,7 +56,39 @@ HttpResponse* HttpClient::post(QString url,QMap<QString,QString> data,HttpRespon
     m_requestHeaders.clear();
 
     return response;
+}
 
+HttpResponse* HttpClient::post(QString url,const QJsonObject& data,HttpResponse* response){
+    this->setOption(CURLOPT_URL,url.toUtf8().constData());
+    this->setOption(CURLOPT_POST,1);
+
+    auto byteArray =  QJsonDocument(data).toJson(QJsonDocument::Compact);
+    auto postData = byteArray.toStdString();
+
+    this->setOption(CURLOPT_POSTFIELDS, postData.c_str());
+
+    struct curl_slist *chunk = nullptr;
+    if(m_requestHeaders.size()>0){
+        for(auto header:m_requestHeaders){
+            chunk = curl_slist_append(chunk, header.toUtf8().constData());
+        }
+        this->setOption(CURLOPT_HTTPHEADER,chunk);
+    }else{
+        this->setOption(CURLOPT_HTTPHEADER,nullptr);
+    }
+    if(response==nullptr){
+        response = new HttpResponse;
+    }
+    this->access(response);
+
+    if(chunk!=nullptr){
+        m_requestHeaders.clear();
+        curl_slist_free_all(chunk);
+    }
+    m_postData = nullptr;
+    m_postLast = nullptr;
+
+    return response;
 }
 
 HttpResponse* HttpClient::get(QString url,HttpResponse* response)

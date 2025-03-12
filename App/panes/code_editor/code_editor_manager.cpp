@@ -24,6 +24,9 @@
 #include "code_lint.h"
 #include "../image_editor/image_editor_pane.h"
 
+#include "modules/ai/ai_request.h"
+#include "network/http/http_response.h"
+
 
 #include <QFileInfo>
 #include <QMutex>
@@ -480,20 +483,42 @@ void CodeEditorManager::onEditorActionTrigger(bool checked){
 
         d->editor->textCursor().blockNumber();
         auto textCursor = d->editor->textCursor();
-        int line = textCursor.blockNumber() + 1;
+        int line = textCursor.blockNumber();
         int column = textCursor.columnNumber();
 
+        auto document = d->editor->textDocument()->document();
+        auto block = document->findBlockByNumber(line);
+        auto text = document->toPlainText();
+        auto nextBlock = block.next();
 
-        qDebug()<<"cursor"<<line<<column;
-        QString text = "test3333333333";
+        auto previous = text.left(block.position());
+        auto suffix = text.mid(nextBlock.position());
+        auto middle = block.text();
+
+        QJsonObject data = {
+            {"prefix",previous},
+            {"suffix",suffix},
+            {"middle",middle.trimmed().isEmpty()?"":middle},
+            //{"path",d->editor->p}
+        };
+
+        /*AiRequest* req = new AiRequest(this,data);
+        auto response = req->call();
+
+        delete response;
+        delete req;*/
+
+
+        /*qDebug()<<"cursor"<<line<<column;
+        QString text = "test3333333333\n333333";
 
         QList<TextEditor::TextSuggestion::Data> suggestions;
-        Utils::Text::Range range{Utils::Text::Position{line,column}, Utils::Text::Position{line,column + text.length()}};
+        Utils::Text::Range range{Utils::Text::Position{line,0}, Utils::Text::Position{line + text.count('\n'),0 + text.length()}};
         Utils::Text::Position pos{line,0 };//select from index
         TextEditor::TextSuggestion::Data item{range,pos,text};
         suggestions.append(item);
 
-        d->editor->insertSuggestion(std::make_unique<TextEditor::CyclicSuggestion>(suggestions, d->editor->document()));
+        d->editor->insertSuggestion(std::make_unique<TextEditor::CyclicSuggestion>(suggestions, d->editor->document()));*/
 
     }
 }

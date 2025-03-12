@@ -2,6 +2,45 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
+    <name>AIOptionWidget</name>
+    <message>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable AI Assisant</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Trigger Policy:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Timeout:</source>
+        <translation type="unfinished">延迟：</translation>
+    </message>
+    <message>
+        <source>ms</source>
+        <translation type="unfinished">毫秒</translation>
+    </message>
+    <message>
+        <source>Configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Model:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>API KEY:</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>AboutDialog</name>
     <message>
         <source>About AnyCode</source>
@@ -1650,6 +1689,13 @@ Please enter a new folder name.</source>
     <message>
         <source>Copy Path</source>
         <translation type="unfinished">复制文件路径</translation>
+    </message>
+</context>
+<context>
+    <name>ady::AIOptionWidget</name>
+    <message>
+        <source>AI Assistant</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

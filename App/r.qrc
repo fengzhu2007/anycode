@@ -122,5 +122,6 @@
         <file>Resource/icons/Certificate_16x.svg</file>
         <file>Resource/icons/AddWebService_16x.svg</file>
         <file>Resource/icons/Import_16x.svg</file>
+        <file>Resource/icons/ai.svg</file>
     </qresource>
 </RCC>
