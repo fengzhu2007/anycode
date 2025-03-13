@@ -1285,6 +1285,10 @@ Please enter a new folder name.</source>
         <source>Other</source>
         <translation type="unfinished">其他</translation>
     </message>
+    <message>
+        <source>Aliyun Dashscope</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ReplaceAllProgressDialog</name>
@@ -1695,6 +1699,14 @@ Please enter a new folder name.</source>
     <name>ady::AIOptionWidget</name>
     <message>
         <source>AI Assistant</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Manual</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2711,6 +2723,13 @@ You can restore this file from the Recycle Bin.</source>
 </context>
 <context>
     <name>ady::SearchScopeModel</name>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished">名称</translation>
+    </message>
+</context>
+<context>
+    <name>ady::SelectModel</name>
     <message>
         <source>Name</source>
         <translation type="unfinished">名称</translation>

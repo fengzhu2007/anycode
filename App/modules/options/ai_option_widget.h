@@ -8,7 +8,7 @@ class AIOptionWidget;
 }
 
 namespace ady{
-
+class AIOptionWidgetPrivate;
 class AIOptionWidget : public OptionWidget
 {
     Q_OBJECT
@@ -25,6 +25,7 @@ public:
 
     void initView();
 private:
+    AIOptionWidgetPrivate *d;
     Ui::AIOptionWidget *ui;
 };
 

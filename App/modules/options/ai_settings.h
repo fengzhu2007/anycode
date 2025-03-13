@@ -7,8 +7,6 @@ namespace ady{
 class AISettings
 {
 public:
-
-
     enum Policy{
         Auto=0,
         Manual
@@ -27,6 +25,9 @@ public:
     friend bool operator!=(const AISettings &t1, const AISettings &t2) { return !t1.equals(t2); }
 
     static QString name();
+
+    static QList<QPair<QString,QString>> servers();
+    static QList<QPair<QString,QString>> models(const QString& server);
 
 
 

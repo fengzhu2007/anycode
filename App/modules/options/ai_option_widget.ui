@@ -35,7 +35,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="tiggerPolicy"/>
+      <widget class="QComboBox" name="triggerPolicy"/>
      </item>
      <item>
       <widget class="QLabel" name="label_5">
@@ -57,6 +57,12 @@
        </property>
        <property name="minimum">
         <number>1000</number>
+       </property>
+       <property name="maximum">
+        <number>10000</number>
+       </property>
+       <property name="singleStep">
+        <number>100</number>
        </property>
       </widget>
      </item>

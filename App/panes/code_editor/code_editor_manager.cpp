@@ -27,6 +27,8 @@
 #include "modules/ai/ai_request.h"
 #include "network/http/http_response.h"
 
+#include "ai_client.h"
+
 
 #include <QFileInfo>
 #include <QMutex>
@@ -58,6 +60,7 @@ public:
     //CodeEditorPane* current = nullptr;
     Editor* current = nullptr;
     CodeEditorView* editor;
+    AIClient* ai;
 
     bool tabChanged = true;
 
@@ -111,6 +114,8 @@ CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
     auto instance = OptionsSettings::getInstance();
     connect(instance,&OptionsSettings::languageChanged,this,&CodeEditorManager::onLanguageSettingChanged);
 
+    //init ai client
+    d->ai = new AIClient(this);
 
     //init register editor
     this->initEditors();
@@ -265,6 +270,13 @@ DockingPane* CodeEditorManager::makePane(const QString& group,const QJsonObject&
 void CodeEditorManager::append(Editor* pane){
     QMutexLocker locker(&d->mutex);
     d->list.append(pane);
+    auto editor = pane->editor();
+    if(editor){
+        auto document = editor->textDocument();
+        d->ai->openDocument(document);
+    }
+
+
 }
 
 void CodeEditorManager::remove(Editor* pane){
@@ -481,44 +493,7 @@ void CodeEditorManager::onEditorActionTrigger(bool checked){
         d->editor->setDisplaySettings(ds);
     }else if(sender==d->testAction){
 
-        d->editor->textCursor().blockNumber();
-        auto textCursor = d->editor->textCursor();
-        int line = textCursor.blockNumber();
-        int column = textCursor.columnNumber();
 
-        auto document = d->editor->textDocument()->document();
-        auto block = document->findBlockByNumber(line);
-        auto text = document->toPlainText();
-        auto nextBlock = block.next();
-
-        auto previous = text.left(block.position());
-        auto suffix = text.mid(nextBlock.position());
-        auto middle = block.text();
-
-        QJsonObject data = {
-            {"prefix",previous},
-            {"suffix",suffix},
-            {"middle",middle.trimmed().isEmpty()?"":middle},
-            //{"path",d->editor->p}
-        };
-
-        /*AiRequest* req = new AiRequest(this,data);
-        auto response = req->call();
-
-        delete response;
-        delete req;*/
-
-
-        /*qDebug()<<"cursor"<<line<<column;
-        QString text = "test3333333333\n333333";
-
-        QList<TextEditor::TextSuggestion::Data> suggestions;
-        Utils::Text::Range range{Utils::Text::Position{line,0}, Utils::Text::Position{line + text.count('\n'),0 + text.length()}};
-        Utils::Text::Position pos{line,0 };//select from index
-        TextEditor::TextSuggestion::Data item{range,pos,text};
-        suggestions.append(item);
-
-        d->editor->insertSuggestion(std::make_unique<TextEditor::CyclicSuggestion>(suggestions, d->editor->document()));*/
 
     }
 }

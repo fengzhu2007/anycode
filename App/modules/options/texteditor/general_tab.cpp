@@ -53,9 +53,7 @@ void GeneralTab::apply(int *state){
             if(changed){
                 instance->setCompletionSettings(setting);
                 instance->completionSettingsChanged(setting);
-
             }
-
         }
 
         {

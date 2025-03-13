@@ -106,4 +106,16 @@ QString AISettings::name(){
     return QLatin1String("ai");
 }
 
+QList<QPair<QString,QString>> AISettings::servers(){
+    return {
+        {"dashscope",QObject::tr("Aliyun Dashscope")},
+    };
+}
+
+QList<QPair<QString,QString>> AISettings::models(const QString& server){
+    return {
+        {"qwen2.5-coder-32b-instruct","qwen2.5-coder-32b-instruct"},
+    };
+}
+
 }

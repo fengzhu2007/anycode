@@ -325,6 +325,9 @@ add_library(App SHARED
         modules/ai/ai_request.h modules/ai/ai_request.cpp
         modules/options/ai_settings.h modules/options/ai_settings.cpp
         modules/options/ai_option_widget.h modules/options/ai_option_widget.cpp modules/options/ai_option_widget.ui
+        components/select_model.h
+        panes/code_editor/ai_client.h panes/code_editor/ai_client.cpp
+        modules/ai/ai_response.h modules/ai/ai_response.cpp
 
 
 
