@@ -22,8 +22,13 @@ public:
     virtual void initValue(const QJsonObject& value) override;
     virtual QJsonObject toJson() override;
 
-
     void initView();
+
+public slots:
+    void onEnabled(bool checked);
+
+
+
 private:
     AIOptionWidgetPrivate *d;
     Ui::AIOptionWidget *ui;

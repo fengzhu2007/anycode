@@ -17,6 +17,7 @@
 #include "codeassist/documentcontentcompletion.h"
 //#include "snippets/snippetprovider.h"
 #include "displaysettings.h"
+#include "modules/options/ai_settings.h"
 #include <texteditorenvironment.h>
 #include <textsuggestion.h>
 #include "modules/options/options_settings.h"
@@ -85,6 +86,8 @@ public:
     QAction* copyPathAction=nullptr;
     QAction* openFolderAction=nullptr;
     QAction* floatTabAction=nullptr;
+    QAction* aiSuggestionAction = nullptr;
+
 
     QAction* testAction=nullptr;
 
@@ -491,9 +494,15 @@ void CodeEditorManager::onEditorActionTrigger(bool checked){
         auto ds = d->editor->displaySettings();
         ds.m_visualizeWhitespace = checked;
         d->editor->setDisplaySettings(ds);
+    }else if(sender==d->aiSuggestionAction){
+        //ai suggestion
+        if(d->current){
+            auto editor = d->current->editor();
+            if(editor){
+                d->ai->request(editor);
+            }
+        }
     }else if(sender==d->testAction){
-
-
 
     }
 }
@@ -524,7 +533,7 @@ void CodeEditorManager::onTabActionTrigger(){
         int count  = container->paneCount();
         int pos = 0;
         for(int i=0;i<count;i++){
-            qDebug()<<"close index"<<pos<<container->paneCount();
+            //qDebug()<<"close index"<<pos<<container->paneCount();
             if(!container->closePane(pos)){
                 pos += 1;
             }
@@ -559,6 +568,7 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
         d->indentAction = new QAction(QIcon(":/Resource/icons/TextIndent_16x.svg"),tr("Indent Selection"),this);
         d->autoFormatAction = new QAction(QIcon(":/Resource/icons/FormatSelection_16x.svg"),tr("Auto Format"),this);
         d->addOrRemoveCommentAction = new QAction(QIcon(":/Resource/icons/CPPCommentCode_16x.svg"),tr("Add/Remove Comment"),this);
+        d->aiSuggestionAction = new QAction(QIcon(":/Resource/icons/CordovaMultiDevice_16x.svg"),tr("AI Suggestion"),this);
 #ifdef Q_DEBUG
         d->testAction = new QAction(tr("Test"),this);
         connect(d->testAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
@@ -589,7 +599,10 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
         connect(d->indentAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
         connect(d->autoFormatAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
         connect(d->addOrRemoveCommentAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
+        connect(d->aiSuggestionAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
     }
+
+    d->aiSuggestionAction->setEnabled(OptionsSettings::getInstance()->aiSettings().enable());
 
     auto ds = editor->displaySettings();
     d->textWrappingAction->setChecked(ds.m_textWrapping);
@@ -618,6 +631,8 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
     contextMenu->addAction(d->autoFormatAction);
     contextMenu->addSeparator();
     contextMenu->addAction(d->addOrRemoveCommentAction);
+    contextMenu->addSeparator();
+    contextMenu->addAction(d->aiSuggestionAction);
 
 #ifdef Q_DEBUG
     contextMenu->addAction(d->testAction);

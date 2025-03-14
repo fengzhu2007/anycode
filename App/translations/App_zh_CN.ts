@@ -9,11 +9,11 @@
     </message>
     <message>
         <source>Enable AI Assisant</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">启用AI助手</translation>
     </message>
     <message>
         <source>Trigger Policy:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">触发策略：</translation>
     </message>
     <message>
         <source>Timeout:</source>
@@ -25,15 +25,15 @@
     </message>
     <message>
         <source>Configuration</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">配置</translation>
     </message>
     <message>
         <source>Name:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">服务：</translation>
     </message>
     <message>
         <source>Model:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">模型：</translation>
     </message>
     <message>
         <source>API KEY:</source>
@@ -1353,7 +1353,7 @@ Please enter a new folder name.</source>
     </message>
     <message>
         <source>Replace All</source>
-        <translation type="unfinished">搜索全部</translation>
+        <translation type="unfinished">替换全部</translation>
     </message>
 </context>
 <context>
@@ -1844,6 +1844,10 @@ Please enter a new folder name.</source>
     <message>
         <source>Test</source>
         <translation type="unfinished">连接测试</translation>
+    </message>
+    <message>
+        <source>AI Suggestion</source>
+        <translation type="unfinished">AI代码补全</translation>
     </message>
 </context>
 <context>

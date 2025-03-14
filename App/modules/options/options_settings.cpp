@@ -7,6 +7,7 @@
 
 static const char environmentKey[] = "environment";
 static const char languageKey[] = "language";
+static const char aiKey[] = "ai";
 
 
 namespace ady{
@@ -37,6 +38,10 @@ OptionsSettings::OptionsSettings():QObject() {
     if(options.contains(languageKey)){
         d->languageSettings.fromJson(options.find(languageKey)->toObject());
     }
+    if(options.contains(aiKey)){
+        d->aiSettings.fromJson(options.find(aiKey)->toObject());
+    }
+
     {
         const QString nameKey = TextEditor::TextEditorSettings::name();
         auto texteditorSettings = TextEditor::TextEditorSettings::instance();

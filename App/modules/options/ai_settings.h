@@ -29,7 +29,9 @@ public:
     static QList<QPair<QString,QString>> servers();
     static QList<QPair<QString,QString>> models(const QString& server);
 
-
+    inline bool enable(){
+        return m_enable && m_apiKey.isEmpty()==false;
+    }
 
 public:
     bool m_enable;

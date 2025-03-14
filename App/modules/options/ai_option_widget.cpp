@@ -3,7 +3,9 @@
 #include "options_settings.h"
 #include "ai_settings.h"
 #include "components/select_model.h"
+#include "components/list_item_delegate.h"
 #include <QIcon>
+#include <QAbstractItemView>
 
 
 namespace ady{
@@ -19,7 +21,13 @@ AIOptionWidget::AIOptionWidget(QWidget *parent)
     ui->setupUi(this);
 
     this->setWindowTitle(tr("AI Assistant"));
-    this->setWindowIcon(QIcon(":/Resource/icons/ai.svg"));
+    this->setWindowIcon(QIcon(":/Resource/icons/CordovaMultiDevice_16x.svg"));
+
+    ui->name->view()->setItemDelegate(new ListItemDelegate(22,ui->name));
+    ui->model->view()->setItemDelegate(new ListItemDelegate(22,ui->model));
+    ui->triggerPolicy->view()->setItemDelegate(new ListItemDelegate(22,ui->triggerPolicy));
+
+    connect(ui->enableAIAssiant,&QCheckBox::clicked,this,&AIOptionWidget::onEnabled);
 
     this->initView();
 }
@@ -112,7 +120,7 @@ void AIOptionWidget::initView(){
     }
 
     ui->apiKey->setText(setting.m_apiKey);
-    ui->enableAIAssiant->setEnabled(setting.m_enable);
+    ui->enableAIAssiant->setChecked(setting.m_enable);
     ui->timeout->setValue(setting.m_triggerTimeout);
 
     QList<QPair<int,QString>> list;
@@ -123,8 +131,16 @@ void AIOptionWidget::initView(){
         model->setDataSource(list);
         ui->triggerPolicy->setModel(model);
     }
+    ui->triggerPolicy->setCurrentIndex(setting.m_triggerPolicy);
+    this->onEnabled(setting.m_enable);
+}
 
-
+void AIOptionWidget::onEnabled(bool checked){
+    ui->name->setEnabled(checked);
+    ui->model->setEnabled(checked);
+    ui->triggerPolicy->setEnabled(checked);
+    ui->timeout->setEnabled(checked);
+    ui->apiKey->setEnabled(checked);
 }
 
 }
