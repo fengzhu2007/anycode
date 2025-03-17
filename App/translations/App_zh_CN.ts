@@ -824,6 +824,14 @@ for (let i = 0; i &lt; 3; i++) {
         <source>SSL Querier</source>
         <translation type="unfinished">证书查询</translation>
     </message>
+    <message>
+        <source>Auto Format</source>
+        <translation type="unfinished">自动格式化</translation>
+    </message>
+    <message>
+        <source>Ctrl+K</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ImageEditorPane</name>
@@ -1699,15 +1707,15 @@ Please enter a new folder name.</source>
     <name>ady::AIOptionWidget</name>
     <message>
         <source>AI Assistant</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">AI代码补全</translation>
     </message>
     <message>
         <source>Auto</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">自动</translation>
     </message>
     <message>
         <source>Manual</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">手动</translation>
     </message>
 </context>
 <context>

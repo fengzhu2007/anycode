@@ -32,6 +32,7 @@
 #include <QTextCodec>
 #include <QTimer>
 #include <QProcess>
+#include <QSvgWidget>
 #include <QDebug>
 
 
@@ -66,12 +67,18 @@ CodeEditorPane::CodeEditorPane(QWidget *parent)
     CodeEditorManager::getInstance()->append(this);
     CodeEditorPane::SN += 1;
 
-
     this->initView();
+
+
 }
 
 
 void CodeEditorPane::initView(){
+
+
+
+
+
     connect(ui->editor,&QPlainTextEdit::modificationChanged,this,&CodeEditorPane::onModificationChanged);
     connect(ui->editor,&QPlainTextEdit::cursorPositionChanged,this,&CodeEditorPane::onCursorPositionChanged);
     connect(ui->editor->textDocument(),&TextEditor::TextDocument::openFinishedSuccessfully,this,&CodeEditorPane::onFileOpend);
@@ -106,9 +113,7 @@ void CodeEditorPane::initView(){
         ui->zoom->setZoom(z);
     });
 
-    //ui->charset->setText(QLatin1String("UTF-8"));
     this->updateInfoBar();
-
 
     ui->editor->setMarksVisible(true);
 }

@@ -650,7 +650,9 @@ QString COS::matchToPath(const QString& from,bool is_file,bool local){
         QString ret;
         if(local){
             //local to remote
+            bool filter = false;
             for(auto one:m_dirMapping){
+                filter = true;
                 const QString localPath =  one.first.startsWith("/")?one.first.mid(1):one.first;//like  path1/path2/
                 const QString remotePath = one.second.startsWith("/")?one.second.mid(1):one.second;//like path3/path4/
                 if(from.startsWith(localPath)){
@@ -658,7 +660,7 @@ QString COS::matchToPath(const QString& from,bool is_file,bool local){
                     break;
                 }
             }
-            if(ret.isEmpty()){
+            if(filter==false){
                 ret = from;
             }
         }else{

@@ -1026,6 +1026,9 @@ void FileTransferModel::addUploadJob(QJsonObject data){
                     for(auto source:sourcelist){
                         if(source.startsWith(projectPath)){
                             QString rSource = source.mid(projectPath.length());
+                            if(!is_file){
+                                rSource += "/";
+                            }
                             QString rDest = req->matchToPath(rSource,is_file,true);
                             if(rDest.isEmpty()){
                                 continue;

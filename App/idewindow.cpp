@@ -65,6 +65,7 @@
 #include <QDesktopServices>
 #include <QLayout>
 #include <QFontDatabase>
+#include <QShortcut>
 #include <QDebug>
 
 namespace ady{
@@ -144,6 +145,7 @@ Type::M_TOGGLE_NOTIFICATION});
     connect(ui->actionSelect_All,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionGoto,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionFind_Replace,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionAuto_Format,&QAction::triggered,this,&IDEWindow::onActionTriggered);
 
     //View
     connect(ui->actionResource_Manage,&QAction::triggered,this,&IDEWindow::onActionTriggered);
@@ -173,8 +175,6 @@ Type::M_TOGGLE_NOTIFICATION});
 
     //debug
     connect(ui->actionDebug,&QAction::triggered,this,&IDEWindow::onActionTriggered);
-
-
 
 
     //this->forTest();
@@ -458,6 +458,15 @@ void IDEWindow::onActionTriggered(){
         if(pane!=nullptr){
             pane->doAction(DockingPane::Cut);
         }
+    }else if(sender==ui->actionAuto_Format){
+        qDebug()<<"auto format";
+        auto pane = this->currentEditorPane();
+        if(pane!=nullptr){
+            auto editor = pane->editor();
+            if(editor){
+                editor->autoFormat();
+            }
+        }
     }else if(sender==ui->actionSelect_All){
         auto pane = this->currentEditorPane();
         if(pane!=nullptr){
@@ -507,7 +516,8 @@ void IDEWindow::onActionTriggered(){
     }else if(sender==ui->actionDonate){
         this->openUrl(APP_DONATE_URL);
     }else if(sender==ui->actionUpdate){
-        UpdateDialog::open(this);
+        //UpdateDialog::open(this);
+        this->openUrl(APP_UPDATE_URL);
     }else if(sender==ui->actionAbout){
         AboutDialog::open(this);
     }else if(sender==ui->actionDebug){
@@ -693,6 +703,8 @@ void IDEWindow::closeEvent(QCloseEvent* e){
     settings->saveToFile();
     this->shutdown();
 }
+
+
 
 void IDEWindow::restoreFromSettings(){
     auto settings = LayoutSettings::getInstance(this);

@@ -83,6 +83,8 @@
     <addaction name="actionPaste_P"/>
     <addaction name="actionDelete_D"/>
     <addaction name="separator"/>
+    <addaction name="actionAuto_Format"/>
+    <addaction name="separator"/>
     <addaction name="actionSelect_All"/>
     <addaction name="separator"/>
     <addaction name="actionGoto"/>
@@ -563,6 +565,21 @@
    </property>
    <property name="text">
     <string>SSL Querier</string>
+   </property>
+  </action>
+  <action name="actionAuto_Format">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/FormatSelection_16x.svg</normaloff>:/Resource/icons/FormatSelection_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Auto Format</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+K</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>

@@ -605,15 +605,21 @@ QString OSS::matchToPath(const QString& from,bool is_file,bool local){
         QString ret;
         if(local){
             //local to remote
+            //qDebug()<<from;
+            bool filter = false;
             for(auto one:m_dirMapping){
+                filter = true;
                 const QString localPath = one.first.startsWith("/")?one.first.mid(1):one.first;//like  path1/path2/
                 const QString remotePath = one.second.startsWith("/")?one.second.mid(1):one.second;//like path3/path4/
+               // qDebug()<<"localPath"<<localPath;
+                //qDebug()<<"remotePath"<<remotePath;
                 if(from.startsWith(localPath)){
                     ret = remotePath + from.mid(localPath.length());
                     break;
                 }
             }
-            if(ret.isEmpty()){
+            //qDebug()<<"ret"<<ret;
+            if(filter==false){
                 ret = from;
             }
         }else{
