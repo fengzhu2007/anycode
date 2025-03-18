@@ -25,17 +25,21 @@
 
 
 
-### 编译与运行
-1. 克隆本项目到本地：
-   ```bash
-   git clone https://github.com/yourusername/yourproject.git
-
 ## 截屏
 
 ![](https://github.com/fengzhu2007/anycode/blob/dev/screen/anycode.png)  
 
 
 ## Windows 构建  
+
+
+克隆本项目到本地：  
+
+```
+git clone https://github.com/fengzhu2007/anycode.git
+git submodule update --init
+```
+
 开发环境 Qt5.15.2  
 Visual Studio 2019以上 C++17  
 

@@ -23,18 +23,20 @@ This project is a text editor developed using Qt, integrating common text editin
 - **Quick Upload**: Supports quick upload of local projects to specified object storage services.
 - **Difference Checking**: Checks file differences via Git or SVN to ensure only changed files are transmitted.
 
-## Compilation and Execution
-
-1. Clone the project to your local machine:
-   ```bash
-   git clone https://github.com/yourusername/yourproject.git
-   ```
 
 ## Screenshots
 
 ![](https://github.com/fengzhu2007/anycode/blob/dev/screen/anycode.png)
 
 ## Windows Build
+
+Clone the project to your local machine:
+
+```
+git clone https://github.com/fengzhu2007/anycode.git
+git submodule update --init
+```
+
 Development Environment: Qt 5.15.2  
 Visual Studio 2019 or later, C++17  
 
