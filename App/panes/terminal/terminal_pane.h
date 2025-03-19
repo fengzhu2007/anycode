@@ -42,7 +42,8 @@ public:
     void newTermnal(const QString& excutablePath,const QString& workingDir);
 
 
-    static TerminalPane* open(DockingPaneManager* dockingManager,bool active=false);
+    static TerminalPane* getInstance();
+    static TerminalPane* open(DockingPaneManager* dockingManager,bool active=false,const QJsonObject& data={});
     static TerminalPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
     static QList<TerminalPane::Excutable> toExecutableList();
 

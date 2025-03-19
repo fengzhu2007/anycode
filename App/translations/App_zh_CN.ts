@@ -689,14 +689,6 @@ for (let i = 0; i &lt; 3; i++) {
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Copy(&amp;C)</source>
-        <translation type="unfinished">复制(&amp;C)</translation>
-    </message>
-    <message>
-        <source>Ctrl+C</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Paste(&amp;P)</source>
         <translation type="unfinished">粘贴(&amp;P)</translation>
     </message>
@@ -831,6 +823,10 @@ for (let i = 0; i &lt; 3; i++) {
     <message>
         <source>Ctrl+K</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy(&amp;C)	Ctrl+C</source>
+        <translation type="unfinished">复制(&amp;C)	Ctrl+C</translation>
     </message>
 </context>
 <context>

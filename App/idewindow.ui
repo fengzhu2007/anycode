@@ -336,10 +336,7 @@
      <normaloff>:/Resource/icons/Copy_16x.svg</normaloff>:/Resource/icons/Copy_16x.svg</iconset>
    </property>
    <property name="text">
-    <string>Copy(&amp;C)</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
+    <string>Copy(&amp;C)	Ctrl+C</string>
    </property>
   </action>
   <action name="actionPaste_P">

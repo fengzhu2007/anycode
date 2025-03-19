@@ -62,9 +62,11 @@ TerminalPane::TerminalPane(QWidget *parent,const QString& executable,const QStri
 
 
 TerminalPane::~TerminalPane(){
+    instance = nullptr;
     Subscriber::unReg();
     delete ui;
     delete d;
+
 }
 
 void TerminalPane::initView(){
@@ -155,9 +157,15 @@ void TerminalPane::newTermnal(const QString& excutablePath,const QString& workin
 
 }
 
-TerminalPane* TerminalPane::open(DockingPaneManager* dockingManager,bool active){
+TerminalPane* TerminalPane::getInstance(){
+    return instance;
+}
+
+TerminalPane* TerminalPane::open(DockingPaneManager* dockingManager,bool active,const QJsonObject& data){
     if(instance==nullptr){
-        instance = new TerminalPane(dockingManager->widget());
+        auto executable = data.find("currentExecutable")->toString();
+        auto workingDir = data.find("currentPath")->toString();
+        instance = new TerminalPane(dockingManager->widget(),executable,workingDir);
         DockingPaneLayoutItemInfo* item = dockingManager->createPane(instance,DockingPaneManager::Bottom,active);
         item->setManualSize(260);
     }
@@ -166,8 +174,6 @@ TerminalPane* TerminalPane::open(DockingPaneManager* dockingManager,bool active)
 
 TerminalPane* TerminalPane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
     if(instance==nullptr){
-        //const QString& executable,const QString& workingDir
-
         auto executable = data.find("currentExecutable")->toString();
         auto workingDir = data.find("currentPath")->toString();
         instance = new TerminalPane(dockingManager->widget(),executable,workingDir);
