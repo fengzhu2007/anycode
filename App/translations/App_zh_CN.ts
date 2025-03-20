@@ -665,38 +665,6 @@ for (let i = 0; i &lt; 3; i++) {
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Undo</source>
-        <translation type="unfinished">撤回</translation>
-    </message>
-    <message>
-        <source>Ctrl+Z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Redo</source>
-        <translation type="unfinished">重做</translation>
-    </message>
-    <message>
-        <source>Ctrl+Y</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cut(&amp;T)</source>
-        <translation type="unfinished">剪切(&amp;T)</translation>
-    </message>
-    <message>
-        <source>Ctrl+X</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Paste(&amp;P)</source>
-        <translation type="unfinished">粘贴(&amp;P)</translation>
-    </message>
-    <message>
-        <source>Ctrl+V</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Delete(&amp;D)</source>
         <translation type="unfinished">删除(&amp;D)</translation>
     </message>
@@ -827,6 +795,22 @@ for (let i = 0; i &lt; 3; i++) {
     <message>
         <source>Copy(&amp;C)	Ctrl+C</source>
         <translation type="unfinished">复制(&amp;C)	Ctrl+C</translation>
+    </message>
+    <message>
+        <source>Undo	Ctrl+Z</source>
+        <translation type="unfinished">撤回	Ctrl+Z</translation>
+    </message>
+    <message>
+        <source>Redo	Ctrl+Y</source>
+        <translation type="unfinished">重做	Ctrl+Y</translation>
+    </message>
+    <message>
+        <source>Cut(&amp;T)	Ctrl+X</source>
+        <translation type="unfinished">剪切(&amp;T)	Ctrl+X</translation>
+    </message>
+    <message>
+        <source>Paste(&amp;P)	Ctrl+V</source>
+        <translation type="unfinished">粘贴(&amp;P)	Ctrl+V</translation>
     </message>
 </context>
 <context>
@@ -1206,10 +1190,6 @@ Please enter a new folder name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>1.0.0</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Error</source>
         <translation type="unfinished">错误</translation>
     </message>
@@ -1291,6 +1271,10 @@ Please enter a new folder name.</source>
     </message>
     <message>
         <source>Aliyun Dashscope</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>1.0.1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

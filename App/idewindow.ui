@@ -300,10 +300,7 @@
      <normaloff>:/Resource/icons/Undo_16x.svg</normaloff>:/Resource/icons/Undo_16x.svg</iconset>
    </property>
    <property name="text">
-    <string>Undo</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Z</string>
+    <string>Undo	Ctrl+Z</string>
    </property>
   </action>
   <action name="actionRedo">
@@ -312,10 +309,7 @@
      <normaloff>:/Resource/icons/Redo_16x.svg</normaloff>:/Resource/icons/Redo_16x.svg</iconset>
    </property>
    <property name="text">
-    <string>Redo</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Y</string>
+    <string>Redo	Ctrl+Y</string>
    </property>
   </action>
   <action name="actionCut_X">
@@ -324,10 +318,7 @@
      <normaloff>:/Resource/icons/Cut_16x.svg</normaloff>:/Resource/icons/Cut_16x.svg</iconset>
    </property>
    <property name="text">
-    <string>Cut(&amp;T)</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+X</string>
+    <string>Cut(&amp;T)	Ctrl+X</string>
    </property>
   </action>
   <action name="actionCopy_C">
@@ -345,10 +336,7 @@
      <normaloff>:/Resource/icons/Paste_16x.svg</normaloff>:/Resource/icons/Paste_16x.svg</iconset>
    </property>
    <property name="text">
-    <string>Paste(&amp;P)</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+V</string>
+    <string>Paste(&amp;P)	Ctrl+V</string>
    </property>
   </action>
   <action name="actionDelete_D">

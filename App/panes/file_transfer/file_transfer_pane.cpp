@@ -10,6 +10,7 @@
 #include "storage/site_storage.h"
 #include "file_transfer_model.h"
 #include "components/message_dialog.h"
+#include "network/network_manager.h"
 
 #include <QMenu>
 
@@ -172,11 +173,15 @@ bool FileTransferPane::onReceive(Event* e) {
                 if(one.status!=1){
                     //remove
                     model->removeSite(one.id);
-
                 }else{
                     auto r = model->find(one.id,false);
                     if(r){
                         model->updateSite(one);
+                        //update request client
+                         auto req = NetworkManager::getInstance()->request(id);
+                        if(req){
+                             req->init(one);
+                        }
                     }else{
                         //add
                         model->addSite(one);
