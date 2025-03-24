@@ -46,7 +46,6 @@ AddonManagerDialog::~AddonManagerDialog()
     delete ui;
 }
 
-
 void AddonManagerDialog::onItemClicked(int index){
     auto item = d->model->itemAt(index);
     //ui->stackedWidget->show();

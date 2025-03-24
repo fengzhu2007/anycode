@@ -328,6 +328,7 @@ add_library(App SHARED
         components/select_model.h
         panes/code_editor/ai_client.h panes/code_editor/ai_client.cpp
         modules/ai/ai_response.h modules/ai/ai_response.cpp
+        panes/db/dbms_pane.h panes/db/dbms_pane.cpp panes/db/dbms_pane.ui
 
 
 
