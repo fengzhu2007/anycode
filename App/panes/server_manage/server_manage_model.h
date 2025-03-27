@@ -81,7 +81,7 @@ public:
     void appendItem(ServerManageModelItem* parent,ServerManageModelItem* item);
     void appendItems(QList<FileItem> list,ServerManageModelItem* parent);
     void refreshItems(QList<FileItem> list,ServerManageModelItem* parent);
-    void openProject(long long id,const QString name);
+    void openProject(long long id,const QString& name);
 
     void addSite(const SiteRecord& site);
     void updateSite(const SiteRecord& site);

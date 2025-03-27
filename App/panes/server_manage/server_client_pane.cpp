@@ -59,6 +59,7 @@ ServerClientPane::ServerClientPane(QWidget* parent,long long id):
 
     SiteStorage storage;
     d = new ServerClientPanePrivate;
+    d->showed = false;
     d->site = storage.one(id);
 
 
@@ -244,7 +245,7 @@ QString ServerClientPane::rootPath(){
 
 void ServerClientPane::setCurrentPath(const QString& path,bool request){
     d->currentPath = path;
-    qDebug()<<"setCurrentPath"<<path;
+    //qDebug()<<"setCurrentPath"<<path;
     ui->lineEdit->setText(d->currentPath);
     if(request){
         //this->reload();
@@ -256,7 +257,7 @@ QString ServerClientPane::currentPath(){
 }
 
 void ServerClientPane::reload(){
-    qDebug()<<"current path"<<d->currentPath<<d->rootPath;
+    //qDebug()<<"current path"<<d->currentPath<<d->rootPath;
     if(d->currentPath==d->rootPath){
         this->connectServer(d->id,d->currentPath);
     }else{
@@ -297,6 +298,7 @@ void ServerClientPane::showEvent(QShowEvent* e){
     if(d->showed==false){
         if(d->site.pid==0){
             //init quick connect
+            qDebug()<<"ServerClientPane::showEvent22";
             Publisher::getInstance()->post(Type::M_SITE_ADDED,&d->site);
             NetworkManager::getInstance()->initRequest(d->id,d->type);
         }
@@ -334,7 +336,11 @@ void ServerClientPane::connectServer(long long id,const QString& path){
     if(isThreadRunning()){
         return ;
     }
-    auto req = NetworkManager::getInstance()->request(id);
+    auto instance = NetworkManager::getInstance();
+    auto req = instance->request(id);
+    if(req==nullptr){
+         req = instance->initRequest(id,{});//new  client
+    }
     if(req!=nullptr){
         ui->widget->start();
         d->thread = new ServerRequestThread(req,ServerRequestThread::Link,new QString(path));

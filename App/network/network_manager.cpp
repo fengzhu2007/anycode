@@ -149,8 +149,9 @@ public:
                 response = request->link();
                 int code = 0;
                 if(!response->status()){
+                    //response->debug();
                     code = -3;
-                    task->errorMsg = response->errorMsg;
+                    task->errorMsg = response->errorInfo();
                 }
                 delete response;
                 response = nullptr;

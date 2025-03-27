@@ -22,6 +22,7 @@ FileSelector::FileSelector(QWidget *parent,const QString& filter)
     d->edit = new QLineEdit(this);
     d->button = new QPushButton(this);
     d->button->setIcon(QIcon(":/Resource/icons/SearchFolderClosed_16x.svg"));
+    d->button->setAutoDefault(false);
     QHBoxLayout* layout = new QHBoxLayout(this);
     this->setLayout(layout);
     layout->addWidget(d->edit);

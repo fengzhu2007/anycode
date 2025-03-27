@@ -329,6 +329,13 @@ add_library(App SHARED
         panes/code_editor/ai_client.h panes/code_editor/ai_client.cpp
         modules/ai/ai_response.h modules/ai/ai_response.cpp
         panes/db/dbms_pane.h panes/db/dbms_pane.cpp panes/db/dbms_pane.ui
+        panes/db/dbms_model.cpp panes/db/dbms_model.h
+        panes/db/dbms_thread.cpp panes/db/dbms_thread.h
+        panes/db/db_driver.h panes/db/db_driver.cpp
+        storage/db_storage.h storage/db_storage.cpp
+        panes/db/sqlite_driver.h panes/db/sqlite_driver.cpp
+        panes/db/sqlite_connect_dialog.h panes/db/sqlite_connect_dialog.cpp panes/db/sqlite_connect_dialog.ui
+        components/tree_item_delegate.h components/tree_item_delegate.cpp
 
 
 

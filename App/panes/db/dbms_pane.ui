@@ -13,7 +13,135 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>3</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QToolBar" name="toolBar">
+     <property name="movable">
+      <bool>false</bool>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>16</width>
+       <height>16</height>
+      </size>
+     </property>
+     <addaction name="actionRefresh"/>
+     <addaction name="actionDelete"/>
+     <addaction name="separator"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="ady::TreeView" name="treeView">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+     <property name="headerHidden">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionRefresh">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Refresh_16x.svg</normaloff>:/Resource/icons/Refresh_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Cancel_16x.svg</normaloff>:/Resource/icons/Cancel_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionDock_To_Client">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/DockTo_16x.svg</normaloff>:/Resource/icons/DockTo_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Dock To Client</string>
+   </property>
+  </action>
+  <action name="actionOpen_Connection">
+   <property name="text">
+    <string>Open Connection</string>
+   </property>
+  </action>
+  <action name="actionAdd_Database">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/AddDatabase_16x.svg</normaloff>:/Resource/icons/AddDatabase_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Add Database</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionClose_Connection">
+   <property name="text">
+    <string>Close Connection</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionOpen_Databse">
+   <property name="text">
+    <string>Open Databse</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionClose_Database">
+   <property name="text">
+    <string>Close Database</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionEdit_Connection">
+   <property name="text">
+    <string>Edit Connection</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <customwidgets>
+  <customwidget>
+   <class>ady::TreeView</class>
+   <extends>QTreeView</extends>
+   <header>components/tree_view.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../r.qrc"/>
+ </resources>
  <connections/>
 </ui>

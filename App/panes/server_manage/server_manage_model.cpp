@@ -508,7 +508,7 @@ void ServerManageModel::refreshItems(QList<FileItem> list,ServerManageModelItem*
     this->appendItems(list,parent);
 }
 
-void ServerManageModel::openProject(long long id,const QString name){
+void ServerManageModel::openProject(long long id,const QString& name){
     //find proj
     auto exists = this->find(id,true);
     if(exists){

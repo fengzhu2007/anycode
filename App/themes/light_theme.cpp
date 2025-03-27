@@ -90,6 +90,7 @@ QString LightTheme::qss(){
                              ".QStatusBar::item{border:0;}"
                              ".ady--PasswordEdit,.QLineEdit{height:24px;border:1px solid #ccc;font-size:12px;}"
                              ".ady--PasswordEdit:focus,.QLineEdit:focus,.ady--PasswordEdit:hover,.QLineEdit:hover{border:1px solid #007acc}"
+                             ".ady--PasswordEdit:disabled,.QLineEdit:disabled{background:#efefef;}"
                              ".ady--ListView>QWidget#qt_scrollarea_viewport>.QWidget{background-color:white;}"
                              "ady--ListViewItem[state='1']{background-color:#d9e0f8}"
                              "ady--ListViewItem:hover{background-color:#c9def5}"

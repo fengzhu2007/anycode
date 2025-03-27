@@ -124,5 +124,11 @@
         <file>Resource/icons/Import_16x.svg</file>
         <file>Resource/icons/CordovaMultiDevice_16x.svg</file>
         <file>Resource/icons/Hourglass_16x.svg</file>
+        <file>Resource/icons/View_16x.svg</file>
+        <file>Resource/icons/Table_16x.svg</file>
+        <file>Resource/icons/Database_16x.svg</file>
+        <file>Resource/icons/AddDatabase_16x.svg</file>
+        <file>Resource/icons/DatabaseTableGroup_16x.svg</file>
+        <file>Resource/icons/sqlite.svg</file>
     </qresource>
 </RCC>

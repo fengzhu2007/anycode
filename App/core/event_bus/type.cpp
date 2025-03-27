@@ -59,6 +59,8 @@ const QString Type::M_RESOURCE_LOCATION = "ResourceLocation";
 
 const QString Type::M_SHOW_PROJECT = "ShowProject";
 
+const QString Type::M_NEW_CONNECTION = "NewConnection";
+const QString Type::M_UPDATE_CONNECTION = "UpdateConnection";
 
 
 Type::Type()

@@ -73,6 +73,10 @@ public:
 
     static const QString M_SHOW_PROJECT;
 
+    //database
+    static const QString M_NEW_CONNECTION;
+    static const QString M_UPDATE_CONNECTION;
+
     //output
     enum OutputLevel{
         Text=0,

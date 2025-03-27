@@ -21,6 +21,7 @@
 #include "panes/terminal/terminal_pane.h"
 #include "panes/output/output_pane.h"
 #include "panes/notification/notification_pane.h"
+#include "panes/db/dbms_pane.h"
 
 #include "panes/loader.h"
 #include "core/event_bus/event.h"
@@ -41,7 +42,7 @@
 #include "languages/html/htmlscanner.h"
 
 #include "modules/help/about_dialog.h"
-#include "modules/help/update_dialog.h"
+//#include "modules/help/update_dialog.h"
 #include "modules/options/options_dialog.h"
 #include "modules/addon/addon_manager_dialog.h"
 #include "modules/import_export/import_export_dialog.h"
@@ -151,6 +152,7 @@ Type::M_TOGGLE_NOTIFICATION,Type::M_OPEN_TERMINAL});
     connect(ui->actionResource_Manage,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionVersion_Control,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionServer,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionDatabase,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionTerminal,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionFile_Transfer,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionOutput,&QAction::triggered,this,&IDEWindow::onActionTriggered);
@@ -498,6 +500,9 @@ void IDEWindow::onActionTriggered(){
         pane->activeToCurrent();
     }else if(sender==ui->actionServer){
         auto pane = ServerManagePane::open(m_dockingPaneManager,true);
+        pane->activeToCurrent();
+    }else if(sender==ui->actionDatabase){
+        auto pane = DBMSPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
     }else if(sender==ui->actionTerminal){
         auto pane = TerminalPane::open(m_dockingPaneManager,true);

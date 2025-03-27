@@ -16,6 +16,7 @@
 #include "group_storage.h"
 #include "favorite_storage.h"
 #include "recent_storage.h"
+#include "db_storage.h"
 
 #include <QDebug>
 namespace ady {
@@ -196,6 +197,8 @@ namespace ady {
                 upgradeV5();
             case 6:
                 upgradeV6();
+            case 7:
+                upgradeV7();
             default:
 
                 break;
@@ -419,6 +422,25 @@ namespace ady {
                                     [%8] INTEGER DEFAULT '0' NULL\
                                     )").arg(RecentStorage::TABLE_NAME).arg(COL_ID).arg(RecentStorage::COL_NAME).arg(RecentStorage::COL_PATH).arg(RecentStorage::COL_DATAID).arg(RecentStorage::COL_TYPE).arg(COL_DATETIME).arg(RecentStorage::COL_UPDATETIME);
             this->db.exec(sql);
+         }
+     }
+
+     void DatabaseHelper::upgradeV7(){
+         int type = this->dbType();
+         if(type==1){
+             //add db table
+             QString sql = QString("CREATE TABLE [%1] (\
+                                       [%2] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT,\
+                                        [%3] VARCHAR(100)  NULL,\
+                                        [%4] VARCHAR(100)  NULL,\
+                                        [%5] VARCHAR(250)  NULL,\
+                                        [%6] INTEGER DEFAULT '0' NULL,\
+                                        [%7] VARCHAR(250)  NULL,\
+                                        [%8] VARCHAR(250)  NULL\
+                                   )").arg(DBStorage::TABLE_NAME).arg(COL_ID).arg(DBStorage::COL_NAME).arg(DBStorage::COL_DRIVER).arg(DBStorage::COL_HOST).arg(DBStorage::COL_PORT).arg(DBStorage::COL_USERNAME).arg(DBStorage::COL_PASSWORD);
+            auto query = this->db.exec(sql);
+             auto error = query.lastError();
+            Q_ASSERT(error.type()==QSqlError::NoError);
          }
      }
 

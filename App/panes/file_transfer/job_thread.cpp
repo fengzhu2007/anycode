@@ -27,6 +27,8 @@ void JobThread::run(){
         if(item->type()==FileTransferModelItem::Job){
             m_task = new Task(item);
             int ret = NetworkManager::getInstance()->exec(m_task);
+            qDebug()<<"222222222222"<<ret;
+
             if(ret==0){
                 //ok
                 //model->removeItem(m_task->siteid,m_task->id);//ok remove task

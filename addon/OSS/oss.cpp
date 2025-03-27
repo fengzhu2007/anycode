@@ -224,6 +224,7 @@ NetworkResponse* OSS::tinyListDir(const QString& dir)
 
 NetworkResponse* OSS::upload(Task* task)
 {
+    qDebug()<<"upload oss";
     QMutexLocker locker(&mutex);
     QString local = task->local;
     QString remote = task->remote;
@@ -326,6 +327,7 @@ NetworkResponse* OSS::upload(Task* task)
         response->errorCode = -2;
         response->errorMsg = QObject::tr("File is not exists");
     }
+    response->debug();
     return response;
 }
 
@@ -584,8 +586,9 @@ NetworkResponse* OSS::customeAccess(const QString& name,QMap<QString,QVariant> d
 static bool orMatches(const QList<QRegularExpression> &exprList, const QString &filePath)
 {
     bool ret = false;
+    auto name = filePath.startsWith("/")?filePath:("/"+filePath);
     for(auto reg:exprList){
-        ret = reg.match(filePath).hasMatch();
+        ret = reg.match(name).hasMatch();
         if(ret){
             break;
         }

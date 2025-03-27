@@ -61,10 +61,12 @@ public:
     bool regular = false;
     bool caseSensitive;
     bool wholeWord;
-    int termMaxIndex;
-    const QChar *termData;
-    const QChar *termDataLower;
-    const QChar *termDataUpper;
+    QString beforeLower;
+    QString beforeUpper;
+   // int termMaxIndex;
+    //const QChar *termData;
+    //const QChar *termDataLower;
+    //const QChar *termDataUpper;
     QList<SearchResultItem>* list;
     //QList<QTextDocument*> docList;
     QMap<QString,QTextDocument*> docList;
@@ -88,10 +90,16 @@ FindReplaceProgress::FindReplaceProgress(Mode mode,const QString& before,const Q
     d->regular = false;
     d->caseSensitive = (flags & QTextDocument::FindCaseSensitively)>0;
     d->wholeWord = (flags & QTextDocument::FindWholeWords)>0;
-    d->termMaxIndex = before.length() - 1;
-    d->termData = before.constData();
-    d->termDataLower = before.toLower().constData();
-    d->termDataUpper = before.toUpper().constData();
+    d->beforeLower = d->before.toLower();
+    d->beforeUpper = d->before.toUpper();
+
+    //d->termMaxIndex = before.length() - 1;
+    //d->termData = before.constData();
+    //auto lower = before.toLower();
+    //auto upper = before.toUpper();
+    //d->termDataLower = lower.constData();
+    //d->termDataUpper = upper.constData();
+    //qDebug()<<"before"<<before<< before.toLower()<< before.toUpper()<<d->termDataLower[0]<<d->termDataLower;
     d->list = new  QList<SearchResultItem>;
     if(d->wholeWord || (flags & 0x08)>0){
         d->regular = true;
@@ -115,10 +123,14 @@ FindReplaceProgress::FindReplaceProgress(Mode mode,const QString& before,const Q
     d->regular = false;
     d->caseSensitive = (flags & QTextDocument::FindCaseSensitively)>0;
     d->wholeWord = (flags & QTextDocument::FindWholeWords)>0;
-    d->termMaxIndex = before.length() - 1;
-    d->termData = before.constData();
-    d->termDataLower = before.toLower().constData();
-    d->termDataUpper = before.toUpper().constData();
+    d->beforeLower = d->before.toLower();
+    d->beforeUpper = d->before.toUpper();
+    //d->termMaxIndex = before.length() - 1;
+    //d->termData = before.constData();
+    //auto lower = before.toLower();
+    //auto upper = before.toUpper();
+    //d->termDataLower = lower.constData();
+    //d->termDataUpper = upper.constData();
     d->list = new  QList<SearchResultItem>;
     if(d->wholeWord || (flags & 0x08)>0){
         d->regular = true;
@@ -143,10 +155,14 @@ FindReplaceProgress::FindReplaceProgress(Mode mode,const QString& before,const Q
     d->regular = false;
     d->caseSensitive = (flags & QTextDocument::FindCaseSensitively)>0;
     d->wholeWord = (flags & QTextDocument::FindWholeWords)>0;
-    d->termMaxIndex = before.length() - 1;
-    d->termData = before.constData();
-    d->termDataLower = before.toLower().constData();
-    d->termDataUpper = before.toUpper().constData();
+    d->beforeLower = d->before.toLower();
+    d->beforeUpper = d->before.toUpper();
+    //d->termMaxIndex = before.length() - 1;
+    //d->termData = before.constData();
+    //auto lower = before.toLower();
+    //auto upper = before.toUpper();
+    //d->termDataLower = lower.constData();
+    //d->termDataUpper = upper.constData();
     d->list = new  QList<SearchResultItem>;
     if(d->wholeWord || (flags & 0x08)>0){
         d->regular = true;
@@ -265,7 +281,6 @@ void FindReplaceProgress::searchFile(const QString& path){
         //exclusion
         return ;
     }
-
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return ;
@@ -277,33 +292,43 @@ void FindReplaceProgress::searchFile(const QString& path){
             return ;
         }
     }*/
+
+
+    const int termMaxIndex = d->before.length() - 1;
+    const QChar *termData = d->before.constData();
+    const QChar *termDataLower = d->beforeLower.constData();
+    const QChar *termDataUpper = d->beforeUpper.constData();
+
     d->searchFileCount += 1;
     bool matched = false;
     file.seek(0);
     int lineNr = 0;
     QTextStream stream(&file);
     stream.setCodec("UTF-8");
+    //qDebug()<<"d->caseSensitive"<<path<<d->before<<lower<<d->before.toUpper()<<termData[0]<<termDataLower[0]<<termDataUpper[0]<<d->termDataLower[0]<<d->termDataUpper[0];
     while (!stream.atEnd()) {
         ++lineNr;
         const QString chunk = stream.readLine();
+        //qDebug()<<"chunk"<<chunk;
         const int chunkLength = chunk.length();
         const QChar *chunkPtr = chunk.constData();
         const QChar *chunkEnd = chunkPtr + chunkLength - 1;
-        for (const QChar *regionPtr = chunkPtr; regionPtr + d->termMaxIndex <= chunkEnd; ++regionPtr) {
+        for (const QChar *regionPtr = chunkPtr; regionPtr + termMaxIndex <= chunkEnd; ++regionPtr) {
             if(this->isInterruptionRequested()){
                 break;
             }
-            const QChar *regionEnd = regionPtr + d->termMaxIndex;
+
+            const QChar *regionEnd = regionPtr + termMaxIndex;
             if ( /* optimization check for start and end of region */
                 // case sensitive
-                (d->caseSensitive && *regionPtr == d->termData[0]
-                 && *regionEnd == d->termData[d->termMaxIndex])
+                (d->caseSensitive && *regionPtr == termData[0]
+                 && *regionEnd == termData[termMaxIndex])
                 ||
                 // case insensitive
-                (!d->caseSensitive && (*regionPtr == d->termDataLower[0]
-                                       || *regionPtr == d->termDataUpper[0])
-                 && (*regionEnd == d->termDataLower[d->termMaxIndex]
-                     || *regionEnd == d->termDataUpper[d->termMaxIndex]))
+                (!d->caseSensitive && (*regionPtr == termDataLower[0]
+                                       || *regionPtr == termDataUpper[0])
+                 && (*regionEnd == termDataLower[termMaxIndex]
+                     || *regionEnd == termDataUpper[termMaxIndex]))
                 ) {
                 bool equal = true;
 
@@ -328,23 +353,25 @@ void FindReplaceProgress::searchFile(const QString& path){
                          ++regionCursor, ++regionIndex) {
                         if (  // case sensitive
                             (d->caseSensitive
-                             && *regionCursor != d->termData[regionIndex])
+                             && *regionCursor != termData[regionIndex])
                             ||
                             // case insensitive
                             (!d->caseSensitive
-                             && *regionCursor != d->termDataLower[regionIndex]
-                             && *regionCursor != d->termDataUpper[regionIndex])
+                             && *regionCursor != termDataLower[regionIndex]
+                             && *regionCursor != termDataUpper[regionIndex])
                             ) {
                             equal = false;
                             break;
                         }
                     }
                 }
+                //qDebug()<<"line"<<lineNr<<chunk<<path;
                 if (equal) {
                     matched = true;
                     const QString resultItemText = clippedText(chunk, MAX_LINE_SIZE);
-                    *d->list << SearchResultItem(lineNr,path,resultItemText,regionPtr - chunkPtr,d->termMaxIndex + 1,{});
-                    regionPtr += d->termMaxIndex; // another +1 done by for-loop
+
+                    *d->list << SearchResultItem(lineNr,path,resultItemText,regionPtr - chunkPtr,termMaxIndex + 1,{});
+                    regionPtr += termMaxIndex; // another +1 done by for-loop
                 }
             }
         }
@@ -439,6 +466,11 @@ void FindReplaceProgress::searchDocument(const QTextDocument* doc,const QString&
             ++lineNr;
         }
     }else{
+        const int termMaxIndex = d->before.length() - 1;
+        const QChar *termData = d->before.constData();
+        const QChar *termDataLower = d->beforeLower.constData();
+        const QChar *termDataUpper = d->beforeUpper.constData();
+
         while(block.isValid()){
             line = block.text();
 
@@ -446,21 +478,21 @@ void FindReplaceProgress::searchDocument(const QTextDocument* doc,const QString&
             const int chunkLength = line.length();
             const QChar *chunkPtr = line.constData();
             const QChar *chunkEnd = chunkPtr + chunkLength - 1;
-            for (const QChar *regionPtr = chunkPtr; regionPtr + d->termMaxIndex <= chunkEnd; ++regionPtr) {
+            for (const QChar *regionPtr = chunkPtr; regionPtr + termMaxIndex <= chunkEnd; ++regionPtr) {
                 if(this->isInterruptionRequested()){
                     break;
                 }
-                const QChar *regionEnd = regionPtr + d->termMaxIndex;
+                const QChar *regionEnd = regionPtr + termMaxIndex;
                 if ( /* optimization check for start and end of region */
                     // case sensitive
-                    (d->caseSensitive && *regionPtr == d->termData[0]
-                     && *regionEnd == d->termData[d->termMaxIndex])
+                    (d->caseSensitive && *regionPtr == termData[0]
+                     && *regionEnd == termData[termMaxIndex])
                     ||
                     // case insensitive
-                    (!d->caseSensitive && (*regionPtr == d->termDataLower[0]
-                                           || *regionPtr == d->termDataUpper[0])
-                     && (*regionEnd == d->termDataLower[d->termMaxIndex]
-                         || *regionEnd == d->termDataUpper[d->termMaxIndex]))
+                    (!d->caseSensitive && (*regionPtr == termDataLower[0]
+                                           || *regionPtr == termDataUpper[0])
+                     && (*regionEnd == termDataLower[termMaxIndex]
+                         || *regionEnd == termDataUpper[termMaxIndex]))
                     ) {
                     bool equal = true;
 
@@ -485,12 +517,12 @@ void FindReplaceProgress::searchDocument(const QTextDocument* doc,const QString&
                              ++regionCursor, ++regionIndex) {
                             if (  // case sensitive
                                 (d->caseSensitive
-                                 && *regionCursor != d->termData[regionIndex])
+                                 && *regionCursor != termData[regionIndex])
                                 ||
                                 // case insensitive
                                 (!d->caseSensitive
-                                 && *regionCursor != d->termDataLower[regionIndex]
-                                 && *regionCursor != d->termDataUpper[regionIndex])
+                                 && *regionCursor != termDataLower[regionIndex]
+                                 && *regionCursor != termDataUpper[regionIndex])
                                 ) {
                                 equal = false;
                                 break;
@@ -500,8 +532,8 @@ void FindReplaceProgress::searchDocument(const QTextDocument* doc,const QString&
                     if (equal) {
                         matched = true;
                         const QString resultItemText = clippedText(line, MAX_LINE_SIZE);
-                        *d->list << SearchResultItem(lineNr,path,resultItemText,regionPtr - chunkPtr,d->termMaxIndex + 1,{});
-                        regionPtr += d->termMaxIndex; // another +1 done by for-loop
+                        *d->list << SearchResultItem(lineNr,path,resultItemText,regionPtr - chunkPtr,termMaxIndex + 1,{});
+                        regionPtr += termMaxIndex; // another +1 done by for-loop
                     }
                 }
             }

@@ -98,6 +98,7 @@
     <addaction name="actionVersion_Control"/>
     <addaction name="separator"/>
     <addaction name="actionServer"/>
+    <addaction name="actionDatabase"/>
     <addaction name="actionTerminal"/>
     <addaction name="separator"/>
     <addaction name="actionFile_Transfer"/>
@@ -562,6 +563,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+K</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionDatabase">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/Database_16x.svg</normaloff>:/Resource/icons/Database_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Database</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

@@ -630,8 +630,9 @@ NetworkResponse* COS::customeAccess(const QString& name,QMap<QString,QVariant> d
 static bool orMatches(const QList<QRegularExpression> &exprList, const QString &filePath)
 {
     bool ret = false;
+    auto name = filePath.startsWith("/")?filePath:("/"+filePath);
     for(auto reg:exprList){
-        ret = reg.match(filePath).hasMatch();
+        ret = reg.match(name).hasMatch();
         if(ret){
             break;
         }
