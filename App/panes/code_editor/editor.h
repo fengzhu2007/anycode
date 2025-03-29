@@ -12,6 +12,7 @@ public:
     enum Type{
         CodeEditor,
         ImageEditor,
+        SVGEditor,
         SQLManager,
 
 
@@ -30,6 +31,8 @@ public:
     virtual void invokeFileState()=0;
     virtual void reload()=0;
     virtual CodeEditorView* editor();
+
+    virtual void checkSemantic();
 
 private:
     EditorPrivate* d;

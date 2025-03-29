@@ -24,6 +24,7 @@
 
 #include "code_lint.h"
 #include "../image_editor/image_editor_pane.h"
+#include "../svg_editor/svg_editor_pane.h"
 
 #include "modules/ai/ai_request.h"
 #include "network/http/http_response.h"
@@ -682,6 +683,7 @@ void CodeEditorManager::initEditors(){
     this->registerEditor<ImageEditorPane>("jpeg");
     this->registerEditor<ImageEditorPane>("webp");
     this->registerEditor<ImageEditorPane>("bmp");
+    this->registerEditor<SVGEditorPane>("svg");
 }
 
 }

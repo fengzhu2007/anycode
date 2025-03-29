@@ -336,6 +336,8 @@ add_library(App SHARED
         panes/db/sqlite_driver.h panes/db/sqlite_driver.cpp
         panes/db/sqlite_connect_dialog.h panes/db/sqlite_connect_dialog.cpp panes/db/sqlite_connect_dialog.ui
         components/tree_item_delegate.h components/tree_item_delegate.cpp
+        panes/svg_editor/svg_editor_pane.h panes/svg_editor/svg_editor_pane.cpp panes/svg_editor/svg_editor_pane.ui
+        panes/svg_editor/svg_viewer.h panes/svg_editor/svg_viewer.cpp
 
 
 

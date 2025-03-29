@@ -1591,12 +1591,12 @@ Please enter a new folder name.</source>
         <translation type="unfinished">无效站点</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="434"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="418"/>
         <source>New File</source>
         <translation type="unfinished">新建文件</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="436"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="420"/>
         <source>New File (%1)</source>
         <translation type="unfinished">新建文件 (%1)</translation>
     </message>
@@ -1848,6 +1848,14 @@ Please enter a new folder name.</source>
         <location filename="../tools/ssl_query/ssl_query_dialog.ui" line="114"/>
         <source>Refresh All</source>
         <translation type="unfinished">全部刷新</translation>
+    </message>
+</context>
+<context>
+    <name>SVGEditorPane</name>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2281,107 +2289,107 @@ Please enter a new folder name.</source>
 <context>
     <name>ady::CodeEditorManager</name>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="559"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="560"/>
         <source>Undo</source>
         <translation type="unfinished">撤回</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="560"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="561"/>
         <source>Redo</source>
         <translation type="unfinished">重做</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="561"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="562"/>
         <source>Copy</source>
         <translation type="unfinished">复制</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="562"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="563"/>
         <source>Copy Html</source>
         <translation type="unfinished">复制HTML</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="563"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="564"/>
         <source>Cut</source>
         <translation type="unfinished">剪切</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="564"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="565"/>
         <source>Paste</source>
         <translation type="unfinished">粘贴</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="565"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="566"/>
         <source>Select All</source>
         <translation type="unfinished">全选</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="566"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="567"/>
         <source>Enable Text &amp;Wrapping</source>
         <translation type="unfinished">启用文本换行</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="567"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="568"/>
         <source>Visualize Whitespace</source>
         <translation type="unfinished">显示空白符</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="568"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="569"/>
         <source>Indent Selection</source>
         <translation type="unfinished">缩进选择行</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="569"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="570"/>
         <source>Auto Format</source>
         <translation type="unfinished">自动格式化</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="570"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="571"/>
         <source>Add/Remove Comment</source>
         <translation type="unfinished">添加/移除注释</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="571"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="572"/>
         <source>AI Suggestion</source>
         <translation type="unfinished">AI代码补全</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="573"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="574"/>
         <source>Test</source>
         <translation type="unfinished">连接测试</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="645"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="646"/>
         <source>Save(&amp;S)</source>
         <translation type="unfinished">保存(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="646"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="647"/>
         <source>Close(&amp;C)</source>
         <translation type="unfinished">关闭(&amp;C)</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="647"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="648"/>
         <source>Close Other(&amp;A)</source>
         <translation type="unfinished">关闭其他(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="648"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="649"/>
         <source>Close All(&amp;L)</source>
         <translation type="unfinished">关闭所有(&amp;L)</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="649"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="650"/>
         <source>Copy Path(&amp;U)</source>
         <translation type="unfinished">复制文件路径(&amp;U)</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="650"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="651"/>
         <source>Open Folder(&amp;O)</source>
         <translation type="unfinished">打开目录(&amp;O)</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="651"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="652"/>
         <source>Float Tab(&amp;F)</source>
         <translation type="unfinished">悬浮标签页(&amp;F)</translation>
     </message>
@@ -2389,42 +2397,42 @@ Please enter a new folder name.</source>
 <context>
     <name>ady::CodeEditorPane</name>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="153"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="151"/>
         <source>Save File AS</source>
         <translation type="unfinished">文件另存为</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="153"/>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="157"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="151"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="155"/>
         <source>All Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="157"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="155"/>
         <source>Save File</source>
         <translation type="unfinished">保存文件</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="244"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="242"/>
         <source>Save</source>
         <translation type="unfinished">保存</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="244"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="242"/>
         <source>Save file
 %1?</source>
         <translation type="unfinished">保存文件
 %1？</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="361"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="359"/>
         <source>The file &quot;%1&quot; is no longer there. 
 Do you want to keep it?</source>
         <translation type="unfinished">文件 &quot;%1&quot;已经不存在。 
 是否依然保留？</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="373"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="371"/>
         <source>&quot;%1&quot; 
 This file has been modified by another program.
  Reload?</source>
@@ -2433,22 +2441,22 @@ This file has been modified by another program.
 是否重新加载？</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="469"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="453"/>
         <source>Row:%1, Col:%2</source>
         <translation type="unfinished">行：%1， 列：%2</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="488"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="472"/>
         <source>Unkown</source>
         <translation type="unfinished">未知</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="493"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="477"/>
         <source>Space</source>
         <translation type="unfinished">空白</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="495"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="479"/>
         <source>Tab</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3433,12 +3441,12 @@ You can restore this file from the Recycle Bin.</source>
 <context>
     <name>ady::SQLiteConnectDialog</name>
     <message>
-        <location filename="../panes/db/sqlite_connect_dialog.cpp" line="58"/>
+        <location filename="../panes/db/sqlite_connect_dialog.cpp" line="70"/>
         <source>Name required.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/sqlite_connect_dialog.cpp" line="63"/>
+        <location filename="../panes/db/sqlite_connect_dialog.cpp" line="75"/>
         <source>File required.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3467,6 +3475,53 @@ You can restore this file from the Recycle Bin.</source>
         <location filename="../tools/ssl_query/ssl_query_dialog.cpp" line="100"/>
         <source>Are you sure you want to delete the selected domain(s)?</source>
         <translation type="unfinished">是否确定删除选择的域名？</translation>
+    </message>
+</context>
+<context>
+    <name>ady::SVGEditorPane</name>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="87"/>
+        <source>Zoom In</source>
+        <translation type="unfinished">放大</translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="88"/>
+        <source>Zoom Out</source>
+        <translation type="unfinished">缩小</translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="89"/>
+        <source>Export...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="161"/>
+        <source>Save File AS</source>
+        <translation type="unfinished">文件另存为</translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="161"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="165"/>
+        <source>All Files (*.*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="165"/>
+        <source>Save File</source>
+        <translation type="unfinished">保存文件</translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="318"/>
+        <source>The file &quot;%1&quot; is no longer there. 
+Do you want to keep it?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="330"/>
+        <source>&quot;%1&quot; 
+This file has been modified by another program.
+ Reload?</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

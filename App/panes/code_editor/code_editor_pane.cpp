@@ -77,8 +77,6 @@ void CodeEditorPane::initView(){
 
 
 
-
-
     connect(ui->editor,&QPlainTextEdit::modificationChanged,this,&CodeEditorPane::onModificationChanged);
     connect(ui->editor,&QPlainTextEdit::cursorPositionChanged,this,&CodeEditorPane::onCursorPositionChanged);
     connect(ui->editor->textDocument(),&TextEditor::TextDocument::openFinishedSuccessfully,this,&CodeEditorPane::onFileOpend);
@@ -388,6 +386,7 @@ void CodeEditorPane::reload(){
     if(!errorMsg.isEmpty()){
         qDebug()<<"reload error:"<<errorMsg;
     }
+
     if(ret){
         //code lint checking
         this->checkSemantic();
@@ -395,21 +394,7 @@ void CodeEditorPane::reload(){
     this->updateInfoBar();
 }
 
-void CodeEditorPane::checkSemantic(){
-    auto infolist = CodeLint::checking(ui->editor->textDocument());
-    auto editor = this->editor();
-    editor->clearSemanticError();//clear before
-    if(infolist.length()>0){
-        for(auto info:infolist){
-            if(info.level!=CodeErrorInfo::None){
-                //mark error
-                editor->addSemanticError(info.line,info.column,info.length,info.message);
-            }else{
-                editor->clearSemanticError();
-            }
-        }
-    }
-}
+
 
 CodeEditorPane* CodeEditorPane::make(DockingPaneManager* dockingManager,const QJsonObject& data){
     auto pane = new CodeEditorPane();
@@ -503,8 +488,6 @@ void CodeEditorPane::showEvent(QShowEvent* e){
             this->invokeFileState();
         });
     }
-
-
 }
 
 void CodeEditorPane::resizeEvent(QResizeEvent* e){
