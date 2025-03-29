@@ -1,5 +1,6 @@
 #include "dbms_model.h"
 #include "storage/db_storage.h"
+#include "db_driver.h"
 #include <QFileIconProvider>
 #include <QFileInfo>
 #include <QIcon>
@@ -12,6 +13,7 @@ namespace ady{
 class DBMSModelItemPrivate{
 public:
     DBMSModelItem::Type type;
+    DBDriver::Type itemType;
     long long id;
     bool expanded=false;
     bool loading = false;
@@ -39,6 +41,15 @@ DBMSModelItem::DBMSModelItem(Type type,long long id,const QString& driver,const 
 DBMSModelItem::DBMSModelItem(Type type,const QString& name,DBMSModelItem* parent){
     d = new DBMSModelItemPrivate();
     d->type = type;
+    d->id = 0l;
+    d->name = name;
+    d->parent = parent;
+}
+
+DBMSModelItem::DBMSModelItem(Type type,int itemType,const QString& name,DBMSModelItem* parent){
+    d = new DBMSModelItemPrivate();
+    d->type = type;
+    d->itemType = static_cast<DBDriver::Type>(itemType);
     d->id = 0l;
     d->name = name;
     d->parent = parent;
@@ -111,8 +122,22 @@ long long DBMSModelItem::id() const {
     return d->id;
 }
 
+long long DBMSModelItem::pid() const{
+    if(d->type==DBMSModelItem::Connection){
+        return d->id;
+    }else if(d->type==DBMSModelItem::Solution){
+        return 0l;
+    }else{
+        return d->parent->pid();
+    }
+}
+
 bool DBMSModelItem::status() const{
     return d->status;
+}
+
+int DBMSModelItem::itemType()const{
+    return d->itemType;
 }
 
 void DBMSModelItem::setName(const QString& name){
@@ -144,6 +169,7 @@ public:
     DBMSModelPrivate():databaseIcon(QString::fromUtf8(":/Resource/icons/Database_16x.svg")),tableIcon(":/Resource/icons/Table_16x.svg"),viewIcon(":/Resource/icons/View_16x.svg"),itemGroupIcon(":/Resource/icons/DatabaseTableGroup_16x.svg"),sqliteIcon(":/Resource/icons/sqlite.svg"){
         sqliteDisabledIcon.addPixmap(sqliteIcon.pixmap(16,16,QIcon::Disabled));
         sqliteIcon.addPixmap(sqliteIcon.pixmap(16,16),QIcon::Active);
+        databaseDisabledIcon.addPixmap(databaseIcon.pixmap(16,16,QIcon::Disabled));
     }
     DBMSModelItem* root = nullptr;
     QIcon databaseIcon;
@@ -152,6 +178,7 @@ public:
     QIcon itemGroupIcon;
     QIcon sqliteIcon;
     QIcon sqliteDisabledIcon;
+    QIcon databaseDisabledIcon;
     QMap<QString,QString> addons;
     QFileIconProvider* provider;
 };
@@ -254,7 +281,7 @@ QVariant DBMSModel::data(const QModelIndex &index, int role) const{
             if(type==DBMSModelItem::Connection){
                 return item->status()?d->sqliteIcon:d->sqliteDisabledIcon;
             }else if(type==DBMSModelItem::DatabaseItem){
-                return d->databaseIcon;
+                return item->status()?d->databaseIcon:d->databaseDisabledIcon;
             }else if(type==DBMSModelItem::ItemType){
                 return d->itemGroupIcon;
             }else if(type==DBMSModelItem::Item){
@@ -278,11 +305,10 @@ bool DBMSModel::hasChildren(const QModelIndex &parent)const{
         if(item!=nullptr){
             switch(item->type()){
             case DBMSModelItem::Connection:
+            case DBMSModelItem::DatabaseItem:
                 return item->status();
                 break;
             case DBMSModelItem::Solution:
-
-            case DBMSModelItem::DatabaseItem:
             case DBMSModelItem::ItemType:
                 return true;
             case DBMSModelItem::Item:
@@ -372,6 +398,10 @@ void DBMSModel::updateConnection(long long id,bool status){
         if(item->id()==id){
             item->setStatus(status);
             changeItem(item);
+            if(status==false){
+                //remove all children
+                this->removeChildren(item);
+            }
             return ;
         }
     }
@@ -385,6 +415,51 @@ void DBMSModel::removeConnection(long long id){
             this->removeItem(item);
             return ;
         }
+    }
+}
+
+void DBMSModel::removeChildren(DBMSModelItem* item){
+    auto index = createIndex(item->row(),0,item);
+    beginRemoveRows(index,0,item->childrenCount() - 1);
+    auto list = item->takeAll();
+    endRemoveRows();
+    qDeleteAll(list);
+}
+
+void DBMSModel::addDatabase(const QStringList& list,DBMSModelItem* parent){
+    if(list.size()==0){
+        return ;
+    }
+    int position = parent->childrenCount();
+    auto parentIndex = createIndex(parent->row(),0,parent);
+    beginInsertRows(parentIndex,position,position);
+    for(auto one:list){
+        auto item = new DBMSModelItem(DBMSModelItem::DatabaseItem,one,parent);
+        parent->appendItem(item);
+    }
+    endInsertRows();
+}
+
+void DBMSModel::addType(const QList<QPair<int,QString>> list,DBMSModelItem* parent){
+    if(list.size()==0){
+        return ;
+    }
+    int position = parent->childrenCount();
+    auto parentIndex = createIndex(parent->row(),0,parent);
+    beginInsertRows(parentIndex,position,position);
+    for(auto one:list){
+        auto item = new DBMSModelItem(DBMSModelItem::ItemType,one.first,one.second,parent);
+        parent->appendItem(item);
+    }
+    endInsertRows();
+}
+
+void DBMSModel::updateDatabase(const QModelIndex& index,bool status){
+    auto item = static_cast<DBMSModelItem*>(index.internalPointer());
+    item->setStatus(status);
+    changeItem(item);
+    if(status==false){
+        this->removeChildren(item);//remove all children
     }
 }
 

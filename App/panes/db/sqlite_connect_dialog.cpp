@@ -38,6 +38,9 @@ SQLiteConnectDialog::SQLiteConnectDialog(const DBRecord& data,QWidget *parent)
     connect(ui->test,&QPushButton::clicked,this,&SQLiteConnectDialog::onTest);
     connect(ui->cancel,&QPushButton::clicked,this,&SQLiteConnectDialog::close);
 
+
+
+
     this->initView();
 
 }
@@ -49,6 +52,15 @@ SQLiteConnectDialog::~SQLiteConnectDialog()
 
 void SQLiteConnectDialog::initView(){
     ui->selectFile->setChecked(true);
+    if(d->data.isValid()){
+        ui->name->setText(d->data.name);
+        ui->file->setText(d->data.host);
+        ui->username->setText(d->data.username);
+        ui->password->setText(d->data.password);
+        if(!d->data.password.isEmpty()){
+            ui->savePassword->setChecked(true);
+        }
+    }
 }
 
 

@@ -16,7 +16,9 @@ public:
     };
     DBMSModelItem();
     DBMSModelItem(Type type,long long id,const QString& driver,const QString& name,DBMSModelItem* parent);//Connection id and connect name
-    DBMSModelItem(Type type,const QString& name,DBMSModelItem* parent);//DatabaseItem itemtype or item
+    DBMSModelItem(Type type,const QString& name,DBMSModelItem* parent);//DatabaseItem
+    DBMSModelItem(Type type,int itemType,const QString& name,DBMSModelItem* parent);//itemtype or item
+
 
     ~DBMSModelItem();
 
@@ -32,7 +34,9 @@ public:
     Type type();
     QString name() const;
     long long id() const ;
+    long long pid() const;
     bool status() const;
+    int itemType() const;
     void setName(const QString& name);
     void setStatus(bool status);
     bool expanded();
@@ -76,6 +80,12 @@ public:
     void updateConnection(long long id,const QString& name);
     void updateConnection(long long id,bool status);
     void removeConnection(long long id);
+    void removeChildren(DBMSModelItem* item);
+
+    void addDatabase(const QStringList& list,DBMSModelItem* parent);
+    void updateDatabase(const QModelIndex& index,bool status);
+
+    void addType(const QList<QPair<int,QString>> list,DBMSModelItem* parent);
 
 
 

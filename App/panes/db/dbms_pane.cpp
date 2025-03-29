@@ -59,6 +59,7 @@ DBMSPane::DBMSPane(QWidget *parent)
 
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeView,&QTreeView::customContextMenuRequested, this, &DBMSPane::onContextMenu);
+    connect(ui->treeView,&QTreeView::expanded,this,&DBMSPane::onTreeItemExpanded);
 
     connect(ui->actionAdd_Database,&QAction::triggered,this,&DBMSPane::onActionTriggered);
     connect(ui->actionRefresh,&QAction::triggered,this,&DBMSPane::onActionTriggered);
@@ -140,7 +141,7 @@ bool DBMSPane::onReceive(Event* e) {
 
 
 void DBMSPane::openConnectDialog(const QString& driver,const DBRecord& data){
-    auto dialog = new SQLiteConnectDialog({},this);
+    auto dialog = new SQLiteConnectDialog(data,this);
     dialog->setModal(true);
     dialog->show();
 }
@@ -190,7 +191,24 @@ void DBMSPane::onMessage(const QString& message,int result){
 }
 
 void DBMSPane::onTreeItemExpanded(const QModelIndex& index){
+    auto item = static_cast<DBMSModelItem*>(index.internalPointer());
+    if(item!=nullptr){
+        DBMSModelItem::Type type = item->type();
+        if(type==DBMSModelItem::ItemType){
+            if(item->expanded()==false){
+                //init link
+                int itemType = item->itemType();
+                if(itemType==DBDriver::Table){
+                    auto driver = d->connectManager.find(item->pid()).value();
+                    auto tableList = driver->tableList();
+                    //qDebug()<<"tablelist"<<tableList;
+                    //d->model->add
+                }else if(itemType==DBDriver::View){
 
+                }
+            }
+        }
+    }
 }
 
 void DBMSPane::onTreeItemDClicked(const QModelIndex& index){
@@ -215,10 +233,10 @@ void DBMSPane::onActionTriggered(){
                     if(ret){
                         //update tree view
                         d->model->updateConnection(r.id,true);
-                        //qDebug()<<"dbList:"<<driver->dbList();
+                        auto list = driver->dbList();
+                        d->model->addDatabase(list,item);
+                        ui->treeView->expand(index);
                     }
-
-
                 }
             }
         }
@@ -229,11 +247,31 @@ void DBMSPane::onActionTriggered(){
             d->model->updateConnection(item->id(),false);
         }
     }else if(sender==ui->actionEdit_Connection){
-
+        QModelIndex index = ui->treeView->selectionModel()->currentIndex();
+        if(index.isValid()){
+            auto item = static_cast<DBMSModelItem*>(index.internalPointer());
+            auto r = DBStorage().one(item->id());
+            if(r.isValid()){
+                this->openConnectDialog(r.driver,r);
+            }
+        }
     }else if(sender==ui->actionOpen_Databse){
+        QModelIndex index = ui->treeView->selectionModel()->currentIndex();
+        if(index.isValid()){
+            d->model->updateDatabase(index,true);
+            auto item = static_cast<DBMSModelItem*>(index.internalPointer());
+            auto id = item->parent()->id();
+            auto driver = d->connectManager.find(id).value();
+            d->model->addType( driver->typeList(),item);
+            ui->treeView->expand(index);
+        }
 
     }else if(sender==ui->actionClose_Database){
+        QModelIndex index = ui->treeView->selectionModel()->currentIndex();
+        if(index.isValid()){
+            d->model->updateDatabase(index,false);
 
+        }
     }
 }
 

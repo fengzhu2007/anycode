@@ -14,6 +14,8 @@ public:
 
     virtual bool connect() override;
     virtual QStringList dbList() override;
+    virtual QStringList tableList() override;
+    virtual QStringList viewList() override;
 
 
 private:
