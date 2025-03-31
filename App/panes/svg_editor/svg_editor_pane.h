@@ -49,6 +49,7 @@ public slots:
     void onModificationChanged(bool changed);
     void onCursorPositionChanged();
     void onFileOpend();
+    void onActionTriggered();
 protected:
     virtual void showEvent(QShowEvent* e) override;
     virtual void resizeEvent(QResizeEvent* e) override;

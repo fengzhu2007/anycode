@@ -1591,12 +1591,12 @@ Please enter a new folder name.</source>
         <translation type="unfinished">无效站点</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="418"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="419"/>
         <source>New File</source>
         <translation type="unfinished">新建文件</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="420"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="421"/>
         <source>New File (%1)</source>
         <translation type="unfinished">新建文件 (%1)</translation>
     </message>
@@ -2441,22 +2441,22 @@ This file has been modified by another program.
 是否重新加载？</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="453"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="454"/>
         <source>Row:%1, Col:%2</source>
         <translation type="unfinished">行：%1， 列：%2</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="472"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="473"/>
         <source>Unkown</source>
         <translation type="unfinished">未知</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="477"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="478"/>
         <source>Space</source>
         <translation type="unfinished">空白</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="479"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="480"/>
         <source>Tab</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3480,47 +3480,67 @@ You can restore this file from the Recycle Bin.</source>
 <context>
     <name>ady::SVGEditorPane</name>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="87"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="92"/>
         <source>Zoom In</source>
         <translation type="unfinished">放大</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="88"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="93"/>
         <source>Zoom Out</source>
         <translation type="unfinished">缩小</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="89"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="94"/>
         <source>Export...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="161"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="172"/>
         <source>Save File AS</source>
         <translation type="unfinished">文件另存为</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="161"/>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="165"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="172"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="176"/>
         <source>All Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="165"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="176"/>
         <source>Save File</source>
         <translation type="unfinished">保存文件</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="318"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="329"/>
         <source>The file &quot;%1&quot; is no longer there. 
 Do you want to keep it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="330"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="341"/>
         <source>&quot;%1&quot; 
 This file has been modified by another program.
  Reload?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="375"/>
+        <source>Row:%1, Col:%2</source>
+        <translation type="unfinished">行：%1， 列：%2</translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="405"/>
+        <source>Unkown</source>
+        <translation type="unfinished">未知</translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="410"/>
+        <source>Space</source>
+        <translation type="unfinished">空白</translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="412"/>
+        <source>Tab</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

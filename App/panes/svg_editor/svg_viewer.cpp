@@ -17,8 +17,24 @@ public:
         this->svgSize = this->svg->renderer()->defaultSize();
     }
 
+    void adjustSize(const QSize& cSize){
+        auto size = this->svg->size();
+        //qDebug()<<"svg size"<<size;
+        //auto cSize = e->size();
+        int x = 0;
+        int y = 0;
+        if(cSize.width() > size.width()){
+            x = (cSize.width() - size.width()) / 2;
+        }
+        if(cSize.height() > size.height()){
+            y = (cSize.height() - size.height()) / 2;
+        }
+        this->svg->setGeometry({x,y,size.width(),size.height()});
+    }
+
 protected:
     virtual void paintEvent(QPaintEvent* e) override{
+        QWidget::paintEvent(e);
         QPainter p(this);
         auto size = this->size();
         //qDebug()<<"size"<<size;
@@ -32,25 +48,14 @@ protected:
                 p.fillRect(QRect(i+10,j+10,10,10),Qt::lightGray);
             }
         }
-        QWidget::paintEvent(e);
     }
 
     virtual void resizeEvent(QResizeEvent* e) override{
-        //qDebug()<<"resize"<<e->size();
         QWidget::resizeEvent(e);
-        //auto size = this->svg->size();
-        auto size = this->svg->size();
-        auto cSize = e->size();
-        int x = 0;
-        int y = 0;
-        if(cSize.width() > size.width()){
-            x = (cSize.width() - size.width()) / 2;
-        }
-        if(cSize.height() > size.height()){
-            y = (cSize.height() - size.height()) / 2;
-        }
-        this->svg->setGeometry({x,y,size.width(),size.height()});
+        this->adjustSize(e->size());
     }
+
+
 
 
 private:
@@ -99,23 +104,17 @@ QSize SVGViewer::originalSize(){
 }
 
 void SVGViewer::setZoom(float zoom){
+    //qDebug()<<"zoom"<<d->zoom<<zoom;
     d->zoom = zoom;
     d->imageSize = {static_cast<int>(d->container->svgSize.width() * d->zoom),
                     static_cast<int>(d->container->svgSize.height() * d->zoom)};
-    auto size = this->size();
-    int width = qMax(d->imageSize.width(),size.width());
-    int height = qMax(d->imageSize.height(),size.height());
+    //auto size = this->size();
+    //int width = qMax(d->imageSize.width(),size.width());
+    //int height = qMax(d->imageSize.height(),size.height());
     d->container->svg->setFixedSize(d->imageSize);
-    auto viewSize = this->viewport()->size();
-    int x = 0;
-    int y = 0;
-    if(viewSize.width() > d->imageSize.width()){
-        x = (viewSize.width() - d->imageSize.width()) / 2;
-    }
-    if(viewSize.height() > d->imageSize.height()){
-        y = (viewSize.height() - d->imageSize.height()) / 2;
-    }
-    d->container->setGeometry({x,y,width,height});
+    //qDebug()<<"svg size"<<d->container->svg->size();
+
+    d->container->adjustSize(d->container->size());
 
 }
 
@@ -124,6 +123,9 @@ float SVGViewer::zoom(){
     return d->zoom;
 }
 
+QSvgRenderer* SVGViewer::renderer(){
+    return d->container->svg->renderer();
+}
 
 
 void SVGViewer::resizeEvent(QResizeEvent* e){

@@ -15,7 +15,7 @@ public:
     QSize originalSize();
     void setZoom(float zoom);
     float zoom();
-
+    QSvgRenderer* renderer();
 
 protected:
     virtual void resizeEvent(QResizeEvent* e) override;

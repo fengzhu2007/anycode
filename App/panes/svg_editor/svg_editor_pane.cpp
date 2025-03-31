@@ -27,6 +27,8 @@
 #include <QTimer>
 #include <QToolBar>
 #include <QTextCodec>
+#include <QPainter>
+#include <QSvgRenderer>
 namespace ady{
 
 const QString SVGEditorPane::PANE_ID = "SVGEditor_%1";
@@ -46,6 +48,10 @@ public:
     CodeEditorView* editor;
     QSplitter* splitter;
     QToolBar* toolBar;
+
+    QAction* zoomInAction;
+    QAction* zoomOutAction;
+    QAction* exportAction;
 };
 
 
@@ -82,12 +88,12 @@ SVGEditorPane::SVGEditorPane(QWidget *parent)
     CodeEditorManager::getInstance()->append(this);
     SVGEditorPane::SN += 1;
 
-    d->toolBar = new QToolBar("My Toolbar", this);
+    d->toolBar = new QToolBar("Toolbar", this);
     d->toolBar->setOrientation(Qt::Vertical);
     d->toolBar->setIconSize(QSize(24, 24));
-    d->toolBar->addAction(QIcon(":/Resource/icons/ZoomIn_16x.svg"),tr("Zoom In"));
-    d->toolBar->addAction(QIcon(":/Resource/icons/ZoomOut_16x.svg"),tr("Zoom Out"));
-    d->toolBar->addAction(QIcon(":/Resource/icons/SaveAs_16x.svg"),tr("Export..."));
+    d->zoomInAction = d->toolBar->addAction(QIcon(":/Resource/icons/ZoomIn_16x.svg"),tr("Zoom In"),this,&SVGEditorPane::onActionTriggered);
+    d->zoomOutAction = d->toolBar->addAction(QIcon(":/Resource/icons/ZoomOut_16x.svg"),tr("Zoom Out"),this,&SVGEditorPane::onActionTriggered);
+    d->exportAction = d->toolBar->addAction(QIcon(":/Resource/icons/ExportPerformanceReport_16x.svg"),tr("Export..."),this,&SVGEditorPane::onActionTriggered);
     d->toolBar->setMovable(true);
     d->toolBar->setFloatable(true);
     d->toolBar->setGeometry(20, 20, 30, 100);
@@ -375,6 +381,32 @@ void SVGEditorPane::onFileOpend(){
     this->updateInfoBar();
 }
 
+void SVGEditorPane::onActionTriggered(){
+    auto sender = this->sender();
+    if(sender==d->zoomInAction){
+        d->viewer->setZoom(d->viewer->zoom() + 0.1);
+    }else if(sender==d->zoomOutAction){
+        d->viewer->setZoom(d->viewer->zoom() - 0.1);
+    }else if(sender==d->exportAction){
+        //choose file name
+        auto outputPath = QFileDialog::getSaveFileName(this, tr("Export To PNG"), "", tr("Images Files (*.png)"));
+        if(outputPath.isEmpty()){
+            return ;
+        }
+        QSize svgSize = d->viewer->imageSize();
+        QImage image(svgSize, QImage::Format_ARGB32);
+        image.fill(Qt::transparent);
+
+        QPainter painter(&image);
+        d->viewer->renderer()->render(&painter);
+        painter.end();
+
+        if (!image.save(outputPath, "PNG")) {
+            qWarning("Failed to save PNG image");
+        }
+    }
+}
+
 void SVGEditorPane::updateInfoBar(){
     auto format = d->editor->textDocument()->format();
     QString name = format.codec->name();
@@ -409,7 +441,6 @@ void SVGEditorPane::showEvent(QShowEvent* e){
 
 void SVGEditorPane::resizeEvent(QResizeEvent* e){
     Editor::resizeEvent(e);
-    d->viewer->setZoom(d->viewer->zoom());
 }
 
 void SVGEditorPane::onModificationChanged(bool changed){
