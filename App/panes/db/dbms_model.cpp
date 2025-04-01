@@ -284,8 +284,10 @@ QVariant DBMSModel::data(const QModelIndex &index, int role) const{
                 return item->status()?d->databaseIcon:d->databaseDisabledIcon;
             }else if(type==DBMSModelItem::ItemType){
                 return d->itemGroupIcon;
-            }else if(type==DBMSModelItem::Item){
+            }else if(type==DBMSModelItem::Table){
                 return d->tableIcon;
+            }else if(type==DBMSModelItem::View){
+                return d->viewIcon;
             }
         }else{
             return QVariant();
@@ -311,7 +313,8 @@ bool DBMSModel::hasChildren(const QModelIndex &parent)const{
             case DBMSModelItem::Solution:
             case DBMSModelItem::ItemType:
                 return true;
-            case DBMSModelItem::Item:
+            case DBMSModelItem::Table:
+            case DBMSModelItem::View:
                 return false;
             }
         }
@@ -343,7 +346,7 @@ Qt::ItemFlags DBMSModel::flags(const QModelIndex &index) const {
     if(index.column()==Name){
         DBMSModelItem* item = static_cast<DBMSModelItem*>(index.internalPointer());
         DBMSModelItem::Type type = item->type();
-        if(type==DBMSModelItem::Item){
+        if(type==DBMSModelItem::Table || type==DBMSModelItem::View){
             flags |= Qt::ItemIsEditable;
         }
     }
@@ -449,6 +452,34 @@ void DBMSModel::addType(const QList<QPair<int,QString>> list,DBMSModelItem* pare
     beginInsertRows(parentIndex,position,position);
     for(auto one:list){
         auto item = new DBMSModelItem(DBMSModelItem::ItemType,one.first,one.second,parent);
+        parent->appendItem(item);
+    }
+    endInsertRows();
+}
+
+void DBMSModel::addTable(const QStringList& list,DBMSModelItem* parent){
+    if(list.size()==0){
+        return ;
+    }
+    int position = parent->childrenCount();
+    auto parentIndex = createIndex(parent->row(),0,parent);
+    beginInsertRows(parentIndex,position,position);
+    for(auto one:list){
+        auto item = new DBMSModelItem(DBMSModelItem::Table,one,parent);
+        parent->appendItem(item);
+    }
+    endInsertRows();
+}
+
+void DBMSModel::addView(const QStringList& list,DBMSModelItem* parent){
+    if(list.size()==0){
+        return ;
+    }
+    int position = parent->childrenCount();
+    auto parentIndex = createIndex(parent->row(),0,parent);
+    beginInsertRows(parentIndex,position,position);
+    for(auto one:list){
+        auto item = new DBMSModelItem(DBMSModelItem::View,one,parent);
         parent->appendItem(item);
     }
     endInsertRows();

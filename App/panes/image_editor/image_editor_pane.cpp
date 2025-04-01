@@ -2,6 +2,8 @@
 #include "ui_image_editor_pane.h"
 #include "../code_editor/code_editor_pane.h"
 #include "../code_editor/code_editor_manager.h"
+#include <docking_pane_container.h>
+#include <docking_pane_container_tabbar.h>
 #include "components/message_dialog.h"
 #include "docking_pane_container.h"
 #include "image_view.h"
@@ -132,8 +134,18 @@ QString ImageEditorPane::path(){
     return d->path;
 }
 
-void ImageEditorPane::rename(const QString& nname){
-
+void ImageEditorPane::rename(const QString& name){
+    auto container = this->container();
+    if(container!=nullptr){
+        int i = container->indexOf(this);
+        if(i>=0){
+            QFileInfo fi(name);
+            auto tabBar = container->tabBar();
+            QString text = tabBar->tabText(i);
+            tabBar->setTabText(i,fi.fileName());
+            tabBar->setTabToolTip(i,name);
+        }
+    }
 }
 
 void ImageEditorPane::autoSave(){

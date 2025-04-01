@@ -171,11 +171,11 @@ bool SVGEditorPane::save(bool rename) {
     bool tabRename = false;
     if(rename){
         //save as
-        path = QFileDialog::getSaveFileName(this, tr("Save File AS"), "", tr("All Files (*.*)"));
+        path = QFileDialog::getSaveFileName(this, tr("Save File AS","Editor"), "", tr("All Files (*.*)","Editor"));
         tabRename = true;
     }else if(path.isEmpty()){
         //new file save
-        path = QFileDialog::getSaveFileName(this, tr("Save File"), "", tr("All Files (*.*)"));
+        path = QFileDialog::getSaveFileName(this, tr("Save File","Editor"), "", tr("All Files (*.*)","Editor"));
         tabRename = true;
     }
     if (path.isEmpty()) {
@@ -258,19 +258,58 @@ QJsonObject SVGEditorPane::toJson() {
 }
 
 bool SVGEditorPane::closeEnable() {
+    if(d->modification){
+        auto name = this->path();
+        if(name.isEmpty()){
+            //new file
+            name = this->windowTitle();
+        }
+
+        auto ret = MessageDialog::confirm(this,tr("Save","Editor"),tr("Save file\n%1?","Editor").arg(name),QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+        if(ret==QMessageBox::Cancel){
+            return false;
+        }
+        if(ret==QMessageBox::Yes){
+            return this->save(false);
+        }
+    }
     return true;
 }
 
 bool SVGEditorPane::doAction(int a) {
+    if(a==DockingPane::Save){
+        return this->save(false);
+    }else if(a==DockingPane::SaveAs){
+        return this->save(true);
+    }else if(a==DockingPane::Redo){
+
+        d->editor->redo();
+    }else if(a==DockingPane::Undo){
+        //qDebug()<<"Undo";
+        d->editor->undo();
+    }else if(a==DockingPane::Cut){
+        d->editor->cut();
+    }else if(a==DockingPane::Copy){
+        d->editor->copy();
+    }else if(a==DockingPane::Paste){
+        d->editor->paste();
+    }else if(a==DockingPane::Delete){
+        QKeyEvent *event = new QKeyEvent(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier);
+        QApplication::postEvent(d->editor, event);
+    }else if(a==DockingPane::SelectAll){
+        d->editor->selectAll();
+    }else if(a==DockingPane::Print){
+        //ui->editor->print();
+    }
     return false;
 }
 
 bool SVGEditorPane::readFile(const QString& path){
     d->path = path;
     d->viewer->setImagePath(path);
-    d->viewer->setZoom(1);
-    qDebug()<<"11"<<d->viewer->imageSize()<<d->viewer->size();
-    auto size = d->viewer->originalSize();
+    //d->viewer->setZoom(1);
+    //qDebug()<<"11"<<d->viewer->imageSize()<<d->viewer->size();
+    //auto size = d->viewer->originalSize();
     //ui->size->setText(tr("%1 * %2").arg(size.width()).arg(size.height()));
     //d->viewer->show();
 
@@ -303,8 +342,19 @@ QString SVGEditorPane::path(){
     return d->path;
 }
 
-void SVGEditorPane::rename(const QString& nname){
-
+void SVGEditorPane::rename(const QString& name){
+    auto container = this->container();
+    if(container!=nullptr){
+        int i = container->indexOf(this);
+        if(i>=0){
+            QFileInfo fi(name);
+            auto tabBar = container->tabBar();
+            QString text = tabBar->tabText(i);
+            tabBar->setTabText(i,fi.fileName());
+            tabBar->setTabToolTip(i,name);
+            this->editor()->rename(name);
+        }
+    }
 }
 
 void SVGEditorPane::autoSave(){
@@ -328,7 +378,7 @@ void SVGEditorPane::invokeFileState(){
     if((d->state & CodeEditorPane::Deleted)==CodeEditorPane::Deleted){
         const QString path = this->path();
         if(!QFileInfo::exists(path)){
-            if(MessageDialog::confirm(this,tr("The file \"%1\" is no longer there. \nDo you want to keep it?").arg(path))==QMessageBox::No){
+            if(MessageDialog::confirm(this,tr("The file \"%1\" is no longer there. \nDo you want to keep it?","Editor").arg(path))==QMessageBox::No){
                 //close pane
                 auto container = this->container();
                 if(container!=nullptr){
@@ -340,7 +390,7 @@ void SVGEditorPane::invokeFileState(){
         d->state &= (~CodeEditorPane::Deleted);
     }else if((d->state & CodeEditorPane::Changed)==CodeEditorPane::Changed){
         const QString path = this->path();
-        if(MessageDialog::confirm(this,tr("\"%1\" \nThis file has been modified by another program.\n Reload?").arg(path))==QMessageBox::Yes){
+        if(MessageDialog::confirm(this,tr("\"%1\" \nThis file has been modified by another program.\n Reload?","Editor").arg(path))==QMessageBox::Yes){
             this->reload();
         }
         d->state &= (~CodeEditorPane::Changed);
@@ -374,7 +424,7 @@ SVGEditorPane* SVGEditorPane::make(DockingPaneManager* dockingManager,const QJso
 
 void SVGEditorPane::onCursorPositionChanged(){
     auto cursor = d->editor->textCursor();
-    ui->position->setText(tr("Row:%1, Col:%2").arg(cursor.blockNumber() + 1).arg(cursor.positionInBlock()+1));
+    ui->position->setText(tr("Row:%1, Col:%2","Editor").arg(cursor.blockNumber() + 1).arg(cursor.positionInBlock()+1));
 }
 
 void SVGEditorPane::onFileOpend(){
@@ -419,14 +469,14 @@ void SVGEditorPane::updateInfoBar(){
     }else if(format.lineTerminationMode==Utils::TextFileFormat::CRLFLineTerminator){
         ui->br->setText(QLatin1String("CRLF"));
     }else{
-        ui->br->setText(tr("Unkown"));
+        ui->br->setText(tr("Unkown","Editor"));
     }
     auto settings = d->editor->textDocument()->tabSettings();
 
     if(settings.m_tabPolicy==TextEditor::TabSettings::TabPolicy::SpacesOnlyTabPolicy){
-        ui->indent->setText(tr("Space"));
+        ui->indent->setText(tr("Space","Editor"));
     }else{
-        ui->indent->setText(tr("Tab"));
+        ui->indent->setText(tr("Tab","Editor"));
     }
 }
 
@@ -463,10 +513,6 @@ void SVGEditorPane::onModificationChanged(bool changed){
             tabBar->setTabText(i,text);
         }
     }
-}
-
-void SVGEditorPane::onZoom(int zoom){
-    d->viewer->setZoom(zoom * 1.0 / 100);
 }
 
 

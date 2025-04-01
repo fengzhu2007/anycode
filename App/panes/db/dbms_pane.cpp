@@ -50,7 +50,9 @@ DBMSPane::DBMSPane(QWidget *parent)
 
     Subscriber::reg();
     this->regMessageIds({Type::M_NEW_CONNECTION,Type::M_UPDATE_CONNECTION});
-    ui->setupUi(this);
+    QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
+    widget->setObjectName("widget");
+    ui->setupUi(widget);
     d = new DBMSPanePrivate;
     d->model = new DBMSModel(ui->treeView);
     ui->treeView->setModel(d->model);
@@ -174,6 +176,12 @@ void DBMSPane::onContextMenu(const QPoint& pos){
             }
             contextMenu.addSeparator();
             contextMenu.addAction(ui->actionDelete);
+        }else if(type==DBMSModelItem::Table){
+            contextMenu.addAction(ui->actionOpen_Table);
+            contextMenu.addAction(ui->actionScheme_Table);
+            contextMenu.addAction(ui->actionRefresh);
+            contextMenu.addSeparator();
+            contextMenu.addAction(ui->actionDelete);
         }
         contextMenu.exec(QCursor::pos());
     }
@@ -201,11 +209,14 @@ void DBMSPane::onTreeItemExpanded(const QModelIndex& index){
                 if(itemType==DBDriver::Table){
                     auto driver = d->connectManager.find(item->pid()).value();
                     auto tableList = driver->tableList();
-                    //qDebug()<<"tablelist"<<tableList;
-                    //d->model->add
+                    d->model->addTable(tableList,item);
                 }else if(itemType==DBDriver::View){
+                    auto driver = d->connectManager.find(item->pid()).value();
+                    auto viewList = driver->viewList();
 
+                    d->model->addView(viewList,item);
                 }
+                item->setExpanded(true);
             }
         }
     }
@@ -272,6 +283,12 @@ void DBMSPane::onActionTriggered(){
             d->model->updateDatabase(index,false);
 
         }
+    }else if(sender==ui->actionOpen_Table){
+
+    }else if(sender==ui->actionScheme_Table){
+
+    }else if(sender==ui->actionNew_Table){
+
     }
 }
 

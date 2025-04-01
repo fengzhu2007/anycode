@@ -12,7 +12,8 @@ public:
         Connection,
         DatabaseItem,
         ItemType,//table typename view typename
-        Item,//table view
+        Table,//table
+        View,
     };
     DBMSModelItem();
     DBMSModelItem(Type type,long long id,const QString& driver,const QString& name,DBMSModelItem* parent);//Connection id and connect name
@@ -86,6 +87,8 @@ public:
     void updateDatabase(const QModelIndex& index,bool status);
 
     void addType(const QList<QPair<int,QString>> list,DBMSModelItem* parent);
+    void addTable(const QStringList& list,DBMSModelItem* parent);
+    void addView(const QStringList& list,DBMSModelItem* parent);
 
 
 

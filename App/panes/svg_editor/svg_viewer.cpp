@@ -108,13 +108,19 @@ void SVGViewer::setZoom(float zoom){
     d->zoom = zoom;
     d->imageSize = {static_cast<int>(d->container->svgSize.width() * d->zoom),
                     static_cast<int>(d->container->svgSize.height() * d->zoom)};
-    //auto size = this->size();
-    //int width = qMax(d->imageSize.width(),size.width());
-    //int height = qMax(d->imageSize.height(),size.height());
-    d->container->svg->setFixedSize(d->imageSize);
-    //qDebug()<<"svg size"<<d->container->svg->size();
 
-    d->container->adjustSize(d->container->size());
+    d->container->svg->setFixedSize(d->imageSize);
+
+    auto size = this->viewport()->size();
+    if(size.width()  < d->imageSize.width()){
+        size.setWidth(d->imageSize.width());
+    }
+    if(size.height()  < d->imageSize.height()){
+        size.setHeight(d->imageSize.height());
+    }
+    d->container->setFixedSize(size);
+    d->container->adjustSize(size);
+    //this->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
 }
 
@@ -130,15 +136,16 @@ QSvgRenderer* SVGViewer::renderer(){
 
 void SVGViewer::resizeEvent(QResizeEvent* e){
     QScrollArea::resizeEvent(e);
-    int width = qMax(static_cast<int>(d->container->svgSize.width() * d->zoom),e->size().width());
-    int height = qMax(static_cast<int>(d->container->svgSize.height() * d->zoom),e->size().height());
+    int w = static_cast<int>(d->container->svgSize.width() * d->zoom);
+    int h = static_cast<int>(d->container->svgSize.height() * d->zoom);
+    int width = qMax(w,e->size().width());
+    int height = qMax(h,e->size().height());
     auto rc = d->container->geometry();
-    //qDebug()<<e->size()<<d->container->svgSize<<QRect{rc.x(),rc.y(),width,height};
+    d->container->svg->setFixedSize({w,h});
     d->container->setGeometry({rc.x(),rc.y(),width,height});
-    //this->update();
-    this->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    d->container->adjustSize(d->container->size());
+   // this->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 }
-
 
 
 

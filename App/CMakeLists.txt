@@ -338,6 +338,12 @@ add_library(App SHARED
         components/tree_item_delegate.h components/tree_item_delegate.cpp
         panes/svg_editor/svg_editor_pane.h panes/svg_editor/svg_editor_pane.cpp panes/svg_editor/svg_editor_pane.ui
         panes/svg_editor/svg_viewer.h panes/svg_editor/svg_viewer.cpp
+        panes/db/table_pane.h panes/db/table_pane.cpp panes/db/table_pane.ui
+        panes/db/table_list_widget.h panes/db/table_list_widget.cpp panes/db/table_list_widget.ui
+        panes/db/table_scheme_widget.h panes/db/table_scheme_widget.cpp panes/db/table_scheme_widget.ui
+        panes/db/table_field_widget.h panes/db/table_field_widget.cpp panes/db/table_field_widget.ui
+        panes/db/table_index_widget.h panes/db/table_index_widget.cpp panes/db/table_index_widget.ui
+        panes/db/table_option_widget.h panes/db/table_option_widget.cpp panes/db/table_option_widget.ui
 
 
 

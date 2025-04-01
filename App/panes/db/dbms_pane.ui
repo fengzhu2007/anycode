@@ -48,7 +48,7 @@
    <item>
     <widget class="ady::TreeView" name="treeView">
      <property name="selectionMode">
-      <enum>QAbstractItemView::ExtendedSelection</enum>
+      <enum>QAbstractItemView::SingleSelection</enum>
      </property>
      <property name="headerHidden">
       <bool>true</bool>
@@ -127,6 +127,30 @@
   <action name="actionEdit_Connection">
    <property name="text">
     <string>Edit Connection</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionOpen_Table">
+   <property name="text">
+    <string>Open Table</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionScheme_Table">
+   <property name="text">
+    <string>Scheme Table</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionNew_Table">
+   <property name="text">
+    <string>New Table</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

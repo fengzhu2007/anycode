@@ -273,6 +273,21 @@ for (let i = 0; i &lt; 3; i++) {
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../panes/db/dbms_pane.ui" line="137"/>
+        <source>Open Table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/dbms_pane.ui" line="145"/>
+        <source>Scheme Table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/dbms_pane.ui" line="153"/>
+        <source>New Table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../panes/db/dbms_pane.ui" line="97"/>
         <source>Add Database</source>
         <translation type="unfinished"></translation>
@@ -1591,16 +1606,6 @@ Please enter a new folder name.</source>
         <translation type="unfinished">无效站点</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="419"/>
-        <source>New File</source>
-        <translation type="unfinished">新建文件</translation>
-    </message>
-    <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="421"/>
-        <source>New File (%1)</source>
-        <translation type="unfinished">新建文件 (%1)</translation>
-    </message>
-    <message>
         <location filename="../storage/database_helper.cpp" line="83"/>
         <source>SQL Error</source>
         <translation type="unfinished">SQL 错误</translation>
@@ -1629,6 +1634,18 @@ Please enter a new folder name.</source>
         <location filename="../panes/db/db_driver.cpp" line="34"/>
         <source>View</source>
         <translation type="unfinished">视图</translation>
+    </message>
+    <message>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="419"/>
+        <source>New File</source>
+        <comment>Editor</comment>
+        <translation type="unfinished">新建文件</translation>
+    </message>
+    <message>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="421"/>
+        <source>New File (%1)</source>
+        <comment>Editor</comment>
+        <translation type="unfinished">新建文件 (%1)</translation>
     </message>
 </context>
 <context>
@@ -2073,6 +2090,64 @@ Please enter a new folder name.</source>
     </message>
 </context>
 <context>
+    <name>TableFields</name>
+    <message>
+        <location filename="../panes/db/table_field_widget.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TableIndexWidget</name>
+    <message>
+        <location filename="../panes/db/table_index_widget.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TableListWidget</name>
+    <message>
+        <location filename="../panes/db/table_list_widget.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TableOptionWidget</name>
+    <message>
+        <location filename="../panes/db/table_option_widget.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TablePane</name>
+    <message>
+        <location filename="../panes/db/table_pane.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/table_pane.ui" line="24"/>
+        <source>Tab 1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/table_pane.ui" line="29"/>
+        <source>Tab 2</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TableSchemeWidget</name>
+    <message>
+        <location filename="../panes/db/table_scheme_widget.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>TerminalPane</name>
     <message>
         <location filename="../panes/terminal/terminal_pane.ui" line="14"/>
@@ -2399,28 +2474,33 @@ Please enter a new folder name.</source>
     <message>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="151"/>
         <source>Save File AS</source>
+        <comment>Editor</comment>
         <translation type="unfinished">文件另存为</translation>
     </message>
     <message>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="151"/>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="155"/>
         <source>All Files (*.*)</source>
+        <comment>Editor</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="155"/>
         <source>Save File</source>
+        <comment>Editor</comment>
         <translation type="unfinished">保存文件</translation>
     </message>
     <message>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="242"/>
         <source>Save</source>
+        <comment>Editor</comment>
         <translation type="unfinished">保存</translation>
     </message>
     <message>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="242"/>
         <source>Save file
 %1?</source>
+        <comment>Editor</comment>
         <translation type="unfinished">保存文件
 %1？</translation>
     </message>
@@ -2428,36 +2508,39 @@ Please enter a new folder name.</source>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="359"/>
         <source>The file &quot;%1&quot; is no longer there. 
 Do you want to keep it?</source>
-        <translation type="unfinished">文件 &quot;%1&quot;已经不存在。 
-是否依然保留？</translation>
+        <comment>Editor</comment>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="371"/>
         <source>&quot;%1&quot; 
 This file has been modified by another program.
  Reload?</source>
-        <translation type="unfinished">&quot;%1&quot; 
-文件已经被修改。
-是否重新加载？</translation>
+        <comment>Editor</comment>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="454"/>
         <source>Row:%1, Col:%2</source>
+        <comment>Editor</comment>
         <translation type="unfinished">行：%1， 列：%2</translation>
     </message>
     <message>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="473"/>
         <source>Unkown</source>
+        <comment>Editor</comment>
         <translation type="unfinished">未知</translation>
     </message>
     <message>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="478"/>
         <source>Space</source>
+        <comment>Editor</comment>
         <translation type="unfinished">空白</translation>
     </message>
     <message>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="480"/>
         <source>Tab</source>
+        <comment>Editor</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2527,7 +2610,7 @@ Message:%4</source>
 <context>
     <name>ady::DBMSPane</name>
     <message>
-        <location filename="../panes/db/dbms_pane.cpp" line="58"/>
+        <location filename="../panes/db/dbms_pane.cpp" line="60"/>
         <source>Database</source>
         <translation type="unfinished">数据库</translation>
     </message>
@@ -2899,19 +2982,19 @@ Last Modify:%3</source>
 <context>
     <name>ady::ImageEditorPane</name>
     <message>
-        <location filename="../panes/image_editor/image_editor_pane.cpp" line="127"/>
+        <location filename="../panes/image_editor/image_editor_pane.cpp" line="129"/>
         <source>%1 * %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/image_editor/image_editor_pane.cpp" line="160"/>
+        <location filename="../panes/image_editor/image_editor_pane.cpp" line="172"/>
         <source>The file &quot;%1&quot; is no longer there. 
 Do you want to keep it?</source>
         <translation type="unfinished">文件 &quot;%1&quot;已经不存在。 
 是否保留？</translation>
     </message>
     <message>
-        <location filename="../panes/image_editor/image_editor_pane.cpp" line="172"/>
+        <location filename="../panes/image_editor/image_editor_pane.cpp" line="184"/>
         <source>&quot;%1&quot; 
 This file has been modified by another program.
  Reload?</source>
@@ -3480,67 +3563,100 @@ You can restore this file from the Recycle Bin.</source>
 <context>
     <name>ady::SVGEditorPane</name>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="92"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="94"/>
         <source>Zoom In</source>
         <translation type="unfinished">放大</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="93"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="95"/>
         <source>Zoom Out</source>
         <translation type="unfinished">缩小</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="94"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="96"/>
         <source>Export...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="172"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="174"/>
         <source>Save File AS</source>
+        <comment>Editor</comment>
         <translation type="unfinished">文件另存为</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="172"/>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="176"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="174"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="178"/>
         <source>All Files (*.*)</source>
+        <comment>Editor</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="176"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="178"/>
         <source>Save File</source>
+        <comment>Editor</comment>
         <translation type="unfinished">保存文件</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="329"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="268"/>
+        <source>Save</source>
+        <comment>Editor</comment>
+        <translation type="unfinished">保存</translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="268"/>
+        <source>Save file
+%1?</source>
+        <comment>Editor</comment>
+        <translation type="unfinished">保存文件
+%1？</translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="381"/>
         <source>The file &quot;%1&quot; is no longer there. 
 Do you want to keep it?</source>
+        <comment>Editor</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="341"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="393"/>
         <source>&quot;%1&quot; 
 This file has been modified by another program.
  Reload?</source>
+        <comment>Editor</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="375"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="427"/>
         <source>Row:%1, Col:%2</source>
+        <comment>Editor</comment>
         <translation type="unfinished">行：%1， 列：%2</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="405"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="442"/>
+        <source>Export To PNG</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="442"/>
+        <source>Images Files (*.png)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="472"/>
         <source>Unkown</source>
+        <comment>Editor</comment>
         <translation type="unfinished">未知</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="410"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="477"/>
         <source>Space</source>
+        <comment>Editor</comment>
         <translation type="unfinished">空白</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="412"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="479"/>
         <source>Tab</source>
+        <comment>Editor</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -44,7 +44,6 @@ public:
 
     static SVGEditorPane* make(DockingPaneManager* dockingManager,const QJsonObject& data={});
 
-    void onZoom(int zoom);
 public slots:
     void onModificationChanged(bool changed);
     void onCursorPositionChanged();
