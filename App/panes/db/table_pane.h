@@ -14,11 +14,18 @@ class TablePane : public DockingPane
     Q_OBJECT
 
 public:
-    explicit TablePane(QWidget *parent = nullptr);
+    /**
+     * @brief TablePane
+     * @param id db record id
+     * @param table
+     * @param parent
+     */
+    explicit TablePane(long long dbid,int type,const QString& name,QWidget *parent = nullptr);
     ~TablePane();
     void initView();
     virtual QString id() override;
     virtual QString group() override;
+    QString& name() const;
 
 
 public:

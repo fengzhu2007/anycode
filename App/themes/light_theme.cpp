@@ -94,7 +94,7 @@ QString LightTheme::qss(){
                              ".ady--ListView>QWidget#qt_scrollarea_viewport>.QWidget{background-color:white;}"
                              "ady--ListViewItem[state='1']{background-color:#d9e0f8}"
                              "ady--ListViewItem:hover{background-color:#c9def5}"
-                             "QTreeView{border:0;background:#f5f5f5}"
+                             "QTreeView,QTableView{border:0;background:#f5f5f5}"
 
 #ifdef Q_OS_WIN
                              ".QSpinBox{border:1px solid #ccc;font-size:12px;height:24px;}"

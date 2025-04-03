@@ -20,6 +20,7 @@
 #include "sqlite_connect_dialog.h"
 #include "dbms_thread.h"
 #include "dbms_model.h"
+#include "table_pane.h"
 
 #include <QMenu>
 #include <QToolButton>
@@ -38,7 +39,7 @@ public:
     QToolButton* add;
     QMap<long long,DBDriver*> connectManager;
     DBMSModel* model;
-
+    QList<QPair<long long,TablePane*>> panels;
 
 };
 
@@ -53,11 +54,22 @@ DBMSPane::DBMSPane(QWidget *parent)
     QWidget* widget = new QWidget(this);//keep level like createPane(id,group...)
     widget->setObjectName("widget");
     ui->setupUi(widget);
+
+    this->setCenterWidget(widget);
     d = new DBMSPanePrivate;
+
+
+
+    this->setStyleSheet("QToolBar{border:0px;}"
+                        "QTreeView{border:0;}");
+
+    this->setWindowTitle(tr("Database"));
+
+
+
     d->model = new DBMSModel(ui->treeView);
     ui->treeView->setModel(d->model);
     ui->treeView->setItemDelegate(new TreeItemDelegate(ui->treeView));
-    this->setWindowTitle(tr("Database"));
 
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->treeView,&QTreeView::customContextMenuRequested, this, &DBMSPane::onContextMenu);
@@ -71,8 +83,9 @@ DBMSPane::DBMSPane(QWidget *parent)
     connect(ui->actionOpen_Databse,&QAction::triggered,this,&DBMSPane::onActionTriggered);
     connect(ui->actionClose_Database,&QAction::triggered,this,&DBMSPane::onActionTriggered);
     connect(ui->actionEdit_Connection,&QAction::triggered,this,&DBMSPane::onActionTriggered);
-
-
+    connect(ui->actionOpen_Table,&QAction::triggered,this,&DBMSPane::onActionTriggered);
+    connect(ui->actionScheme_Table,&QAction::triggered,this,&DBMSPane::onActionTriggered);
+    connect(ui->actionNew_Table,&QAction::triggered,this,&DBMSPane::onActionTriggered);
 
     this->registerInitCallback<SQliteDriver>("sqlite","SQLite");//init sqlite
     this->initView();
@@ -81,9 +94,9 @@ DBMSPane::DBMSPane(QWidget *parent)
 DBMSPane::~DBMSPane()
 {
     Subscriber::unReg();
+    instance = nullptr;
     delete d;
     delete ui;
-
 }
 
 
@@ -146,6 +159,32 @@ void DBMSPane::openConnectDialog(const QString& driver,const DBRecord& data){
     auto dialog = new SQLiteConnectDialog(data,this);
     dialog->setModal(true);
     dialog->show();
+}
+
+
+TablePane* DBMSPane::openTablePane(long long id,const QString& table){
+    for(auto one:d->panels){
+        if(one.first==id){
+            auto name = one.second->name();
+            if(name.isEmpty()==false && name==table){
+                //active;
+                one.second->activeToCurrent();
+                return nullptr;
+            }
+        }
+    }
+    auto pane = new TablePane(id,DBMSModelItem::Table,table);//open table
+    auto workbench = this->container()->workbench();
+    workbench->manager()->createPane(pane,DockingPaneManager::Center,true);
+    return pane;
+}
+
+DBDriver* DBMSPane::connector(long long id){
+    if(d->connectManager.contains(id)){
+        return d->connectManager[id];
+    }else{
+        return nullptr;
+    }
 }
 
 
@@ -284,6 +323,11 @@ void DBMSPane::onActionTriggered(){
 
         }
     }else if(sender==ui->actionOpen_Table){
+        QModelIndex index = ui->treeView->selectionModel()->currentIndex();
+        if(index.isValid()){
+            auto item = static_cast<DBMSModelItem*>(index.internalPointer());
+            this->openTablePane(item->pid(),item->name());
+        }
 
     }else if(sender==ui->actionScheme_Table){
 
@@ -338,6 +382,10 @@ DBMSPane* DBMSPane::make(DockingPaneManager* dockingManager,const QJsonObject& d
         return instance;
     }
     return nullptr;
+}
+
+DBMSPane* DBMSPane::getInstance(){
+    return instance;
 }
 
 }

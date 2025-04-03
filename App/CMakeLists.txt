@@ -344,6 +344,9 @@ add_library(App SHARED
         panes/db/table_field_widget.h panes/db/table_field_widget.cpp panes/db/table_field_widget.ui
         panes/db/table_index_widget.h panes/db/table_index_widget.cpp panes/db/table_index_widget.ui
         panes/db/table_option_widget.h panes/db/table_option_widget.cpp panes/db/table_option_widget.ui
+        panes/db/table_field_model.h panes/db/table_field_model.cpp
+        panes/db/table_field.h panes/db/table_field.cpp
+        panes/db/table_data_model.h panes/db/table_data_model.cpp
 
 
 

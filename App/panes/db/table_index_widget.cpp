@@ -1,7 +1,9 @@
 #include "table_index_widget.h"
 #include "ui_table_index_widget.h"
 
-TableIndexWidget::TableIndexWidget(QWidget *parent)
+
+namespace ady{
+TableIndexWidget::TableIndexWidget(long long id,const QString& table,QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::TableIndexWidget)
 {
@@ -11,4 +13,6 @@ TableIndexWidget::TableIndexWidget(QWidget *parent)
 TableIndexWidget::~TableIndexWidget()
 {
     delete ui;
+}
+
 }

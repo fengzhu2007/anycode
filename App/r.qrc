@@ -131,5 +131,7 @@
         <file>Resource/icons/DatabaseTableGroup_16x.svg</file>
         <file>Resource/icons/sqlite.svg</file>
         <file>Resource/icons/ExportPerformanceReport_16x.svg</file>
+        <file>Resource/icons/Remove_16x.svg</file>
+        <file>Resource/icons/Add_16x.svg</file>
     </qresource>
 </RCC>

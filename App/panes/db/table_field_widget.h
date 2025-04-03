@@ -8,16 +8,22 @@ class TableFieldWidget;
 }
 
 namespace ady{
+class TableFieldWidgetPrivate;
 class TableFieldWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit TableFieldWidget(QWidget *parent = nullptr);
+    explicit TableFieldWidget(long long id,const QString& table,QWidget *parent = nullptr);
     ~TableFieldWidget();
+
+    void initData();
+
+
 
 private:
     Ui::TableFieldWidget *ui;
+    TableFieldWidgetPrivate* d;
 };
 }
 

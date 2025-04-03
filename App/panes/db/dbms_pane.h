@@ -12,7 +12,7 @@ namespace ady{
 
 class DBDriver;
 class DBRecord;
-
+class TablePane;
 using InitDBConnectFunc = std::function<DBDriver*(const DBRecord&)>;
 
 class DBMSPanePrivate;
@@ -30,6 +30,7 @@ public:
 
     static DBMSPane* open(DockingPaneManager* dockingManager,bool active=false);
     static DBMSPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
+    static DBMSPane* getInstance();
 
 
     template <typename T>
@@ -40,6 +41,12 @@ public:
     }
 
     void openConnectDialog(const QString& driver,const DBRecord& data);
+
+    TablePane* openTablePane(long long id,const QString& table);
+
+    DBDriver* connector(long long id);
+
+
 
 public slots:
     void onContextMenu(const QPoint& pos);

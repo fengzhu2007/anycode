@@ -2112,6 +2112,11 @@ Please enter a new folder name.</source>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../panes/db/table_list_widget.ui" line="56"/>
+        <source>Add</source>
+        <translation type="unfinished">添加</translation>
+    </message>
 </context>
 <context>
     <name>TableOptionWidget</name>
@@ -2126,16 +2131,6 @@ Please enter a new folder name.</source>
     <message>
         <location filename="../panes/db/table_pane.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../panes/db/table_pane.ui" line="24"/>
-        <source>Tab 1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../panes/db/table_pane.ui" line="29"/>
-        <source>Tab 2</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2509,7 +2504,8 @@ Please enter a new folder name.</source>
         <source>The file &quot;%1&quot; is no longer there. 
 Do you want to keep it?</source>
         <comment>Editor</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">文件 &quot;%1&quot;已经不存在。 
+是否保留？</translation>
     </message>
     <message>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="371"/>
@@ -2517,7 +2513,9 @@ Do you want to keep it?</source>
 This file has been modified by another program.
  Reload?</source>
         <comment>Editor</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&quot;%1&quot; 
+文件被修改。
+是否重新加载？</translation>
     </message>
     <message>
         <location filename="../panes/code_editor/code_editor_pane.cpp" line="454"/>
@@ -2610,7 +2608,7 @@ Message:%4</source>
 <context>
     <name>ady::DBMSPane</name>
     <message>
-        <location filename="../panes/db/dbms_pane.cpp" line="60"/>
+        <location filename="../panes/db/dbms_pane.cpp" line="66"/>
         <source>Database</source>
         <translation type="unfinished">数据库</translation>
     </message>
@@ -3615,7 +3613,8 @@ You can restore this file from the Recycle Bin.</source>
         <source>The file &quot;%1&quot; is no longer there. 
 Do you want to keep it?</source>
         <comment>Editor</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">文件 &quot;%1&quot;已经不存在。 
+是否保留？</translation>
     </message>
     <message>
         <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="393"/>
@@ -3623,7 +3622,9 @@ Do you want to keep it?</source>
 This file has been modified by another program.
  Reload?</source>
         <comment>Editor</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&quot;%1&quot; 
+文件被修改。
+是否重新加载？</translation>
     </message>
     <message>
         <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="427"/>
@@ -3849,6 +3850,70 @@ files to &quot;%2&quot;?</source>
         <location filename="../components/statusbar/status_bar_view.cpp" line="116"/>
         <source>Upload:%1/s, Download:%2/s</source>
         <translation type="unfinished">上传：%1/s， 下载：%2/s</translation>
+    </message>
+</context>
+<context>
+    <name>ady::TableFieldModel</name>
+    <message>
+        <location filename="../panes/db/table_field_model.cpp" line="26"/>
+        <source>Name</source>
+        <translation type="unfinished">名称</translation>
+    </message>
+    <message>
+        <location filename="../panes/db/table_field_model.cpp" line="28"/>
+        <source>Type</source>
+        <translation type="unfinished">类型</translation>
+    </message>
+    <message>
+        <location filename="../panes/db/table_field_model.cpp" line="30"/>
+        <source>Length</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/table_field_model.cpp" line="32"/>
+        <source>Primary Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ady::TablePane</name>
+    <message>
+        <location filename="../panes/db/table_pane.cpp" line="45"/>
+        <source>New Table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/table_pane.cpp" line="47"/>
+        <source>%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/table_pane.cpp" line="52"/>
+        <source>Data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/table_pane.cpp" line="53"/>
+        <source>Scheme</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ady::TableSchemeWidget</name>
+    <message>
+        <location filename="../panes/db/table_scheme_widget.cpp" line="34"/>
+        <source>Field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/table_scheme_widget.cpp" line="35"/>
+        <source>Index</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/table_scheme_widget.cpp" line="36"/>
+        <source>Option</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
