@@ -31,7 +31,7 @@ public:
     virtual QList<QPair<int,QString>> typeList();
     virtual QStringList tableList()=0;
     virtual QStringList viewList()=0;
-    virtual QList<QSqlField> tableFields(const QString name)=0;
+    virtual QList<TableField> tableFields(const QString name)=0;
     virtual std::tuple<QList<QSqlField>,QList<QList<QVariant>>,long long> queryData(const QString& table,const QString& where={},QList<QVariant>whereValues={},const QString& order={},int offset=0,int num=100)=0;
 
 

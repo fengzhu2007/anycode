@@ -3,7 +3,7 @@
 namespace ady{
 class TableFieldModelPrivate{
 public:
-    QList<QSqlField>data;
+    QList<TableField>data;
 };
 
 TableFieldModel::TableFieldModel(QObject* parent):QAbstractListModel(parent){
@@ -28,11 +28,13 @@ QVariant TableFieldModel::data(const QModelIndex &index, int role ) const {
         int column = index.column();
         auto field = d->data.at(index.row());
         if(column==Name){
-            return field.name();
+            return field.name;
         }else if(column==Type){
-            return field.type();
+            return field.type;
         }else if(column==Length){
-            return field.length();
+            return field.length;
+        }else if(column==PrimaryKey){
+            return field.primaryKey?1:0;
         }
     }
     return {};
@@ -53,10 +55,15 @@ QVariant TableFieldModel::headerData(int section, Qt::Orientation orientation,in
     return {};
 }
 
-void TableFieldModel::setDatasource(const QList<QSqlField>& data){
+void TableFieldModel::setDatasource(const QList<TableField>& data){
     beginResetModel();
     d->data = data;
     endResetModel();
 }
+
+TableField TableFieldModel::at(int row) const {
+    return d->data.at(row);
+}
+
 
 }

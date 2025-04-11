@@ -7,13 +7,13 @@ class TableField
 public:
     QString name;
     QString type;
-    int length;
-    int decimal;
+    int length=0;
+    int decimal=0;
     QString defaultValue;
-    bool primaryKey;
-    bool uniqueValue;
-    bool autoIncrement;
-    bool notNull;
+    bool primaryKey=false;
+    bool uniqueValue=false;
+    bool autoIncrement=false;
+    bool notNull=false;
 
 };
 }

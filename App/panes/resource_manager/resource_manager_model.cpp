@@ -463,6 +463,10 @@ QStringList ResourceManagerModel::takeWatchDirectory(const QString& path,bool in
     return list;
 }
 
+QStringList ResourceManagerModel::allWatchDirectory(){
+    return d->watcher->directories();
+}
+
 ResourceManagerModelItem* ResourceManagerModel::find(const QString& path){
     QMutexLocker locker(&(d->mutex));
     return d->root->findChild(path);
@@ -602,6 +606,14 @@ void ResourceManagerModel::findAllExpend(ResourceManagerModelItem* item,QJsonArr
 }
 
 void ResourceManagerModel::onDirectoryChanged(const QString &path){
+    //to test path
+    QString message = QString::fromUtf8("DirectoryChanged:%1").arg(path);
+    QJsonObject json = {
+        {"level",1},
+        {"source",tr("ResourceManager")},
+        {"content",message}
+    };
+    Publisher::getInstance()->post(Type::M_OUTPUT,json);
     auto task = new ResourceManageReadFolderTask(this,path);
     task->setType(BackendThreadTask::RefreshFolder);
     BackendThread::getInstance()->appendTask(task);

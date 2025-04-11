@@ -440,6 +440,54 @@ for (let i = 0; i &lt; 3; i++) {
     </message>
 </context>
 <context>
+    <name>FieldForm</name>
+    <message>
+        <location filename="../panes/db/sqlite/field_form.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/sqlite/field_form.ui" line="22"/>
+        <source>Name</source>
+        <translation type="unfinished">名称</translation>
+    </message>
+    <message>
+        <location filename="../panes/db/sqlite/field_form.ui" line="29"/>
+        <source>Type</source>
+        <translation type="unfinished">类型</translation>
+    </message>
+    <message>
+        <location filename="../panes/db/sqlite/field_form.ui" line="42"/>
+        <source>Length</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/sqlite/field_form.ui" line="49"/>
+        <source>Decimal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/sqlite/field_form.ui" line="87"/>
+        <source>Not Null</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/sqlite/field_form.ui" line="80"/>
+        <source>Primary Key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/sqlite/field_form.ui" line="70"/>
+        <source>Default Value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/sqlite/field_form.ui" line="107"/>
+        <source>Auto Increment</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FileTransferPane</name>
     <message>
         <location filename="../panes/file_transfer/file_transfer_pane.ui" line="14"/>
@@ -1636,13 +1684,13 @@ Please enter a new folder name.</source>
         <translation type="unfinished">视图</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="419"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="423"/>
         <source>New File</source>
         <comment>Editor</comment>
         <translation type="unfinished">新建文件</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="421"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="425"/>
         <source>New File (%1)</source>
         <comment>Editor</comment>
         <translation type="unfinished">新建文件 (%1)</translation>
@@ -2113,7 +2161,7 @@ Please enter a new folder name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/table_list_widget.ui" line="56"/>
+        <location filename="../panes/db/table_list_widget.ui" line="60"/>
         <source>Add</source>
         <translation type="unfinished">添加</translation>
     </message>
@@ -2486,13 +2534,13 @@ Please enter a new folder name.</source>
         <translation type="unfinished">保存文件</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="242"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="246"/>
         <source>Save</source>
         <comment>Editor</comment>
         <translation type="unfinished">保存</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="242"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="246"/>
         <source>Save file
 %1?</source>
         <comment>Editor</comment>
@@ -2500,7 +2548,7 @@ Please enter a new folder name.</source>
 %1？</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="359"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="363"/>
         <source>The file &quot;%1&quot; is no longer there. 
 Do you want to keep it?</source>
         <comment>Editor</comment>
@@ -2508,7 +2556,7 @@ Do you want to keep it?</source>
 是否保留？</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="371"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="375"/>
         <source>&quot;%1&quot; 
 This file has been modified by another program.
  Reload?</source>
@@ -2518,25 +2566,25 @@ This file has been modified by another program.
 是否重新加载？</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="454"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="458"/>
         <source>Row:%1, Col:%2</source>
         <comment>Editor</comment>
         <translation type="unfinished">行：%1， 列：%2</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="473"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="477"/>
         <source>Unkown</source>
         <comment>Editor</comment>
         <translation type="unfinished">未知</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="478"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="482"/>
         <source>Space</source>
         <comment>Editor</comment>
         <translation type="unfinished">空白</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="480"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="484"/>
         <source>Tab</source>
         <comment>Editor</comment>
         <translation type="unfinished"></translation>
@@ -3390,6 +3438,11 @@ This file has been modified by another program.
         <source>Name</source>
         <translation type="unfinished">名称</translation>
     </message>
+    <message>
+        <location filename="../panes/resource_manager/resource_manager_model.cpp" line="609"/>
+        <source>ResourceManager</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ady::ResourceManagerPane</name>
@@ -3491,22 +3544,22 @@ You can restore this file from the Recycle Bin.</source>
 您可以从回收站还原此文件。</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="960"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="967"/>
         <source>Upload</source>
         <translation type="unfinished">上传</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="986"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="993"/>
         <source>All Sites</source>
         <translation type="unfinished">所有站点</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="995"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1002"/>
         <source>Close Confirm</source>
         <translation type="unfinished">关闭确认</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="995"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1002"/>
         <source>Are you sure you want to close &apos;%1&apos;?</source>
         <translation type="unfinished">是否确定关闭“%!”？</translation>
     </message>
@@ -3855,22 +3908,22 @@ files to &quot;%2&quot;?</source>
 <context>
     <name>ady::TableFieldModel</name>
     <message>
-        <location filename="../panes/db/table_field_model.cpp" line="26"/>
+        <location filename="../panes/db/table_field_model.cpp" line="46"/>
         <source>Name</source>
         <translation type="unfinished">名称</translation>
     </message>
     <message>
-        <location filename="../panes/db/table_field_model.cpp" line="28"/>
+        <location filename="../panes/db/table_field_model.cpp" line="48"/>
         <source>Type</source>
         <translation type="unfinished">类型</translation>
     </message>
     <message>
-        <location filename="../panes/db/table_field_model.cpp" line="30"/>
+        <location filename="../panes/db/table_field_model.cpp" line="50"/>
         <source>Length</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/table_field_model.cpp" line="32"/>
+        <location filename="../panes/db/table_field_model.cpp" line="52"/>
         <source>Primary Key</source>
         <translation type="unfinished"></translation>
     </message>

@@ -55,6 +55,7 @@ public:
     void appendWatchDirectory(const QString& path);
     void removeWatchDirectory(const QString& path);
     QStringList takeWatchDirectory(const QString& path,bool include_children=true);
+    QStringList allWatchDirectory();
 
     ResourceManagerModelItem* find(const QString& path);
     ResourceManagerModelItem* findProject(const QString& path);

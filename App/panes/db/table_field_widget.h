@@ -19,6 +19,8 @@ public:
 
     void initData();
 
+public slots:
+    void onFieldActivated(const QModelIndex& index);
 
 
 private:

@@ -3,7 +3,7 @@
 
 
 #include <QAbstractListModel>
-#include <QSqlField>
+#include "table_field.h"
 
 
 namespace ady{
@@ -26,7 +26,8 @@ public:
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     virtual QVariant headerData(int section, Qt::Orientation orientation,int role = Qt::DisplayRole) const override;
 
-    void setDatasource(const QList<QSqlField>& data);
+    void setDatasource(const QList<TableField>& data);
+    TableField at(int row) const ;
 
 private:
     TableFieldModelPrivate* d;

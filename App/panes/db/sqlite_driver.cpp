@@ -53,14 +53,79 @@ QStringList SQliteDriver::viewList(){
     return d->db.tables(QSql::Views);
 }
 
-QList<QSqlField> SQliteDriver::tableFields(const QString name) {
-    QSqlRecord record = d->db.record(name);
-    QList<QSqlField> fields;
-    auto count = record.count();
-    for (int i = 0; i < count; ++i) {
-        fields.append(record.field(i));
+QList<TableField> SQliteDriver::tableFields(const QString name) {
+
+    QSqlQuery query(d->db);
+    QString sql = QString::fromUtf8("PRAGMA table_info([%1])").arg(name);
+    query.prepare(sql);
+    if (!query.exec()) {
+        qDebug() << "Error getting table info:" << query.lastError().text();
+        return {};
     }
-    return fields;
+    QList<TableField> list;
+    while (query.next()) {
+        TableField field;
+        field.name = query.value("name").toString();
+        QString type = query.value("type").toString();
+        this->parseFieldType(field,type);
+        field.notNull = query.value("notnull").toInt()>0;
+        field.defaultValue = query.value("dflt_value").toString();
+        field.primaryKey = query.value("pk").toInt()>0;
+        if(field.primaryKey && type.toUpper()==QLatin1String("INTEGER")){
+            //search sqlite_sequence
+            QSqlQuery seqQuery("SELECT [name] FROM sqlite_sequence WHERE name='" + name + "'");
+            if(seqQuery.exec() && seqQuery.next()){
+                field.autoIncrement = true;
+            }
+        }
+        list.append(field);
+    }
+    return list;
+}
+
+
+
+void SQliteDriver::parseFieldType(TableField& field,const QString& type){
+    int index = 0;
+    int start = 0;
+    int step = 0;//0=name,1=length,2=decimal
+    while(index < type.length()){
+        QChar ch = type.at(index);
+        switch(ch.unicode()){
+        case '(':
+            if(step==0){
+                field.type = type.mid(start,index - start);
+            }
+            start = index+1;
+            step = 1;
+            break;
+        case ')':
+            if(step==1){
+                 auto length = type.mid(start,index - start);
+                 field.length = length.toInt();
+
+            }else if(step==2){
+                //decimal
+                auto decimal = type.mid(start,index - start);
+                field.decimal = decimal.toInt();
+            }
+            break;
+        case ',':
+            if(step==1){
+                //save length
+                auto length = type.mid(start,index - start);
+                field.length = length.toInt();
+            }
+            start = index+1;
+            step = 2;
+            break;
+        }
+        index++;
+    }
+    if(step==0){
+        field.type = type;
+    }
+
 }
 
 std::tuple<QList<QSqlField>,QList<QList<QVariant>>,long long> SQliteDriver::queryData(const QString& table,const QString& where,QList<QVariant>whereValues,const QString& order,int offset,int num){

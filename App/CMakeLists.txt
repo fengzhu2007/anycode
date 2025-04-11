@@ -347,6 +347,10 @@ add_library(App SHARED
         panes/db/table_field_model.h panes/db/table_field_model.cpp
         panes/db/table_field.h panes/db/table_field.cpp
         panes/db/table_data_model.h panes/db/table_data_model.cpp
+        panes/db/sqlite/field_form.h panes/db/sqlite/field_form.cpp panes/db/sqlite/field_form.ui
+        panes/db/field_form_impl.h panes/db/field_form_impl.cpp
+        core/debug_log.h core/debug_log.cpp
+
 
 
 

@@ -17,7 +17,7 @@
 
 #include <w_toast.h>
 
-
+#include "core/debug_log.h"
 
 #include <QFileInfo>
 #include <QPlainTextEdit>
@@ -164,7 +164,8 @@ bool CodeEditorPane::save(bool rename){
     instance->removeWatchFile(this->path());
     QFileInfo fi(path);
     auto m = ResourceManagerModel::getInstance();
-    auto list = m->takeWatchDirectory(fi.dir().absolutePath(),false);
+    QString folder = fi.dir().absolutePath();
+    auto list = m->takeWatchDirectory(folder,false);
 
     auto ret = this->writeFile(path);
     if(ret){
@@ -203,7 +204,9 @@ bool CodeEditorPane::save(bool rename){
     if(!list.isEmpty()){
         m->appendWatchDirectory(list.at(0));
     }
+
     instance->appendWatchFile(path);
+    DebugLog::write(QString::fromUtf8("File save"),QString::fromUtf8("folder:%1;%2").arg(folder).arg(m->allWatchDirectory().join("|")));
     return ret;
 }
 

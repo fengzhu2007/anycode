@@ -4,6 +4,7 @@
 #include "modules/options/environment_settings.h"
 #include "themes/light_theme.h"
 #include "themes/dark_theme.h"
+#include "core/debug_log.h"
 #include <w_qss.h>
 #include <QTranslator>
 namespace ady{
@@ -39,11 +40,15 @@ IDEApplication::IDEApplication(int &argc, char **argv):QApplication(argc,argv) {
             this->installTranslator(translator);
         }
     }
+
+
 }
 
 IDEApplication::~IDEApplication(){
     OptionsSettings::destory();
+    DebugLog::destory();
     wQSS::destory();
+
 }
 
 
