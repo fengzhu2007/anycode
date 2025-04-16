@@ -27,6 +27,13 @@ public:
     virtual QVariant headerData(int section, Qt::Orientation orientation,int role = Qt::DisplayRole) const override;
 
     void setDatasource(const QList<TableField>& data);
+    void appendItem(const TableField& field);
+    void updateItem(const TableField& field);
+    void removeItem(int row);
+
+    QList<TableField>& fields() const;
+
+
     TableField at(int row) const ;
 
 private:

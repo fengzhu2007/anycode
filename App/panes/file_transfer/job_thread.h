@@ -18,6 +18,7 @@ public:
 
     inline long long id(){return m_siteid;}
     void abort();
+    void abortTask(long long id);
 
 signals:
     void finishTask(long long siteid,long long id);

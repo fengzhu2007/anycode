@@ -8,6 +8,7 @@ class TableFieldWidget;
 }
 
 namespace ady{
+class TableField;
 class TableFieldWidgetPrivate;
 class TableFieldWidget : public QWidget
 {
@@ -21,6 +22,8 @@ public:
 
 public slots:
     void onFieldActivated(const QModelIndex& index);
+    void onActionTriggered();
+    void onFieldChanged(const QString& name,TableField* field);
 
 
 private:

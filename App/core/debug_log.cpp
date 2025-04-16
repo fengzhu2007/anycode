@@ -1,6 +1,6 @@
 #include "debug_log.h"
 #include <QFile>
-
+#include <QDateTime>
 
 namespace ady{
 
@@ -16,11 +16,7 @@ public:
 DebugLog::DebugLog() {
     d = new DebugLogPrivate();
     d->log = new QFile("log.txt");
-    if(d->log->open(QIODevice::WriteOnly|QIODevice::Append)){
-        d->state = true;
-    }else{
-        d->state = false;
-    }
+
 }
 
 DebugLog::~DebugLog() {
@@ -48,8 +44,15 @@ void DebugLog::write(const QString& category,const QString& content){
     if(instance==nullptr){
         getInstance();
     }
-    auto line = QString::fromUtf8("%1:%2\n").arg(category).arg(content).toStdString();
+    if(instance->d->log->open(QIODevice::WriteOnly|QIODevice::Append)){
+        instance->d->state = true;
+    }else{
+        instance->d->state = false;
+        return ;
+    }
+    auto line = QString::fromUtf8("%1:%2 %3\n").arg(category).arg(QDateTime::currentDateTime().toString()).arg(content).toStdString();
     instance->d->log->write(line.data());
+    instance->d->log->close();
 }
 
 }

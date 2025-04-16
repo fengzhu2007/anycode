@@ -139,6 +139,7 @@ QString CodeEditorPane::description(){
 
 void CodeEditorPane::activation(){
     ui->editor->setFocus();
+    //qDebug()<<"activation"<<this->path();
     CodeEditorManager::getInstance()->setCurrent(this);
 }
 
@@ -166,7 +167,7 @@ bool CodeEditorPane::save(bool rename){
     auto m = ResourceManagerModel::getInstance();
     QString folder = fi.dir().absolutePath();
     auto list = m->takeWatchDirectory(folder,false);
-
+    //m->setWatching(false);
     auto ret = this->writeFile(path);
     if(ret){
         //rename tab title
@@ -201,12 +202,14 @@ bool CodeEditorPane::save(bool rename){
             storage.add(RecentStorage::File,source);
         }
     }
+
+    //qDebug()<<m->allWatchDirectory();
+
     if(!list.isEmpty()){
         m->appendWatchDirectory(list.at(0));
     }
-
-    instance->appendWatchFile(path);
-    DebugLog::write(QString::fromUtf8("File save"),QString::fromUtf8("folder:%1;%2").arg(folder).arg(m->allWatchDirectory().join("|")));
+    //instance->appendWatchFile(path);
+    //DebugLog::write(QString::fromUtf8("File save"),QString::fromUtf8("folder:%1;%2").arg(folder).arg(m->allWatchDirectory().join("|")));
     return ret;
 }
 
@@ -303,7 +306,8 @@ void CodeEditorPane::autoSave(){
     }
     auto instance = CodeEditorManager::getInstance();
     instance->removeWatchFile(path);
-    if(this->writeFile(path)){
+    auto m = ResourceManagerModel::getInstance();
+    if(!this->writeFile(path)){
 
     }
     instance->appendWatchFile(path);

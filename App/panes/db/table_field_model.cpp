@@ -61,6 +61,35 @@ void TableFieldModel::setDatasource(const QList<TableField>& data){
     endResetModel();
 }
 
+void TableFieldModel::appendItem(const TableField& field){
+    beginResetModel();
+    d->data.append(field);
+    endResetModel();
+}
+
+void TableFieldModel::updateItem(const TableField& field){
+    for(int i=0;i<d->data.length();i++){
+        auto one = d->data.at(i);
+        if(one.id==field.id){
+            auto start = this->index(i,Name);
+            auto end = this->index(i,PrimaryKey);
+            d->data[i] = field;
+            emit dataChanged(start,end,QVector<int>{Qt::DisplayRole});
+            return ;
+        }
+    }
+}
+
+void TableFieldModel::removeItem(int row){
+    beginResetModel();
+    d->data.removeAt(row);
+    endResetModel();
+}
+
+QList<TableField>& TableFieldModel::fields() const{
+    return d->data;
+}
+
 TableField TableFieldModel::at(int row) const {
     return d->data.at(row);
 }

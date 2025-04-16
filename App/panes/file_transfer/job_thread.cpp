@@ -27,7 +27,7 @@ void JobThread::run(){
         if(item->type()==FileTransferModelItem::Job){
             m_task = new Task(item);
             int ret = NetworkManager::getInstance()->exec(m_task);
-            qDebug()<<"222222222222"<<ret;
+            //qDebug()<<"222222222222"<<ret;
 
             if(ret==0){
                 //ok
@@ -79,6 +79,12 @@ void JobThread::run(){
 
 void JobThread::abort(){
     if(m_task!=nullptr){
+        m_task->abort = true;
+    }
+}
+
+void JobThread::abortTask(long long id){
+    if(m_task!=nullptr && m_task->id==id){
         m_task->abort = true;
     }
 }

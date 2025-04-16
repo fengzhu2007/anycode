@@ -6,6 +6,7 @@
 #include "network_status_task.h"
 #include "tools/ssl_query/ssl_query_task.h"
 #include "storage/common_storage.h"
+#include "core/debug_log.h"
 #include <QTimer>
 #include <QDateTime>
 #include <QDebug>
@@ -54,10 +55,12 @@ void Schedule::init(QObject* parent){
 }
 
 void Schedule::stop(){
+    DebugLog::write("Schedule","Schedule:stop");
     instance->d->timer.stop();
 }
 
 void Schedule::start(){
+    DebugLog::write("Schedule","Schedule:start");
     instance->d->timer.start();
 }
 
@@ -96,6 +99,7 @@ void Schedule::addSSLQuery(){
 void Schedule::onTimeout(){
     long long mtime = QDateTime::currentDateTime().toMSecsSinceEpoch();
     long long duration = mtime - d->start_time;
+    DebugLog::write("Schedule",QString::fromUtf8("Schedule:onTimeout:%1").arg(d->queue.size()));
     for(auto one:d->queue){
         if(one->isShouldExecute(mtime,duration)){
             one->doing();

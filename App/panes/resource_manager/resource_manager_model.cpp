@@ -31,6 +31,7 @@ public:
     QFileSystemWatcher *watcher;
     QString currentPath;
     QMutex mutex;
+    bool watching;
 };
 
 ResourceManagerModel* ResourceManagerModel::getInstance(){
@@ -55,6 +56,7 @@ ResourceManagerModel::ResourceManagerModel()
     d->iconProvider = ResourceManageIconProvider::getInstance();
     d->root = new ResourceManagerModelItem();
     d->watcher = new QFileSystemWatcher(this);
+    d->watching = true;
     connect(d->watcher,&QFileSystemWatcher::directoryChanged,this,&ResourceManagerModel::onDirectoryChanged);
     connect(this,&ResourceManagerModel::updateChildren,this,&ResourceManagerModel::onUpdateChildren);
 }
@@ -443,12 +445,16 @@ void ResourceManagerModel::removeItem(ResourceManagerModelItem* item){
 
 void ResourceManagerModel::appendWatchDirectory(const QString& path){
     //qDebug()<<"addpath"<<path;
-    d->watcher->addPath(path);
+    auto list = d->watcher->directories();
+    if(list.indexOf(path)==-1){
+        d->watcher->addPath(path);
+    }
+
 }
 
-void ResourceManagerModel::removeWatchDirectory(const QString& path){
+bool ResourceManagerModel::removeWatchDirectory(const QString& path){
     //qDebug()<<"removepath"<<path;
-    d->watcher->removePath(path);
+    return d->watcher->removePath(path);
 }
 
 QStringList ResourceManagerModel::takeWatchDirectory(const QString& path,bool include_children){
@@ -456,8 +462,9 @@ QStringList ResourceManagerModel::takeWatchDirectory(const QString& path,bool in
     QStringList list;
     foreach(auto one,alllist){
         if(path==one || (include_children && one.startsWith(path))){
-            this->removeWatchDirectory(one);
-            list.push_back(one);
+            if(this->removeWatchDirectory(one)){
+                list.push_back(one);
+            }
         }
     }
     return list;
@@ -465,6 +472,10 @@ QStringList ResourceManagerModel::takeWatchDirectory(const QString& path,bool in
 
 QStringList ResourceManagerModel::allWatchDirectory(){
     return d->watcher->directories();
+}
+
+void ResourceManagerModel::setWatching(bool watching){
+    d->watching = watching;
 }
 
 ResourceManagerModelItem* ResourceManagerModel::find(const QString& path){
@@ -607,6 +618,12 @@ void ResourceManagerModel::findAllExpend(ResourceManagerModelItem* item,QJsonArr
 
 void ResourceManagerModel::onDirectoryChanged(const QString &path){
     //to test path
+    if(!d->watching){
+        qDebug()<<"no watching"<<path;
+        d->watching = true;
+        return ;
+    }
+    qDebug()<<"watching"<<path;
     QString message = QString::fromUtf8("DirectoryChanged:%1").arg(path);
     QJsonObject json = {
         {"level",1},

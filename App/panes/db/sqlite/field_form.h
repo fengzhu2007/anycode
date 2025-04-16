@@ -9,9 +9,8 @@ class FieldForm;
 }
 
 namespace ady{
-
 namespace sqlite{
-
+class FieldFormImplPrivate;
 class FieldForm : public FieldFormImpl
 {
     Q_OBJECT
@@ -23,8 +22,14 @@ public:
     virtual void init(const TableField& field) override;
     virtual bool save() override;
 
+
+public slots:
+    void onValueChanged(int state);
+    void onTextChanged(const QString& text);
+
 private:
     Ui::FieldForm *ui;
+    FieldFormImplPrivate* d;
 };
 
 }

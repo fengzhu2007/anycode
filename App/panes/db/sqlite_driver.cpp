@@ -53,7 +53,7 @@ QStringList SQliteDriver::viewList(){
     return d->db.tables(QSql::Views);
 }
 
-QList<TableField> SQliteDriver::tableFields(const QString name) {
+QList<TableField> SQliteDriver::tableFields(const QString& name) {
 
     QSqlQuery query(d->db);
     QString sql = QString::fromUtf8("PRAGMA table_info([%1])").arg(name);
@@ -160,5 +160,182 @@ std::tuple<QList<QSqlField>,QList<QList<QVariant>>,long long> SQliteDriver::quer
     }
 }
 
+bool SQliteDriver::updateTableFields(const QString& name,const QList<TableField>& ofields ,const QList<TableField>& nfields){
+
+    if(tableExists(name)){
+        //update
+        QList<TableField> list;
+        bool changed = false;
+        for(auto nOne:nfields){
+            bool exists = false;
+            for(auto oOne:ofields){
+                if(nOne.id==oOne.id){
+                    exists = true;
+                    if(!oOne.equal(nOne)){
+                        changed = true;
+                    }
+                }
+            }
+            if(exists==false){
+                //new
+                list.append(nOne);
+            }
+        }
+
+        if(changed || ofields.length()!=nfields.length()){
+            this->alterTableByRecreation(name,ofields,nfields);
+        }else if(list.length()>0){
+            for(auto one:list){
+                this->addColumn(name,one);
+            }
+        }
+        return false;
+
+
+    }else{
+        //add table
+        QString sql = QString::fromUtf8("CREATE TABLE [%1] (").arg(name);
+        for(int i=0;i<nfields.length();i++){
+            auto one = nfields.at(i);
+            sql += QString::fromUtf8("[%1] ").arg(one.name);
+            sql += one.type;
+            if(one.length>0){
+                if(one.decimal>0){
+                    sql += QLatin1String("(%1,%2)").arg(one.length).arg(one.decimal);
+                }else{
+                    sql += QLatin1String("(%1)").arg(one.length);
+                }
+            }
+            if(one.primaryKey){
+                sql += QLatin1String(" PRIMARY KEY");
+            }
+            if(one.autoIncrement){
+                sql += QLatin1String(" AUTOINCREMENT");
+            }
+            if(!one.defaultValue.isEmpty()){
+                sql += QLatin1String(" DEFAULT %1").arg(one.defaultValue);
+            }
+            if(one.notNull){
+                sql += QLatin1String(" NOT NULL");
+            }else{
+                sql += QLatin1String(" NULL");
+            }
+            if(i<nfields.length() - 1){
+                sql += QLatin1String(",");
+            }
+        }
+        sql += QLatin1String(");");
+
+        QSqlQuery query(d->db);
+        query.prepare(sql);
+        auto ret = query.exec();
+        return ret;
+
+    }
+
+}
+
+bool SQliteDriver::tableExists(const QString& name){
+    QSqlQuery query(d->db);
+    query.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=:name");
+    query.bindValue(":name", name);
+    if (!query.exec()) {
+        qWarning() << "Query failed:" << query.lastError();
+        return false;
+    }
+    return query.next();
+}
+
+
+bool SQliteDriver::addColumn(const QString &tableName, const TableField& field){
+    auto sql = QString::fromUtf8("ALTER TABLE [%1] ADD COLUMN [%2]").arg(tableName).arg(field.name);
+    if(field.length>0){
+        if(field.decimal>0){
+            sql += QLatin1String("(%1,%2)").arg(field.length).arg(field.decimal);
+        }else{
+            sql += QLatin1String("(%1)").arg(field.length);
+        }
+    }
+    if(field.primaryKey){
+        sql += QLatin1String(" PRIMARY KEY");
+    }
+    if(field.autoIncrement){
+        sql += QLatin1String(" AUTOINCREMENT");
+    }
+    if(!field.defaultValue.isEmpty()){
+        sql += QLatin1String(" DEFAULT %1").arg(field.defaultValue);
+    }
+    if(field.notNull){
+        sql += QLatin1String(" NOT NULL");
+    }else{
+        sql += QLatin1String(" NULL");
+    }
+    QSqlQuery query(d->db);
+    query.prepare(sql);
+    return query.exec();
+}
+
+bool SQliteDriver::editColumn(const QString &tableName, const TableField& ofield,const TableField& nfield){
+    return false;
+}
+
+bool SQliteDriver::dropColumn(const QString &tableName, const TableField& field){
+    return false;
+}
+
+bool SQliteDriver::alterTableByRecreation(const QString &tableName,const QList<TableField>& ofields ,const QList<TableField>& nfields){
+
+    auto existInOldFields = [](const TableField& field,const QList<TableField>& fields){
+        for(auto one:fields){
+            if(one.id==field.id){
+                return one.name;
+            }
+        }
+        return QString();
+    };
+
+
+
+    if(!d->db.transaction()){
+        qDebug() << "Failed to start transaction:" << d->db.lastError().text();
+        return false;
+    }
+
+    try{
+        QString name = QString::fromUtf8("%1_temp").arg(tableName);
+        auto ret = this->updateTableFields(name,{},nfields);
+        if(ret){
+            throw QString::fromUtf8("Create temp table failed");
+        }
+        QStringList oList;
+        QStringList nList;
+
+        for(auto nOne:nfields){
+            auto name = existInOldFields(nOne,ofields);
+            if(!name.isEmpty()){
+                oList.append(QString::fromUtf8("[%1]").arg(name));
+                nList.append(QString::fromUtf8("[%1]").arg(nOne.name));
+            }
+        }
+        QSqlQuery query(d->db);
+        QString sql = QString::fromUtf8("INSERT INTO [%1] (%2) SELECT %3 FROM [%4] ").arg(name).arg(nList.join(",")).arg(oList.join(",")).arg(tableName);
+        if (!query.exec(sql)) {
+            throw QString("Failed to copy data: %1").arg(query.lastError().text());
+        }
+
+        if (!query.exec(QString("DROP TABLE [%1]").arg(tableName))) {
+            throw QString("Failed to drop original table: %1").arg(query.lastError().text());
+        }
+        if (!query.exec(QString("ALTER TABLE [%1] RENAME TO [%2]").arg(name, tableName))) {
+            throw QString("Failed to rename temp table: %1").arg(query.lastError().text());
+        }
+        d->db.commit();
+        return true;
+    }catch(const QString &error){
+        d->db.rollback();
+        qDebug()<<"error"<<error;
+        return false;
+    }
+}
 
 }

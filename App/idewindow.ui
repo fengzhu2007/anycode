@@ -98,7 +98,6 @@
     <addaction name="actionVersion_Control"/>
     <addaction name="separator"/>
     <addaction name="actionServer"/>
-    <addaction name="actionDatabase"/>
     <addaction name="actionTerminal"/>
     <addaction name="separator"/>
     <addaction name="actionFile_Transfer"/>

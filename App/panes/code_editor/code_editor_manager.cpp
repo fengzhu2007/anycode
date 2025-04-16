@@ -192,6 +192,7 @@ Editor* CodeEditorManager::current(){
 
 void CodeEditorManager::setCurrent(Editor* pane){
     d->current = pane;
+    //qDebug()<<"setCurrent"<<d->tabChanged;
     if(d->tabChanged)
         Publisher::getInstance()->post(Type::M_RESOURCE_LOCATION);
     d->tabChanged = true;
@@ -524,21 +525,24 @@ void CodeEditorManager::onTabActionTrigger(){
             if(i==index){
                 pos += 1;
             }else{
+                d->tabChanged = false;//pause resource pane location
                 if(!container->closePane(pos)){
                     pos += 1;
                 }
             }
         }
+        d->tabChanged = false;
     }else if(sender==d->closeAllAction){
         auto container = d->current->container();
         int count  = container->paneCount();
         int pos = 0;
         for(int i=0;i<count;i++){
-            //qDebug()<<"close index"<<pos<<container->paneCount();
+            d->tabChanged = false;//pause resource pane location
             if(!container->closePane(pos)){
                 pos += 1;
             }
         }
+        d->tabChanged = true;
     }else if(sender==d->copyPathAction){
         QApplication::clipboard()->setText(d->current->path());
     }else if(sender==d->openFolderAction){

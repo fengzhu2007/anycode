@@ -31,10 +31,14 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="lineEdit"/>
+      <widget class="QLineEdit" name="name"/>
      </item>
      <item row="1" column="1">
-      <widget class="QComboBox" name="comboBox"/>
+      <widget class="QComboBox" name="type">
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_3">
@@ -72,27 +76,35 @@
       </widget>
      </item>
      <item row="6" column="1">
-      <widget class="QComboBox" name="comboBox_2"/>
+      <widget class="QComboBox" name="defaultValue">
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item row="5" column="1">
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QCheckBox" name="primaryKey">
        <property name="text">
         <string>Primary Key</string>
        </property>
       </widget>
      </item>
      <item row="4" column="1">
-      <widget class="QCheckBox" name="checkBox_2">
+      <widget class="QCheckBox" name="notNull">
        <property name="text">
         <string>Not Null</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QSpinBox" name="spinBox"/>
+      <widget class="QSpinBox" name="length">
+       <property name="maximum">
+        <number>2000</number>
+       </property>
+      </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QSpinBox" name="spinBox_2"/>
+      <widget class="QSpinBox" name="decimal"/>
      </item>
      <item row="7" column="0">
       <widget class="QLabel" name="label_8">
@@ -102,7 +114,7 @@
       </widget>
      </item>
      <item row="7" column="1">
-      <widget class="QCheckBox" name="checkBox_3">
+      <widget class="QCheckBox" name="autoIncrement">
        <property name="text">
         <string>Auto Increment</string>
        </property>
