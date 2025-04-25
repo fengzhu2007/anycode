@@ -1,4 +1,5 @@
 #include "table_data_model.h"
+#include <QColor>
 #include <QDebug>
 namespace ady{
 
@@ -6,6 +7,7 @@ class TableDataModelPrivate{
 public:
     QList<QSqlField> fields;
     QList<QList<QVariant>> data;
+    QList<int> modifications;
 
 };
 
@@ -34,8 +36,30 @@ QVariant TableDataModel::data(const QModelIndex &index, int role) const {
         if(column<item.size()){
             return item.at(column);
         }
+    }else if(role==Qt::ForegroundRole){
+        const auto &item = d->data.at(index.row());
+        auto column = index.column();
+        auto val = item.at(column);
+        if(val.isNull()){
+            return QColor(Qt::lightGray);
+        }
     }
     return {};
+}
+
+bool TableDataModel::setData(const QModelIndex &index, const QVariant &value, int role){
+    if(role==Qt::EditRole){
+        auto item = d->data.at(index.row());
+        auto col = index.column();
+        if(item.at(col)!=value){
+            item[index.column()] = value;
+            d->data[index.row()] = item;
+            if(!d->modifications.contains(index.row())){
+                d->modifications.append(index.row());
+            }
+        }
+    }
+    return QAbstractItemModel::setData(index,value,role);
 }
 
 QVariant TableDataModel::headerData(int section, Qt::Orientation orientation,int role ) const {
@@ -44,7 +68,9 @@ QVariant TableDataModel::headerData(int section, Qt::Orientation orientation,int
             return d->fields.at(section).name();
         }
     }else if(orientation == Qt::Vertical && role==Qt::DisplayRole){
-
+        if(d->modifications.contains(section)){
+            return QString::fromUtf8("*");
+        }
     }
     return {};
 }
@@ -62,6 +88,48 @@ void TableDataModel::setDatasource(const QList<QSqlField>& fields,const QList<QL
     d->fields = fields;
     d->data = data;
     endResetModel();
+}
+
+void TableDataModel::appendItem(const QList<QVariant>& item){
+    beginInsertRows({},d->data.size(),d->data.size());
+    d->data.append(item);
+    endInsertRows();
+
+}
+
+void TableDataModel::appendRow(){
+    QList<QVariant> item;
+    for(int i=0;i<columnCount();i++){
+        auto field = d->fields.at(i);
+        qDebug()<<"fields"<<field.name()<<field.defaultValue();
+        item.append(field.defaultValue());
+    }
+    this->appendItem(item);
+    d->modifications.append(rowCount() - 1);
+}
+
+void TableDataModel::updateItem(int row,const QList<QVariant>& item){
+    d->data[row] = item;
+    auto start = createIndex(row,0);
+    auto end = createIndex(row,item.length() - 1);
+    dataChanged(start,end,QVector<int>{Qt::DisplayRole,Qt::EditRole});
+    this->clearChanged(row);
+}
+
+QMap<long long,QList<QVariant>> TableDataModel::changedData() const{
+    QMap<long long,QList<QVariant>> data;
+
+    for(auto row:d->modifications){
+        data.insert(row,d->data.at(row));
+    }
+    return data;
+}
+
+void TableDataModel::clearChanged(int row){
+    if(d->modifications.contains(row)){
+        d->modifications.removeAll(row);
+        headerDataChanged(Qt::Vertical,row,row);
+    }
 }
 
 }

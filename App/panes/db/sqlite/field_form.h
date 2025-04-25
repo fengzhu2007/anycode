@@ -16,8 +16,10 @@ class FieldForm : public FieldFormImpl
     Q_OBJECT
 
 public:
-    explicit FieldForm(QWidget *parent = nullptr);
+    explicit FieldForm(long long id,QWidget *parent = nullptr);
     ~FieldForm();
+
+    void initView();
 
     virtual void init(const TableField& field) override;
     virtual bool save() override;
@@ -26,6 +28,10 @@ public:
 public slots:
     void onValueChanged(int state);
     void onTextChanged(const QString& text);
+    void onTypeChanged(int index);
+
+private:
+    void setType(const QString& type);
 
 private:
     Ui::FieldForm *ui;

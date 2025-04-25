@@ -40,7 +40,16 @@
        <height>16</height>
       </size>
      </property>
+     <addaction name="actionSave"/>
+     <addaction name="actionSave_All"/>
+     <addaction name="separator"/>
      <addaction name="actionAdd"/>
+     <addaction name="actionDelete"/>
+     <addaction name="separator"/>
+     <addaction name="actionRefresh"/>
+     <addaction name="separator"/>
+     <addaction name="actionPrevious"/>
+     <addaction name="actionNext"/>
     </widget>
    </item>
    <item>
@@ -58,6 +67,78 @@
    </property>
    <property name="text">
     <string>Add</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Save_16x.svg</normaloff>:/Resource/icons/Save_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Cancel_16x.svg</normaloff>:/Resource/icons/Cancel_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionPrevious">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Previous_16x.svg</normaloff>:/Resource/icons/Previous_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Previous</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionNext">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Next_16x.svg</normaloff>:/Resource/icons/Next_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Next</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionSave_All">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/SaveAll_16x.svg</normaloff>:/Resource/icons/SaveAll_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Save All</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Refresh_16x.svg</normaloff>:/Resource/icons/Refresh_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

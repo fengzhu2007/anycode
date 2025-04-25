@@ -137,6 +137,16 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>name</tabstop>
+  <tabstop>type</tabstop>
+  <tabstop>length</tabstop>
+  <tabstop>decimal</tabstop>
+  <tabstop>notNull</tabstop>
+  <tabstop>primaryKey</tabstop>
+  <tabstop>defaultValue</tabstop>
+  <tabstop>autoIncrement</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

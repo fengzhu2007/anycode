@@ -20,6 +20,9 @@ public:
 
     void initData();
 
+public slots:
+    void onActionTriggered();
+
 protected:
 
 private:

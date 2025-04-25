@@ -20,10 +20,17 @@ public:
 
     void initData();
 
+
+    void notifyFieldsChanged();
+
+signals:
+    void fieldsChanged(const QStringList& fields);
+
 public slots:
     void onFieldActivated(const QModelIndex& index);
     void onActionTriggered();
     void onFieldChanged(const QString& name,TableField* field);
+
 
 
 private:

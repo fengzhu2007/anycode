@@ -350,6 +350,9 @@ add_library(App SHARED
         panes/db/sqlite/field_form.h panes/db/sqlite/field_form.cpp panes/db/sqlite/field_form.ui
         panes/db/field_form_impl.h panes/db/field_form_impl.cpp
         core/debug_log.h core/debug_log.cpp
+        panes/db/index_form_impl.h panes/db/index_form_impl.cpp
+        panes/db/sqlite/index_form.h panes/db/sqlite/index_form.cpp panes/db/sqlite/index_form.ui
+        panes/db/table_index_model.h panes/db/table_index_model.cpp
 
 
 

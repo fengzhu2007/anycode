@@ -35,6 +35,9 @@ TableSchemeWidget::TableSchemeWidget(long long id,const QString& table,QWidget *
     ui->tabWidget->addTab(d->indexTab,tr("Index"));
     ui->tabWidget->addTab(d->optionTab,tr("Option"));
 
+    connect(d->fieldTab,&TableFieldWidget::fieldsChanged,d->indexTab,&TableIndexWidget::onFieldsChanged);
+
+    d->fieldTab->notifyFieldsChanged();
 }
 
 TableSchemeWidget::~TableSchemeWidget()

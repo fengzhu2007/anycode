@@ -4,13 +4,15 @@
 #include "dbms_pane.h"
 #include "db_driver.h"
 #include "sqlite/field_form.h"
-#include "components/tree_item_delegate.h"
+#include "components/message_dialog.h"
+#include <w_toast.h>
 #include <QToolBar>
 #include <QAction>
 #include <QSplitter>
 #include <QTreeView>
 #include <QVBoxLayout>
 #include <QTimer>
+#include <QSqlError>
 
 
 namespace Ui {
@@ -58,10 +60,6 @@ public :
         this->treeView->setRootIsDecorated(false);
         this->splitter->addWidget(this->treeView);
 
-        this->form = new ady::sqlite::FieldForm(this->splitter);
-        this->splitter->addWidget(this->form);
-
-
 
 
 
@@ -86,6 +84,16 @@ TableFieldWidget::TableFieldWidget(long long id,const QString& table,QWidget *pa
     , ui(new Ui::TableFieldWidget)
 {
     ui->setupUi(this);
+
+    ui->form = new ady::sqlite::FieldForm(id,ui->splitter);
+    ui->splitter->addWidget(ui->form);
+
+
+
+
+
+
+
     d = new TableFieldWidgetPrivate;
     d->id = id;
     d->name = table;
@@ -115,12 +123,8 @@ void TableFieldWidget::initData(){
     if(instance){
         auto driver = instance->connector(d->id);
         if(driver){
-
             d->fields = driver->tableFields(d->name);
             d->model->setDatasource(d->fields);
-
-
-
         }
     }
 }
@@ -143,18 +147,40 @@ void TableFieldWidget::onActionTriggered(){
         auto ret = driver->updateTableFields(d->name,d->fields,d->model->fields());
         if(ret==false){
             //show error message
+            auto error = driver->lastError();
+            if(error.type()!=QSqlError::NoError){
+                wToast::showText(tr("SQL Error:%1").arg(error.databaseText()));
+            }
+        }else{
+            this->initData();
+            wToast::showText(tr("Save successfully"));
         }
-
     }else if(sender==ui->actionRemove){
-
+        //auto list = ui->treeView->selectionModel()->selectedIndexes();
+        auto index = ui->treeView->selectionModel()->currentIndex();
+        if(index.isValid()){
+            if(MessageDialog::confirm(this,tr("Delete Feild Confirm"),tr("Are you sure you want to delete the current field?"))==QMessageBox::Yes){
+                d->model->removeItem(index.row());
+                this->notifyFieldsChanged();
+            }
+        }
     }
 }
 
 void TableFieldWidget::onFieldChanged(const QString& name,TableField* field){
     //d->modifications.insert(name,*field);
-
     d->model->updateItem(*field);
+    this->notifyFieldsChanged();
 
+}
+
+void TableFieldWidget::notifyFieldsChanged(){
+    auto list = d->model->fields();
+    QStringList array;
+    for(auto one:list){
+        array.append(one.name);
+    }
+    emit fieldsChanged(array);
 }
 
 }
