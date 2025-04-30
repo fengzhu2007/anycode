@@ -57,6 +57,7 @@ public:
     QStringList takeWatchDirectory(const QString& path,bool include_children=true);
     QStringList allWatchDirectory();
     void setWatching(bool watching);
+    void delayWatchDirectory(const QString& path,qint64 msec);
 
     ResourceManagerModelItem* find(const QString& path);
     ResourceManagerModelItem* findProject(const QString& path);

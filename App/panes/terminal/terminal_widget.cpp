@@ -18,6 +18,7 @@ public:
     QString executable;
     QString workingDir;
     IPtyProcess* process = nullptr;
+    bool initialized = false;
 
 };
 
@@ -74,6 +75,10 @@ qint64 TerminalWidget::writeToPty(const QByteArray &data){
 void TerminalWidget::onReadReady(){
     auto data = d->process->readAll();
     this->writeToTerminal(data,false);
+    if(!d->initialized){
+        d->initialized = true;
+        this->setFocus();
+    }
 }
 
 void TerminalWidget::onProcessClose(){

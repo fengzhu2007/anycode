@@ -1250,7 +1250,7 @@ for (let i = 0; i &lt; 3; i++) {
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/sqlite/index_form.ui" line="42"/>
+        <location filename="../panes/db/sqlite/index_form.ui" line="39"/>
         <source>Unique Key</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1597,7 +1597,7 @@ Please enter a new folder name.</source>
     </message>
     <message>
         <location filename="../common.h" line="5"/>
-        <source>1.1.0</source>
+        <source>1.2.0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1707,13 +1707,13 @@ Please enter a new folder name.</source>
         <translation type="unfinished">视图</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="426"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="430"/>
         <source>New File</source>
         <comment>Editor</comment>
         <translation type="unfinished">新建文件</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="428"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="432"/>
         <source>New File (%1)</source>
         <comment>Editor</comment>
         <translation type="unfinished">新建文件 (%1)</translation>
@@ -2605,13 +2605,13 @@ Please enter a new folder name.</source>
         <translation type="unfinished">保存文件</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="248"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="249"/>
         <source>Save</source>
         <comment>Editor</comment>
         <translation type="unfinished">保存</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="248"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="249"/>
         <source>Save file
 %1?</source>
         <comment>Editor</comment>
@@ -2619,7 +2619,7 @@ Please enter a new folder name.</source>
 %1？</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="366"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="370"/>
         <source>The file &quot;%1&quot; is no longer there. 
 Do you want to keep it?</source>
         <comment>Editor</comment>
@@ -2627,7 +2627,7 @@ Do you want to keep it?</source>
 是否保留？</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="378"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="382"/>
         <source>&quot;%1&quot; 
 This file has been modified by another program.
  Reload?</source>
@@ -2637,25 +2637,25 @@ This file has been modified by another program.
 是否重新加载？</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="461"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="465"/>
         <source>Row:%1, Col:%2</source>
         <comment>Editor</comment>
         <translation type="unfinished">行：%1， 列：%2</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="480"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="484"/>
         <source>Unkown</source>
         <comment>Editor</comment>
         <translation type="unfinished">未知</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="485"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="489"/>
         <source>Space</source>
         <comment>Editor</comment>
         <translation type="unfinished">空白</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="487"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="491"/>
         <source>Tab</source>
         <comment>Editor</comment>
         <translation type="unfinished"></translation>
@@ -3076,22 +3076,22 @@ Last Modify:%3</source>
         <translation type="unfinished">终端</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="392"/>
+        <location filename="../idewindow.cpp" line="396"/>
         <source>Select Folder</source>
         <translation type="unfinished">选择文件夹</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="395"/>
+        <location filename="../idewindow.cpp" line="399"/>
         <source>Open File</source>
         <translation type="unfinished">打开文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="395"/>
+        <location filename="../idewindow.cpp" line="399"/>
         <source>All Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="571"/>
+        <location filename="../idewindow.cpp" line="575"/>
         <source>Text &quot;%1&quot; not found</source>
         <translation type="unfinished">文本 &quot;%1&quot; 未找到</translation>
     </message>
@@ -3505,12 +3505,12 @@ This file has been modified by another program.
 <context>
     <name>ady::ResourceManagerModel</name>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_model.cpp" line="212"/>
+        <location filename="../panes/resource_manager/resource_manager_model.cpp" line="216"/>
         <source>Name</source>
         <translation type="unfinished">名称</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_model.cpp" line="630"/>
+        <location filename="../panes/resource_manager/resource_manager_model.cpp" line="659"/>
         <source>ResourceManager</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3615,24 +3615,24 @@ You can restore this file from the Recycle Bin.</source>
 您可以从回收站还原此文件。</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="967"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="977"/>
         <source>Upload</source>
         <translation type="unfinished">上传</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="993"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1003"/>
         <source>All Sites</source>
         <translation type="unfinished">所有站点</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1002"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1012"/>
         <source>Close Confirm</source>
         <translation type="unfinished">关闭确认</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1002"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1012"/>
         <source>Are you sure you want to close &apos;%1&apos;?</source>
-        <translation type="unfinished">是否确定关闭“%!”？</translation>
+        <translation type="unfinished">是否确定关闭“%1”？</translation>
     </message>
 </context>
 <context>
@@ -4107,17 +4107,17 @@ files to &quot;%2&quot;?</source>
         <translation type="unfinished">终端</translation>
     </message>
     <message>
-        <location filename="../panes/terminal/terminal_pane.cpp" line="229"/>
+        <location filename="../panes/terminal/terminal_pane.cpp" line="230"/>
         <source>Command Prompt</source>
         <translation type="unfinished">命令提示符</translation>
     </message>
     <message>
-        <location filename="../panes/terminal/terminal_pane.cpp" line="233"/>
+        <location filename="../panes/terminal/terminal_pane.cpp" line="234"/>
         <source>PowerShell</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/terminal/terminal_pane.cpp" line="240"/>
+        <location filename="../panes/terminal/terminal_pane.cpp" line="241"/>
         <source>Bash</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4125,7 +4125,7 @@ files to &quot;%2&quot;?</source>
 <context>
     <name>ady::TerminalWidget</name>
     <message>
-        <location filename="../panes/terminal/terminal_widget.cpp" line="102"/>
+        <location filename="../panes/terminal/terminal_widget.cpp" line="107"/>
         <source>Start Failed,Error:%1</source>
         <translation type="unfinished">启动失败，错误：%1</translation>
     </message>

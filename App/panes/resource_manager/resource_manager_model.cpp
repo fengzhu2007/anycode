@@ -18,6 +18,8 @@
 #include <QJsonObject>
 #include <QMimeData>
 #include <QDebug>
+#include <QElapsedTimer>
+
 namespace ady{
 
 
@@ -32,6 +34,8 @@ public:
     QString currentPath;
     QMutex mutex;
     bool watching;
+    QElapsedTimer timer;
+    QMap<QString,qint64> directories;
 };
 
 ResourceManagerModel* ResourceManagerModel::getInstance(){
@@ -457,6 +461,18 @@ bool ResourceManagerModel::removeWatchDirectory(const QString& path){
     return d->watcher->removePath(path);
 }
 
+void ResourceManagerModel::delayWatchDirectory(const QString& path,qint64 msec){
+    if(d->directories.size()==0){
+        d->timer.start();
+    }
+    if(d->directories.contains(path)){
+        d->directories[path] = d->timer.elapsed() + msec;
+    }else{
+        d->directories.insert(path,d->timer.elapsed() + msec);
+    }
+
+}
+
 QStringList ResourceManagerModel::takeWatchDirectory(const QString& path,bool include_children){
     auto alllist = d->watcher->directories();
     QStringList list;
@@ -619,11 +635,24 @@ void ResourceManagerModel::findAllExpend(ResourceManagerModelItem* item,QJsonArr
 void ResourceManagerModel::onDirectoryChanged(const QString &path){
     //to test path
     if(!d->watching){
-        qDebug()<<"no watching"<<path;
+        //qDebug()<<"no watching"<<path;
         d->watching = true;
         return ;
     }
-    qDebug()<<"watching"<<path;
+    //qDebug()<<"watching"<<path;
+
+    if(d->directories.contains(path)){
+        auto msec = d->timer.elapsed() - d->directories[path];
+        qDebug()<<"onDirectoryChanged path"<<path<<msec;
+        if(msec<0){
+
+            return ;
+        }
+        d->directories.remove(path);
+    }
+
+
+
     QString message = QString::fromUtf8("DirectoryChanged:%1").arg(path);
     QJsonObject json = {
         {"level",1},

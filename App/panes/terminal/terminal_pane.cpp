@@ -213,6 +213,7 @@ void TerminalPane::onCurrentChanged(int index){
     d->currentExecutable = widget->executablePath();
 }
 
+
 void TerminalPane::updateToolBar(){
     ui->actionRemove->setEnabled(ui->tabWidget->count()>1);
 }

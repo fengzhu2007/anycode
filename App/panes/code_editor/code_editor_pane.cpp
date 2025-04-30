@@ -166,8 +166,9 @@ bool CodeEditorPane::save(bool rename){
     QFileInfo fi(path);
     auto m = ResourceManagerModel::getInstance();
     QString folder = fi.dir().absolutePath();
-    auto list = m->takeWatchDirectory(folder,false);
+    //auto list = m->takeWatchDirectory(folder,false);
     //m->setWatching(false);
+    m->delayWatchDirectory(folder,500);
     auto ret = this->writeFile(path);
     if(ret){
         //rename tab title
@@ -205,9 +206,9 @@ bool CodeEditorPane::save(bool rename){
 
     //qDebug()<<m->allWatchDirectory();
 
-    if(!list.isEmpty()){
+    /*if(!list.isEmpty()){
         m->appendWatchDirectory(list.at(0));
-    }
+    }*/
     //instance->appendWatchFile(path);
     //DebugLog::write(QString::fromUtf8("File save"),QString::fromUtf8("folder:%1;%2").arg(folder).arg(m->allWatchDirectory().join("|")));
     return ret;
@@ -307,6 +308,9 @@ void CodeEditorPane::autoSave(){
     auto instance = CodeEditorManager::getInstance();
     instance->removeWatchFile(path);
     auto m = ResourceManagerModel::getInstance();
+    QFileInfo fi(path);
+    QString folder = fi.dir().absolutePath();
+    m->delayWatchDirectory(folder,500);
     if(!this->writeFile(path)){
 
     }

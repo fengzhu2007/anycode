@@ -324,9 +324,13 @@ bool IDEWindow::onReceive(Event* e){
     }else if(e->id()==Type::M_OPEN_FILE_TRANSFTER){
         auto pane = FileTransferPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
+        qDebug()<<"M_OPEN_FILE_TRANSFTER";
     }else if(e->id()==Type::M_OPEN_PANE){
         auto one = static_cast<QString*>(e->data());
-        PaneLoader::open(m_dockingPaneManager,*one,{});
+        auto pane = PaneLoader::open(m_dockingPaneManager,*one,{});
+        if(pane!=nullptr){
+            pane->activeToCurrent();
+        }
     }else if(e->id()==Type::M_RESTART){
         //qDebug()<<"restart";
         this->restart();
