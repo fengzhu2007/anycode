@@ -13,6 +13,7 @@ namespace ady{
 class DBDriver;
 class DBRecord;
 class TablePane;
+class DBMSModelItem;
 using InitDBConnectFunc = std::function<DBDriver*(const DBRecord&)>;
 
 class DBMSPanePrivate;
@@ -43,6 +44,7 @@ public:
     void openConnectDialog(const QString& driver,const DBRecord& data);
 
     TablePane* openTablePane(long long id,const QString& table);
+    void removeTablePane(TablePane* pane);
 
     DBDriver* connector(long long id);
 
@@ -65,6 +67,8 @@ public slots:
     //void onRename(ServerManageModelItem* item,const QString& newName);
     void onThreadFinished();
     void onOutput(const QString& message,int status);
+
+    void onRename(DBMSModelItem* item,const QString& name);
     //void onDropUpload(const QMimeData* data);
 
 

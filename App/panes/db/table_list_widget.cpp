@@ -4,6 +4,7 @@
 #include "table_data_model.h"
 #include "dbms_pane.h"
 #include "db_driver.h"
+#include "components/message_dialog.h"
 
 namespace ady{
 class TableListWidgetPrivate{
@@ -59,13 +60,21 @@ void TableListWidget::initData(){
     if(instance){
         auto driver = instance->connector(d->id);
         if(driver){
-            auto result = driver->queryData(d->name);
+            int offset = (d->page - 1) * d->num;
+            auto result = driver->queryData(d->name,{},{},{},offset,d->num);
             d->fields = std::get<0>(result);
             d->data = std::get<1>(result);
             d->total = std::get<2>(result);
             d->model->setDatasource(d->fields,d->data);
+
+            ui->actionPrevious->setEnabled(d->page>1);
+            ui->actionNext->setEnabled(d->data.size()>=d->num);
         }
     }
+}
+
+void TableListWidget::setTableName(const QString& tableName){
+    d->name = tableName;
 }
 
 void TableListWidget::onActionTriggered(){
@@ -93,6 +102,10 @@ void TableListWidget::onActionTriggered(){
                         if(ret){
                             d->data[row] = iter.value();
                             d->model->clearChanged(row);
+                        }else{
+                            //driver->err
+                            MessageDialog::error(this,driver->errorText());
+                            return ;
                         }
                     }
                     iter++;
@@ -102,11 +115,38 @@ void TableListWidget::onActionTriggered(){
     }else if(sender==ui->actionAdd){
         d->model->appendRow();
     }else if(sender==ui->actionDelete){
+        QModelIndex index = ui->tableView->selectionModel()->currentIndex();
+        if(index.isValid()){
+            int row = index.row();
+            if(row >= d->data.size()){
+                d->model->removeRow(row);
+                return ;
+            }
+            auto item = d->data.at(row);
+            auto driver = DBMSPane::getInstance()->connector(d->id);
+            if(driver){
+                if(MessageDialog::confirm(this,tr("Are you want to delete current record?"))==QMessageBox::Yes){
+                    auto ret = driver->del(d->name,d->fields,item);
+                    if(ret){
+                        d->model->removeRow(row);
+                    }else{
+                        MessageDialog::error(this,driver->errorText());
+                    }
 
+                }
+
+
+
+            }
+        }
     }else if(sender==ui->actionPrevious){
-
+        if(d->page>1){
+            d->page -= 1;
+        }
+        this->initData();
     }else if(sender==ui->actionNext){
-
+        d->page +=1 ;
+        this->initData();
     }else if(sender==ui->actionRefresh){
         this->initData();
     }

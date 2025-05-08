@@ -64,6 +64,15 @@ public:
         return m_data.at(i).first;
     }
 
+    int indexOf(T v) const{
+        for(int i=0;i<m_data.size();i++){
+            if(v==m_data.at(i).first){
+                return i;
+            }
+        }
+        return -1;
+    }
+
 private:
     QList<QPair<T,QString>> m_data;
 };

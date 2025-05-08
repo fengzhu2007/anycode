@@ -2,6 +2,7 @@
 #include "ui_table_pane.h"
 #include "table_list_widget.h"
 #include "table_scheme_widget.h"
+#include "dbms_pane.h"
 //#include "dbms_model.h"
 
 namespace ady{
@@ -56,6 +57,7 @@ TablePane::TablePane(long long dbid,int type,const QString& name,QWidget *parent
 
 TablePane::~TablePane()
 {
+    DBMSPane::getInstance()->removeTablePane(this);
     delete ui;
     delete d;
 }
@@ -76,6 +78,11 @@ QString& TablePane::name() const{
     return d->name;
 }
 
+void TablePane::setTableName(const QString& tableName){
+    d->name = tableName;
+    d->listTab->setTableName(d->name);
+    d->schemeTab->setTableName(d->name);
+}
 
 
 }

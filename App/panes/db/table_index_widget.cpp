@@ -93,7 +93,7 @@ TableIndexWidget::TableIndexWidget(long long id,const QString& table,QWidget *pa
     ui->treeView->setAlternatingRowColors(true);
     //ui->treeView->setShowGrid(true);
     connect(ui->treeView,&QAbstractItemView::clicked,this,&TableIndexWidget::onFieldActivated);
-    connect(ui->form,&sqlite::IndexForm::change,this,&TableIndexWidget::onFieldChanged);
+    connect(ui->form,&sqlite::IndexForm::change,this,&TableIndexWidget::onIndexChanged);
 
     connect(ui->actionAdd,&QAction::triggered,this,&TableIndexWidget::onActionTriggered);
     connect(ui->actionSave,&QAction::triggered,this,&TableIndexWidget::onActionTriggered);
@@ -120,6 +120,10 @@ void TableIndexWidget::initData(){
             d->model->setDatasource(d->indexes);
         }
     }
+}
+
+void TableIndexWidget::setTableName(const QString& tableName){
+    d->name = tableName;
 }
 
 void TableIndexWidget::onFieldActivated(const QModelIndex& index){
@@ -152,16 +156,16 @@ void TableIndexWidget::onActionTriggered(){
         //auto list = ui->treeView->selectionModel()->selectedIndexes();
         auto index = ui->treeView->selectionModel()->currentIndex();
         if(index.isValid()){
-            if(MessageDialog::confirm(this,tr("Delete Feild Confirm"),tr("Are you sure you want to delete the current field?"))==QMessageBox::Yes){
+            if(MessageDialog::confirm(this,tr("Delete Index Confirm"),tr("Are you sure you want to delete the current index?"))==QMessageBox::Yes){
                 d->model->removeItem(index.row());
             }
         }
     }
 }
 
-void TableIndexWidget::onFieldChanged(const QString& name,TableIndex* index){
+void TableIndexWidget::onIndexChanged(const QString& name,TableIndex* index){
     //d->modifications.insert(name,*field);
-
+    //qDebug()<<"onIndexChanged"<<index->id<<index->name<<index->fields.size();
     d->model->updateItem(*index);
 
 }

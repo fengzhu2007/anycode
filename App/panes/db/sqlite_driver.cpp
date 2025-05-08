@@ -91,12 +91,16 @@ QList<TableIndex> SQliteDriver::tableIndexes(const QString& name){
     query.prepare(QString::fromUtf8("SELECT * FROM sqlite_master WHERE type = 'index' AND tbl_name =?"));
     query.bindValue(0,name);
     QList<TableIndex> list;
+    auto ret = query.exec();
+    if(ret==false){
+        qDebug() << "Error getting table info:" << query.lastError().text();
+        return {};
+    }
     while (query.next()) {
-
+        qDebug()<<"one index";
         QString sql = query.value("sql").toString();
         TableIndex index;
         this->parseIndex(index,sql);
-
         list.append(index);
     }
     return list;
@@ -153,16 +157,20 @@ void SQliteDriver::parseIndex(TableIndex& tIndex,const QString& sql){
               "typename" COLLATE NOCASE ASC,
               "typelabel"
             )*/
+    //qDebug()<<"index sql"<<sql;
     QList<TableIndexColumn> columns;
     int step = 0;//0=find index name,1=find field,
     int index = 0;
-    int start = 0;
+    int start = -1;
+
     while(index < sql.length()){
         QChar ch = sql.at(index);
         switch(ch.unicode()){
         case '"':
         case '\'':
-            if(start==0){
+        case '[':
+        case ']':
+            if(start==-1){
                 start = index+1;//quote start
             }else{
                 if(step==0){
@@ -170,14 +178,45 @@ void SQliteDriver::parseIndex(TableIndex& tIndex,const QString& sql){
                     QString name = sql.mid(start,index - start);
                     tIndex.name = name;
                     step = 10;//set unknow
-                    qDebug()<<"name"<<name;
+                    //qDebug()<<"name"<<name;
                 }else if(step==1){
                     //find column name
                     QString name = sql.mid(start,index - start);
                     step=2;//find field extra info
+                    TableIndexColumn filed = {name};
+                    //qDebug()<<"field name"<<name;
+
+                    int ss = -1;
+                    while(index<sql.length()){
+                        auto chr = sql.at(index);
+                        if(chr.isLetterOrNumber()){
+                            if(ss==-1){
+                                ss = index;
+                            }
+                        }else if(chr.isLetterOrNumber()==false){
+                            if(ss>-1){
+                                auto str = sql.mid(ss,index-ss).toUpper();
+                                //qDebug()<<"str:"<<str;
+                                if(str==QLatin1String("BINARY") || str==QLatin1String("NOCASE") || str==QLatin1String("RTRIM")){
+                                    filed.collate = str;
+                                }else if(str==QLatin1String("ASC") || str==QLatin1String("DESC")){
+                                    filed.order = str;
+                                }
+                                ss = -1;
+                            }
+                        }
+                        if(chr==QLatin1Char(',') || chr==QLatin1Char(')')){
+                            step = 1;//reset to find field
+                            break ;
+                        }
+                        index++;
+                    }
+
+                    columns.append(filed);
+
                     //columns.append()
                 }
-                start = 0;
+                start = -1;
             }
             break;
         case '(':
@@ -186,11 +225,27 @@ void SQliteDriver::parseIndex(TableIndex& tIndex,const QString& sql){
         case ',':
             step = 1;//reset to find field
             break;
-
-
+        default:
+            if(step==0){
+                if(ch.isLetterOrNumber()){
+                    if(start==-1){
+                        start = index;
+                    }
+                }else if(ch.isSpace()){
+                    if(start>-1){
+                        auto str = sql.mid(start,index-start).toUpper();
+                        if(str==QLatin1String("UNIQUE")){
+                            tIndex.isUnique = true;
+                        }
+                        start = -1;
+                    }
+                }
+            }
+            break;
         }
         index++;
     }
+    tIndex.fields = columns;
 
 }
 
@@ -219,7 +274,6 @@ std::tuple<QList<QSqlField>,QList<QList<QVariant>>,long long> SQliteDriver::quer
             }
             list.append(item);
         }
-        //d->db.driver()->FieldName();
         return std::make_tuple(std::move(fields),std::move(list),total);
     }else{
         return std::make_tuple(QList<QSqlField>{},QList<QList<QVariant>>{},0);
@@ -261,6 +315,7 @@ bool SQliteDriver::updateTableFields(const QString& name,const QList<TableField>
         //qDebug()<<"changed"<<changed<<list.size();
 
         if(changed){
+            //qDebug()<<"change fields";
             return this->alterTableByRecreation(name,ofields,nfields);
         }else if(list.size()>0){
             return this->addColumns(name,list);
@@ -317,19 +372,20 @@ bool SQliteDriver::updateTableIndexes(const QString& name,const QList<TableIndex
         }
         try{
             for(auto index:nIndexes){
-                QString sql = QString::fromUtf8("CREATE INDEX [%1] ON [%2] (").arg(index.name).arg(name);
+                QString sql = QString::fromUtf8("CREATE %1 INDEX [%2] ON [%3] (").arg(index.isUnique?"UNIQUE":"").arg(index.name).arg(name);
                 int i=0;
                 for(auto field:index.fields){
                     sql += QString::fromUtf8("[%1] %2  %3").arg(field.name).arg(field.collate.isEmpty()?"":("COLLATE "+ field.collate)).arg(field.order);
                     if(i<index.fields.length() - 1){
                         sql += ",";
                     }
+                    i++;
                 }
                 sql += ")";
                 QSqlQuery query = d->db.exec(sql);
                 d->error = query.lastError();
                 if(d->error.type()!=QSqlError::NoError){
-                    throw QString("Failed to add index: %1").arg(index.name);
+                    throw QString("Failed to add index: %1;SQL:%2").arg(index.name).arg(sql);
                 }
             }
             d->db.commit();
@@ -397,13 +453,15 @@ bool SQliteDriver::updateTableIndexes(const QString& name,const QList<TableIndex
 
 
             for(auto one:list){
-                QString sql = QString::fromUtf8("CREATE INDEX [%1] ON [%2] (").arg(one.name).arg(name);
+                //QString sql = QString::fromUtf8("CREATE INDEX [%1] ON [%2] (").arg(one.name).arg(name);
+                QString sql = QString::fromUtf8("CREATE %1 INDEX [%2] ON [%3] (").arg(one.isUnique?"UNIQUE":"").arg(one.name).arg(name);
                 int i=0;
                 for(auto field:one.fields){
                     sql += QString::fromUtf8("[%1] %2  %3").arg(field.name).arg(field.collate.isEmpty()?"":("COLLATE "+ field.collate)).arg(field.order);
                     if(i<one.fields.length() - 1){
                         sql += ",";
                     }
+                    i++;
                 }
                 sql += ")";
                 QSqlQuery query = d->db.exec(sql);
@@ -464,7 +522,7 @@ bool SQliteDriver::insert(const QString& name,const QList<QSqlField>& fields,QLi
         return false;
     }
     sql += list.join(",")+") VALUES ("+placeholderlist.join(",")+")";
-    qDebug()<<"sql"<<sql;
+    //qDebug()<<"sql"<<sql;
     QSqlQuery query(d->db);
     query.prepare(sql);
     int i = 0;
@@ -491,7 +549,6 @@ bool SQliteDriver::insert(const QString& name,const QList<QSqlField>& fields,QLi
 }
 
 bool SQliteDriver::update(const QString& name,const QList<QSqlField>& fields,const QList<QVariant>& oData,const QList<QVariant>& nData){
-
         //update
         QSqlIndex primaryIndex = d->db.primaryIndex(name);
         QString sql = QString::fromUtf8("UPDATE [%1] SET ").arg(name);
@@ -528,6 +585,65 @@ bool SQliteDriver::update(const QString& name,const QList<QSqlField>& fields,con
         }
         return ret;
 
+}
+
+bool SQliteDriver::del(const QString& name,const QList<QSqlField>& fields,QList<QVariant>& data ){
+    QSqlIndex primaryIndex = d->db.primaryIndex(name);
+    QString sql = QString::fromUtf8("DELETE FROM [%1] WHERE 1=1 ").arg(name);
+    QStringList placeholderlist;
+    QStringList whereList;
+    QList<QVariant> whereValue;
+    for(int i=0;i<fields.length();i++){
+        auto field = fields.at(i);
+        auto oOne = data.at(i);
+
+        if(primaryIndex.contains(field.name())){
+            sql += QString::fromUtf8(" AND [%1]=?").arg(field.name());
+            whereValue.append(oOne);
+        }
+    }
+    if(whereValue.size()==0){
+        return false;
+    }
+    QSqlQuery query(d->db);
+    query.prepare(sql);
+    int i = 0;
+    for(auto one:whereValue){
+        query.bindValue(i++,one);
+    }
+    auto ret = query.exec();
+    if(!ret){
+        d->error = query.lastError();
+    }
+    return ret;
+}
+
+bool SQliteDriver::rename(const QString& oldName,const QString& newName){
+    QSqlQuery query(d->db);
+    if(query.exec(QString::fromUtf8("ALTER TABLE [%1] RENAME TO [%2]").arg(oldName).arg(newName))){
+        return true;
+    }else{
+        d->error = query.lastError();
+        return false;
+    }
+}
+
+bool SQliteDriver::dropTable(const QString& name){
+    QSqlQuery query(d->db);
+    if(query.exec(QString::fromUtf8("DROP TABLE IF EXISTS [%1]").arg(name))){
+        return true;
+    }else{
+        d->error = query.lastError();
+        return false;
+    }
+}
+
+QSqlError SQliteDriver::error(){
+    return d->error;
+}
+
+QString SQliteDriver::errorText() {
+    return d->error.driverText() + d->error.databaseText();
 }
 
 bool SQliteDriver::tableExists(const QString& name){
@@ -612,7 +728,32 @@ bool SQliteDriver::alterTableByRecreation(const QString &tableName,const QList<T
         qDebug() << "Failed to start transaction:" << d->db.lastError().text();
         return false;
     }
+
+    //get index trigger
+    QSqlQuery query(d->db);
+    query.prepare(QString::fromUtf8("SELECT * FROM sqlite_master WHERE (type = 'index' OR type='trigger') AND tbl_name =?"));
+    query.bindValue(0,tableName);
+    QStringList sqllist;
+    auto ret = query.exec();
+    if(ret==false){
+        d->error = query.lastError();
+        qDebug() << "Error getting table info:" << query.lastError().text();
+        return false;
+    }
+    while (query.next()) {
+        QString sql = query.value("sql").toString();
+        sqllist.append(sql);
+    }
+
     try{
+
+        QSqlQuery query(d->db);
+        if (!query.exec(QString::fromUtf8("PRAGMA foreign_keys=OFF"))) {
+            d->error = query.lastError();
+            throw QString("SQL error: %1").arg(query.lastError().text());
+        }
+
+
         QString name = QString::fromUtf8("%1_temp").arg(tableName);
         auto ret = this->updateTableFields(name,{},nfields);
         if(!ret){
@@ -627,7 +768,7 @@ bool SQliteDriver::alterTableByRecreation(const QString &tableName,const QList<T
                 nList.append(QString::fromUtf8("[%1]").arg(nOne.name));
             }
         }
-        QSqlQuery query(d->db);
+
         QString sql = QString::fromUtf8("INSERT INTO [%1] (%2) SELECT %3 FROM [%4] ").arg(name).arg(nList.join(",")).arg(oList.join(",")).arg(tableName);
         if (!query.exec(sql)) {
             d->error = query.lastError();
@@ -642,6 +783,19 @@ bool SQliteDriver::alterTableByRecreation(const QString &tableName,const QList<T
             d->error = query.lastError();
             throw QString("Failed to rename temp table: %1").arg(query.lastError().text());
         }
+        for(auto sql:sqllist){
+            auto ret = query.exec(sql);
+            if(ret==false){
+                d->error = query.lastError();
+                throw QString("Execute sql error: %1").arg(query.lastError().text());
+            }
+        }
+
+        if (!query.exec(QString::fromUtf8("PRAGMA foreign_keys=ON"))) {
+            d->error = query.lastError();
+            throw QString("SQL error: %1").arg(query.lastError().text());
+        }
+
         d->db.commit();
         return true;
     }catch(const QString &error){

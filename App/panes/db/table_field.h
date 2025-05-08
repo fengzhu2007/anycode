@@ -48,7 +48,7 @@ public:
     bool notNull=false;
     inline bool equal(const TableField& other) const{
         if(name==other.name && type==other.type && length==other.length && decimal==other.decimal && primaryKey==other.primaryKey && autoIncrement==other.autoIncrement
-            && notNull==other.notNull){
+            && notNull==other.notNull && defaultValue==other.defaultValue){
             return true;
         }else{
             return false;
@@ -82,14 +82,19 @@ public:
 
     }
 
-    TableIndex(const TableField& other){
+    TableIndex(const TableIndex& other){
         this->id = other.id;
         this->name = other.name;
+        this->isUnique = other.isUnique;
+        this->fields = other.fields;
+
     }
 
     TableIndex& operator=(const TableIndex& other) {
         this->id = other.id;
         this->name = other.name;
+        this->isUnique = other.isUnique;
+        this->fields = other.fields;
         return *this;
     }
 

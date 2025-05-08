@@ -40,6 +40,11 @@ public:
     virtual QSqlError lastError()=0;
     virtual bool insert(const QString& name,const QList<QSqlField>& fields,QList<QVariant>& data)=0;
     virtual bool update(const QString& name,const QList<QSqlField>& fields,const QList<QVariant>& oData,const QList<QVariant>& nData)=0;
+    virtual bool del(const QString& name,const QList<QSqlField>& fields,QList<QVariant>& data )=0;
+    virtual bool rename(const QString& oldName,const QString& newName)=0;
+    virtual bool dropTable(const QString& name)=0;
+    virtual QSqlError error()=0;
+    virtual QString errorText()=0;
 
 public:
     DBDriverPrivate* d;

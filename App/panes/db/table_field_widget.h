@@ -19,6 +19,7 @@ public:
     ~TableFieldWidget();
 
     void initData();
+    void setTableName(const QString& tableName);
 
 
     void notifyFieldsChanged();

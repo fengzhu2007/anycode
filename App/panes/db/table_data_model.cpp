@@ -101,11 +101,17 @@ void TableDataModel::appendRow(){
     QList<QVariant> item;
     for(int i=0;i<columnCount();i++){
         auto field = d->fields.at(i);
-        qDebug()<<"fields"<<field.name()<<field.defaultValue();
         item.append(field.defaultValue());
     }
     this->appendItem(item);
     d->modifications.append(rowCount() - 1);
+}
+
+void TableDataModel::removeRow(int row){
+    beginRemoveRows({},row,row);
+    d->data.removeAt(row);
+    endRemoveRows();
+    d->modifications.removeOne(row);
 }
 
 void TableDataModel::updateItem(int row,const QList<QVariant>& item){
@@ -130,6 +136,10 @@ void TableDataModel::clearChanged(int row){
         d->modifications.removeAll(row);
         headerDataChanged(Qt::Vertical,row,row);
     }
+}
+
+const QList<QVariant>& TableDataModel::at(int row) const{
+    return d->data.at(row);
 }
 
 }

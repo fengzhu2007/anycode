@@ -29,11 +29,11 @@ TableSchemeWidget::TableSchemeWidget(long long id,const QString& table,QWidget *
 
     d->fieldTab = new TableFieldWidget(id,table,ui->tabWidget);
     d->indexTab = new TableIndexWidget(id,table,ui->tabWidget);
-    d->optionTab = new TableOptionWidget(id,table,ui->tabWidget);
+    //d->optionTab = new TableOptionWidget(id,table,ui->tabWidget);
 
     ui->tabWidget->addTab(d->fieldTab,tr("Field"));
     ui->tabWidget->addTab(d->indexTab,tr("Index"));
-    ui->tabWidget->addTab(d->optionTab,tr("Option"));
+    //ui->tabWidget->addTab(d->optionTab,tr("Option"));
 
     connect(d->fieldTab,&TableFieldWidget::fieldsChanged,d->indexTab,&TableIndexWidget::onFieldsChanged);
 
@@ -44,6 +44,11 @@ TableSchemeWidget::~TableSchemeWidget()
 {
     delete ui;
     delete d;
+}
+
+void TableSchemeWidget::setTableName(const QString& tableName){
+    d->fieldTab->setTableName(tableName);
+    d->indexTab->setTableName(tableName);
 }
 
 }

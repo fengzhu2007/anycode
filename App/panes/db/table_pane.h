@@ -26,6 +26,7 @@ public:
     virtual QString id() override;
     virtual QString group() override;
     QString& name() const;
+    void setTableName(const QString& tableName);
 
 
 public:

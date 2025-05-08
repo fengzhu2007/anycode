@@ -6,6 +6,7 @@
 #include <docking_pane_container.h>
 #include <docking_pane_layout_item_info.h>
 #include <docking_workbench.h>
+#include <docking_pane_container_tabbar.h>
 #include <w_toast.h>
 
 #include "core/event_bus/event.h"
@@ -21,6 +22,7 @@
 #include "dbms_thread.h"
 #include "dbms_model.h"
 #include "table_pane.h"
+#include "components/message_dialog.h"
 
 #include <QMenu>
 #include <QToolButton>
@@ -86,6 +88,8 @@ DBMSPane::DBMSPane(QWidget *parent)
     connect(ui->actionOpen_Table,&QAction::triggered,this,&DBMSPane::onActionTriggered);
     connect(ui->actionScheme_Table,&QAction::triggered,this,&DBMSPane::onActionTriggered);
     connect(ui->actionNew_Table,&QAction::triggered,this,&DBMSPane::onActionTriggered);
+
+    connect(d->model,&DBMSModel::rename,this,&DBMSPane::onRename);
 
     this->registerInitCallback<SQliteDriver>("sqlite","SQLite");//init sqlite
     this->initView();
@@ -176,7 +180,18 @@ TablePane* DBMSPane::openTablePane(long long id,const QString& table){
     auto pane = new TablePane(id,DBMSModelItem::Table,table);//open table
     auto workbench = this->container()->workbench();
     workbench->manager()->createPane(pane,DockingPaneManager::Center,true);
+    d->panels.append({id,pane});
     return pane;
+}
+
+void DBMSPane::removeTablePane(TablePane* pane){
+    auto iter = d->panels.begin();
+    while(iter!=d->panels.end()){
+        if(iter->second==pane){
+            d->panels.erase(iter);
+            return ;
+        }
+    }
 }
 
 DBDriver* DBMSPane::connector(long long id){
@@ -333,6 +348,24 @@ void DBMSPane::onActionTriggered(){
 
     }else if(sender==ui->actionNew_Table){
 
+    }else if(sender==ui->actionDelete){
+        QModelIndex index = ui->treeView->selectionModel()->currentIndex();
+        if(index.isValid()){
+            auto item = static_cast<DBMSModelItem*>(index.internalPointer());
+            if(item->type()==DBMSModelItem::Table){
+                if(MessageDialog::confirm(this,tr("Delete Table"),tr("Are you want to delete table [%1]?").arg(item->name()))==QMessageBox::Yes){
+                    auto driver = d->connectManager.find(item->pid()).value();
+                    auto ret = driver->dropTable(item->name());
+                    if(ret){
+                        //remove item
+                        d->model->removeItem(item);
+                    }else{
+                        MessageDialog::error(this,tr("SQL Error:%1").arg(driver->errorText()));
+                    }
+                }
+            }
+
+        }
     }
 }
 
@@ -348,6 +381,44 @@ void DBMSPane::onOutput(const QString& message,int status){
         {"content",message}
     };
     Publisher::getInstance()->post(Type::M_OUTPUT,json);
+}
+
+void DBMSPane::onRename(DBMSModelItem* item,const QString& name){
+    if(item->type()==DBMSModelItem::Table){
+        auto oldName = item->name();
+        if(oldName!=name){
+            auto id = item->pid();
+            auto driver = DBMSPane::getInstance()->connector(id);
+            if(driver){
+                auto ret = driver->rename(oldName,name);
+                if(ret){
+                    //rename ok
+                    item->setName(name);
+                    d->model->changeItem(item);
+                    qDebug()<<"panes"<<d->panels.size();
+
+                    //update tab
+                    for(auto pane:d->panels){
+                        qDebug()<<"id"<<pane.first<<id<<oldName<<pane.second->name();
+                        if(pane.first==id && pane.second->name()==oldName){
+                            pane.second->setTableName(name);
+                            auto container = pane.second->container();
+                            if(container!=nullptr){
+                                int i = container->indexOf(pane.second);
+                                if(i>=0){
+                                    auto tabBar = container->tabBar();
+                                    tabBar->setTabText(i,name);
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    //this->onOutput()
+                    qDebug()<<"rename error";
+                }
+            }
+        }
+    }
 }
 
 

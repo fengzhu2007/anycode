@@ -18,11 +18,12 @@ public:
     explicit TableIndexWidget(long long id,const QString& table,QWidget *parent = nullptr);
     ~TableIndexWidget();
     void initData();
+    void setTableName(const QString& tableName);
 
 public slots:
     void onFieldActivated(const QModelIndex& index);
     void onActionTriggered();
-    void onFieldChanged(const QString& name,TableIndex* index);
+    void onIndexChanged(const QString& name,TableIndex* index);
     void onFieldsChanged(const QStringList& fields);
 
 private:

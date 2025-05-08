@@ -1,4 +1,5 @@
 #include "table_index_model.h"
+#include <QDebug>
 
 namespace ady{
 class TableIndexModelPrivate{
@@ -26,11 +27,11 @@ int TableIndexModel::columnCount(const QModelIndex &parent) const {
 QVariant TableIndexModel::data(const QModelIndex &index, int role ) const {
     if(role==Qt::DisplayRole){
         int column = index.column();
-        auto field = d->data.at(index.row());
+        auto one = d->data.at(index.row());
         if(column==Name){
-            return field.name;
+            return one.name;
         }else if(column==FeildList){
-            auto list = field.fields;
+            auto list = one.fields;
             QStringList arr;
             for(auto one:list){
                 arr.append(one.name);
@@ -64,13 +65,14 @@ void TableIndexModel::appendItem(const TableIndex& field){
     endResetModel();
 }
 
-void TableIndexModel::updateItem(const TableIndex& field){
+void TableIndexModel::updateItem(const TableIndex& index){
     for(int i=0;i<d->data.length();i++){
         auto one = d->data.at(i);
-        if(one.id==field.id){
+        if(one.id==index.id){
             auto start = this->index(i,Name);
             auto end = this->index(i,FeildList);
-            d->data[i] = field;
+            d->data[i] = index;
+            qDebug()<<"index"<<index.id<<index.name<<d->data[i].fields.length();
             emit dataChanged(start,end,QVector<int>{Qt::DisplayRole});
             return ;
         }

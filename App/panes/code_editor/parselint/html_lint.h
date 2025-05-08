@@ -19,6 +19,7 @@ public:
 private:
     bool parseHtml(TSParser* parser,const std::string& text,const std::vector<TSRange>& ranges);
     bool parsePhp(TSParser* parser,const std::string& text,const std::vector<TSRange>& ranges);
+    bool parseJS(TSParser* parser,const std::string& text,const std::vector<TSRange>& ranges);
 
 };
 }

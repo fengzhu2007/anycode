@@ -28,7 +28,11 @@ public:
     virtual QSqlError lastError() override;
     virtual bool insert(const QString& name,const QList<QSqlField>& fields,QList<QVariant>& data) override;
     virtual bool update(const QString& name,const QList<QSqlField>& fields,const QList<QVariant>& oData,const QList<QVariant>& nData) override;
-
+    virtual bool del(const QString& name,const QList<QSqlField>& fields,QList<QVariant>& data ) override;
+    virtual bool rename(const QString& oldName,const QString& newName) override;
+    virtual bool dropTable(const QString& name) override;
+    virtual QSqlError error() override;
+    virtual QString errorText() override;
 
 
     bool tableExists(const QString& name);

@@ -22,9 +22,11 @@ public:
     void setDatasource(const QList<QSqlField>& fields,const QList<QList<QVariant>>& data);
     void appendItem(const QList<QVariant>& item);
     void appendRow();
+    void removeRow(int row);
     void updateItem(int row,const QList<QVariant>& item);
     QMap<long long,QList<QVariant>> changedData() const ;
     void clearChanged(int row);
+    const QList<QVariant>& at(int row) const;
 
 private:
     TableDataModelPrivate* d;

@@ -129,6 +129,10 @@ void TableFieldWidget::initData(){
     }
 }
 
+void TableFieldWidget::setTableName(const QString& tableName){
+    d->name = tableName;
+}
+
 void TableFieldWidget::onFieldActivated(const QModelIndex& index){
     auto field = d->model->at(index.row());
     ui->form->init(field);

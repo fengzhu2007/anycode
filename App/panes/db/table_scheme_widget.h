@@ -16,6 +16,8 @@ public:
     explicit TableSchemeWidget(long long id,const QString& table,QWidget *parent = nullptr);
     ~TableSchemeWidget();
 
+    void setTableName(const QString& tableName);
+
 private:
     Ui::TableSchemeWidget *ui;
     TableSchemeWidgetPrivate* d;

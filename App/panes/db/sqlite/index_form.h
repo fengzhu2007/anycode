@@ -23,7 +23,10 @@ public:
     virtual bool save() override;
     virtual void fieldsChanged(const QStringList& fields) override;
 
-
+public slots:
+    void onValueChanged(int state);
+    void onTextChanged(const QString& text);
+    void onFieldChanged(const QModelIndex& index);
 
 
 private:

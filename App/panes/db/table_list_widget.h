@@ -19,7 +19,7 @@ public:
     ~TableListWidget();
 
     void initData();
-
+    void setTableName(const QString& tableName);
 public slots:
     void onActionTriggered();
 
