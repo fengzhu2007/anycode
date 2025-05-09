@@ -2202,37 +2202,37 @@ Please enter a new folder name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/table_list_widget.ui" line="69"/>
+        <location filename="../panes/db/table_list_widget.ui" line="68"/>
         <source>Add</source>
         <translation type="unfinished">添加</translation>
     </message>
     <message>
-        <location filename="../panes/db/table_list_widget.ui" line="81"/>
+        <location filename="../panes/db/table_list_widget.ui" line="80"/>
         <source>Save</source>
         <translation type="unfinished">保存</translation>
     </message>
     <message>
-        <location filename="../panes/db/table_list_widget.ui" line="93"/>
+        <location filename="../panes/db/table_list_widget.ui" line="92"/>
         <source>Delete</source>
         <translation type="unfinished">删除</translation>
     </message>
     <message>
-        <location filename="../panes/db/table_list_widget.ui" line="105"/>
+        <location filename="../panes/db/table_list_widget.ui" line="104"/>
         <source>Previous</source>
         <translation type="unfinished">上一步</translation>
     </message>
     <message>
-        <location filename="../panes/db/table_list_widget.ui" line="117"/>
+        <location filename="../panes/db/table_list_widget.ui" line="116"/>
         <source>Next</source>
         <translation type="unfinished">下一步</translation>
     </message>
     <message>
-        <location filename="../panes/db/table_list_widget.ui" line="129"/>
+        <location filename="../panes/db/table_list_widget.ui" line="128"/>
         <source>Save All</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/table_list_widget.ui" line="141"/>
+        <location filename="../panes/db/table_list_widget.ui" line="140"/>
         <source>Refresh</source>
         <translation type="unfinished">刷新</translation>
     </message>
@@ -2727,9 +2727,24 @@ Message:%4</source>
 <context>
     <name>ady::DBMSPane</name>
     <message>
-        <location filename="../panes/db/dbms_pane.cpp" line="66"/>
+        <location filename="../panes/db/dbms_pane.cpp" line="68"/>
         <source>Database</source>
         <translation type="unfinished">数据库</translation>
+    </message>
+    <message>
+        <location filename="../panes/db/dbms_pane.cpp" line="356"/>
+        <source>Delete Table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/dbms_pane.cpp" line="356"/>
+        <source>Are you want to delete table [%1]?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/db/dbms_pane.cpp" line="363"/>
+        <source>SQL Error:%1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3509,11 +3524,6 @@ This file has been modified by another program.
         <source>Name</source>
         <translation type="unfinished">名称</translation>
     </message>
-    <message>
-        <location filename="../panes/resource_manager/resource_manager_model.cpp" line="659"/>
-        <source>ResourceManager</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>ady::ResourceManagerPane</name>
@@ -4002,22 +4012,22 @@ files to &quot;%2&quot;?</source>
 <context>
     <name>ady::TableFieldWidget</name>
     <message>
-        <location filename="../panes/db/table_field_widget.cpp" line="152"/>
+        <location filename="../panes/db/table_field_widget.cpp" line="156"/>
         <source>SQL Error:%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/table_field_widget.cpp" line="156"/>
+        <location filename="../panes/db/table_field_widget.cpp" line="160"/>
         <source>Save successfully</source>
         <translation type="unfinished">保存成功</translation>
     </message>
     <message>
-        <location filename="../panes/db/table_field_widget.cpp" line="162"/>
+        <location filename="../panes/db/table_field_widget.cpp" line="166"/>
         <source>Delete Feild Confirm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/table_field_widget.cpp" line="162"/>
+        <location filename="../panes/db/table_field_widget.cpp" line="166"/>
         <source>Are you sure you want to delete the current field?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4025,12 +4035,12 @@ files to &quot;%2&quot;?</source>
 <context>
     <name>ady::TableIndexModel</name>
     <message>
-        <location filename="../panes/db/table_index_model.cpp" line="47"/>
+        <location filename="../panes/db/table_index_model.cpp" line="48"/>
         <source>Name</source>
         <translation type="unfinished">名称</translation>
     </message>
     <message>
-        <location filename="../panes/db/table_index_model.cpp" line="49"/>
+        <location filename="../panes/db/table_index_model.cpp" line="50"/>
         <source>Fields</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4038,45 +4048,53 @@ files to &quot;%2&quot;?</source>
 <context>
     <name>ady::TableIndexWidget</name>
     <message>
-        <location filename="../panes/db/table_index_widget.cpp" line="145"/>
+        <location filename="../panes/db/table_index_widget.cpp" line="149"/>
         <source>SQL Error:%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/table_index_widget.cpp" line="149"/>
+        <location filename="../panes/db/table_index_widget.cpp" line="153"/>
         <source>Save successfully</source>
         <translation type="unfinished">保存成功</translation>
     </message>
     <message>
-        <location filename="../panes/db/table_index_widget.cpp" line="155"/>
-        <source>Delete Feild Confirm</source>
+        <location filename="../panes/db/table_index_widget.cpp" line="159"/>
+        <source>Delete Index Confirm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/table_index_widget.cpp" line="155"/>
-        <source>Are you sure you want to delete the current field?</source>
+        <location filename="../panes/db/table_index_widget.cpp" line="159"/>
+        <source>Are you sure you want to delete the current index?</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ady::TableListWidget</name>
+    <message>
+        <location filename="../panes/db/table_list_widget.cpp" line="128"/>
+        <source>Are you want to delete current record?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ady::TablePane</name>
     <message>
-        <location filename="../panes/db/table_pane.cpp" line="45"/>
+        <location filename="../panes/db/table_pane.cpp" line="46"/>
         <source>New Table</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/table_pane.cpp" line="47"/>
+        <location filename="../panes/db/table_pane.cpp" line="48"/>
         <source>%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/table_pane.cpp" line="52"/>
+        <location filename="../panes/db/table_pane.cpp" line="53"/>
         <source>Data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/db/table_pane.cpp" line="53"/>
+        <location filename="../panes/db/table_pane.cpp" line="54"/>
         <source>Scheme</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4091,11 +4109,6 @@ files to &quot;%2&quot;?</source>
     <message>
         <location filename="../panes/db/table_scheme_widget.cpp" line="35"/>
         <source>Index</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../panes/db/table_scheme_widget.cpp" line="36"/>
-        <source>Option</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

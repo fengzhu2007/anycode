@@ -643,7 +643,7 @@ void ResourceManagerModel::onDirectoryChanged(const QString &path){
 
     if(d->directories.contains(path)){
         auto msec = d->timer.elapsed() - d->directories[path];
-        qDebug()<<"onDirectoryChanged path"<<path<<msec;
+        //qDebug()<<"onDirectoryChanged path"<<path<<msec;
         if(msec<0){
 
             return ;
@@ -653,13 +653,15 @@ void ResourceManagerModel::onDirectoryChanged(const QString &path){
 
 
 
-    QString message = QString::fromUtf8("DirectoryChanged:%1").arg(path);
+    /*QString message = QString::fromUtf8("DirectoryChanged:%1").arg(path);
     QJsonObject json = {
         {"level",1},
         {"source",tr("ResourceManager")},
         {"content",message}
     };
-    Publisher::getInstance()->post(Type::M_OUTPUT,json);
+    Publisher::getInstance()->post(Type::M_OUTPUT,json);*/
+
+
     auto task = new ResourceManageReadFolderTask(this,path);
     task->setType(BackendThreadTask::RefreshFolder);
     BackendThread::getInstance()->appendTask(task);

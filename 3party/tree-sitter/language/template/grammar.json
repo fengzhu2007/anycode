@@ -29,6 +29,10 @@
           },
           {
             "type": "SYMBOL",
+            "name": "template_directive"
+          },
+          {
+            "type": "SYMBOL",
             "name": "content"
           }
         ]
@@ -60,7 +64,7 @@
           "members": [
             {
               "type": "PATTERN",
-              "value": "[^<]+|<"
+              "value": "[^<{]+|<"
             },
             {
               "type": "STRING",
@@ -69,6 +73,10 @@
             {
               "type": "STRING",
               "value": "<?"
+            },
+            {
+              "type": "STRING",
+              "value": "{"
             }
           ]
         }
@@ -280,6 +288,23 @@
           "value": "?>"
         }
       ]
+    },
+    "template_directive": {
+      "type": "PREC_RIGHT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "{{"
+          },
+          {
+            "type": "PATTERN",
+            "value": "[^}]*}}"
+          }
+        ]
+      }
     }
   },
   "extras": [],

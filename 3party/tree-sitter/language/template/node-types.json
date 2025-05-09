@@ -121,9 +121,18 @@
         {
           "type": "php_directive",
           "named": true
+        },
+        {
+          "type": "template_directive",
+          "named": true
         }
       ]
     }
+  },
+  {
+    "type": "template_directive",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "%%>",
@@ -203,6 +212,14 @@
   },
   {
     "type": "_%>",
+    "named": false
+  },
+  {
+    "type": "{",
+    "named": false
+  },
+  {
+    "type": "{{",
     "named": false
   }
 ]
