@@ -31,15 +31,35 @@ TerminalWidget::TerminalWidget(const QString& executable,const QString& workingD
 
 
     auto colors = std::array<QColor,20>();
-    for(int i=0;i<20;i++){
-        colors[i] = this->toQColor(i);
-    }
+    colors[0] = Qt::black;
+    colors[1] = 0xac4142;
+    colors[2] = 0x7e8e50;
+    colors[3] = 0xe5b567;
+    colors[4] = 0x6c99bb;
+    colors[5] = 0xa320ac;
+    colors[6] = 0x7dd6cf;
+    colors[7] = 0xd0d0d0;
+    colors[8] = 0x505050;
+    colors[9] = 0xd05e5b;
+    colors[10] = 0xa7b773;
+    colors[11] = 0xffd184;
+    colors[12] = 0x94c8ea;
+    colors[13] = 0xf257fb;
+    colors[14] = 0xa1fcf7;
+    colors[15] = Qt::white;
+
+
+
+    /*for(int i=0;i<16;i++){
+        colors[i] = Qt::black;
+    }*/
     auto theme = Theme::getInstance();
 
     //custome
     colors[Foreground] = theme->textColor();
     colors[Background] = theme->backgroundColor();//background
     colors[Selection] = theme->secondaryTextColor();//selection background
+    colors[FindMatch] = theme->primaryTextColor();//FindMatch background
     this->setColors(colors);
 
 }
