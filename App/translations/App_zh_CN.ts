@@ -3480,66 +3480,76 @@ You can restore this file from the Recycle Bin.</source>
 <context>
     <name>ady::SVGEditorPane</name>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="92"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="94"/>
         <source>Zoom In</source>
         <translation type="unfinished">放大</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="93"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="95"/>
         <source>Zoom Out</source>
         <translation type="unfinished">缩小</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="94"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="96"/>
         <source>Export...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="172"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="174"/>
         <source>Save File AS</source>
         <translation type="unfinished">文件另存为</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="172"/>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="176"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="174"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="178"/>
         <source>All Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="176"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="178"/>
         <source>Save File</source>
         <translation type="unfinished">保存文件</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="329"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="331"/>
         <source>The file &quot;%1&quot; is no longer there. 
 Do you want to keep it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="341"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="343"/>
         <source>&quot;%1&quot; 
 This file has been modified by another program.
  Reload?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="375"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="377"/>
         <source>Row:%1, Col:%2</source>
         <translation type="unfinished">行：%1， 列：%2</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="405"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="392"/>
+        <source>Export To PNG</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="392"/>
+        <source>Images Files (*.png)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="422"/>
         <source>Unkown</source>
         <translation type="unfinished">未知</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="410"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="427"/>
         <source>Space</source>
         <translation type="unfinished">空白</translation>
     </message>
     <message>
-        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="412"/>
+        <location filename="../panes/svg_editor/svg_editor_pane.cpp" line="429"/>
         <source>Tab</source>
         <translation type="unfinished"></translation>
     </message>
