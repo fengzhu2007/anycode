@@ -56,18 +56,18 @@ ServerManagePane::ServerManagePane(QWidget *parent) :
     d = new ServerManagePanePrivate;
     d->title = tr("Server Manager");
 
+    this->setStyleSheet("QToolBar{border:0px;}"
+                        "QTreeView{border:0;}");
+
+
     this->setWindowTitle(d->title);
 
-    this->setStyleSheet("QTreeView{border:0;}");
 
     auto theme = Theme::getInstance();
     auto color = theme->color().name(QColor::HexRgb);
     auto secondaryColor = theme->secondaryColor().name(QColor::HexRgb);
     auto backgroundColor = theme->backgroundColor().name(QColor::HexRgb);
     auto textColor = theme->textColor().name(QColor::HexRgb);
-
-
-    this->setStyleSheet("QToolBar{border:0px;}");
 
 
 

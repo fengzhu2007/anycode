@@ -17,7 +17,7 @@
 
 #include <w_toast.h>
 
-
+#include "core/debug_log.h"
 
 #include <QFileInfo>
 #include <QPlainTextEdit>
@@ -139,6 +139,7 @@ QString CodeEditorPane::description(){
 
 void CodeEditorPane::activation(){
     ui->editor->setFocus();
+    //qDebug()<<"activation"<<this->path();
     CodeEditorManager::getInstance()->setCurrent(this);
 }
 
@@ -148,11 +149,11 @@ bool CodeEditorPane::save(bool rename){
     bool tabRename = false;
     if(rename){
         //save as
-        path = QFileDialog::getSaveFileName(this, tr("Save File AS"), "", tr("All Files (*.*)"));
+        path = QFileDialog::getSaveFileName(this, tr("Save File AS","Editor"), "", tr("All Files (*.*)","Editor"));
         tabRename = true;
     }else if(path.isEmpty()){
         //new file save
-        path = QFileDialog::getSaveFileName(this, tr("Save File"), "", tr("All Files (*.*)"));
+        path = QFileDialog::getSaveFileName(this, tr("Save File","Editor"), "", tr("All Files (*.*)","Editor"));
         tabRename = true;
     }
     if (path.isEmpty()) {
@@ -164,8 +165,10 @@ bool CodeEditorPane::save(bool rename){
     instance->removeWatchFile(this->path());
     QFileInfo fi(path);
     auto m = ResourceManagerModel::getInstance();
-    auto list = m->takeWatchDirectory(fi.dir().absolutePath(),false);
-
+    QString folder = fi.dir().absolutePath();
+    //auto list = m->takeWatchDirectory(folder,false);
+    //m->setWatching(false);
+    m->delayWatchDirectory(folder,500);
     auto ret = this->writeFile(path);
     if(ret){
         //rename tab title
@@ -200,10 +203,14 @@ bool CodeEditorPane::save(bool rename){
             storage.add(RecentStorage::File,source);
         }
     }
-    if(!list.isEmpty()){
+
+    //qDebug()<<m->allWatchDirectory();
+
+    /*if(!list.isEmpty()){
         m->appendWatchDirectory(list.at(0));
-    }
-    instance->appendWatchFile(path);
+    }*/
+    //instance->appendWatchFile(path);
+    //DebugLog::write(QString::fromUtf8("File save"),QString::fromUtf8("folder:%1;%2").arg(folder).arg(m->allWatchDirectory().join("|")));
     return ret;
 }
 
@@ -239,7 +246,7 @@ bool CodeEditorPane::closeEnable(){
             name = this->windowTitle();
         }
 
-        auto ret = MessageDialog::confirm(this,tr("Save"),tr("Save file\n%1?").arg(name),QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+        auto ret = MessageDialog::confirm(this,tr("Save","Editor"),tr("Save file\n%1?","Editor").arg(name),QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
         if(ret==QMessageBox::Cancel){
             return false;
         }
@@ -300,7 +307,11 @@ void CodeEditorPane::autoSave(){
     }
     auto instance = CodeEditorManager::getInstance();
     instance->removeWatchFile(path);
-    if(this->writeFile(path)){
+    auto m = ResourceManagerModel::getInstance();
+    QFileInfo fi(path);
+    QString folder = fi.dir().absolutePath();
+    m->delayWatchDirectory(folder,500);
+    if(!this->writeFile(path)){
 
     }
     instance->appendWatchFile(path);
@@ -356,7 +367,7 @@ void CodeEditorPane::invokeFileState(){
     if((d->state & CodeEditorPane::Deleted)==CodeEditorPane::Deleted){
         const QString path = this->path();
         if(!QFileInfo::exists(path)){
-            if(MessageDialog::confirm(this,tr("The file \"%1\" is no longer there. \nDo you want to keep it?").arg(path))==QMessageBox::No){
+            if(MessageDialog::confirm(this,tr("The file \"%1\" is no longer there. \nDo you want to keep it?","Editor").arg(path))==QMessageBox::No){
                 //close pane
                 auto container = this->container();
                 if(container!=nullptr){
@@ -368,7 +379,7 @@ void CodeEditorPane::invokeFileState(){
         d->state &= (~CodeEditorPane::Deleted);
     }else if((d->state & CodeEditorPane::Changed)==CodeEditorPane::Changed){
         const QString path = this->path();
-        if(MessageDialog::confirm(this,tr("\"%1\" \nThis file has been modified by another program.\n Reload?").arg(path))==QMessageBox::Yes){
+        if(MessageDialog::confirm(this,tr("\"%1\" \nThis file has been modified by another program.\n Reload?","Editor").arg(path))==QMessageBox::Yes){
             this->reload();
         }
         d->state &= (~CodeEditorPane::Changed);
@@ -416,9 +427,9 @@ CodeEditorPane* CodeEditorPane::make(DockingPaneManager* dockingManager,const QJ
     }
 
     if(CodeEditorPane::NEW_COUNT==0){
-        pane->setWindowTitle(QObject::tr("New File"));
+        pane->setWindowTitle(QObject::tr("New File","Editor"));
     }else{
-        pane->setWindowTitle(QObject::tr("New File (%1)").arg(CodeEditorPane::NEW_COUNT));
+        pane->setWindowTitle(QObject::tr("New File (%1)","Editor").arg(CodeEditorPane::NEW_COUNT));
     }
     ++CodeEditorPane::NEW_COUNT;
 
@@ -451,7 +462,7 @@ void CodeEditorPane::onModificationChanged(bool changed){
 
 void CodeEditorPane::onCursorPositionChanged(){
     auto cursor = ui->editor->textCursor();
-    ui->position->setText(tr("Row:%1, Col:%2").arg(cursor.blockNumber() + 1).arg(cursor.positionInBlock()+1));
+    ui->position->setText(tr("Row:%1, Col:%2","Editor").arg(cursor.blockNumber() + 1).arg(cursor.positionInBlock()+1));
 }
 
 void CodeEditorPane::onFileOpend(){
@@ -470,14 +481,14 @@ void CodeEditorPane::updateInfoBar(){
     }else if(format.lineTerminationMode==Utils::TextFileFormat::CRLFLineTerminator){
         ui->br->setText(QLatin1String("CRLF"));
     }else{
-        ui->br->setText(tr("Unkown"));
+        ui->br->setText(tr("Unkown","Editor"));
     }
     auto settings = ui->editor->textDocument()->tabSettings();
 
     if(settings.m_tabPolicy==TextEditor::TabSettings::TabPolicy::SpacesOnlyTabPolicy){
-        ui->indent->setText(tr("Space"));
+        ui->indent->setText(tr("Space","Editor"));
     }else{
-        ui->indent->setText(tr("Tab"));
+        ui->indent->setText(tr("Tab","Editor"));
     }
 }
 

@@ -439,7 +439,7 @@ namespace ady {
                                         [%8] VARCHAR(250)  NULL\
                                    )").arg(DBStorage::TABLE_NAME).arg(COL_ID).arg(DBStorage::COL_NAME).arg(DBStorage::COL_DRIVER).arg(DBStorage::COL_HOST).arg(DBStorage::COL_PORT).arg(DBStorage::COL_USERNAME).arg(DBStorage::COL_PASSWORD);
             auto query = this->db.exec(sql);
-             auto error = query.lastError();
+            auto error = query.lastError();
             Q_ASSERT(error.type()==QSqlError::NoError);
          }
      }

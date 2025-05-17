@@ -393,7 +393,7 @@ namespace ady {
                 response->errorCode = -2;
                 response->errorMsg = QObject::tr("File write failed");
             }
-            response->debug();
+            //response->debug();
             delete task->file;
             task->file = nullptr;
         }

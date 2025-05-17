@@ -864,6 +864,16 @@ void ResourceManagerPane::onSearchFile(const QString& text){
     auto delegate = static_cast<ResourceManagerTreeItemDelegate*>(ui->treeView->itemDelegate());
     delegate->setSearchText(text);
     ui->treeView->update();
+
+    auto indexlist = d->model->match(d->model->index(0,0),Qt::DisplayRole,text,-1, Qt::MatchContains | Qt::MatchRecursive);
+    if(indexlist.length()>0){
+        for(auto index:indexlist){
+            if(ui->treeView->isExpanded(index.parent())){
+                ui->treeView->scrollTo(index,QAbstractItemView::EnsureVisible);
+                break;
+            }
+        }
+    }
 }
 
 void ResourceManagerPane::onDropAddFolder(const QMimeData* data){
@@ -923,6 +933,13 @@ void ResourceManagerPane::onOpenedSelected(const QModelIndex& index){
 }
 
 void ResourceManagerPane::onLocateSuccess(const QString& path,bool recursion){
+    QString message = QString::fromUtf8("Locate:%1").arg(path);
+    QJsonObject json = {
+        {"level",1},
+        {"source",this->windowTitle()},
+        {"content",message}
+    };
+    Publisher::getInstance()->post(Type::M_OUTPUT,json);
     auto index = d->model->locate(path);
     if(index.isValid()){
         auto item = static_cast<ResourceManagerModelItem*>(index.internalPointer());

@@ -18,6 +18,8 @@
 #include <QJsonObject>
 #include <QMimeData>
 #include <QDebug>
+#include <QElapsedTimer>
+
 namespace ady{
 
 
@@ -31,6 +33,9 @@ public:
     QFileSystemWatcher *watcher;
     QString currentPath;
     QMutex mutex;
+    bool watching;
+    QElapsedTimer timer;
+    QMap<QString,qint64> directories;
 };
 
 ResourceManagerModel* ResourceManagerModel::getInstance(){
@@ -55,6 +60,7 @@ ResourceManagerModel::ResourceManagerModel()
     d->iconProvider = ResourceManageIconProvider::getInstance();
     d->root = new ResourceManagerModelItem();
     d->watcher = new QFileSystemWatcher(this);
+    d->watching = true;
     connect(d->watcher,&QFileSystemWatcher::directoryChanged,this,&ResourceManagerModel::onDirectoryChanged);
     connect(this,&ResourceManagerModel::updateChildren,this,&ResourceManagerModel::onUpdateChildren);
 }
@@ -443,12 +449,28 @@ void ResourceManagerModel::removeItem(ResourceManagerModelItem* item){
 
 void ResourceManagerModel::appendWatchDirectory(const QString& path){
     //qDebug()<<"addpath"<<path;
-    d->watcher->addPath(path);
+    auto list = d->watcher->directories();
+    if(list.indexOf(path)==-1){
+        d->watcher->addPath(path);
+    }
+
 }
 
-void ResourceManagerModel::removeWatchDirectory(const QString& path){
+bool ResourceManagerModel::removeWatchDirectory(const QString& path){
     //qDebug()<<"removepath"<<path;
-    d->watcher->removePath(path);
+    return d->watcher->removePath(path);
+}
+
+void ResourceManagerModel::delayWatchDirectory(const QString& path,qint64 msec){
+    if(d->directories.size()==0){
+        d->timer.start();
+    }
+    if(d->directories.contains(path)){
+        d->directories[path] = d->timer.elapsed() + msec;
+    }else{
+        d->directories.insert(path,d->timer.elapsed() + msec);
+    }
+
 }
 
 QStringList ResourceManagerModel::takeWatchDirectory(const QString& path,bool include_children){
@@ -456,11 +478,20 @@ QStringList ResourceManagerModel::takeWatchDirectory(const QString& path,bool in
     QStringList list;
     foreach(auto one,alllist){
         if(path==one || (include_children && one.startsWith(path))){
-            this->removeWatchDirectory(one);
-            list.push_back(one);
+            if(this->removeWatchDirectory(one)){
+                list.push_back(one);
+            }
         }
     }
     return list;
+}
+
+QStringList ResourceManagerModel::allWatchDirectory(){
+    return d->watcher->directories();
+}
+
+void ResourceManagerModel::setWatching(bool watching){
+    d->watching = watching;
 }
 
 ResourceManagerModelItem* ResourceManagerModel::find(const QString& path){
@@ -602,6 +633,33 @@ void ResourceManagerModel::findAllExpend(ResourceManagerModelItem* item,QJsonArr
 }
 
 void ResourceManagerModel::onDirectoryChanged(const QString &path){
+    //to test path
+    if(!d->watching){
+        //qDebug()<<"no watching"<<path;
+        d->watching = true;
+        return ;
+    }
+    //qDebug()<<"watching"<<path;
+
+    if(d->directories.contains(path)){
+        auto msec = d->timer.elapsed() - d->directories[path];
+        qDebug()<<"onDirectoryChanged path"<<path<<msec;
+        if(msec<0){
+
+            return ;
+        }
+        d->directories.remove(path);
+    }
+
+
+
+    QString message = QString::fromUtf8("DirectoryChanged:%1").arg(path);
+    QJsonObject json = {
+        {"level",1},
+        {"source",tr("ResourceManager")},
+        {"content",message}
+    };
+    Publisher::getInstance()->post(Type::M_OUTPUT,json);
     auto task = new ResourceManageReadFolderTask(this,path);
     task->setType(BackendThreadTask::RefreshFolder);
     BackendThread::getInstance()->appendTask(task);

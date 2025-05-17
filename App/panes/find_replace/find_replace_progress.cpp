@@ -3,7 +3,9 @@
 #include "utils/filesearch.h"
 #include "utils/stringutils.h"
 #include "panes/code_editor/code_editor_manager.h"
-#include "panes/code_editor/code_editor_pane.h"
+//#include "panes/code_editor/code_editor_pane.h"
+#include "panes/code_editor/code_editor_view.h"
+#include <textdocument.h>
 //#include "common/utils.h"
 #include <QDir>
 #include <QFileInfo>
@@ -281,105 +283,107 @@ void FindReplaceProgress::searchFile(const QString& path){
         //exclusion
         return ;
     }
-    QFile file(path);
+    /*QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return ;
     }
-    /*QByteArray data = file.read(1024);
+    QByteArray data = file.read(1024);
     for (char byte : data) {
         if (byte < 0x09 || (byte > 0x0D && byte < 0x20) || byte == 0x7F) {
             file.close();
             return ;
         }
     }*/
+    TextEditor::TextDocument textDocument;
+    QString error;
+    auto ret = textDocument.open(&error,Utils::FilePath::fromString(path),Utils::FilePath::fromString(path));
+    if(ret==Core::IDocument::OpenResult::Success){
+        const int termMaxIndex = d->before.length() - 1;
+        const QChar *termData = d->before.constData();
+        const QChar *termDataLower = d->beforeLower.constData();
+        const QChar *termDataUpper = d->beforeUpper.constData();
+        d->searchFileCount += 1;
+        bool matched = false;
+        int lineNr = 0;
 
+        auto block = textDocument.document()->firstBlock();
+        while(block.isValid()){
+            ++lineNr;
+            const QString chunk = block.text();
+            //qDebug()<<"chunk"<<chunk;
+            const int chunkLength = chunk.length();
+            const QChar *chunkPtr = chunk.constData();
+            const QChar *chunkEnd = chunkPtr + chunkLength - 1;
+            for (const QChar *regionPtr = chunkPtr; regionPtr + termMaxIndex <= chunkEnd; ++regionPtr) {
+                if(this->isInterruptionRequested()){
+                    break;
+                }
 
-    const int termMaxIndex = d->before.length() - 1;
-    const QChar *termData = d->before.constData();
-    const QChar *termDataLower = d->beforeLower.constData();
-    const QChar *termDataUpper = d->beforeUpper.constData();
+                const QChar *regionEnd = regionPtr + termMaxIndex;
+                if ( /* optimization check for start and end of region */
+                    // case sensitive
+                    (d->caseSensitive && *regionPtr == termData[0]
+                     && *regionEnd == termData[termMaxIndex])
+                    ||
+                    // case insensitive
+                    (!d->caseSensitive && (*regionPtr == termDataLower[0]
+                                           || *regionPtr == termDataUpper[0])
+                     && (*regionEnd == termDataLower[termMaxIndex]
+                         || *regionEnd == termDataUpper[termMaxIndex]))
+                    ) {
+                    bool equal = true;
 
-    d->searchFileCount += 1;
-    bool matched = false;
-    file.seek(0);
-    int lineNr = 0;
-    QTextStream stream(&file);
-    stream.setCodec("UTF-8");
-    //qDebug()<<"d->caseSensitive"<<path<<d->before<<lower<<d->before.toUpper()<<termData[0]<<termDataLower[0]<<termDataUpper[0]<<d->termDataLower[0]<<d->termDataUpper[0];
-    while (!stream.atEnd()) {
-        ++lineNr;
-        const QString chunk = stream.readLine();
-        //qDebug()<<"chunk"<<chunk;
-        const int chunkLength = chunk.length();
-        const QChar *chunkPtr = chunk.constData();
-        const QChar *chunkEnd = chunkPtr + chunkLength - 1;
-        for (const QChar *regionPtr = chunkPtr; regionPtr + termMaxIndex <= chunkEnd; ++regionPtr) {
-            if(this->isInterruptionRequested()){
-                break;
-            }
-
-            const QChar *regionEnd = regionPtr + termMaxIndex;
-            if ( /* optimization check for start and end of region */
-                // case sensitive
-                (d->caseSensitive && *regionPtr == termData[0]
-                 && *regionEnd == termData[termMaxIndex])
-                ||
-                // case insensitive
-                (!d->caseSensitive && (*regionPtr == termDataLower[0]
-                                       || *regionPtr == termDataUpper[0])
-                 && (*regionEnd == termDataLower[termMaxIndex]
-                     || *regionEnd == termDataUpper[termMaxIndex]))
-                ) {
-                bool equal = true;
-
-                // whole word check
-                const QChar *beforeRegion = regionPtr - 1;
-                const QChar *afterRegion = regionEnd + 1;
-                if (d->wholeWord
-                    && (((beforeRegion >= chunkPtr)
-                         && (beforeRegion->isLetterOrNumber()
-                             || ((*beforeRegion) == QLatin1Char('_'))))
-                        ||
-                        ((afterRegion <= chunkEnd)
-                         && (afterRegion->isLetterOrNumber()
-                             || ((*afterRegion) == QLatin1Char('_'))))
-                        )) {
-                    equal = false;
-                } else {
-                    // check all chars
-                    int regionIndex = 1;
-                    for (const QChar *regionCursor = regionPtr + 1;
-                         regionCursor < regionEnd;
-                         ++regionCursor, ++regionIndex) {
-                        if (  // case sensitive
-                            (d->caseSensitive
-                             && *regionCursor != termData[regionIndex])
+                    // whole word check
+                    const QChar *beforeRegion = regionPtr - 1;
+                    const QChar *afterRegion = regionEnd + 1;
+                    if (d->wholeWord
+                        && (((beforeRegion >= chunkPtr)
+                             && (beforeRegion->isLetterOrNumber()
+                                 || ((*beforeRegion) == QLatin1Char('_'))))
                             ||
-                            // case insensitive
-                            (!d->caseSensitive
-                             && *regionCursor != termDataLower[regionIndex]
-                             && *regionCursor != termDataUpper[regionIndex])
-                            ) {
-                            equal = false;
-                            break;
+                            ((afterRegion <= chunkEnd)
+                             && (afterRegion->isLetterOrNumber()
+                                 || ((*afterRegion) == QLatin1Char('_'))))
+                            )) {
+                        equal = false;
+                    } else {
+                        // check all chars
+                        int regionIndex = 1;
+                        for (const QChar *regionCursor = regionPtr + 1;
+                             regionCursor < regionEnd;
+                             ++regionCursor, ++regionIndex) {
+                            if (  // case sensitive
+                                (d->caseSensitive
+                                 && *regionCursor != termData[regionIndex])
+                                ||
+                                // case insensitive
+                                (!d->caseSensitive
+                                 && *regionCursor != termDataLower[regionIndex]
+                                 && *regionCursor != termDataUpper[regionIndex])
+                                ) {
+                                equal = false;
+                                break;
+                            }
                         }
                     }
-                }
-                //qDebug()<<"line"<<lineNr<<chunk<<path;
-                if (equal) {
-                    matched = true;
-                    const QString resultItemText = clippedText(chunk, MAX_LINE_SIZE);
+                    //qDebug()<<"line"<<lineNr<<chunk<<path;
+                    if (equal) {
+                        matched = true;
+                        const QString resultItemText = clippedText(chunk, MAX_LINE_SIZE);
 
-                    *d->list << SearchResultItem(lineNr,path,resultItemText,regionPtr - chunkPtr,termMaxIndex + 1,{});
-                    regionPtr += termMaxIndex; // another +1 done by for-loop
+                        *d->list << SearchResultItem(lineNr,path,resultItemText,regionPtr - chunkPtr,termMaxIndex + 1,{});
+                        regionPtr += termMaxIndex; // another +1 done by for-loop
+                    }
                 }
             }
+            block = block.next();
+        }
+
+        if(matched){
+            d->matchFileCount += 1;
         }
     }
-    file.close();
-    if(matched){
-        d->matchFileCount += 1;
-    }
+
 }
 
 void FindReplaceProgress::searchFileRegExp(const QString& path){
@@ -391,7 +395,47 @@ void FindReplaceProgress::searchFileRegExp(const QString& path){
         //exclusion
         return ;
     }
-    QFile file(path);
+
+    TextEditor::TextDocument textDocument;
+    QString error;
+    auto ret = textDocument.open(&error,Utils::FilePath::fromString(path),Utils::FilePath::fromString(path));
+    if(ret==Core::IDocument::OpenResult::Success){
+        d->searchFileCount += 1;
+        bool matched = false;
+        int lineNr = 0;
+        QString line;
+        QRegularExpressionMatch match;
+        auto block = textDocument.document()->firstBlock();
+        while(block.isValid()){
+            ++lineNr;
+            line = block.text();
+
+            const QString resultItemText = clippedText(line, MAX_LINE_SIZE);
+            int lengthOfLine = line.size();
+            int pos = 0;
+            while ((match = this->doGuardedMatch(line, pos)).hasMatch()) {
+                if(this->isInterruptionRequested()){
+                    break;
+                }
+                pos = match.capturedStart();
+                matched = true;
+                *d->list << SearchResultItem(lineNr,path,resultItemText,pos,match.capturedLength(),match.capturedTexts());
+                if (match.capturedLength() == 0)
+                    break;
+                pos += match.capturedLength();
+                if (pos >= lengthOfLine)
+                    break;
+            }
+            block = block.next();
+        }
+        if(matched){
+            d->matchFileCount += 1;
+        }
+    }
+
+
+
+    /*QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return ;
     }
@@ -434,7 +478,7 @@ void FindReplaceProgress::searchFileRegExp(const QString& path){
     file.close();
     if(matched){
         d->matchFileCount += 1;
-    }
+    }*/
 }
 
 void FindReplaceProgress::searchDocument(const QTextDocument* doc,const QString& path){
@@ -565,7 +609,6 @@ QStringList FindReplaceProgress::replaceAll(const QString &text,const QList<Sear
     for (const SearchResultItem &item : items)
         changes[item.filePath].append(item);
 
-    QTextDocument doc;
     auto instance = CodeEditorManager::getInstance();
     for (auto it = changes.cbegin(), end = changes.cend(); it != end; ++it) {
         const QString path = it.key();
@@ -577,7 +620,63 @@ QStringList FindReplaceProgress::replaceAll(const QString &text,const QList<Sear
         }
         QSet<QPair<int, int>> processed;
 
-        QFile file(path);
+        TextEditor::TextDocument textDocument;
+        QString error;
+        auto ret = textDocument.open(&error,Utils::FilePath::fromString(path),Utils::FilePath::fromString(path));
+        if(ret==Core::IDocument::OpenResult::Success){
+            const QList<SearchResultItem> changeItems = it.value();
+            auto doc = textDocument.document();
+            QTextCursor editCursor(doc);
+            int offset = 0;
+            int line = 0;
+            int count = 0;
+            for (const SearchResultItem &item : changeItems) {
+                if(this->isInterruptionRequested()){
+                    break;
+                }
+                const QPair<int, int> p{item.line, item.matchStart};
+                if (processed.contains(p))
+                    continue;
+                processed.insert(p);
+
+                QString replacement;
+                if (!item.regexpCapturedTexts.isEmpty()) {
+                    replacement = Utils::expandRegExpReplacement(text, item.regexpCapturedTexts);
+                } else if (preserveCase) {
+                    const QString originalText = item.searchItem;
+                    replacement = Utils::matchCaseReplacement(originalText, text);
+                } else {
+                    replacement = text;
+                }
+                QTextBlock block = doc->findBlockByLineNumber(item.line - 1);
+                if(block.isValid()){
+                    if(line!=item.line){
+                        offset = 0;
+                        line = item.line;
+                    }
+                    int position = block.position() + item.matchStart + offset;
+                    editCursor.setPosition(position);
+                    editCursor.setPosition(position + item.matchLength ,QTextCursor::KeepAnchor);
+                    editCursor.insertText(replacement);
+                    //qDebug()<<"result"<<doc.toPlainText();
+                    offset += (replacement.length() - item.matchLength);
+                    count += 1;
+                }
+            }
+
+            bool ret = textDocument.write(Utils::FilePath::fromString(path),doc->toPlainText(),&error);
+            if(ret){
+                d->replaceFiles += 1;
+                d->replaceCount += count;
+            }
+        }
+
+
+
+
+
+
+        /*QFile file(path);
         if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
             continue;
         }
@@ -618,15 +717,18 @@ QStringList FindReplaceProgress::replaceAll(const QString &text,const QList<Sear
                 editCursor.setPosition(position);
                 editCursor.setPosition(position + item.matchLength ,QTextCursor::KeepAnchor);
                 editCursor.insertText(replacement);
+                //qDebug()<<"result"<<doc.toPlainText();
                 offset += (replacement.length() - item.matchLength);
                 count += 1;
             }
         }
         file.seek(0);
+        //qDebug()<<"result2"<<doc.toPlainText();
+        //qDebug()<<"result3"<<doc.toPlainText().toUtf8();
         auto ret = file.write(doc.toPlainText().toUtf8());
         file.close();
         d->replaceFiles += 1;
-        d->replaceCount += count;
+        d->replaceCount += count;*/
     }
     return changes.keys();
 }

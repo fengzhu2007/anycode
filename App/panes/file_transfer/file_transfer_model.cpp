@@ -942,6 +942,15 @@ void FileTransferModel::remoteItems(FileTransferModelItem* site,int from,int end
     auto list = site->take(from,end);
     endRemoveRows();
     //delete list
+    //stop progressing task list
+    for(auto one:list){
+        auto state = one->state();
+        if(state==FileTransferModelItem::Doing){
+            for(auto th:d->threads){
+                th->abortTask(one->id());
+            }
+        }
+    }
     qDeleteAll(list);
 }
 
@@ -1271,6 +1280,7 @@ void FileTransferModel::finish(){
         //one->terminate();
        // one->wait();
     }
+    d->threads.clear();
     d->cond.wakeAll();
 }
 

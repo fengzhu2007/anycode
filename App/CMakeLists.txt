@@ -338,6 +338,22 @@ add_library(App SHARED
         components/tree_item_delegate.h components/tree_item_delegate.cpp
         panes/svg_editor/svg_editor_pane.h panes/svg_editor/svg_editor_pane.cpp panes/svg_editor/svg_editor_pane.ui
         panes/svg_editor/svg_viewer.h panes/svg_editor/svg_viewer.cpp
+        panes/db/table_pane.h panes/db/table_pane.cpp panes/db/table_pane.ui
+        panes/db/table_list_widget.h panes/db/table_list_widget.cpp panes/db/table_list_widget.ui
+        panes/db/table_scheme_widget.h panes/db/table_scheme_widget.cpp panes/db/table_scheme_widget.ui
+        panes/db/table_field_widget.h panes/db/table_field_widget.cpp panes/db/table_field_widget.ui
+        panes/db/table_index_widget.h panes/db/table_index_widget.cpp panes/db/table_index_widget.ui
+        panes/db/table_option_widget.h panes/db/table_option_widget.cpp panes/db/table_option_widget.ui
+        panes/db/table_field_model.h panes/db/table_field_model.cpp
+        panes/db/table_field.h panes/db/table_field.cpp
+        panes/db/table_data_model.h panes/db/table_data_model.cpp
+        panes/db/sqlite/field_form.h panes/db/sqlite/field_form.cpp panes/db/sqlite/field_form.ui
+        panes/db/field_form_impl.h panes/db/field_form_impl.cpp
+        core/debug_log.h core/debug_log.cpp
+        panes/db/index_form_impl.h panes/db/index_form_impl.cpp
+        panes/db/sqlite/index_form.h panes/db/sqlite/index_form.cpp panes/db/sqlite/index_form.ui
+        panes/db/table_index_model.h panes/db/table_index_model.cpp
+
 
 
 
