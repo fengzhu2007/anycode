@@ -476,7 +476,7 @@ void IDEWindow::onActionTriggered(){
             pane->doAction(DockingPane::Cut);
         }
     }else if(sender==ui->actionAuto_Format){
-        qDebug()<<"auto format";
+        //qDebug()<<"auto format";
         auto pane = this->currentEditorPane();
         if(pane!=nullptr){
             auto editor = pane->editor();

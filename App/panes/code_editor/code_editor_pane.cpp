@@ -456,6 +456,7 @@ void CodeEditorPane::onModificationChanged(bool changed){
             }
             d->modification = changed;
             tabBar->setTabText(i,text);
+            container->updateTabBar(i);
         }
     }
 }

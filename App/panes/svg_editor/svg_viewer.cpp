@@ -90,9 +90,10 @@ SVGViewer::~SVGViewer(){
 }
 
 void SVGViewer::setImagePath(const QString& path){
-    d->zoom  = 1.0f;
+    //d->zoom  = 1.0f;
     d->container->load(path);
     d->imageSize = d->container->svgSize;
+    //this->setZoom(d->zoom);
 }
 
 QSize SVGViewer::imageSize(){

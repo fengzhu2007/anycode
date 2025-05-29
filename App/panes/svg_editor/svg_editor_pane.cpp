@@ -231,6 +231,7 @@ bool SVGEditorPane::save(bool rename) {
     if(ret){
         //reload viewer
         d->viewer->setImagePath(d->path);
+        d->viewer->setZoom(d->viewer->zoom());
     }
     return ret;
 }

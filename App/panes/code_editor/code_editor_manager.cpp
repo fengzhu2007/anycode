@@ -88,6 +88,7 @@ public:
     QAction* openFolderAction=nullptr;
     QAction* floatTabAction=nullptr;
     QAction* aiSuggestionAction = nullptr;
+    QAction* copyLineAction = nullptr;
 
 
     QAction* testAction=nullptr;
@@ -504,6 +505,8 @@ void CodeEditorManager::onEditorActionTrigger(bool checked){
                 d->ai->request(editor);
             }
         }
+    }else if(sender==d->copyLineAction){
+        qDebug()<<"sender";
     }else if(sender==d->testAction){
 
     }
@@ -574,6 +577,7 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
         d->autoFormatAction = new QAction(QIcon(":/Resource/icons/FormatSelection_16x.svg"),tr("Auto Format"),this);
         d->addOrRemoveCommentAction = new QAction(QIcon(":/Resource/icons/CPPCommentCode_16x.svg"),tr("Add/Remove Comment"),this);
         d->aiSuggestionAction = new QAction(QIcon(":/Resource/icons/CordovaMultiDevice_16x.svg"),tr("AI Suggestion"),this);
+        d->copyLineAction = new QAction(tr("Copy Line"),this);
 #ifdef Q_DEBUG
         d->testAction = new QAction(tr("Test"),this);
         connect(d->testAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
@@ -590,6 +594,7 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
         d->pasteAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
         d->selectAllAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_A));
         d->autoFormatAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_K));
+        d->copyLineAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
 
         connect(d->undoAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
         connect(d->redoAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
@@ -604,6 +609,7 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
         connect(d->autoFormatAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
         connect(d->addOrRemoveCommentAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
         connect(d->aiSuggestionAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
+        connect(d->copyLineAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
     }
 
     d->aiSuggestionAction->setEnabled(OptionsSettings::getInstance()->aiSettings().enable());
