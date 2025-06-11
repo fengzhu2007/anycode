@@ -135,5 +135,6 @@
         <file>Resource/icons/Add_16x.svg</file>
         <file>Resource/icons/Previous_16x.svg</file>
         <file>Resource/icons/Next_16x.svg</file>
+        <file>Resource/icons/ColorPalette_16x.svg</file>
     </qresource>
 </RCC>

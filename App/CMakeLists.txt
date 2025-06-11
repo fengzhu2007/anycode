@@ -353,6 +353,8 @@ add_library(App SHARED
         panes/db/index_form_impl.h panes/db/index_form_impl.cpp
         panes/db/sqlite/index_form.h panes/db/sqlite/index_form.cpp panes/db/sqlite/index_form.ui
         panes/db/table_index_model.h panes/db/table_index_model.cpp
+        tools/color/color_dialog.h tools/color/color_dialog.cpp tools/color/color_dialog.ui
+        tools/color/color_picker.h tools/color/color_picker.cpp
 
 
 
