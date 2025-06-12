@@ -179,8 +179,10 @@ bool CodeEditorPane::save(bool rename){
                 int i = container->indexOf(this);
                 if(i>=0){
                     auto tabBar = container->tabBar();
+                    auto last = tabBar->lastVisibleTab();
                     tabBar->setTabText(i,fi.fileName());
                     tabBar->setTabToolTip(i,path);
+                    tabBar->ensureVisible(last);
                 }
             }
         }
@@ -293,9 +295,11 @@ void CodeEditorPane::rename(const QString& name){
             QFileInfo fi(name);
             auto tabBar = container->tabBar();
             QString text = tabBar->tabText(i);
+            auto last = tabBar->lastVisibleTab();
             tabBar->setTabText(i,fi.fileName());
             tabBar->setTabToolTip(i,name);
             this->editor()->rename(name);
+            tabBar->ensureVisible(last);
         }
     }
 }
@@ -455,8 +459,11 @@ void CodeEditorPane::onModificationChanged(bool changed){
                 }
             }
             d->modification = changed;
+            auto last = tabBar->lastVisibleTab();
+            qDebug()<<"last"<<last;
             tabBar->setTabText(i,text);
             container->updateTabBar(i);
+            tabBar->ensureVisible(last);
         }
     }
 }
