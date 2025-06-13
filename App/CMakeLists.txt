@@ -19,6 +19,13 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Xml Sql Gui 
 
 
 
+
+#message(STATUS "Qt5 : ${Qt5Widgets_PRIVATE_INCLUDE_DIRS}")
+
+
+
+
+
 include_directories(SYSTEM "../3party/bin/x64/include")
 
 include_directories(SYSTEM "../libsvnpp/include")
@@ -36,6 +43,9 @@ include_directories(SYSTEM "../3party/tree-sitter/language")
 #include_directories(SYSTEM "../3party/scintilla/qt/ScintillaEditBase")
 #include_directories(SYSTEM "../3party/scintilla/include")
 #include_directories(SYSTEM "../3party/scintilla/src")
+
+#get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+#message(STATUS "Include directories: ${dirs}")
 
 
 if(WIN32)
@@ -353,6 +363,8 @@ add_library(App SHARED
         panes/db/index_form_impl.h panes/db/index_form_impl.cpp
         panes/db/sqlite/index_form.h panes/db/sqlite/index_form.cpp panes/db/sqlite/index_form.ui
         panes/db/table_index_model.h panes/db/table_index_model.cpp
+        tools/color/color_dialog.h tools/color/color_dialog.cpp tools/color/color_dialog.ui
+        tools/color/color_picker.h tools/color/color_picker.cpp
 
 
 

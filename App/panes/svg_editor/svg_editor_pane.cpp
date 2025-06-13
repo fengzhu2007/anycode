@@ -199,8 +199,10 @@ bool SVGEditorPane::save(bool rename) {
                 int i = container->indexOf(this);
                 if(i>=0){
                     auto tabBar = container->tabBar();
+                    auto last = tabBar->lastVisibleTab();
                     tabBar->setTabText(i,fi.fileName());
                     tabBar->setTabToolTip(i,path);
+                    tabBar->ensureVisible(last);
                 }
             }
         }
@@ -351,9 +353,11 @@ void SVGEditorPane::rename(const QString& name){
             QFileInfo fi(name);
             auto tabBar = container->tabBar();
             QString text = tabBar->tabText(i);
+            auto last = tabBar->lastVisibleTab();
             tabBar->setTabText(i,fi.fileName());
             tabBar->setTabToolTip(i,name);
             this->editor()->rename(name);
+            tabBar->ensureVisible(last);
         }
     }
 }
@@ -510,8 +514,11 @@ void SVGEditorPane::onModificationChanged(bool changed){
                     text = text.left(text.length() - 1);
                 }
             }
+            auto last = tabBar->lastVisibleTab();
             d->modification = changed;
             tabBar->setTabText(i,text);
+            tabBar->ensureVisible(last);
+
         }
     }
 }

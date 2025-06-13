@@ -108,6 +108,7 @@
      <string>&amp;Tool</string>
     </property>
     <addaction name="separator"/>
+    <addaction name="actionColor_Tool"/>
     <addaction name="actionSSL_Querier"/>
     <addaction name="actionImport_And_Export"/>
     <addaction name="actionOptions"/>
@@ -577,6 +578,15 @@
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionColor_Tool">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/ColorPalette_16x.svg</normaloff>:/Resource/icons/ColorPalette_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Color Tool</string>
    </property>
   </action>
  </widget>

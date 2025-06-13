@@ -48,6 +48,7 @@
 #include "modules/import_export/import_export_dialog.h"
 
 #include "tools/ssl_query/ssl_query_dialog.h"
+#include "tools/color/color_dialog.h"
 
 #include "components/statusbar/status_bar_view.h"
 #include "common.h"
@@ -159,7 +160,7 @@ Type::M_TOGGLE_NOTIFICATION,Type::M_OPEN_TERMINAL});
 
 
     //tool
-
+    connect(ui->actionColor_Tool,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionSSL_Querier,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionOptions,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionImport_And_Export,&QAction::triggered,this,&IDEWindow::onActionTriggered);
@@ -519,6 +520,8 @@ void IDEWindow::onActionTriggered(){
         pane->activeToCurrent();
 
     //tool
+    }else if(sender==ui->actionColor_Tool){
+        ColorDialog::open(this);
     }else if(sender==ui->actionSSL_Querier){
         SSLQueryDialog::open(this);
     }else if(sender==ui->actionOptions){
