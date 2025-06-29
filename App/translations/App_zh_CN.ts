@@ -838,315 +838,343 @@ for (let i = 0; i &lt; 3; i++) {
         <translation type="unfinished">工具(&amp;T)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="118"/>
+        <location filename="../idewindow.ui" line="119"/>
         <source>E&amp;xtension</source>
         <translation type="unfinished">扩展(&amp;X)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="124"/>
+        <location filename="../idewindow.ui" line="125"/>
         <source>&amp;Help</source>
         <translation type="unfinished">帮助(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="156"/>
+        <location filename="../idewindow.ui" line="157"/>
         <source>toolBar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="186"/>
-        <location filename="../idewindow.ui" line="226"/>
+        <location filename="../idewindow.ui" line="187"/>
+        <location filename="../idewindow.ui" line="227"/>
         <source>Project</source>
         <translation type="unfinished">项目</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="189"/>
+        <location filename="../idewindow.ui" line="190"/>
         <source>New Project</source>
         <translation type="unfinished">新建项目</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="192"/>
+        <location filename="../idewindow.ui" line="193"/>
         <source>Ctrl+Alt+N</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="201"/>
-        <location filename="../idewindow.ui" line="256"/>
+        <location filename="../idewindow.ui" line="202"/>
+        <location filename="../idewindow.ui" line="257"/>
         <source>File</source>
         <translation type="unfinished">文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="204"/>
+        <location filename="../idewindow.ui" line="205"/>
         <source>New File</source>
         <translation type="unfinished">新建文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="207"/>
+        <location filename="../idewindow.ui" line="208"/>
         <source>Ctrl+N</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="212"/>
+        <location filename="../idewindow.ui" line="213"/>
         <source>Close(&amp;C)</source>
         <translation type="unfinished">关闭(&amp;C)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="217"/>
+        <location filename="../idewindow.ui" line="218"/>
         <source>Quit(Q)	Alt+F4</source>
         <translation type="unfinished">退出(Q)	Alt+F4</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="229"/>
+        <location filename="../idewindow.ui" line="230"/>
         <source>Open Project</source>
         <translation type="unfinished">打开项目</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="232"/>
+        <location filename="../idewindow.ui" line="233"/>
         <source>Ctrl+Alt+O</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="241"/>
+        <location filename="../idewindow.ui" line="242"/>
         <source>Folder</source>
         <translation type="unfinished">文件夹</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="244"/>
+        <location filename="../idewindow.ui" line="245"/>
         <source>Open Folder</source>
         <translation type="unfinished">打开文件夹</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="247"/>
+        <location filename="../idewindow.ui" line="248"/>
         <source>Ctrl+Alt+Shift+O</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="259"/>
+        <location filename="../idewindow.ui" line="260"/>
         <source>Open File</source>
         <translation type="unfinished">打开文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="262"/>
+        <location filename="../idewindow.ui" line="263"/>
         <source>Ctrl+O</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="271"/>
+        <location filename="../idewindow.ui" line="272"/>
         <source>Save(&amp;S)</source>
         <translation type="unfinished">保存(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="274"/>
+        <location filename="../idewindow.ui" line="275"/>
         <source>Ctrl+S</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="283"/>
+        <location filename="../idewindow.ui" line="284"/>
         <source>Save As(&amp;A)</source>
         <translation type="unfinished">另存为(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="292"/>
+        <location filename="../idewindow.ui" line="293"/>
         <source>Save All(&amp;L)</source>
         <translation type="unfinished">全部保存(&amp;L)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="295"/>
+        <location filename="../idewindow.ui" line="296"/>
         <source>Ctrl+Shift+S</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="304"/>
+        <location filename="../idewindow.ui" line="305"/>
         <source>Undo	Ctrl+Z</source>
         <translation type="unfinished">撤回	Ctrl+Z</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="313"/>
+        <location filename="../idewindow.ui" line="314"/>
         <source>Redo	Ctrl+Y</source>
         <translation type="unfinished">重做	Ctrl+Y</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="322"/>
+        <location filename="../idewindow.ui" line="323"/>
         <source>Cut(&amp;T)	Ctrl+X</source>
         <translation type="unfinished">剪切(&amp;T)	Ctrl+X</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="331"/>
+        <location filename="../idewindow.ui" line="332"/>
         <source>Copy(&amp;C)	Ctrl+C</source>
         <translation type="unfinished">复制(&amp;C)	Ctrl+C</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="340"/>
+        <location filename="../idewindow.ui" line="341"/>
         <source>Paste(&amp;P)	Ctrl+V</source>
         <translation type="unfinished">粘贴(&amp;P)	Ctrl+V</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="349"/>
+        <location filename="../idewindow.ui" line="350"/>
         <source>Delete(&amp;D)</source>
         <translation type="unfinished">删除(&amp;D)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="352"/>
+        <location filename="../idewindow.ui" line="353"/>
         <source>Del</source>
         <translation type="unfinished">删除</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="357"/>
+        <location filename="../idewindow.ui" line="358"/>
         <source>Find Replace(&amp;F)</source>
         <translation type="unfinished">查找和替换(&amp;F)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="360"/>
+        <location filename="../idewindow.ui" line="361"/>
         <source>Ctrl+F</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="365"/>
+        <location filename="../idewindow.ui" line="366"/>
         <source>Goto(&amp;G)</source>
         <translation type="unfinished">跳转到(&amp;G)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="368"/>
+        <location filename="../idewindow.ui" line="369"/>
         <source>Ctrl+G</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="377"/>
+        <location filename="../idewindow.ui" line="378"/>
         <source>Select All(&amp;A)	Ctl+A</source>
         <translation type="unfinished">全选(&amp;A)	Ctl+A</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="380"/>
+        <location filename="../idewindow.ui" line="381"/>
         <source>Select All(A)</source>
         <translation type="unfinished">全选(A)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="389"/>
+        <location filename="../idewindow.ui" line="390"/>
         <source>Resource Manager</source>
         <translation type="unfinished">资源管理器</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="398"/>
+        <location filename="../idewindow.ui" line="399"/>
         <source>Version Control</source>
         <translation type="unfinished">版本控制器</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="407"/>
+        <location filename="../idewindow.ui" line="408"/>
         <source>Terminal</source>
         <translation type="unfinished">终端</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="416"/>
+        <location filename="../idewindow.ui" line="417"/>
         <source>Log</source>
         <translation type="unfinished">日志</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="425"/>
+        <location filename="../idewindow.ui" line="426"/>
         <source>File Transfer</source>
         <translation type="unfinished">文件传输</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="434"/>
+        <location filename="../idewindow.ui" line="435"/>
         <source>Server</source>
         <translation type="unfinished">服务器</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="443"/>
+        <location filename="../idewindow.ui" line="444"/>
         <source>Options(&amp;O)...</source>
         <translation type="unfinished">选项(&amp;O)...</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="452"/>
+        <location filename="../idewindow.ui" line="453"/>
         <source>View Help(&amp;V)</source>
         <translation type="unfinished">查看帮助(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="457"/>
+        <location filename="../idewindow.ui" line="458"/>
         <source>About...</source>
         <translation type="unfinished">关于...</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="466"/>
+        <location filename="../idewindow.ui" line="467"/>
         <source>Home</source>
         <translation type="unfinished">主页</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="475"/>
+        <location filename="../idewindow.ui" line="476"/>
         <source>Addon Manage</source>
         <translation type="unfinished">插件管理</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="480"/>
+        <location filename="../idewindow.ui" line="481"/>
         <source>Donate</source>
         <translation type="unfinished">捐赠</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="485"/>
+        <location filename="../idewindow.ui" line="486"/>
         <source>Clear Projects</source>
         <translation type="unfinished">清除项目</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="490"/>
+        <location filename="../idewindow.ui" line="491"/>
         <source>Clear Files</source>
         <translation type="unfinished">清除文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="495"/>
+        <location filename="../idewindow.ui" line="496"/>
         <source>Close Project</source>
         <translation type="unfinished">关闭项目</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="500"/>
+        <location filename="../idewindow.ui" line="501"/>
         <source>Update</source>
         <translation type="unfinished">更新</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="509"/>
+        <location filename="../idewindow.ui" line="510"/>
         <source>Command Prompt</source>
         <translation type="unfinished">命令提示符</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="518"/>
+        <location filename="../idewindow.ui" line="519"/>
         <source>PowerShell</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="527"/>
+        <location filename="../idewindow.ui" line="528"/>
         <source>Output</source>
         <translation type="unfinished">输出</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="536"/>
+        <location filename="../idewindow.ui" line="537"/>
         <source>Debug</source>
         <translation type="unfinished">调试</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="544"/>
+        <location filename="../idewindow.ui" line="545"/>
         <source>Import And Export...</source>
         <translation type="unfinished">导入和导出...</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="553"/>
+        <location filename="../idewindow.ui" line="554"/>
         <source>SSL Querier</source>
         <translation type="unfinished">证书查询</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="562"/>
+        <location filename="../idewindow.ui" line="563"/>
         <source>Auto Format</source>
         <translation type="unfinished">自动格式化</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="565"/>
+        <location filename="../idewindow.ui" line="566"/>
         <source>Ctrl+K</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="577"/>
+        <location filename="../idewindow.ui" line="578"/>
         <source>Database</source>
         <translation type="unfinished">数据库</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="589"/>
+        <location filename="../idewindow.ui" line="590"/>
         <source>Color Tool</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../idewindow.ui" line="599"/>
+        <source>Image Clip</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ImageClipDialog</name>
+    <message>
+        <location filename="../tools/image_clip/image_clip_dialog.ui" line="14"/>
+        <source>Image Clip</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/image_clip_dialog.ui" line="32"/>
+        <source>Source:</source>
+        <translation type="unfinished">来源：</translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/image_clip_dialog.ui" line="39"/>
+        <source>Destination:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/image_clip_dialog.ui" line="124"/>
+        <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1858,6 +1886,39 @@ Please enter a new folder name.</source>
     </message>
 </context>
 <context>
+    <name>ResizeTab</name>
+    <message>
+        <location filename="../tools/image_clip/resize_tab.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/resize_tab.ui" line="22"/>
+        <source>Left:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/resize_tab.ui" line="29"/>
+        <source>Top:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/resize_tab.ui" line="36"/>
+        <source>Right:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/resize_tab.ui" line="43"/>
+        <source>Bottom</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/resize_tab.ui" line="64"/>
+        <source>Relative</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ResourceManagerPane</name>
     <message>
         <location filename="../panes/resource_manager/resource_manager_pane.ui" line="14"/>
@@ -1999,6 +2060,24 @@ Please enter a new folder name.</source>
     <message>
         <location filename="../panes/svg_editor/svg_editor_pane.ui" line="14"/>
         <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ScaleTab</name>
+    <message>
+        <location filename="../tools/image_clip/scale_tab.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/scale_tab.ui" line="22"/>
+        <source>Width:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/scale_tab.ui" line="29"/>
+        <source>Height:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2680,25 +2759,25 @@ This file has been modified by another program.
 是否重新加载？</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="472"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="473"/>
         <source>Row:%1, Col:%2</source>
         <comment>Editor</comment>
         <translation type="unfinished">行：%1， 列：%2</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="491"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="492"/>
         <source>Unkown</source>
         <comment>Editor</comment>
         <translation type="unfinished">未知</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="496"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="497"/>
         <source>Space</source>
         <comment>Editor</comment>
         <translation type="unfinished">空白</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_pane.cpp" line="498"/>
+        <location filename="../panes/code_editor/code_editor_pane.cpp" line="499"/>
         <source>Tab</source>
         <comment>Editor</comment>
         <translation type="unfinished"></translation>
@@ -2815,6 +2894,14 @@ Last Modify:%3</source>
         <location filename="../cvs/diff_file_model.cpp" line="110"/>
         <source>Modify Time</source>
         <translation type="unfinished">修改时间</translation>
+    </message>
+</context>
+<context>
+    <name>ady::DirSelector</name>
+    <message>
+        <location filename="../components/dir_selector.cpp" line="61"/>
+        <source>Select Folder</source>
+        <translation type="unfinished">选择文件夹</translation>
     </message>
 </context>
 <context>
@@ -3114,44 +3201,57 @@ Last Modify:%3</source>
 <context>
     <name>ady::IDEWindow</name>
     <message>
-        <location filename="../idewindow.cpp" line="197"/>
+        <location filename="../idewindow.cpp" line="201"/>
         <source>Command Line</source>
         <translation type="unfinished">命令行</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="200"/>
+        <location filename="../idewindow.cpp" line="204"/>
         <source>Command Prompt</source>
         <translation type="unfinished">命令提示符</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="205"/>
+        <location filename="../idewindow.cpp" line="209"/>
         <source>PowerShell</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="215"/>
+        <location filename="../idewindow.cpp" line="219"/>
         <source>Terminal</source>
         <translation type="unfinished">终端</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="397"/>
+        <location filename="../idewindow.cpp" line="401"/>
         <source>Select Folder</source>
         <translation type="unfinished">选择文件夹</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="400"/>
+        <location filename="../idewindow.cpp" line="404"/>
         <source>Open File</source>
         <translation type="unfinished">打开文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="400"/>
+        <location filename="../idewindow.cpp" line="404"/>
         <source>All Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="578"/>
+        <location filename="../idewindow.cpp" line="586"/>
         <source>Text &quot;%1&quot; not found</source>
         <translation type="unfinished">文本 &quot;%1&quot; 未找到</translation>
+    </message>
+</context>
+<context>
+    <name>ady::ImageClipDialog</name>
+    <message>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="42"/>
+        <source>Scale</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="44"/>
+        <source>Resize</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

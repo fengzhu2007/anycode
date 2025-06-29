@@ -365,6 +365,11 @@ add_library(App SHARED
         panes/db/table_index_model.h panes/db/table_index_model.cpp
         tools/color/color_dialog.h tools/color/color_dialog.cpp tools/color/color_dialog.ui
         tools/color/color_picker.h tools/color/color_picker.cpp
+        tools/image_clip/image_clip_dialog.h tools/image_clip/image_clip_dialog.cpp tools/image_clip/image_clip_dialog.ui
+        components/dir_selector.h components/dir_selector.cpp
+        tools/image_clip/scale_tab.h tools/image_clip/scale_tab.cpp tools/image_clip/scale_tab.ui
+        tools/image_clip/resize_tab.h tools/image_clip/resize_tab.cpp tools/image_clip/resize_tab.ui
+        tools/image_clip/image_process_thread.h tools/image_clip/image_process_thread.cpp
 
 
 

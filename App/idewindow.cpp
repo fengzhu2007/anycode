@@ -50,6 +50,8 @@
 #include "tools/ssl_query/ssl_query_dialog.h"
 #include "tools/color/color_dialog.h"
 
+#include "tools/image_clip/image_clip_dialog.h"
+
 #include "components/statusbar/status_bar_view.h"
 #include "common.h"
 //#include "app_oss.h"
@@ -164,6 +166,8 @@ Type::M_TOGGLE_NOTIFICATION,Type::M_OPEN_TERMINAL});
     connect(ui->actionSSL_Querier,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionOptions,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionImport_And_Export,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionImage_Clip,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+
 
 
     //addon
@@ -528,6 +532,10 @@ void IDEWindow::onActionTriggered(){
         OptionsDialog::open(this);
     }else if(sender==ui->actionImport_And_Export){
         ImportExportDialog::open(this);
+
+    }else if(sender==ui->actionImage_Clip){
+        ImageClipDialog::open(this);
+
     //addon
     }else if(sender==ui->actionAddon_Manage){
         AddonManagerDialog::open(this);
