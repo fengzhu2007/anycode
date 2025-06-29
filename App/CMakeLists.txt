@@ -370,6 +370,9 @@ add_library(App SHARED
         tools/image_clip/scale_tab.h tools/image_clip/scale_tab.cpp tools/image_clip/scale_tab.ui
         tools/image_clip/resize_tab.h tools/image_clip/resize_tab.cpp tools/image_clip/resize_tab.ui
         tools/image_clip/image_process_thread.h tools/image_clip/image_process_thread.cpp
+        panes/frames_viewer/frames_viewer_pane.h panes/frames_viewer/frames_viewer_pane.cpp panes/frames_viewer/frames_viewer_pane.ui
+        panes/frames_viewer/animation_frames_player.h panes/frames_viewer/animation_frames_player.cpp
+        panes/frames_viewer/frames_model.h panes/frames_viewer/frames_model.cpp
 
 
 

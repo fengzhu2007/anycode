@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile_F">
@@ -108,6 +108,7 @@
      <string>&amp;Tool</string>
     </property>
     <addaction name="separator"/>
+    <addaction name="actionFrames_Viewer"/>
     <addaction name="actionImage_Clip"/>
     <addaction name="actionColor_Tool"/>
     <addaction name="actionSSL_Querier"/>
@@ -597,6 +598,11 @@
    </property>
    <property name="text">
     <string>Image Clip</string>
+   </property>
+  </action>
+  <action name="actionFrames_Viewer">
+   <property name="text">
+    <string>Frames Viewer</string>
    </property>
   </action>
  </widget>

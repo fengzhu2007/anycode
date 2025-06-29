@@ -22,6 +22,7 @@
 #include "panes/output/output_pane.h"
 #include "panes/notification/notification_pane.h"
 #include "panes/db/dbms_pane.h"
+#include "panes/frames_viewer/frames_viewer_pane.h"
 
 #include "panes/loader.h"
 #include "core/event_bus/event.h"
@@ -167,7 +168,7 @@ Type::M_TOGGLE_NOTIFICATION,Type::M_OPEN_TERMINAL});
     connect(ui->actionOptions,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionImport_And_Export,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionImage_Clip,&QAction::triggered,this,&IDEWindow::onActionTriggered);
-
+    connect(ui->actionFrames_Viewer,&QAction::triggered,this,&IDEWindow::onActionTriggered);
 
 
     //addon
@@ -535,7 +536,9 @@ void IDEWindow::onActionTriggered(){
 
     }else if(sender==ui->actionImage_Clip){
         ImageClipDialog::open(this);
-
+    }else if(sender==ui->actionFrames_Viewer){
+        auto pane = FramesViewerPane::open(m_dockingPaneManager,true);
+        pane->activeToCurrent();
     //addon
     }else if(sender==ui->actionAddon_Manage){
         AddonManagerDialog::open(this);
