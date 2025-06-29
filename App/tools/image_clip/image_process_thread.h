@@ -1,0 +1,46 @@
+#ifndef IMAGE_PROCESS_THREAD_H
+#define IMAGE_PROCESS_THREAD_H
+#include <QThread>
+#include <QFileInfo>
+namespace ady{
+
+class ImageProcessThreadPrivate;
+
+class ImageProcessThread : public QThread
+{
+    Q_OBJECT
+public:
+    enum ProcessName{
+        Scale=0,
+        Resize,
+    };
+    enum ProcessResult{
+        OK,
+        Ignore,
+        Failed
+    };
+
+    ImageProcessThread(ProcessName name,const QString& source,const QString& destination,QObject* parent);
+    ~ImageProcessThread();
+
+
+
+    virtual void run();
+
+    void setScaleParams(int width,int height);
+    void setResizeParams(int left,int top,int right,int bottom,bool relative);
+
+
+signals:
+    void finishOne(int name,int result,const QString& from,const QString& to);
+
+private:
+    void scale(const QFileInfo& fi);
+    void resize(const QFileInfo& fi);
+
+private:
+    ImageProcessThreadPrivate* d;
+
+};
+}
+#endif // IMAGE_PROCESS_THREAD_H
