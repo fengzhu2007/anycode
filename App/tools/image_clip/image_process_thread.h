@@ -13,6 +13,7 @@ public:
     enum ProcessName{
         Scale=0,
         Resize,
+        Cut,
     };
     enum ProcessResult{
         OK,
@@ -29,6 +30,7 @@ public:
 
     void setScaleParams(int width,int height);
     void setResizeParams(int left,int top,int right,int bottom,bool relative);
+    void setCutParams(int left,int top,int right,int bottom);
 
 
 signals:
@@ -37,7 +39,7 @@ signals:
 private:
     void scale(const QFileInfo& fi);
     void resize(const QFileInfo& fi);
-
+    void cut(const QFileInfo& fi);
 private:
     ImageProcessThreadPrivate* d;
 

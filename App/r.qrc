@@ -137,5 +137,7 @@
         <file>Resource/icons/Next_16x.svg</file>
         <file>Resource/icons/ColorPalette_16x.svg</file>
         <file>Resource/icons/DynamicImage_16x.svg</file>
+        <file>Resource/icons/ImageStack_16x.svg</file>
+        <file>Resource/icons/EnableDiagnostics_16x.svg</file>
     </qresource>
 </RCC>

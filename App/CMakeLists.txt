@@ -373,6 +373,8 @@ add_library(App SHARED
         panes/frames_viewer/frames_viewer_pane.h panes/frames_viewer/frames_viewer_pane.cpp panes/frames_viewer/frames_viewer_pane.ui
         panes/frames_viewer/animation_frames_player.h panes/frames_viewer/animation_frames_player.cpp
         panes/frames_viewer/frames_model.h panes/frames_viewer/frames_model.cpp
+        panes/frames_viewer/frames_merge_dialog.h panes/frames_viewer/frames_merge_dialog.cpp panes/frames_viewer/frames_merge_dialog.ui
+        tools/image_clip/cut_tab.h tools/image_clip/cut_tab.cpp tools/image_clip/cut_tab.ui
 
 
 

@@ -259,6 +259,34 @@ for (let i = 0; i &lt; 3; i++) {
     </message>
 </context>
 <context>
+    <name>CutTab</name>
+    <message>
+        <location filename="../tools/image_clip/cut_tab.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/cut_tab.ui" line="22"/>
+        <source>Left:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/cut_tab.ui" line="29"/>
+        <source>Top:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/cut_tab.ui" line="36"/>
+        <source>Right:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/cut_tab.ui" line="43"/>
+        <source>Bottom</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>DBMSPane</name>
     <message>
         <location filename="../panes/db/dbms_pane.ui" line="14"/>
@@ -670,6 +698,24 @@ for (let i = 0; i &lt; 3; i++) {
     </message>
 </context>
 <context>
+    <name>FramesMergeDialog</name>
+    <message>
+        <location filename="../panes/frames_viewer/frames_merge_dialog.ui" line="14"/>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_merge_dialog.ui" line="45"/>
+        <source>Columns:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_merge_dialog.ui" line="68"/>
+        <source>Save</source>
+        <translation type="unfinished">保存</translation>
+    </message>
+</context>
+<context>
     <name>FramesViewerPane</name>
     <message>
         <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="14"/>
@@ -677,13 +723,28 @@ for (let i = 0; i &lt; 3; i++) {
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="41"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="100"/>
         <source>Load</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="87"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="126"/>
         <source>Play</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="138"/>
+        <source>Merge</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="150"/>
+        <source>Enable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="162"/>
+        <source>Disable</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1173,7 +1234,7 @@ for (let i = 0; i &lt; 3; i++) {
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="605"/>
+        <location filename="../idewindow.ui" line="609"/>
         <source>Frames Viewer</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2922,7 +2983,7 @@ Last Modify:%3</source>
 <context>
     <name>ady::DirSelector</name>
     <message>
-        <location filename="../components/dir_selector.cpp" line="61"/>
+        <location filename="../components/dir_selector.cpp" line="66"/>
         <source>Select Folder</source>
         <translation type="unfinished">选择文件夹</translation>
     </message>
@@ -3030,7 +3091,7 @@ Last Modify:%3</source>
 <context>
     <name>ady::FileSelector</name>
     <message>
-        <location filename="../components/file_selector.cpp" line="72"/>
+        <location filename="../components/file_selector.cpp" line="74"/>
         <source>Select File</source>
         <translation type="unfinished">选择文件</translation>
     </message>
@@ -3141,10 +3202,33 @@ Last Modify:%3</source>
     </message>
 </context>
 <context>
+    <name>ady::FramesMergeDialog</name>
+    <message>
+        <location filename="../panes/frames_viewer/frames_merge_dialog.cpp" line="111"/>
+        <source>Save Image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_merge_dialog.cpp" line="111"/>
+        <source>PNG Image Files (*.png)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_merge_dialog.cpp" line="114"/>
+        <source>Save Successfully</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ady::FramesViewerPane</name>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="35"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="41"/>
         <source>Frames Viewer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="101"/>
+        <source>No picture found.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3275,17 +3359,22 @@ Last Modify:%3</source>
 <context>
     <name>ady::ImageClipDialog</name>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="42"/>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="43"/>
         <source>Scale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="44"/>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="45"/>
         <source>Resize</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="81"/>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="47"/>
+        <source>Cut</source>
+        <translation type="unfinished">剪切</translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="87"/>
         <source>Process Successfully</source>
         <translation type="unfinished"></translation>
     </message>

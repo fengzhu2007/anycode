@@ -2,6 +2,7 @@
 #include "ui_image_clip_dialog.h"
 #include "resize_tab.h"
 #include "scale_tab.h"
+#include "cut_tab.h"
 #include "components/message_dialog.h"
 #include <QDebug>
 namespace ady{
@@ -42,6 +43,8 @@ void ImageClipDialog::initView(){
     ui->tabWidget->addTab(scaleTab,tr("Scale"));
     auto resizeTab = new ResizeTab(this);
     ui->tabWidget->addTab(resizeTab,tr("Resize"));
+    auto cutTab = new CutTab(this);
+    ui->tabWidget->addTab(cutTab,tr("Cut"));
 }
 
 
@@ -65,6 +68,9 @@ void ImageClipDialog::onOk(){
         }else if(current==ImageProcessThread::ProcessName::Resize){
             auto resizeTab = static_cast<ResizeTab*>(ui->tabWidget->currentWidget());
             d->thread->setResizeParams(resizeTab->optionLeft(),resizeTab->optionTop(),resizeTab->optionRight(),resizeTab->optionBottom(),resizeTab->optionRelative());
+        }else if(current==ImageProcessThread::ProcessName::Cut){
+            auto cutTab = static_cast<ResizeTab*>(ui->tabWidget->currentWidget());
+            d->thread->setCutParams(cutTab->optionLeft(),cutTab->optionTop(),cutTab->optionRight(),cutTab->optionBottom());
         }
         d->thread->start();
         ui->progress->start();

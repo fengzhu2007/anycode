@@ -28,6 +28,7 @@ public slots:
     void onDoubleClicked(const QModelIndex& index);
     void onActionTriggered();
     void onFrameChange();
+    void onListContextMenu(const QPoint &pos);
 public:
     static const QString PANE_ID;
     static const QString PANE_GROUP;

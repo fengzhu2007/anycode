@@ -2,11 +2,13 @@
 #include "ui_frames_viewer_pane.h"
 #include "animation_frames_player.h"
 #include "frames_model.h"
+#include "frames_merge_dialog.h"
 #include <docking_pane_layout_item_info.h>
 #include <w_toast.h>
 #include <QVBoxLayout>
 #include <QDir>
 #include <QTimer>
+#include <QMenu>
 namespace ady{
 
 const QString FramesViewerPane::PANE_ID = "FramesViewer_%1";
@@ -40,10 +42,16 @@ FramesViewerPane::FramesViewerPane(QWidget *parent)
 
     d->model = new FramesModel(ui->listView);
     ui->listView->setModel(d->model);
+    ui->listView->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
     connect(ui->load,&QPushButton::clicked,this,&FramesViewerPane::onLoad);
     connect(ui->listView,&QListView::doubleClicked,this,&FramesViewerPane::onDoubleClicked);
-    connect(ui->actionPlay,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
+
+    connect(ui->listView,&QListView::customContextMenuRequested,this,&FramesViewerPane::onListContextMenu);
     connect(&d->timer,&QTimer::timeout,this,&FramesViewerPane::onFrameChange);
+    connect(ui->actionPlay,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
+    connect(ui->actionEnable,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
+    connect(ui->actionDisable,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
+    connect(ui->actionMerge,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
 }
 
 FramesViewerPane::~FramesViewerPane()
@@ -66,7 +74,6 @@ QString FramesViewerPane::group(){
 FramesViewerPane* FramesViewerPane::open(DockingPaneManager* dockingManager,bool active){
     auto pane = new FramesViewerPane(dockingManager->widget());
     DockingPaneLayoutItemInfo* item = dockingManager->createPane(pane,DockingPaneManager::Center,active);
-    item->setManualSize(260);
     return pane;
 }
 
@@ -81,16 +88,11 @@ void FramesViewerPane::onLoad(){
     QStringList filters;
     filters << "*.png" << "*.jpg" << "*.jpeg";
     dir.setNameFilters(filters);
-    // QDir output(d->destination);
-    // if(!output.exists()){
-    //     output.mkdir();
-    // }
+
 
     QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Name|QDir::DirsFirst|QDir::IgnoreCase);
     QStringList array;
 
-
-    //void setList(QList<FileItem>& data);
     for(auto file:list){
         array.append(file.absoluteFilePath());
     }
@@ -113,13 +115,54 @@ void FramesViewerPane::onActionTriggered(){
         d->timer.setInterval(50);
         d->timer.setSingleShot(false);
         d->timer.start();
+    }else if(sender==ui->actionEnable){
+        auto indexlist = ui->listView->selectionModel()->selectedIndexes();
+        for(auto index:indexlist){
+            d->model->setFrameStatus(index.row(),true);
+        }
+    }else if(sender==ui->actionDisable){
+        auto indexlist = ui->listView->selectionModel()->selectedIndexes();
+        for(auto index:indexlist){
+            d->model->setFrameStatus(index.row(),false);
+        }
+    }else if(sender==ui->actionMerge){
+        auto dialog = FramesMergeDialog::open(this);
+        dialog->setModel(d->model);
+        dialog->saveTo(ui->folder->text());
+        dialog->show();
+
     }
 }
 void FramesViewerPane::onFrameChange(){
     auto total = d->model->rowCount();
+    if(total<=0){
+        return ;
+    }
 
-    d->current = d->current % total;
-    d->player->load(d->model->image(d->current));
-    d->current += 1;
+    for(int i=0;i<total;i++){
+         d->current = d->current % total;
+        auto frame = d->model->at(d->current);
+        d->current += 1;
+        if(frame.status){
+            d->player->load(frame.image);
+            return ;
+        }
+    }
+    d->player->load(d->model->image(0));
 }
+
+void FramesViewerPane::onListContextMenu(const QPoint &pos){
+    QMenu contextMenu(this);
+
+    auto view = static_cast<QAbstractItemView*>(this->sender());
+    auto model = view->selectionModel();
+    QModelIndex index = model->currentIndex();
+    //int total = model->model()->rowCount();
+    if(index.isValid()){
+        contextMenu.addAction(ui->actionEnable);
+        contextMenu.addAction(ui->actionDisable);
+        contextMenu.exec(QCursor::pos());
+    }
+}
+
 }

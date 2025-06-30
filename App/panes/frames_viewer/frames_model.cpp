@@ -1,6 +1,6 @@
 #include "frames_model.h"
 #include <QDebug>
-
+#include <QIcon>
 namespace ady{
 class FramesModelPrivate{
 
@@ -41,9 +41,13 @@ QVariant FramesModel::data(const QModelIndex &index, int role) const
         return QVariant();
     if(role==Qt::DecorationRole){
         auto item = m_data.at(index.row());
-        return item.image;
+        if(item.status){
+            return item.image;
+        }else{
+            return QIcon(item.image).pixmap(item.image.size(), QIcon::Disabled, QIcon::Off);
+        }
+
     }
-    // FIXME: Implement me!
     return QVariant();
 }
 
@@ -54,12 +58,34 @@ void FramesModel::setDatasource(const QStringList& list){
          FrameItem item ;
          item.image.load(one);
          m_data.append(item);
+         item.status = true;
     }
     endResetModel();
 }
 
+const FrameItem& FramesModel::at(int row) const{
+    return m_data.at(row);
+}
+
 const QPixmap& FramesModel::image(int row) const {
     return m_data.at(row).image;
+}
+
+void FramesModel::setFrameStatus(int row,bool status){
+    m_data[row].status = status;
+    auto index = this->createIndex(row,0);
+    emit dataChanged(index,index);
+}
+
+QList<FrameItem> FramesModel::results(){
+    QList<FrameItem> array;
+    for(auto one:m_data){
+        if(one.status){
+            array.append(one);
+        }
+    }
+    return array;
+
 }
 
 }

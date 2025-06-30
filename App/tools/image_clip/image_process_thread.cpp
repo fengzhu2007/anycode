@@ -19,6 +19,13 @@ struct ResizeOption{
     bool relative;
 };
 
+struct CutOption{
+    int left;
+    int top;
+    int right;
+    int bottom;
+};
+
 class ImageProcessThreadPrivate{
 public:
     ImageProcessThread::ProcessName name;
@@ -26,6 +33,7 @@ public:
     QString destination;
     ScaleOption scale;
     ResizeOption resize;
+    CutOption cut;
 
     QImage process;
 };
@@ -54,6 +62,12 @@ void ImageProcessThread::setResizeParams(int left,int top,int right,int bottom,b
     d->resize.relative = relative;
 }
 
+void ImageProcessThread::setCutParams(int left,int top,int right,int bottom){
+    d->cut.left = left;
+    d->cut.top = top;
+    d->cut.right = right;
+    d->cut.bottom = bottom;
+}
 void ImageProcessThread::run(){
     QDir dir(d->source);
     QStringList filters;
@@ -73,6 +87,8 @@ void ImageProcessThread::run(){
             this->scale(file);
         }else if(d->name==Resize){
             this->resize(file);
+        }else if(d->name==Cut){
+            this->cut(file);
         }
     }
 }
@@ -114,6 +130,27 @@ void ImageProcessThread::resize(const QFileInfo& fi){
         //painter.end();
         auto outputPath = d->destination + "/"+fi.fileName();
         if (resizeImage.save(outputPath, extension.toStdString().c_str())) {
+
+            emit finishOne(d->name,ProcessResult::OK,path,outputPath);
+        }else{
+            emit finishOne(d->name,ProcessResult::Failed,path,outputPath);
+        }
+    }
+}
+
+void ImageProcessThread::cut(const QFileInfo& fi){
+    auto path = fi.absoluteFilePath();
+    if(d->process.load(path)){
+        QString extension = fi.suffix().toUpper();
+        if(extension!="PNG"){
+            extension = "JPG";
+        }
+        auto width = d->process.width() - d->cut.left - d->cut.right;
+        auto height = d->process.height()-d->cut.top - d->cut.bottom;
+        QRect cropRect(d->cut.left, d->cut.top, width, height);
+        QImage croppedImage = d->process.copy(cropRect);
+        auto outputPath = d->destination + "/"+fi.fileName();
+        if (croppedImage.save(outputPath, extension.toStdString().c_str())) {
 
             emit finishOne(d->name,ProcessResult::OK,path,outputPath);
         }else{

@@ -9,6 +9,7 @@ class FrameItem{
 public:
     QString filename;
     QPixmap image;
+    bool status;
 };
 class FramesModelPrivate;
 class FramesModel : public QAbstractTableModel
@@ -33,7 +34,11 @@ public:
 
     void setDatasource(const QStringList& list);
 
+
+    const FrameItem& at(int row) const;
     const QPixmap& image(int row) const;
+    void setFrameStatus(int row,bool status);
+    QList<FrameItem> results();
 private:
     QList<FrameItem> m_data;
     //QStringList m_data;

@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile_F">
@@ -181,7 +181,7 @@
   </widget>
   <action name="actionNew_Project">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/NewFileCollection_16x.svg</normaloff>:/Resource/icons/NewFileCollection_16x.svg</iconset>
    </property>
    <property name="text">
@@ -196,7 +196,7 @@
   </action>
   <action name="actionNew_File">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/NewFile_16x.svg</normaloff>:/Resource/icons/NewFile_16x.svg</iconset>
    </property>
    <property name="text">
@@ -221,7 +221,7 @@
   </action>
   <action name="actionOpen_Project">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/OpenProject_16x.svg</normaloff>:/Resource/icons/OpenProject_16x.svg</iconset>
    </property>
    <property name="text">
@@ -236,7 +236,7 @@
   </action>
   <action name="actionOpen_Folder">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/OpenFolder_16x.svg</normaloff>:/Resource/icons/OpenFolder_16x.svg</iconset>
    </property>
    <property name="text">
@@ -251,7 +251,7 @@
   </action>
   <action name="actionOpen_File">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/OpenFile_16x.svg</normaloff>:/Resource/icons/OpenFile_16x.svg</iconset>
    </property>
    <property name="text">
@@ -266,7 +266,7 @@
   </action>
   <action name="actionSave_S">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Save_16x.svg</normaloff>:/Resource/icons/Save_16x.svg</iconset>
    </property>
    <property name="text">
@@ -278,7 +278,7 @@
   </action>
   <action name="actionSave_As_A">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/SaveAs_16x.svg</normaloff>:/Resource/icons/SaveAs_16x.svg</iconset>
    </property>
    <property name="text">
@@ -287,7 +287,7 @@
   </action>
   <action name="actionSave_All_L">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/SaveAll_16x.svg</normaloff>:/Resource/icons/SaveAll_16x.svg</iconset>
    </property>
    <property name="text">
@@ -299,7 +299,7 @@
   </action>
   <action name="actionUndo_U">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Undo_16x.svg</normaloff>:/Resource/icons/Undo_16x.svg</iconset>
    </property>
    <property name="text">
@@ -308,7 +308,7 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Redo_16x.svg</normaloff>:/Resource/icons/Redo_16x.svg</iconset>
    </property>
    <property name="text">
@@ -317,7 +317,7 @@
   </action>
   <action name="actionCut_X">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Cut_16x.svg</normaloff>:/Resource/icons/Cut_16x.svg</iconset>
    </property>
    <property name="text">
@@ -326,7 +326,7 @@
   </action>
   <action name="actionCopy_C">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Copy_16x.svg</normaloff>:/Resource/icons/Copy_16x.svg</iconset>
    </property>
    <property name="text">
@@ -335,7 +335,7 @@
   </action>
   <action name="actionPaste_P">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Paste_16x.svg</normaloff>:/Resource/icons/Paste_16x.svg</iconset>
    </property>
    <property name="text">
@@ -344,7 +344,7 @@
   </action>
   <action name="actionDelete_D">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Cancel_16x.svg</normaloff>:/Resource/icons/Cancel_16x.svg</iconset>
    </property>
    <property name="text">
@@ -372,7 +372,7 @@
   </action>
   <action name="actionSelect_All">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/SelectAll_16x.svg</normaloff>:/Resource/icons/SelectAll_16x.svg</iconset>
    </property>
    <property name="text">
@@ -384,7 +384,7 @@
   </action>
   <action name="actionResource_Manage">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/SolutionFolderSwitch_16x.svg</normaloff>:/Resource/icons/SolutionFolderSwitch_16x.svg</iconset>
    </property>
    <property name="text">
@@ -393,7 +393,7 @@
   </action>
   <action name="actionVersion_Control">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/ShowParentNodeOnly_16x.svg</normaloff>:/Resource/icons/ShowParentNodeOnly_16x.svg</iconset>
    </property>
    <property name="text">
@@ -402,7 +402,7 @@
   </action>
   <action name="actionTerminal">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/ImmediateWindow_16x.svg</normaloff>:/Resource/icons/ImmediateWindow_16x.svg</iconset>
    </property>
    <property name="text">
@@ -411,7 +411,7 @@
   </action>
   <action name="actionLog">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Log_16x.svg</normaloff>:/Resource/icons/Log_16x.svg</iconset>
    </property>
    <property name="text">
@@ -420,7 +420,7 @@
   </action>
   <action name="actionFile_Transfer">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/TransferJob_16x.svg</normaloff>:/Resource/icons/TransferJob_16x.svg</iconset>
    </property>
    <property name="text">
@@ -429,7 +429,7 @@
   </action>
   <action name="actionServer">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/RemoteServer_16x.svg</normaloff>:/Resource/icons/RemoteServer_16x.svg</iconset>
    </property>
    <property name="text">
@@ -438,7 +438,7 @@
   </action>
   <action name="actionOptions">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Settings_16x.svg</normaloff>:/Resource/icons/Settings_16x.svg</iconset>
    </property>
    <property name="text">
@@ -447,7 +447,7 @@
   </action>
   <action name="actionView_Help_H">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/StatusHelp_16x.svg</normaloff>:/Resource/icons/StatusHelp_16x.svg</iconset>
    </property>
    <property name="text">
@@ -461,7 +461,7 @@
   </action>
   <action name="actionHome">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Home_16x.svg</normaloff>:/Resource/icons/Home_16x.svg</iconset>
    </property>
    <property name="text">
@@ -470,7 +470,7 @@
   </action>
   <action name="actionAddon_Manage">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Extension_16x.svg</normaloff>:/Resource/icons/Extension_16x.svg</iconset>
    </property>
    <property name="text">
@@ -504,7 +504,7 @@
   </action>
   <action name="actionCommand_Prompt_2">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/ImmediateWindow_16x.svg</normaloff>:/Resource/icons/ImmediateWindow_16x.svg</iconset>
    </property>
    <property name="text">
@@ -513,7 +513,7 @@
   </action>
   <action name="actionPowerShell">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/PowerShellInteractiveWindow_16x.svg</normaloff>:/Resource/icons/PowerShellInteractiveWindow_16x.svg</iconset>
    </property>
    <property name="text">
@@ -522,7 +522,7 @@
   </action>
   <action name="actionOutput">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Output_16x.svg</normaloff>:/Resource/icons/Output_16x.svg</iconset>
    </property>
    <property name="text">
@@ -531,7 +531,7 @@
   </action>
   <action name="actionDebug">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/EnableDebugging_16x.svg</normaloff>:/Resource/icons/EnableDebugging_16x.svg</iconset>
    </property>
    <property name="text">
@@ -548,7 +548,7 @@
   </action>
   <action name="actionSSL_Querier">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Certificate_16x.svg</normaloff>:/Resource/icons/Certificate_16x.svg</iconset>
    </property>
    <property name="text">
@@ -557,7 +557,7 @@
   </action>
   <action name="actionAuto_Format">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/FormatSelection_16x.svg</normaloff>:/Resource/icons/FormatSelection_16x.svg</iconset>
    </property>
    <property name="text">
@@ -572,7 +572,7 @@
   </action>
   <action name="actionDatabase">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/Database_16x.svg</normaloff>:/Resource/icons/Database_16x.svg</iconset>
    </property>
    <property name="text">
@@ -584,7 +584,7 @@
   </action>
   <action name="actionColor_Tool">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/ColorPalette_16x.svg</normaloff>:/Resource/icons/ColorPalette_16x.svg</iconset>
    </property>
    <property name="text">
@@ -593,7 +593,7 @@
   </action>
   <action name="actionImage_Clip">
    <property name="icon">
-    <iconset resource="r.qrc">
+    <iconset>
      <normaloff>:/Resource/icons/DynamicImage_16x.svg</normaloff>:/Resource/icons/DynamicImage_16x.svg</iconset>
    </property>
    <property name="text">
@@ -601,13 +601,15 @@
    </property>
   </action>
   <action name="actionFrames_Viewer">
+   <property name="icon">
+    <iconset>
+     <normaloff>:/Resource/icons/ImageStack_16x.svg</normaloff>:/Resource/icons/ImageStack_16x.svg</iconset>
+   </property>
    <property name="text">
     <string>Frames Viewer</string>
    </property>
   </action>
  </widget>
- <resources>
-  <include location="r.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

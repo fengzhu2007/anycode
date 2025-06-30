@@ -13,7 +13,19 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QListView" name="listView">
      <property name="maximumSize">
@@ -21,6 +33,9 @@
        <width>16777215</width>
        <height>120</height>
       </size>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
      </property>
      <property name="isWrapping" stdset="0">
       <bool>false</bool>
@@ -31,15 +46,56 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <widget class="QToolBar" name="toolBar">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="movable">
+      <bool>false</bool>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>16</width>
+       <height>16</height>
+      </size>
+     </property>
+     <addaction name="actionPlay"/>
+     <addaction name="actionMerge"/>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0">
      <item>
-      <widget class="ady::DirSelector" name="folder" native="true"/>
+      <widget class="ady::DirSelector" name="folder" native="true">
+       <property name="maximumSize">
+        <size>
+         <width>400</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="filters"/>
+      <widget class="QLineEdit" name="filters">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="load">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>24</height>
+        </size>
+       </property>
        <property name="text">
         <string>Load</string>
        </property>
@@ -60,26 +116,6 @@
      </item>
     </layout>
    </item>
-   <item>
-    <widget class="QToolBar" name="toolBar">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="movable">
-      <bool>false</bool>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>16</width>
-       <height>16</height>
-      </size>
-     </property>
-     <addaction name="actionPlay"/>
-    </widget>
-   </item>
   </layout>
   <action name="actionPlay">
    <property name="icon">
@@ -88,6 +124,42 @@
    </property>
    <property name="text">
     <string>Play</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionMerge">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/ImageStack_16x.svg</normaloff>:/Resource/icons/ImageStack_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Merge</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionEnable">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/EnableDiagnostics_16x.svg</normaloff>:/Resource/icons/EnableDiagnostics_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Enable</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionDisable">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Cancel_16x.svg</normaloff>:/Resource/icons/Cancel_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Disable</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

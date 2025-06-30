@@ -3,6 +3,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QFileDialog>
+#include <QStandardPaths>
 
 namespace ady{
 class FileSelectorPrivate{
@@ -30,7 +31,7 @@ FileSelector::FileSelector(QWidget *parent,const QString& filter)
     layout->setMargin(0);
     layout->setContentsMargins(0,0,0,0);
     layout->setSpacing(2);
-
+    d->dir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
     connect(d->button,&QPushButton::clicked,this,&FileSelector::onSelectFile);
 }
 
@@ -69,6 +70,7 @@ QString FileSelector::text() const{
 }
 
 void FileSelector::onSelectFile(){
+
     auto filePath = QFileDialog::getOpenFileName(this,tr("Select File"),d->dir,d->filter);
     if(!filePath.isEmpty()){
         d->edit->setText(filePath);
