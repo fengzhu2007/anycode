@@ -59,7 +59,7 @@ void FramesMergeDialog::setModel(FramesModel* model){
 void FramesMergeDialog::merge(){
     auto list = d->model->results();
     auto columns = ui->columns->value();
-    qDebug()<<"columns"<<columns;
+    //qDebug()<<"columns"<<columns;
     int width = 0;
     int height = 0;
     int total = list.size();
@@ -71,7 +71,8 @@ void FramesMergeDialog::merge(){
         for(int j=0;j<columns;j++){
             int index = i * columns + j;
             if(index<total){
-                auto img = d->model->image(index);
+                auto item = list.at(index);
+                auto img = item.image;
                 h = std::max(h,img.height());
                 w += img.width();
             }
@@ -90,7 +91,8 @@ void FramesMergeDialog::merge(){
             hh = 0;
             offsetX = 0;
         }
-        auto img = d->model->image(i);
+        auto item = list.at(i);
+        auto img = item.image;
         hh = std::max(hh,img.height());
 
 

@@ -41,10 +41,17 @@ QVariant FramesModel::data(const QModelIndex &index, int role) const
         return QVariant();
     if(role==Qt::DecorationRole){
         auto item = m_data.at(index.row());
+        auto size = item.image.size();
+        int w = size.width();
+        int h = size.height();
+        if(h>95){
+            size.setHeight(95);
+            size.setWidth(95.0 / h * w);
+        }
         if(item.status){
-            return item.image;
+            return item.image.scaled(size);
         }else{
-            return QIcon(item.image).pixmap(item.image.size(), QIcon::Disabled, QIcon::Off);
+            return QIcon(item.image).pixmap(size, QIcon::Disabled, QIcon::Off);
         }
 
     }
