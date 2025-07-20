@@ -3,6 +3,8 @@
 #include "resize_tab.h"
 #include "scale_tab.h"
 #include "cut_tab.h"
+#include "workflow_tab.h"
+#include "workflow_model.h"
 #include "components/message_dialog.h"
 #include <QDebug>
 namespace ady{
@@ -12,6 +14,7 @@ class ImageClipDialogPrivate{
 
 public:
     ImageProcessThread* thread=nullptr;
+    WorkflowTab* workflow = nullptr;
 };
 
 ImageClipDialog::ImageClipDialog(QWidget *parent)
@@ -26,6 +29,7 @@ ImageClipDialog::ImageClipDialog(QWidget *parent)
     this->initView();
 
     connect(ui->ok,&QPushButton::clicked,this,&ImageClipDialog::onOk);
+    connect(ui->addToWorkflow,&QPushButton::clicked,this,&ImageClipDialog::onAddToWorkflow);
 }
 
 ImageClipDialog::~ImageClipDialog()
@@ -45,6 +49,33 @@ void ImageClipDialog::initView(){
     ui->tabWidget->addTab(resizeTab,tr("Resize"));
     auto cutTab = new CutTab(this);
     ui->tabWidget->addTab(cutTab,tr("Cut"));
+
+    d->workflow = new WorkflowTab(this);
+    ui->tabWidget->addTab(d->workflow,tr("Workflow"));
+}
+
+void ImageClipDialog::onAddToWorkflow(){
+     auto current = ui->tabWidget->currentIndex();
+
+    if(current==ImageProcessThread::ProcessName::Scale){
+        auto scaleTab = static_cast<ScaleTab*>(ui->tabWidget->currentWidget());
+        auto option = new ScaleOption{scaleTab->optionWidth(),scaleTab->optionHeight()};
+        WorkflowData data{ImageProcessThread::ProcessName::Scale,tr("Scale"),option};
+
+        d->workflow->addFlow(data);
+
+    }else if(current==ImageProcessThread::ProcessName::Resize){
+        auto resizeTab = static_cast<ResizeTab*>(ui->tabWidget->currentWidget());
+        auto option = new ResizeOption{resizeTab->optionLeft(),resizeTab->optionTop(),resizeTab->optionRight(),resizeTab->optionBottom(),resizeTab->optionRelative()};
+        WorkflowData data{ImageProcessThread::ProcessName::Resize,tr("Resize"),option};
+        d->workflow->addFlow(data);
+    }else if(current==ImageProcessThread::ProcessName::Cut){
+        auto cutTab = static_cast<ResizeTab*>(ui->tabWidget->currentWidget());
+        auto option = new CutOption{cutTab->optionLeft(),cutTab->optionTop(),cutTab->optionRight(),cutTab->optionBottom()};
+        WorkflowData data{ImageProcessThread::ProcessName::Cut,tr("Cut"),option};
+        d->workflow->addFlow(data);
+    }
+    ui->tabWidget->setCurrentIndex(ImageProcessThread::ProcessName::Workflow);
 }
 
 
@@ -71,6 +102,25 @@ void ImageClipDialog::onOk(){
         }else if(current==ImageProcessThread::ProcessName::Cut){
             auto cutTab = static_cast<ResizeTab*>(ui->tabWidget->currentWidget());
             d->thread->setCutParams(cutTab->optionLeft(),cutTab->optionTop(),cutTab->optionRight(),cutTab->optionBottom());
+        }else if(current==ImageProcessThread::ProcessName::Workflow){
+            auto list = d->workflow->queue();
+            if(list.size()>0){
+                for(auto item:list){
+                    if(item.name==ImageProcessThread::ProcessName::Scale){
+                        auto option = static_cast<ScaleOption*>(item.data);
+                        d->thread->setScaleParams(option->width,option->height);
+                    }else if(item.name==ImageProcessThread::ProcessName::Resize){
+                        auto option = static_cast<ResizeOption*>(item.data);
+                        d->thread->setResizeParams(option->left,option->top,option->right,option->bottom,option->relative);
+                    }else if(item.name==ImageProcessThread::ProcessName::Cut){
+                        auto option = static_cast<CutOption*>(item.data);
+                        d->thread->setCutParams(option->left,option->top,option->right,option->bottom);
+                    }
+                }
+            }else{
+                MessageDialog::info(this,tr("Undefined processing flow!"));
+                return ;
+            }
         }
         d->thread->start();
         ui->progress->start();

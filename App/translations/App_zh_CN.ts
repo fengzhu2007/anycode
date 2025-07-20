@@ -1257,7 +1257,12 @@ for (let i = 0; i &lt; 3; i++) {
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.ui" line="124"/>
+        <location filename="../tools/image_clip/image_clip_dialog.ui" line="111"/>
+        <source>Add to workflow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/image_clip_dialog.ui" line="134"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1997,7 +2002,7 @@ Please enter a new folder name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/resize_tab.ui" line="64"/>
+        <location filename="../tools/image_clip/resize_tab.ui" line="80"/>
         <source>Relative</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2160,7 +2165,7 @@ Please enter a new folder name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/scale_tab.ui" line="29"/>
+        <location filename="../tools/image_clip/scale_tab.ui" line="36"/>
         <source>Height:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2592,6 +2597,27 @@ Please enter a new folder name.</source>
         <location filename="../panes/version_control/version_control_pane.ui" line="222"/>
         <source>Copy Path</source>
         <translation type="unfinished">复制文件路径</translation>
+    </message>
+</context>
+<context>
+    <name>WorkflowItem</name>
+    <message>
+        <location filename="../tools/image_clip/workflow_item.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/workflow_item.ui" line="38"/>
+        <source>Remove</source>
+        <translation type="unfinished">移除</translation>
+    </message>
+</context>
+<context>
+    <name>WorkflowTab</name>
+    <message>
+        <location filename="../tools/image_clip/workflow_tab.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3204,17 +3230,17 @@ Last Modify:%3</source>
 <context>
     <name>ady::FramesMergeDialog</name>
     <message>
-        <location filename="../panes/frames_viewer/frames_merge_dialog.cpp" line="111"/>
+        <location filename="../panes/frames_viewer/frames_merge_dialog.cpp" line="113"/>
         <source>Save Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_merge_dialog.cpp" line="111"/>
+        <location filename="../panes/frames_viewer/frames_merge_dialog.cpp" line="113"/>
         <source>PNG Image Files (*.png)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_merge_dialog.cpp" line="114"/>
+        <location filename="../panes/frames_viewer/frames_merge_dialog.cpp" line="116"/>
         <source>Save Successfully</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3359,22 +3385,28 @@ Last Modify:%3</source>
 <context>
     <name>ady::ImageClipDialog</name>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="43"/>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="47"/>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="63"/>
         <source>Scale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="45"/>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="49"/>
         <source>Resize</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="47"/>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="51"/>
         <source>Cut</source>
         <translation type="unfinished">剪切</translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="87"/>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="54"/>
+        <source>Workflow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="115"/>
         <source>Process Successfully</source>
         <translation type="unfinished"></translation>
     </message>

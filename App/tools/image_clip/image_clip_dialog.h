@@ -24,6 +24,7 @@ public slots:
     void onOk();
     void onFinishOne(int,int,const QString& source,const QString& destination);
     void onProressComplete();
+    void onAddToWorkflow();
 
 private:
     explicit ImageClipDialog(QWidget *parent = nullptr);

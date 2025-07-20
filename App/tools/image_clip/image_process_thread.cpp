@@ -6,25 +6,7 @@
 
 namespace ady{
 
-struct ScaleOption{
-    int width;
-    int height;
-};
 
-struct ResizeOption{
-    int left;
-    int top;
-    int right;
-    int bottom;
-    bool relative;
-};
-
-struct CutOption{
-    int left;
-    int top;
-    int right;
-    int bottom;
-};
 
 class ImageProcessThreadPrivate{
 public:
@@ -34,8 +16,9 @@ public:
     ScaleOption scale;
     ResizeOption resize;
     CutOption cut;
-
+    QList<ImageProcessThread::ProcessName> processlist;
     QImage process;
+
 };
 
 ImageProcessThread::ImageProcessThread(ProcessName name,const QString& source,const QString& destination,QObject* parent):QThread(parent){
@@ -52,6 +35,9 @@ ImageProcessThread::~ImageProcessThread(){
 void ImageProcessThread::setScaleParams(int width,int height){
     d->scale.width = width;
     d->scale.height = height;
+    if(d->name==ProcessName::Workflow){
+        d->processlist.append(ProcessName::Scale);
+    }
 }
 
 void ImageProcessThread::setResizeParams(int left,int top,int right,int bottom,bool relative){
@@ -60,6 +46,9 @@ void ImageProcessThread::setResizeParams(int left,int top,int right,int bottom,b
     d->resize.right = right;
     d->resize.bottom = bottom;
     d->resize.relative = relative;
+    if(d->name==ProcessName::Workflow){
+        d->processlist.append(ProcessName::Resize);
+    }
 }
 
 void ImageProcessThread::setCutParams(int left,int top,int right,int bottom){
@@ -67,6 +56,9 @@ void ImageProcessThread::setCutParams(int left,int top,int right,int bottom){
     d->cut.top = top;
     d->cut.right = right;
     d->cut.bottom = bottom;
+    if(d->name==ProcessName::Workflow){
+        d->processlist.append(ProcessName::Cut);
+    }
 }
 void ImageProcessThread::run(){
     QDir dir(d->source);
@@ -89,6 +81,8 @@ void ImageProcessThread::run(){
             this->resize(file);
         }else if(d->name==Cut){
             this->cut(file);
+        }else if(d->name==Workflow){
+            this->workflow(file);
         }
     }
 }
@@ -158,6 +152,47 @@ void ImageProcessThread::cut(const QFileInfo& fi){
         }
     }
 }
+
+void ImageProcessThread::workflow(const QFileInfo& fi){
+    if(d->processlist.size()>0){
+        auto path = fi.absoluteFilePath();
+        if(d->process.load(path)){
+            for(auto processname:d->processlist){
+                if(processname==ProcessName::Scale){
+                    d->process = d->process.scaled(QSize(d->scale.width,d->scale.height),
+                                      Qt::KeepAspectRatio,
+                                      Qt::SmoothTransformation);
+                }else if(processname==ProcessName::Resize){
+                    auto width = d->process.width() + d->resize.left + d->resize.right;
+                    auto height = d->process.height() + d->resize.top + d->resize.bottom;
+                    QImage resizeImage(width,height,QImage::Format_ARGB32);
+                    resizeImage.fill(Qt::transparent);
+                    QPainter painter(&resizeImage);
+                    painter.drawImage(d->resize.left, d->resize.top, d->process);
+                    d->process = resizeImage;
+
+                }else if(processname==ProcessName::Cut){
+                    auto width = d->process.width() - d->cut.left - d->cut.right;
+                    auto height = d->process.height()-d->cut.top - d->cut.bottom;
+                    QRect cropRect(d->cut.left, d->cut.top, width, height);
+                    d->process = d->process.copy(cropRect);
+                }
+            }
+            QString extension = fi.suffix().toUpper();
+            if(extension!="PNG"){
+                extension = "JPG";
+            }
+            auto outputPath = d->destination + "/"+fi.fileName();
+            if (d->process.save(outputPath, extension.toStdString().c_str())) {
+                emit finishOne(d->name,ProcessResult::OK,path,outputPath);
+            }else{
+                emit finishOne(d->name,ProcessResult::Failed,path,outputPath);
+            }
+        }
+    }
+}
+
+
 
 
 }

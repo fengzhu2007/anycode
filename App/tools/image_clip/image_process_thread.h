@@ -4,6 +4,27 @@
 #include <QFileInfo>
 namespace ady{
 
+struct ScaleOption{
+    int width;
+    int height;
+};
+
+struct ResizeOption{
+    int left;
+    int top;
+    int right;
+    int bottom;
+    bool relative;
+};
+
+struct CutOption{
+    int left;
+    int top;
+    int right;
+    int bottom;
+};
+
+
 class ImageProcessThreadPrivate;
 
 class ImageProcessThread : public QThread
@@ -14,6 +35,7 @@ public:
         Scale=0,
         Resize,
         Cut,
+        Workflow,
     };
     enum ProcessResult{
         OK,
@@ -40,6 +62,7 @@ private:
     void scale(const QFileInfo& fi);
     void resize(const QFileInfo& fi);
     void cut(const QFileInfo& fi);
+    void workflow(const QFileInfo& fi);
 private:
     ImageProcessThreadPrivate* d;
 

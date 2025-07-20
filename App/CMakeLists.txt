@@ -375,6 +375,9 @@ add_library(App SHARED
         panes/frames_viewer/frames_model.h panes/frames_viewer/frames_model.cpp
         panes/frames_viewer/frames_merge_dialog.h panes/frames_viewer/frames_merge_dialog.cpp panes/frames_viewer/frames_merge_dialog.ui
         tools/image_clip/cut_tab.h tools/image_clip/cut_tab.cpp tools/image_clip/cut_tab.ui
+        tools/image_clip/workflow_tab.h tools/image_clip/workflow_tab.cpp tools/image_clip/workflow_tab.ui
+        tools/image_clip/workflow_item.h tools/image_clip/workflow_item.cpp tools/image_clip/workflow_item.ui
+        tools/image_clip/workflow_model.h tools/image_clip/workflow_model.cpp
 
 
 
