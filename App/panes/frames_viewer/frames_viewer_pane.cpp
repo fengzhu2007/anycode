@@ -112,7 +112,7 @@ void FramesViewerPane::onActionTriggered(){
             return ;
         }
         d->current = 0;
-        d->timer.setInterval(50);
+        d->timer.setInterval(200);
         d->timer.setSingleShot(false);
         d->timer.start();
     }else if(sender==ui->actionEnable){

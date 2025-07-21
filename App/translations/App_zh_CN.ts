@@ -3392,11 +3392,13 @@ Last Modify:%3</source>
     </message>
     <message>
         <location filename="../tools/image_clip/image_clip_dialog.cpp" line="49"/>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="70"/>
         <source>Resize</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../tools/image_clip/image_clip_dialog.cpp" line="51"/>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="75"/>
         <source>Cut</source>
         <translation type="unfinished">剪切</translation>
     </message>
@@ -3406,7 +3408,12 @@ Last Modify:%3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="115"/>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="121"/>
+        <source>Undefined processing flow!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/image_clip_dialog.cpp" line="137"/>
         <source>Process Successfully</source>
         <translation type="unfinished"></translation>
     </message>
