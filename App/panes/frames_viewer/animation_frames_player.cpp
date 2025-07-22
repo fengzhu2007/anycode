@@ -38,7 +38,7 @@ public:
         auto rect = this->geometry();
         if(rect.width()!=rc.width() || rect.height()!=rc.height()){
             this->setGeometry(rc);
-            qDebug()<<this->imageViewer->geometry()<<this->geometry()<<rc;
+            //qDebug()<<this->imageViewer->geometry()<<this->geometry()<<rc;
             this->adjustSize(this->rangeSize);
         }
 
@@ -80,7 +80,7 @@ protected:
 
     virtual void resizeEvent(QResizeEvent* e) override{
         QWidget::resizeEvent(e);
-        qDebug()<<"player size 1:"<<e->size();
+        //qDebug()<<"player size 1:"<<e->size();
         //this->adjustSize(e->size());
     }
 
@@ -105,6 +105,7 @@ class AnimationFramesPlayerPrivate{
 
 public:
     Player* player;
+    QLabel* label;
 
 };
 
@@ -114,6 +115,10 @@ AnimationFramesPlayer::AnimationFramesPlayer(QWidget *parent)
 
     d = new AnimationFramesPlayerPrivate;
     d->player = new Player(this);
+    d->label = new QLabel(this);
+    d->label->setAlignment(Qt::AlignCenter);
+    d->label->setStyleSheet("QLabel{background:rgba(0,0,0,160);color:#ffffff;padding:4px 10px}");
+    d->label->hide();
     //d->container->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     //d->container->setAlignment(Qt::AlignCenter);
     //d->zoom = 1.0f;
@@ -131,19 +136,18 @@ void AnimationFramesPlayer::load(const QPixmap& image){
     d->player->load(image);
 }
 
+void AnimationFramesPlayer::setText(const QString& text){
+    if(d->label->isHidden()){
+        d->label->show();
+    }
+    d->label->setText(text);
+}
+
 void AnimationFramesPlayer::resizeEvent(QResizeEvent* e){
     QScrollArea::resizeEvent(e);
     d->player->rangeSize = e->size();
-    // int w = static_cast<int>(d->player->imageSize.width() * 1);
-    // int h = static_cast<int>(d->player->imageSize.height() * 1);
-    // int width = qMax(w,e->size().width());
-    // int height = qMax(h,e->size().height());
-    // auto rc = d->player->geometry();
-    // qDebug()<<"player resize:"<<QSize{w,h}<<e->size();
-    // d->player->imageViewer->setFixedSize({w,h});
-    // d->player->setGeometry({rc.x(),rc.y(),width,height});
-    // d->player->adjustSize(d->player->size());
-
+    d->player->setGeometry({0,0,e->size().width(),e->size().height()});
+    d->label->setGeometry({10,e->size().height() - 10 - 20,200,20});
 }
 
 // void AnimationFramesPlayer::scrollContentsBy(int dx, int dy){

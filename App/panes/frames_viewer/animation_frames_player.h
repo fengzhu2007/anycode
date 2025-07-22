@@ -13,6 +13,7 @@ public:
     ~AnimationFramesPlayer();
 
     void load(const QPixmap& image);
+    void setText(const QString& text);
 signals:
 
 protected:

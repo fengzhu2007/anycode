@@ -14,7 +14,10 @@
 #include <QFileDialog>
 #include <QStyledItemDelegate>
 #include <QPainter>
+#include <QClipboard>
 #include "components/message_dialog.h"
+#include <docking_pane_container.h>
+#include <docking_pane_container_tabbar.h>
 namespace ady{
 
 const QString FramesViewerPane::PANE_ID = "FramesViewer_%1";
@@ -66,13 +69,13 @@ class FramesViewerPanePrivate{
 public:
     int id;
     AnimationFramesPlayer* player;
-    QLabel* label;
     QLabel* intervalLabel;
     QSpinBox* spinBox;
     FramesModel* model;
     QTimer timer;
     int current = 0;
     int interval = 200;
+    QString folder;
 
 
 };
@@ -88,12 +91,9 @@ FramesViewerPane::FramesViewerPane(QWidget *parent)
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     d->player = new AnimationFramesPlayer(widget);
-    d->label = new QLabel(this);
-    d->label->setAlignment(Qt::AlignCenter);
-    d->label->setStyleSheet("QLabel{background:rgba(0,0,0,160);color:#ffffff;padding:4px 10px}");
-    d->label->hide();
+
     auto layout = static_cast<QVBoxLayout*>(widget->layout());
-    layout->insertWidget(0,d->player,1);
+    layout->insertWidget(1,d->player,1);
     this->setWindowTitle(tr("Frames Viewer"));
 
     d->intervalLabel = new QLabel(tr("Interval:"),ui->toolBar);
@@ -112,9 +112,10 @@ FramesViewerPane::FramesViewerPane(QWidget *parent)
     ui->listView->setModel(d->model);
     ui->listView->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
     ui->listView->setItemDelegate(new IconTopLeftTextDelegate(ui->listView));
+    ui->listView->setStyleSheet("border-left:0;border-right:0;border-bottom:0");
 
 
-    connect(ui->load,&QPushButton::clicked,this,&FramesViewerPane::onLoad);
+    //connect(ui->load,&QPushButton::clicked,this,&FramesViewerPane::onLoad);
     connect(ui->listView,&QListView::doubleClicked,this,&FramesViewerPane::onDoubleClicked);
 
     connect(ui->listView,&QListView::customContextMenuRequested,this,&FramesViewerPane::onListContextMenu);
@@ -125,7 +126,8 @@ FramesViewerPane::FramesViewerPane(QWidget *parent)
     connect(ui->actionDisable,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
     connect(ui->actionMerge,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
     connect(ui->actionExport,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
-
+    connect(ui->actionOpenFolder,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
+    connect(ui->actionCopy_Path,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
 
 }
 
@@ -159,12 +161,26 @@ FramesViewerPane* FramesViewerPane::make(DockingPaneManager* dockingManager,cons
 
 void FramesViewerPane::resizeEvent(QResizeEvent* e){
     DockingPane::resizeEvent(e);
-    d->label->setGeometry({10,10,200,20});
 }
 
-void FramesViewerPane::onLoad(){
-    auto folder = ui->folder->text();
+void FramesViewerPane::loadFolder(const QString& folder){
+    //auto folder = ui->folder->text();
     QDir dir(folder);
+    this->setToolTip(folder);//dirName
+
+    auto container = this->container();
+    if(container!=nullptr){
+        int i = container->indexOf(this);
+        if(i>=0){
+            auto tabBar = container->tabBar();
+            auto last = tabBar->lastVisibleTab();
+            tabBar->setTabText(i,QString::fromUtf8("%1[%2]").arg(this->windowTitle()).arg(dir.dirName()));
+            tabBar->setTabToolTip(i,folder);
+            tabBar->ensureVisible(last);
+        }
+    }
+    ui->actionCopy_Path->setEnabled(true);
+
     QStringList filters;
     filters << "*.png" << "*.jpg" << "*.jpeg";
     dir.setNameFilters(filters);
@@ -181,9 +197,8 @@ void FramesViewerPane::onLoad(){
 
 void FramesViewerPane::onDoubleClicked(const QModelIndex& index){
     //d->label->setText(tr("%1/%2").arg(index.row()+1).arg(d->model->rowCount()));
-    d->label->show();
     auto image = d->model->image(index.row());
-    d->label->setText(tr("[%1/%2] Width:%3,Height:%4").arg(index.row()+1).arg(d->model->rowCount()).arg(image.size().width()).arg(image.size().height()));
+    d->player->setText(tr("[%1/%2] Width:%3,Height:%4").arg(index.row()+1).arg(d->model->rowCount()).arg(image.size().width()).arg(image.size().height()));
     d->player->load(image);
 }
 void FramesViewerPane::onActionTriggered(){
@@ -194,7 +209,6 @@ void FramesViewerPane::onActionTriggered(){
         }
         ui->actionPlay->setEnabled(false);
         ui->actionStop->setEnabled(true);
-        d->label->show();
         d->current = 0;
         d->timer.setInterval(d->interval);
         d->timer.setSingleShot(false);
@@ -203,6 +217,20 @@ void FramesViewerPane::onActionTriggered(){
         ui->actionPlay->setEnabled(true);
         ui->actionStop->setEnabled(false);
         d->timer.stop();
+    }else if(sender==ui->actionOpenFolder){
+        auto folder = d->folder;
+        if(folder.isEmpty()){
+            folder = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+        }
+        auto folderPath = QFileDialog::getExistingDirectory(this,tr("Open Image Frames Folder"),folder);
+        if(!folderPath.isEmpty()){
+            d->folder = folderPath;
+            this->loadFolder(folderPath);
+        }
+    }else if(sender==ui->actionCopy_Path){
+        QClipboard *clipboard = QApplication::clipboard();
+        clipboard->setText(d->folder);
+        wToast::showText(tr("Copy successfully!"));
     }else if(sender==ui->actionEnable){
         auto indexlist = ui->listView->selectionModel()->selectedIndexes();
         for(auto index:indexlist){
@@ -216,10 +244,10 @@ void FramesViewerPane::onActionTriggered(){
     }else if(sender==ui->actionMerge){
         auto dialog = FramesMergeDialog::open(this);
         dialog->setModel(d->model);
-        dialog->saveTo(ui->folder->text());
+        dialog->saveTo(d->folder);
         dialog->show();
     }else if(sender==ui->actionExport){
-        auto folder = ui->folder->text();
+        auto folder = d->folder;
         if(folder.isEmpty()){
             folder = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
         }
@@ -249,13 +277,13 @@ void FramesViewerPane::onFrameChange(){
         d->current += 1;
         if(frame.status){
             //d->label->setText(tr("%1/%2").arg(d->current).arg(d->model->rowCount()));
-            d->label->setText(tr("[%1/%2] Width:%3,Height:%4").arg(d->current).arg(d->model->rowCount()).arg(frame.image.size().width()).arg(frame.image.size().height()));
+            d->player->setText(tr("[%1/%2] Width:%3,Height:%4").arg(d->current).arg(d->model->rowCount()).arg(frame.image.size().width()).arg(frame.image.size().height()));
             d->player->load(frame.image);
             return ;
         }
     }
     auto image = d->model->image(0);
-    d->label->setText(tr("[%1/%2] Width:%3,Height:%4").arg(1).arg(d->model->rowCount()).arg(image.size().width()).arg(image.size().height()));
+    d->player->setText(tr("[%1/%2] Width:%3,Height:%4").arg(1).arg(d->model->rowCount()).arg(image.size().width()).arg(image.size().height()));
     d->player->load(image);
 }
 

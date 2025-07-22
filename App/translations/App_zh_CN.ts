@@ -267,22 +267,37 @@ for (let i = 0; i &lt; 3; i++) {
     </message>
     <message>
         <location filename="../tools/image_clip/cut_tab.ui" line="22"/>
-        <source>Left:</source>
+        <source>Margin Left:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../tools/image_clip/cut_tab.ui" line="29"/>
-        <source>Top:</source>
+        <source>Margin Top:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../tools/image_clip/cut_tab.ui" line="36"/>
-        <source>Right:</source>
+        <source>Margin Right:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../tools/image_clip/cut_tab.ui" line="43"/>
-        <source>Bottom</source>
+        <source>Margin Bottom:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/cut_tab.ui" line="78"/>
+        <source>Width:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/cut_tab.ui" line="92"/>
+        <source>Height:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/cut_tab.ui" line="108"/>
+        <source>Prioritize the use of width and height.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -701,7 +716,7 @@ for (let i = 0; i &lt; 3; i++) {
     <name>FramesMergeDialog</name>
     <message>
         <location filename="../panes/frames_viewer/frames_merge_dialog.ui" line="14"/>
-        <source>Dialog</source>
+        <source>Frames Merge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -723,28 +738,43 @@ for (let i = 0; i &lt; 3; i++) {
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="100"/>
-        <source>Load</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="126"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="92"/>
         <source>Play</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="138"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="104"/>
         <source>Merge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="150"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="116"/>
         <source>Enable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="162"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="128"/>
         <source>Disable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="140"/>
+        <source>Export</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="152"/>
+        <source>Stop</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="164"/>
+        <source>OpenFolder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="179"/>
+        <source>Copy Path</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1247,22 +1277,22 @@ for (let i = 0; i &lt; 3; i++) {
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.ui" line="32"/>
+        <location filename="../tools/image_clip/image_clip_dialog.ui" line="41"/>
         <source>Source:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.ui" line="39"/>
+        <location filename="../tools/image_clip/image_clip_dialog.ui" line="70"/>
         <source>Destination:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.ui" line="117"/>
+        <location filename="../tools/image_clip/image_clip_dialog.ui" line="142"/>
         <source>Add to workflow</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/image_clip_dialog.ui" line="140"/>
+        <location filename="../tools/image_clip/image_clip_dialog.ui" line="165"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3238,20 +3268,51 @@ Last Modify:%3</source>
 <context>
     <name>ady::FramesViewerPane</name>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="43"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="97"/>
         <source>Frames Viewer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="108"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="99"/>
+        <source>Interval:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="100"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="102"/>
+        <source>Animation interval (millisecond)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="194"/>
         <source>No picture found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="113"/>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="155"/>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="160"/>
-        <source>%1/%2</source>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="201"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="280"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="286"/>
+        <source>[%1/%2] Width:%3,Height:%4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="225"/>
+        <source>Open Image Frames Folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="233"/>
+        <source>Copy successfully!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="254"/>
+        <source>Export to Folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="263"/>
+        <source>Successfully exported %1 files</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

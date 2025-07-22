@@ -22,13 +22,13 @@ public:
 
     static FramesViewerPane* open(DockingPaneManager* dockingManager,bool active=false);
     static FramesViewerPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
-
+    void loadFolder(const QString& folder);
 
 protected:
     virtual void resizeEvent(QResizeEvent* e) override;
 
 public slots:
-    void onLoad();
+
     void onDoubleClicked(const QModelIndex& index);
     void onActionTriggered();
     void onFrameChange();
