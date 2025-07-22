@@ -31,7 +31,8 @@ void WorkflowItem::init(const WorkflowData& data){
         params = QString("Left:%1;Top:%2;Right:%3;Bottom:%4").arg(option->left).arg(option->top).arg(option->right).arg(option->bottom);
     }else if(data.name==ImageProcessThread::ProcessName::Cut){
         auto option = static_cast<CutOption*>(data.data);
-        params = QString("Left:%1;Top:%2;Width:%5;Height:%6;Right:%3;Bottom:%4").arg(option->left).arg(option->top).arg(option->width).arg(option->height).arg(option->right).arg(option->bottom);
+        params = QString("Left:%1;Top:%2;Width:%3;Height:%4;Right:%5;Bottom:%6").arg(option->left).arg(option->top)
+                     .arg(option->width).arg(option->height).arg(option->right).arg(option->bottom);
     }
     ui->params->setText(params);
 }

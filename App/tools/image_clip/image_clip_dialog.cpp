@@ -70,8 +70,9 @@ void ImageClipDialog::onAddToWorkflow(){
         WorkflowData data{ImageProcessThread::ProcessName::Resize,tr("Resize"),option};
         d->workflow->addFlow(data);
     }else if(current==ImageProcessThread::ProcessName::Cut){
-        auto cutTab = static_cast<ResizeTab*>(ui->tabWidget->currentWidget());
-        auto option = new CutOption{cutTab->optionLeft(),cutTab->optionTop(),cutTab->optionRight(),cutTab->optionBottom()};
+        auto cutTab = static_cast<CutTab*>(ui->tabWidget->currentWidget());
+        auto option = new CutOption{cutTab->optionLeft(),cutTab->optionTop(),cutTab->optionRight(),cutTab->optionBottom(),
+cutTab->optionWidth(),cutTab->optionHeight()};
         WorkflowData data{ImageProcessThread::ProcessName::Cut,tr("Cut"),option};
         d->workflow->addFlow(data);
     }
@@ -114,7 +115,7 @@ void ImageClipDialog::onOk(){
                         d->thread->setResizeParams(option->left,option->top,option->right,option->bottom,option->relative);
                     }else if(item.name==ImageProcessThread::ProcessName::Cut){
                         auto option = static_cast<CutOption*>(item.data);
-                        d->thread->setCutParams(option->left,option->top,option->right,option->bottom);
+                        d->thread->setCutParams(option->left,option->top,option->right,option->bottom,option->width,option->height);
                     }
                 }
             }else{
