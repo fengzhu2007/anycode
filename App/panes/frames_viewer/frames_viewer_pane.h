@@ -23,12 +23,17 @@ public:
     static FramesViewerPane* open(DockingPaneManager* dockingManager,bool active=false);
     static FramesViewerPane* make(DockingPaneManager* dockingManager,const QJsonObject& data);
 
+
+protected:
+    virtual void resizeEvent(QResizeEvent* e) override;
+
 public slots:
     void onLoad();
     void onDoubleClicked(const QModelIndex& index);
     void onActionTriggered();
     void onFrameChange();
     void onListContextMenu(const QPoint &pos);
+    void onIntervalChanged(int interval);
 public:
     static const QString PANE_ID;
     static const QString PANE_GROUP;

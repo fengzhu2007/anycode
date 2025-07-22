@@ -16,21 +16,37 @@ public:
     }
 
     void load(const QPixmap& image){
-        qDebug()<<"image"<<image;
-        qDebug()<<"load"<<image.size();
+        //qDebug()<<"image"<<image;
+        //qDebug()<<"load"<<image.size();
         this->imageSize = image.size();
         this->imageViewer->setPixmap(image);
 
-        //this->adjustSize(this->imageSize);
-        this->imageViewer->setFixedSize(this->imageSize);
-        this->imageViewer->setGeometry({0,0,this->imageSize.width(),this->imageSize.height()});
 
-        qDebug()<<this->imageViewer->geometry();
+        this->imageViewer->setFixedSize(this->imageSize);
+        //this->imageViewer->setGeometry({0,0,this->imageSize.width(),this->imageSize.height()});
+
+        //qDebug()<<this->imageViewer->geometry()<<this->geometry();
+
+        auto rc = QRect(0,0,this->rangeSize.width(),this->rangeSize.height());
+
+        if(this->rangeSize.width()<this->imageSize.width()){
+            rc.setWidth(this->imageSize.width());
+        }
+        if(this->rangeSize.height()<this->imageSize.height()){
+            rc.setHeight(this->imageSize.height());
+        }
+        auto rect = this->geometry();
+        if(rect.width()!=rc.width() || rect.height()!=rc.height()){
+            this->setGeometry(rc);
+            qDebug()<<this->imageViewer->geometry()<<this->geometry()<<rc;
+            this->adjustSize(this->rangeSize);
+        }
+
     }
 
     void adjustSize(const QSize& cSize){
         auto size = this->imageViewer->size();
-        qDebug()<<"image size"<<size;
+        //qDebug()<<"image size"<<size;
         //auto cSize = e->size();
         int x = 0;
         int y = 0;
@@ -64,6 +80,7 @@ protected:
 
     virtual void resizeEvent(QResizeEvent* e) override{
         QWidget::resizeEvent(e);
+        qDebug()<<"player size 1:"<<e->size();
         //this->adjustSize(e->size());
     }
 
@@ -73,7 +90,9 @@ protected:
 private:
     QLabel *imageViewer;
     QSize imageSize;
-
+    QSize rangeSize;
+    // int scrollTop = 0;
+    // int scrollLeft = 0;
 
     friend class AnimationFramesPlayer;
 };
@@ -114,17 +133,25 @@ void AnimationFramesPlayer::load(const QPixmap& image){
 
 void AnimationFramesPlayer::resizeEvent(QResizeEvent* e){
     QScrollArea::resizeEvent(e);
-    int w = static_cast<int>(d->player->imageSize.width() * 1);
-    int h = static_cast<int>(d->player->imageSize.height() * 1);
-    int width = qMax(w,e->size().width());
-    int height = qMax(h,e->size().height());
-    auto rc = d->player->geometry();
-    qDebug()<<"player resize:"<<QSize{w,h};
-    d->player->imageViewer->setFixedSize({w,h});
-    d->player->setGeometry({rc.x(),rc.y(),width,height});
-    d->player->adjustSize(d->player->size());
+    d->player->rangeSize = e->size();
+    // int w = static_cast<int>(d->player->imageSize.width() * 1);
+    // int h = static_cast<int>(d->player->imageSize.height() * 1);
+    // int width = qMax(w,e->size().width());
+    // int height = qMax(h,e->size().height());
+    // auto rc = d->player->geometry();
+    // qDebug()<<"player resize:"<<QSize{w,h}<<e->size();
+    // d->player->imageViewer->setFixedSize({w,h});
+    // d->player->setGeometry({rc.x(),rc.y(),width,height});
+    // d->player->adjustSize(d->player->size());
 
 }
+
+// void AnimationFramesPlayer::scrollContentsBy(int dx, int dy){
+//     QScrollArea::scrollContentsBy(dx,dy);
+//     qDebug()<<"scrollContentsBy"<<dx<<dy;
+//     d->player->scrollLeft -= dx;
+//     d->player->scrollTop -= dy;
+// }
 
 
 

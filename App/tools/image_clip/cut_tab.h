@@ -18,6 +18,8 @@ public:
     int optionTop();
     int optionRight();
     int optionBottom();
+    int optionWidth();
+    int optionHeight();
 private:
     Ui::CutTab *ui;
 };

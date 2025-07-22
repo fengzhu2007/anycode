@@ -22,6 +22,8 @@ struct CutOption{
     int top;
     int right;
     int bottom;
+    int width;
+    int height;
 };
 
 
@@ -52,7 +54,7 @@ public:
 
     void setScaleParams(int width,int height);
     void setResizeParams(int left,int top,int right,int bottom,bool relative);
-    void setCutParams(int left,int top,int right,int bottom);
+    void setCutParams(int left,int top,int right,int bottom,int width=0,int height=0);
 
 
 signals:

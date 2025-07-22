@@ -6,9 +6,15 @@
 #include <docking_pane_layout_item_info.h>
 #include <w_toast.h>
 #include <QVBoxLayout>
+#include <QSpinBox>
 #include <QDir>
 #include <QTimer>
 #include <QMenu>
+#include <QStandardPaths>
+#include <QFileDialog>
+#include <QStyledItemDelegate>
+#include <QPainter>
+#include "components/message_dialog.h"
 namespace ady{
 
 const QString FramesViewerPane::PANE_ID = "FramesViewer_%1";
@@ -16,13 +22,59 @@ const QString FramesViewerPane::PANE_GROUP = "FramesViewer";
 int FramesViewerPane::SN = 0;
 
 
+
+
+class IconTopLeftTextDelegate : public QStyledItemDelegate {
+public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
+        painter->save();
+        QIcon icon = index.data(Qt::DecorationRole).value<QPixmap>();
+        QString text = index.data(Qt::DisplayRole).toString();
+        QRect iconRect = option.rect;
+        icon.paint(painter, iconRect);
+
+        QFontMetrics fm(option.font);
+        QRect textBound = fm.boundingRect(option.rect, Qt::TextWordWrap, text);
+        QRect textRect = QRect(option.rect.topLeft(), textBound.size()).adjusted(5, 5, 5, 5);
+        //QRect textRect;
+        textRect.setSize({32,16});
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QColor(0, 0, 0, 150));
+        painter->drawRoundedRect(textRect, 3, 3);
+        textRect = textRect.adjusted(2, 2, -2, -2);
+        painter->setPen(Qt::white);
+        painter->drawText(textRect, Qt::AlignCenter | Qt::TextWordWrap, text);
+
+        if (option.state & QStyle::State_Selected) {
+            QColor highlightColor = option.palette.highlight().color();
+            highlightColor.setAlpha(120);
+            painter->fillRect(option.rect, highlightColor);
+        }
+        painter->restore();
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override {
+        return QSize(100, 100);
+    }
+};
+
+
+
 class FramesViewerPanePrivate{
 public:
     int id;
     AnimationFramesPlayer* player;
+    QLabel* label;
+    QLabel* intervalLabel;
+    QSpinBox* spinBox;
     FramesModel* model;
     QTimer timer;
     int current = 0;
+    int interval = 200;
+
+
 };
 
 FramesViewerPane::FramesViewerPane(QWidget *parent)
@@ -36,22 +88,45 @@ FramesViewerPane::FramesViewerPane(QWidget *parent)
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     d->player = new AnimationFramesPlayer(widget);
+    d->label = new QLabel(this);
+    d->label->setAlignment(Qt::AlignCenter);
+    d->label->setStyleSheet("QLabel{background:rgba(0,0,0,160);color:#ffffff;padding:4px 10px}");
+    d->label->hide();
     auto layout = static_cast<QVBoxLayout*>(widget->layout());
     layout->insertWidget(0,d->player,1);
     this->setWindowTitle(tr("Frames Viewer"));
 
+    d->intervalLabel = new QLabel(tr("Interval:"),ui->toolBar);
+    d->intervalLabel->setToolTip(tr("Animation interval (millisecond)"));
+    d->spinBox = new QSpinBox(ui->toolBar);
+    d->spinBox->setToolTip(tr("Animation interval (millisecond)"));
+    d->spinBox->setMinimum(0);
+    d->spinBox->setMaximum(1000 *  20);
+    d->spinBox->setValue(d->interval);
+    d->spinBox->setFixedHeight(20);
+    ui->toolBar->insertWidget(ui->actionPlay,d->intervalLabel);
+    ui->toolBar->insertWidget(ui->actionPlay,d->spinBox);
+    connect(d->spinBox,QOverload<int>::of(&QSpinBox::valueChanged),this,&FramesViewerPane::onIntervalChanged);
+    ui->actionStop->setEnabled(false);
     d->model = new FramesModel(ui->listView);
     ui->listView->setModel(d->model);
     ui->listView->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+    ui->listView->setItemDelegate(new IconTopLeftTextDelegate(ui->listView));
+
+
     connect(ui->load,&QPushButton::clicked,this,&FramesViewerPane::onLoad);
     connect(ui->listView,&QListView::doubleClicked,this,&FramesViewerPane::onDoubleClicked);
 
     connect(ui->listView,&QListView::customContextMenuRequested,this,&FramesViewerPane::onListContextMenu);
     connect(&d->timer,&QTimer::timeout,this,&FramesViewerPane::onFrameChange);
     connect(ui->actionPlay,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
+    connect(ui->actionStop,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
     connect(ui->actionEnable,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
     connect(ui->actionDisable,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
     connect(ui->actionMerge,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
+    connect(ui->actionExport,&QAction::triggered,this,&FramesViewerPane::onActionTriggered);
+
+
 }
 
 FramesViewerPane::~FramesViewerPane()
@@ -82,17 +157,19 @@ FramesViewerPane* FramesViewerPane::make(DockingPaneManager* dockingManager,cons
     return pane;
 }
 
+void FramesViewerPane::resizeEvent(QResizeEvent* e){
+    DockingPane::resizeEvent(e);
+    d->label->setGeometry({10,10,200,20});
+}
+
 void FramesViewerPane::onLoad(){
     auto folder = ui->folder->text();
     QDir dir(folder);
     QStringList filters;
     filters << "*.png" << "*.jpg" << "*.jpeg";
     dir.setNameFilters(filters);
-
-
     QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Name|QDir::DirsFirst|QDir::IgnoreCase);
     QStringList array;
-
     for(auto file:list){
         array.append(file.absoluteFilePath());
     }
@@ -103,7 +180,11 @@ void FramesViewerPane::onLoad(){
 }
 
 void FramesViewerPane::onDoubleClicked(const QModelIndex& index){
-    d->player->load(d->model->image(index.row()));
+    //d->label->setText(tr("%1/%2").arg(index.row()+1).arg(d->model->rowCount()));
+    d->label->show();
+    auto image = d->model->image(index.row());
+    d->label->setText(tr("[%1/%2] Width:%3,Height:%4").arg(index.row()+1).arg(d->model->rowCount()).arg(image.size().width()).arg(image.size().height()));
+    d->player->load(image);
 }
 void FramesViewerPane::onActionTriggered(){
     auto sender = this->sender();
@@ -111,10 +192,17 @@ void FramesViewerPane::onActionTriggered(){
         if(d->model->rowCount()<=0){
             return ;
         }
+        ui->actionPlay->setEnabled(false);
+        ui->actionStop->setEnabled(true);
+        d->label->show();
         d->current = 0;
-        d->timer.setInterval(200);
+        d->timer.setInterval(d->interval);
         d->timer.setSingleShot(false);
         d->timer.start();
+    }else if(sender==ui->actionStop){
+        ui->actionPlay->setEnabled(true);
+        ui->actionStop->setEnabled(false);
+        d->timer.stop();
     }else if(sender==ui->actionEnable){
         auto indexlist = ui->listView->selectionModel()->selectedIndexes();
         for(auto index:indexlist){
@@ -130,26 +218,48 @@ void FramesViewerPane::onActionTriggered(){
         dialog->setModel(d->model);
         dialog->saveTo(ui->folder->text());
         dialog->show();
-
+    }else if(sender==ui->actionExport){
+        auto folder = ui->folder->text();
+        if(folder.isEmpty()){
+            folder = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+        }
+        auto folderPath = QFileDialog::getExistingDirectory(this,tr("Export to Folder"),folder);
+        if(!folderPath.isEmpty()){
+            auto list = d->model->results();
+            for(auto frame:list){
+                QFileInfo fi(frame.filename);
+                auto newFilename = folderPath + "/" + fi.fileName();
+                QFile::copy(frame.filename,newFilename);
+            }
+            if(list.size()>0){
+                MessageDialog::info(this,tr("Successfully exported %1 files").arg(list.size()));
+            }
+        }
     }
 }
+
 void FramesViewerPane::onFrameChange(){
     auto total = d->model->rowCount();
     if(total<=0){
         return ;
     }
-
     for(int i=0;i<total;i++){
          d->current = d->current % total;
         auto frame = d->model->at(d->current);
         d->current += 1;
         if(frame.status){
+            //d->label->setText(tr("%1/%2").arg(d->current).arg(d->model->rowCount()));
+            d->label->setText(tr("[%1/%2] Width:%3,Height:%4").arg(d->current).arg(d->model->rowCount()).arg(frame.image.size().width()).arg(frame.image.size().height()));
             d->player->load(frame.image);
             return ;
         }
     }
-    d->player->load(d->model->image(0));
+    auto image = d->model->image(0);
+    d->label->setText(tr("[%1/%2] Width:%3,Height:%4").arg(1).arg(d->model->rowCount()).arg(image.size().width()).arg(image.size().height()));
+    d->player->load(image);
 }
+
+
 
 void FramesViewerPane::onListContextMenu(const QPoint &pos){
     QMenu contextMenu(this);
@@ -163,6 +273,11 @@ void FramesViewerPane::onListContextMenu(const QPoint &pos){
         contextMenu.addAction(ui->actionDisable);
         contextMenu.exec(QCursor::pos());
     }
+}
+
+void FramesViewerPane::onIntervalChanged(int interval){
+    d->interval = interval;
+    d->timer.setInterval(d->interval);
 }
 
 }

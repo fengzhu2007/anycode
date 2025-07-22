@@ -30,7 +30,7 @@ WorkflowData::WorkflowData(const WorkflowData& other){
         this->data = new ResizeOption{option->left,option->top,option->right,option->bottom,true};
     }else if(name==ImageProcessThread::ProcessName::Cut){
         auto option = static_cast<CutOption*>(other.data);
-        this->data = new CutOption{option->left,option->top,option->right,option->bottom};
+        this->data = new CutOption{option->left,option->top,option->right,option->bottom,option->width,option->height};
     }else{
         this->data = nullptr;
     }
@@ -48,7 +48,7 @@ WorkflowData& WorkflowData::operator=(const WorkflowData& other){
         this->data = new ResizeOption{option->left,option->top,option->right,option->bottom,true};
     }else if(name==ImageProcessThread::ProcessName::Cut){
         auto option = static_cast<CutOption*>(other.data);
-        this->data = new CutOption{option->left,option->top,option->right,option->bottom};
+        this->data = new CutOption{option->left,option->top,option->right,option->bottom,option->width,option->height};
     }else{
         this->data = nullptr;
     }
@@ -75,7 +75,7 @@ int WorkflowModel::count(){
 }
 
 ListViewItem* WorkflowModel::item(int i){
-    qDebug()<<"workflow model item:"<<i;
+    //qDebug()<<"workflow model item:"<<i;
     auto w = static_cast<WorkflowItem*>(ListViewModel::item(i));
     if(w==nullptr){
         w = new WorkflowItem(d->listview->widget());

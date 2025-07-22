@@ -53,7 +53,8 @@ QVariant FramesModel::data(const QModelIndex &index, int role) const
         }else{
             return QIcon(item.image).pixmap(size, QIcon::Disabled, QIcon::Off);
         }
-
+    }else if(role==Qt::DisplayRole){
+        return index.row() + 1;
     }
     return QVariant();
 }
@@ -62,10 +63,11 @@ void FramesModel::setDatasource(const QStringList& list){
     beginResetModel();
     m_data.clear();
     for(auto one:list){
-         FrameItem item ;
-         item.image.load(one);
-         m_data.append(item);
-         item.status = true;
+        FrameItem item ;
+        item.filename = one;
+        item.image.load(one);
+        m_data.append(item);
+        item.status = true;
     }
     endResetModel();
 }

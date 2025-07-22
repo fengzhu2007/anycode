@@ -51,11 +51,13 @@ void ImageProcessThread::setResizeParams(int left,int top,int right,int bottom,b
     }
 }
 
-void ImageProcessThread::setCutParams(int left,int top,int right,int bottom){
+void ImageProcessThread::setCutParams(int left,int top,int right,int bottom,int width,int height){
     d->cut.left = left;
     d->cut.top = top;
     d->cut.right = right;
     d->cut.bottom = bottom;
+    d->cut.width = width;
+    d->cut.height = height;
     if(d->name==ProcessName::Workflow){
         d->processlist.append(ProcessName::Cut);
     }
@@ -139,8 +141,16 @@ void ImageProcessThread::cut(const QFileInfo& fi){
         if(extension!="PNG"){
             extension = "JPG";
         }
+
         auto width = d->process.width() - d->cut.left - d->cut.right;
+        if(d->cut.width>0){
+            width = d->cut.width;
+        }
+
         auto height = d->process.height()-d->cut.top - d->cut.bottom;
+        if(d->cut.height>0){
+            height = d->cut.height;
+        }
         QRect cropRect(d->cut.left, d->cut.top, width, height);
         QImage croppedImage = d->process.copy(cropRect);
         auto outputPath = d->destination + "/"+fi.fileName();
@@ -174,6 +184,16 @@ void ImageProcessThread::workflow(const QFileInfo& fi){
                 }else if(processname==ProcessName::Cut){
                     auto width = d->process.width() - d->cut.left - d->cut.right;
                     auto height = d->process.height()-d->cut.top - d->cut.bottom;
+
+                    if(d->cut.width>0){
+                        width = d->cut.width;
+                    }
+
+                    if(d->cut.height>0){
+                        height = d->cut.height;
+                    }
+
+
                     QRect cropRect(d->cut.left, d->cut.top, width, height);
                     d->process = d->process.copy(cropRect);
                 }

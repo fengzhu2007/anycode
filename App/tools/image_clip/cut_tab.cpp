@@ -29,4 +29,14 @@ int CutTab::optionRight(){
 int CutTab::optionBottom(){
     return ui->bottom->value();
 }
+
+int CutTab::optionWidth(){
+    return ui->width->value();
+}
+
+int CutTab::optionHeight(){
+    return ui->height->value();
+}
+
+
 }

@@ -28,6 +28,12 @@
    </property>
    <item>
     <widget class="QListView" name="listView">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>120</height>
+      </size>
+     </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>
@@ -63,7 +69,11 @@
       </size>
      </property>
      <addaction name="actionPlay"/>
+     <addaction name="actionStop"/>
+     <addaction name="separator"/>
      <addaction name="actionMerge"/>
+     <addaction name="separator"/>
+     <addaction name="actionExport"/>
     </widget>
    </item>
    <item>
@@ -160,6 +170,30 @@
    </property>
    <property name="text">
     <string>Disable</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/ExportPerformanceReport_16x.svg</normaloff>:/Resource/icons/ExportPerformanceReport_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Export</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Stop_16x.svg</normaloff>:/Resource/icons/Stop_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Stop</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
