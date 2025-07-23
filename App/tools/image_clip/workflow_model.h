@@ -9,22 +9,40 @@
 
 namespace ady{
 
+
 class WorkflowData{
 public:
+    WorkflowData(){
+
+    }
     ImageProcessThread::ProcessName name;
     QString title;
-    void* data;
+    union {
+        ScaleOption scale;
+        ResizeOption resize;
+        CutOption cut;
+    };
 
 public:
-    WorkflowData(ImageProcessThread::ProcessName name,const QString& title,void* data){
+    WorkflowData(ImageProcessThread::ProcessName name,const QString& title,const ScaleOption& data){
         this->name = name;
         this->title = title;
-        this->data = data;
+        this->scale = data;
+    }
+    WorkflowData(ImageProcessThread::ProcessName name,const QString& title,const ResizeOption& data){
+        this->name = name;
+        this->title = title;
+        this->resize = data;
+    }
+    WorkflowData(ImageProcessThread::ProcessName name,const QString& title,const CutOption& data){
+        this->name = name;
+        this->title = title;
+        this->cut = data;
     }
 
     WorkflowData(const WorkflowData&);
-    ~WorkflowData();
     WorkflowData& operator=(const WorkflowData&);
+    bool operator==(const WorkflowData& other) const;
 };
 
 class WorkflowModelPrivate;
@@ -43,7 +61,7 @@ public:
 signals:
     void itemClicked(int i);
 public slots:
-    void onRemoved(int i);
+    void onRemoved();
 private:
     WorkflowModelPrivate* d;
 

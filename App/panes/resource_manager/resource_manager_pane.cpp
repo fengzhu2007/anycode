@@ -361,9 +361,8 @@ void ResourceManagerPane::onTreeItemExpanded(const QModelIndex& index){
                     //add to read thread
                     this->readFolder(item);
                     item->setExpanded(true);
-
-                    d->model->appendWatchDirectory(item->path());
                 }
+                d->model->appendWatchDirectory(item->path());
             }
             item->setState(ResourceManagerModelItem::Expand);
         }

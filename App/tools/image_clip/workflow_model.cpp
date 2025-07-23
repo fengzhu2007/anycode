@@ -6,55 +6,52 @@
 
 namespace ady{
 
-WorkflowData::~WorkflowData(){
-    if(this->data!=nullptr){
-        if(name==ImageProcessThread::ProcessName::Scale){
-            delete static_cast<ScaleOption*>(data);
-        }else if(name==ImageProcessThread::ProcessName::Resize){
-            delete static_cast<ResizeOption*>(data);
-        }else if(name==ImageProcessThread::ProcessName::Cut){
-            delete static_cast<CutOption*>(data);
-        }
-    }
-
-}
 
 WorkflowData::WorkflowData(const WorkflowData& other){
+    //qDebug()<<"copy =:"<<this<<&other;
     this->name = other.name;
     this->title = other.title;
     if(name==ImageProcessThread::ProcessName::Scale){
-        auto option = static_cast<ScaleOption*>(other.data);
-        this->data = new ScaleOption{option->width,option->height};
+        this->scale = other.scale;
     }else if(name==ImageProcessThread::ProcessName::Resize){
-        auto option = static_cast<ResizeOption*>(other.data);
-        this->data = new ResizeOption{option->left,option->top,option->right,option->bottom,true};
+        this->resize = other.resize;
     }else if(name==ImageProcessThread::ProcessName::Cut){
-        auto option = static_cast<CutOption*>(other.data);
-        this->data = new CutOption{option->left,option->top,option->right,option->bottom,option->width,option->height};
-    }else{
-        this->data = nullptr;
+        this->cut = other.cut;
     }
-
 }
 
 WorkflowData& WorkflowData::operator=(const WorkflowData& other){
+    //qDebug()<<"operator=:"<<this<<&other;
     this->name = other.name;
     this->title = other.title;
     if(name==ImageProcessThread::ProcessName::Scale){
-        auto option = static_cast<ScaleOption*>(other.data);
-        this->data = new ScaleOption{option->width,option->height};
+        this->scale = other.scale;
     }else if(name==ImageProcessThread::ProcessName::Resize){
-        auto option = static_cast<ResizeOption*>(other.data);
-        this->data = new ResizeOption{option->left,option->top,option->right,option->bottom,true};
+        this->resize = other.resize;
     }else if(name==ImageProcessThread::ProcessName::Cut){
-        auto option = static_cast<CutOption*>(other.data);
-        this->data = new CutOption{option->left,option->top,option->right,option->bottom,option->width,option->height};
-    }else{
-        this->data = nullptr;
+        this->cut = other.cut;
     }
     return *this;
 }
 
+bool WorkflowData::operator==(const WorkflowData& other) const{
+    qDebug()<<"WorkflowData::operator==";
+     qDebug()<<"name"<<this->name<<";other:name"<<other.name;
+     qDebug()<<"title"<<this->title<<";other:name"<<other.title;
+    if(this->name==other.name && this->title==other.title){
+        qDebug()<<"name"<<this->name<<";other:name"<<other.name;
+        if(name==ImageProcessThread::ProcessName::Scale){
+            return this->scale==other.scale;
+        }else if(name==ImageProcessThread::ProcessName::Resize){
+            return this->resize == other.resize;
+        }else if(name==ImageProcessThread::ProcessName::Cut){
+            return this->cut == other.cut;
+        }
+        return false;
+    }else{
+        return false;
+    }
+}
 
 
 
@@ -84,7 +81,6 @@ ListViewItem* WorkflowModel::item(int i){
     }
     WorkflowData one = d->list.at(i);
     w->init(one);
-    w->setRow(i);
     return w;
 }
 
@@ -107,8 +103,18 @@ WorkflowData WorkflowModel::itemAt(int i){
     return d->list.at(i);
 }
 
-void WorkflowModel::onRemoved(int i){
-    this->itemRemoved(i);
+void WorkflowModel::onRemoved(){
+    auto sender = static_cast<WorkflowItem*>(this->sender());
+    auto data = sender->data();
+
+    auto i = 0;
+    for(auto v:d->list){
+        if(data==v){
+            this->itemRemoved(i);
+            return ;
+        }
+        i++;
+    }
 }
 
 QList<WorkflowData>& WorkflowModel::dataSource(){

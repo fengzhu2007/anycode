@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         SetUnhandledExceptionFilter(ExceptionFilter);
     #endif
     #endif
-
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     ady::IDEApplication a(argc, argv);
 
     //ady::MainWindow w;

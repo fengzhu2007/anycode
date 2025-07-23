@@ -147,6 +147,8 @@ void AnimationFramesPlayer::resizeEvent(QResizeEvent* e){
     QScrollArea::resizeEvent(e);
     d->player->rangeSize = e->size();
     d->player->setGeometry({0,0,e->size().width(),e->size().height()});
+    //d->label->move(10,e->size().height() - 30);
+
     d->label->setGeometry({10,e->size().height() - 10 - 20,200,20});
 }
 

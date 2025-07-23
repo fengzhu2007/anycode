@@ -7,6 +7,10 @@ namespace ady{
 struct ScaleOption{
     int width;
     int height;
+
+    bool operator==(const ScaleOption& other)  const{
+        return this->width==other.width && this->height==other.height;
+    }
 };
 
 struct ResizeOption{
@@ -15,6 +19,9 @@ struct ResizeOption{
     int right;
     int bottom;
     bool relative;
+    bool operator==(const ResizeOption& other) const{
+        return this->left==other.left && this->top==other.top && this->right==other.right && this->bottom==other.bottom && this->relative==other.relative;
+    }
 };
 
 struct CutOption{
@@ -24,6 +31,9 @@ struct CutOption{
     int bottom;
     int width;
     int height;
+    bool operator==(const CutOption& other) const{
+        return this->left==other.left && this->top==other.top && this->right==other.right && this->bottom==other.bottom && this->width==other.width && this->height==other.height;
+    }
 };
 
 

@@ -96,6 +96,18 @@ set(TS_FILES
 
 qt5_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${TS_FILES} OPTIONS -source-language zh_CN -no-obsolete)
 
+#qt5_add_translation(QM_FILES ${TS_FILES})
+
+# 添加自定义目标用于手动更新翻译（不会在每次构建时自动运行）
+#add_custom_target(update_translations
+#    COMMAND ${Qt5_LUPDATE_EXECUTABLE}
+#        -source-language zh_CN
+#        -no-obsolete
+#        ${CMAKE_CURRENT_SOURCE_DIR}
+#        -ts ${TS_FILES}
+#    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#    COMMENT "Updating translations..."
+#)
 
 
 set(SOURCES

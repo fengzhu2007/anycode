@@ -16,12 +16,12 @@ public:
     explicit WorkflowItem(QWidget *parent = nullptr);
     ~WorkflowItem();
     virtual void init(const WorkflowData& data);
-    void setRow(int row);
+   // void setRow(int row);
+    WorkflowData& data() const;
 
 signals:
-    void removed(int row);
-public slots:
-    void onRemove();
+    void removed();
+
 
 private:
     Ui::WorkflowItem *ui;
