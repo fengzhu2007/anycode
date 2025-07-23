@@ -3,6 +3,7 @@
 #include <QImage>
 #include <QPixmap>
 #include <QPainter>
+#include <QDebug>
 
 namespace ady{
 
@@ -96,7 +97,16 @@ void ImageProcessThread::scale(const QFileInfo& fi){
         if(extension!="PNG"){
             extension = "JPG";
         }
-        QImage scaledImage = d->process.scaled(QSize(d->scale.width,d->scale.height),
+        auto width = d->scale.width;
+        auto height = d->scale.height;
+        if(height==0 && width>0){
+            height = d->process.height() * ( width * 1.0 / d->process.width() );
+        }
+        if(width==0 && height>0){
+            width = d->process.width() * ( height * 1.0 / d->process.height() );
+        }
+
+        QImage scaledImage = d->process.scaled(QSize(width,height),
                                                   Qt::KeepAspectRatio,
                                                   Qt::SmoothTransformation);
         auto outputPath = d->destination + "/"+fi.fileName();
@@ -169,7 +179,17 @@ void ImageProcessThread::workflow(const QFileInfo& fi){
         if(d->process.load(path)){
             for(auto processname:d->processlist){
                 if(processname==ProcessName::Scale){
-                    d->process = d->process.scaled(QSize(d->scale.width,d->scale.height),
+                    auto width = d->scale.width;
+                    auto height = d->scale.height;
+                    if(height==0 && width>0){
+                        height = d->process.height() * ( width * 1.0 / d->process.width() );
+                    }
+                    if(width==0 && height>0){
+                        width = d->process.width() * ( height * 1.0 / d->process.height() );
+                    }
+                    qDebug()<<"width:"<<width<<height;
+
+                    d->process = d->process.scaled(QSize(width,height),
                                       Qt::KeepAspectRatio,
                                       Qt::SmoothTransformation);
                 }else if(processname==ProcessName::Resize){
