@@ -16,6 +16,7 @@ WorkflowTab::WorkflowTab(QWidget *parent)
     d = new WorkflowTabPrivate;
     d->model = new WorkflowModel(ui->listView);
     ui->listView->setModel(d->model);
+    ui->listView->setStyleSheet("QScrollArea{border:0}");
 }
 
 WorkflowTab::~WorkflowTab()

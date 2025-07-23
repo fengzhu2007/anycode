@@ -23,7 +23,7 @@ ImageClipDialog::ImageClipDialog(QWidget *parent)
 {
     d = new ImageClipDialogPrivate;
     ui->setupUi(this);
-    ui->addToWorkflow->setStyleSheet("min-width:120px");
+    ui->addToWorkflow->setStyleSheet("min-width:100px");
 
     this->resetupUi();
 

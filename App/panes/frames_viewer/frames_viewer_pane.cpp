@@ -166,8 +166,6 @@ void FramesViewerPane::resizeEvent(QResizeEvent* e){
 void FramesViewerPane::loadFolder(const QString& folder){
     //auto folder = ui->folder->text();
     QDir dir(folder);
-    this->setToolTip(folder);//dirName
-
     auto container = this->container();
     if(container!=nullptr){
         int i = container->indexOf(this);

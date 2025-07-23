@@ -268,37 +268,37 @@ for (let i = 0; i &lt; 3; i++) {
     <message>
         <location filename="../tools/image_clip/cut_tab.ui" line="22"/>
         <source>Margin Left:</source>
-        <translation type="unfinished"></translation>
+        <translation>左边距：</translation>
     </message>
     <message>
         <location filename="../tools/image_clip/cut_tab.ui" line="29"/>
         <source>Margin Top:</source>
-        <translation type="unfinished"></translation>
+        <translation>上边距：</translation>
     </message>
     <message>
         <location filename="../tools/image_clip/cut_tab.ui" line="36"/>
         <source>Margin Right:</source>
-        <translation type="unfinished"></translation>
+        <translation>右边距：</translation>
     </message>
     <message>
         <location filename="../tools/image_clip/cut_tab.ui" line="43"/>
         <source>Margin Bottom:</source>
-        <translation type="unfinished"></translation>
+        <translation>下边距：</translation>
     </message>
     <message>
         <location filename="../tools/image_clip/cut_tab.ui" line="78"/>
         <source>Width:</source>
-        <translation type="unfinished"></translation>
+        <translation>宽：</translation>
     </message>
     <message>
         <location filename="../tools/image_clip/cut_tab.ui" line="92"/>
         <source>Height:</source>
-        <translation type="unfinished"></translation>
+        <translation>高：</translation>
     </message>
     <message>
         <location filename="../tools/image_clip/cut_tab.ui" line="108"/>
         <source>Prioritize the use of width and height.</source>
-        <translation type="unfinished"></translation>
+        <translation>优先使用宽和高。</translation>
     </message>
 </context>
 <context>
@@ -717,7 +717,7 @@ for (let i = 0; i &lt; 3; i++) {
     <message>
         <location filename="../panes/frames_viewer/frames_merge_dialog.ui" line="14"/>
         <source>Frames Merge</source>
-        <translation type="unfinished"></translation>
+        <translation>合并帧</translation>
     </message>
     <message>
         <location filename="../panes/frames_viewer/frames_merge_dialog.ui" line="45"/>
@@ -760,22 +760,22 @@ for (let i = 0; i &lt; 3; i++) {
     <message>
         <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="140"/>
         <source>Export</source>
-        <translation type="unfinished"></translation>
+        <translation>导出</translation>
     </message>
     <message>
         <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="152"/>
         <source>Stop</source>
-        <translation type="unfinished">停止</translation>
+        <translation>停止</translation>
     </message>
     <message>
         <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="164"/>
         <source>OpenFolder</source>
-        <translation type="unfinished"></translation>
+        <translation>打开文件夹</translation>
     </message>
     <message>
         <location filename="../panes/frames_viewer/frames_viewer_pane.ui" line="179"/>
         <source>Copy Path</source>
-        <translation type="unfinished"></translation>
+        <translation>复制路径</translation>
     </message>
 </context>
 <context>
@@ -3280,50 +3280,50 @@ Last Modify:%3</source>
     <message>
         <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="97"/>
         <source>Frames Viewer</source>
-        <translation></translation>
+        <translation>图片帧</translation>
     </message>
     <message>
         <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="99"/>
         <source>Interval:</source>
-        <translation type="unfinished">间隔：</translation>
+        <translation>间隔：</translation>
     </message>
     <message>
         <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="100"/>
         <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="102"/>
         <source>Animation interval (millisecond)</source>
-        <translation type="unfinished"></translation>
+        <translation>动画间隔（毫秒）</translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="194"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="192"/>
         <source>No picture found.</source>
-        <translation></translation>
+        <translation>未找到图片。</translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="201"/>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="280"/>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="286"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="199"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="278"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="284"/>
         <source>[%1/%2] Width:%3,Height:%4</source>
-        <translation type="unfinished"></translation>
+        <translation>[%1/%2] 宽：%3，高：%4</translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="225"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="223"/>
         <source>Open Image Frames Folder</source>
-        <translation type="unfinished"></translation>
+        <translation>打开图片帧文件夹</translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="233"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="231"/>
         <source>Copy successfully!</source>
-        <translation type="unfinished"></translation>
+        <translation>复制成功！</translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="254"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="252"/>
         <source>Export to Folder</source>
-        <translation type="unfinished"></translation>
+        <translation>导出</translation>
     </message>
     <message>
-        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="263"/>
+        <location filename="../panes/frames_viewer/frames_viewer_pane.cpp" line="261"/>
         <source>Successfully exported %1 files</source>
-        <translation type="unfinished"></translation>
+        <translation>成功导出%1个文件</translation>
     </message>
 </context>
 <context>
