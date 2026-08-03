@@ -20,6 +20,8 @@ public:
     int optionTop();
     int optionRight();
     int optionBottom();
+    int optionWidth();
+    int optionHeight();
     bool optionRelative();
 
 

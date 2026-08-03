@@ -41,12 +41,15 @@ void ImageProcessThread::setScaleParams(int width,int height){
     }
 }
 
-void ImageProcessThread::setResizeParams(int left,int top,int right,int bottom,bool relative){
+void ImageProcessThread::setResizeParams(int left,int top,int right,int bottom,int width,int height,bool relative){
     d->resize.left = left;
     d->resize.top = top;
     d->resize.right = right;
     d->resize.bottom = bottom;
+    d->resize.width = width;
+    d->resize.height = height;
     d->resize.relative = relative;
+    //qDebug()<<"setResizeParams"<<left<<top;
     if(d->name==ProcessName::Workflow){
         d->processlist.append(ProcessName::Resize);
     }
@@ -128,11 +131,26 @@ void ImageProcessThread::resize(const QFileInfo& fi){
         }
         auto width = d->process.width() + d->resize.left + d->resize.right;
         auto height = d->process.height() + d->resize.top + d->resize.bottom;
+        auto left = d->resize.left;
+        auto top = d->resize.top;
+
+        if(d->resize.width>0 && width > d->resize.width){
+            width = d->resize.width;
+            if(d->resize.left==0 && d->resize.right==0){
+                left = (d->resize.width - width) / 2;
+            }
+        }
+        if(d->resize.height>0 && height > d->resize.height){
+            height = d->resize.height;
+            if(d->resize.top==0 && d->resize.bottom==0){
+                top = (d->resize.height - height) / 2;
+            }
+        }
 
         QImage resizeImage(width,height,QImage::Format_ARGB32);
         resizeImage.fill(Qt::transparent);
         QPainter painter(&resizeImage);
-        painter.drawImage(d->resize.left, d->resize.top, d->process);
+        painter.drawImage(left,top, d->process);
         //painter.end();
         auto outputPath = d->destination + "/"+fi.fileName();
         if (resizeImage.save(outputPath, extension.toStdString().c_str())) {
@@ -195,10 +213,25 @@ void ImageProcessThread::workflow(const QFileInfo& fi){
                 }else if(processname==ProcessName::Resize){
                     auto width = d->process.width() + d->resize.left + d->resize.right;
                     auto height = d->process.height() + d->resize.top + d->resize.bottom;
+                    auto left = d->resize.left;
+                    auto top = d->resize.top;
+
+                    if(d->resize.width>0 && width < d->resize.width){
+                        if(d->resize.left==0 && d->resize.right==0){
+                            left = (d->resize.width - width) / 2;
+                        }
+                        width = d->resize.width;
+                    }
+                    if(d->resize.height>0 && height < d->resize.height){
+                        if(d->resize.top==0 && d->resize.bottom==0){
+                            top = (d->resize.height - height) / 2;
+                        }
+                        height = d->resize.height;
+                    }
                     QImage resizeImage(width,height,QImage::Format_ARGB32);
                     resizeImage.fill(Qt::transparent);
                     QPainter painter(&resizeImage);
-                    painter.drawImage(d->resize.left, d->resize.top, d->process);
+                    painter.drawImage(left,top, d->process);
                     d->process = resizeImage;
 
                 }else if(processname==ProcessName::Cut){

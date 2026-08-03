@@ -67,7 +67,7 @@ void ImageClipDialog::onAddToWorkflow(){
     }else if(current==ImageProcessThread::ProcessName::Resize){
         auto resizeTab = static_cast<ResizeTab*>(ui->tabWidget->currentWidget());
 
-        WorkflowData data{ImageProcessThread::ProcessName::Resize,tr("Resize"),ResizeOption{resizeTab->optionLeft(),resizeTab->optionTop(),resizeTab->optionRight(),resizeTab->optionBottom(),resizeTab->optionRelative()}};
+        WorkflowData data{ImageProcessThread::ProcessName::Resize,tr("Resize"),ResizeOption{resizeTab->optionLeft(),resizeTab->optionTop(),resizeTab->optionRight(),resizeTab->optionBottom(),resizeTab->optionWidth(),resizeTab->optionHeight(),resizeTab->optionRelative()}};
         d->workflow->addFlow(data);
     }else if(current==ImageProcessThread::ProcessName::Cut){
         auto cutTab = static_cast<CutTab*>(ui->tabWidget->currentWidget());
@@ -98,7 +98,7 @@ void ImageClipDialog::onOk(){
             d->thread->setScaleParams(scaleTab->optionWidth(),scaleTab->optionHeight());
         }else if(current==ImageProcessThread::ProcessName::Resize){
             auto resizeTab = static_cast<ResizeTab*>(ui->tabWidget->currentWidget());
-            d->thread->setResizeParams(resizeTab->optionLeft(),resizeTab->optionTop(),resizeTab->optionRight(),resizeTab->optionBottom(),resizeTab->optionRelative());
+            d->thread->setResizeParams(resizeTab->optionLeft(),resizeTab->optionTop(),resizeTab->optionRight(),resizeTab->optionBottom(),resizeTab->optionWidth(),resizeTab->optionHeight(),resizeTab->optionRelative());
         }else if(current==ImageProcessThread::ProcessName::Cut){
             auto cutTab = static_cast<ResizeTab*>(ui->tabWidget->currentWidget());
             d->thread->setCutParams(cutTab->optionLeft(),cutTab->optionTop(),cutTab->optionRight(),cutTab->optionBottom());
@@ -111,7 +111,7 @@ void ImageClipDialog::onOk(){
                         d->thread->setScaleParams(option.width,option.height);
                     }else if(item.name==ImageProcessThread::ProcessName::Resize){
                         auto option = item.resize;
-                        d->thread->setResizeParams(option.left,option.top,option.right,option.bottom,option.relative);
+                        d->thread->setResizeParams(option.left,option.top,option.right,option.bottom,option.width,option.height,option.relative);
                     }else if(item.name==ImageProcessThread::ProcessName::Cut){
                         auto option = item.cut;
                         d->thread->setCutParams(option.left,option.top,option.right,option.bottom,option.width,option.height);

@@ -30,7 +30,7 @@ void WorkflowItem::init(const WorkflowData& data){
         params = QString("Width:%1;Height:%2").arg(option.width).arg(option.height);
     }else if(data.name==ImageProcessThread::ProcessName::Resize){
         auto option = data.resize;
-        params = QString("Left:%1;Top:%2;Right:%3;Bottom:%4").arg(option.left).arg(option.top).arg(option.right).arg(option.bottom);
+        params = QString("Left:%1;Top:%2;Right:%3;Bottom:%4;Width:%5;Height:%6").arg(option.left).arg(option.top).arg(option.right).arg(option.bottom).arg(option.width).arg(option.height);
     }else if(data.name==ImageProcessThread::ProcessName::Cut){
         auto option = data.cut;
         params = QString("Left:%1;Top:%2;Width:%3;Height:%4;Right:%5;Bottom:%6").arg(option.left).arg(option.top)
