@@ -355,6 +355,8 @@ add_library(App SHARED
         panes/db/dbms_thread.cpp panes/db/dbms_thread.h
         panes/db/db_driver.h panes/db/db_driver.cpp
         storage/db_storage.h storage/db_storage.cpp
+        storage/template_command_storage.h storage/template_command_storage.cpp
+        storage/template_command_history.h storage/template_command_history.cpp
         panes/db/sqlite_driver.h panes/db/sqlite_driver.cpp
         panes/db/sqlite_connect_dialog.h panes/db/sqlite_connect_dialog.cpp panes/db/sqlite_connect_dialog.ui
         components/tree_item_delegate.h components/tree_item_delegate.cpp
@@ -390,6 +392,7 @@ add_library(App SHARED
         tools/image_clip/workflow_tab.h tools/image_clip/workflow_tab.cpp tools/image_clip/workflow_tab.ui
         tools/image_clip/workflow_item.h tools/image_clip/workflow_item.cpp tools/image_clip/workflow_item.ui
         tools/image_clip/workflow_model.h tools/image_clip/workflow_model.cpp
+        tools/template_command/template_command_dialog.h tools/template_command/template_command_dialog.cpp tools/template_command/template_command_dialog.ui
 
 
 

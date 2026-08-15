@@ -17,6 +17,8 @@
 #include "favorite_storage.h"
 #include "recent_storage.h"
 #include "db_storage.h"
+#include "template_command_storage.h"
+#include "template_command_history.h"
 
 #include <QDebug>
 namespace ady {
@@ -199,6 +201,14 @@ namespace ady {
                 upgradeV6();
             case 7:
                 upgradeV7();
+            case 8:
+                upgradeV8();
+            case 9:
+                upgradeV9();
+            case 10:
+                upgradeV10();
+            case 11:
+                upgradeV11();
             default:
 
                 break;
@@ -443,6 +453,70 @@ namespace ady {
             Q_ASSERT(error.type()==QSqlError::NoError);
          }
      }
+
+
+     void DatabaseHelper::upgradeV8(){
+         int type = this->dbType();
+         if(type==1){
+             //add template_command table
+             QString sql = QString("CREATE TABLE [%1] (\
+                                       [%2] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT,\
+                                        [%3] VARCHAR(250)  NULL,\
+                                        [%4] TEXT  NULL,\
+                                        [%5] TEXT  NULL,\
+                                        [%6] TEXT  NULL,\
+                                        [%7] VARCHAR(20)  NULL,\
+                                        [%8] INTEGER DEFAULT '0' NULL\
+                                   )").arg(TemplateCommandStorage::TABLE_NAME).arg(COL_ID).arg(TemplateCommandStorage::COL_TITLE).arg(TemplateCommandStorage::COL_COMMAND_TEMPLATE).arg(TemplateCommandStorage::COL_PARAM_TYPES).arg(TemplateCommandStorage::COL_DEFAULT_VALUES).arg(TemplateCommandStorage::COL_SHELL_TYPE).arg(TemplateCommandStorage::COL_LISTORDER);
+            this->db.exec(sql);
+         }
+     }
+
+     void DatabaseHelper::upgradeV9(){
+         int type = this->dbType();
+         if(type==1 && tableExists(TemplateCommandStorage::TABLE_NAME)){
+             // add missing columns for databases created before default_values/shell_type were added
+             this->db.exec(QString("ALTER TABLE [%1] ADD COLUMN [%2] TEXT NULL")
+                               .arg(TemplateCommandStorage::TABLE_NAME)
+                               .arg(TemplateCommandStorage::COL_DEFAULT_VALUES));
+             this->db.exec(QString("ALTER TABLE [%1] ADD COLUMN [%2] VARCHAR(20) NULL")
+                               .arg(TemplateCommandStorage::TABLE_NAME)
+                               .arg(TemplateCommandStorage::COL_SHELL_TYPE));
+         }
+     }
+
+void DatabaseHelper::upgradeV10(){
+    int type = this->dbType();
+    if(type==1){
+        QString sql = QString("CREATE TABLE IF NOT EXISTS [%1] ("
+                              "[%2] INTEGER PRIMARY KEY AUTOINCREMENT,"
+                              "[%3] TEXT,"
+                              "[%4] TEXT,"
+                              "[%5] TEXT,"
+                              "[%6] VARCHAR(20),"
+                              "[%7] TEXT)")
+                          .arg(TemplateCommandHistoryStorage::TABLE_NAME)
+                          .arg(COL_ID)
+                          .arg(TemplateCommandHistoryStorage::COL_TEMPLATE_TITLE)
+                          .arg(TemplateCommandHistoryStorage::COL_COMMAND)
+                          .arg(TemplateCommandHistoryStorage::COL_PARAMS)
+                          .arg(TemplateCommandHistoryStorage::COL_SHELL_TYPE)
+                          .arg(TemplateCommandHistoryStorage::COL_CREATED_AT);
+        this->db.exec(sql);
+    }
+}
+
+void DatabaseHelper::upgradeV11(){
+    int type = this->dbType();
+    if(type==1 && tableExists(TemplateCommandHistoryStorage::TABLE_NAME)){
+        this->db.exec(QString("ALTER TABLE [%1] ADD COLUMN [%2] TEXT NULL")
+                          .arg(TemplateCommandHistoryStorage::TABLE_NAME)
+                          .arg(TemplateCommandHistoryStorage::COL_COMMAND_TEMPLATE));
+        this->db.exec(QString("ALTER TABLE [%1] ADD COLUMN [%2] TEXT NULL")
+                          .arg(TemplateCommandHistoryStorage::TABLE_NAME)
+                          .arg(TemplateCommandHistoryStorage::COL_PARAM_TYPES));
+    }
+}
 
 
     DatabaseHelper* DatabaseHelper::getDatabase(QString filename)

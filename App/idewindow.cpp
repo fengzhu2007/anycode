@@ -52,6 +52,7 @@
 #include "tools/color/color_dialog.h"
 
 #include "tools/image_clip/image_clip_dialog.h"
+#include "tools/template_command/template_command_dialog.h"
 
 #include "components/statusbar/status_bar_view.h"
 #include "common.h"
@@ -136,6 +137,7 @@ Type::M_TOGGLE_NOTIFICATION,Type::M_OPEN_TERMINAL});
     connect(ui->actionClose_Project,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionClear,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionClear_Files,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionTemplateCommand,&QAction::triggered,this,&IDEWindow::onActionTriggered);
 
     connect(ui->actionQuit_Q_tAlt_F4,&QAction::triggered,this,&IDEWindow::close);
 
@@ -536,6 +538,8 @@ void IDEWindow::onActionTriggered(){
 
     }else if(sender==ui->actionImage_Clip){
         ImageClipDialog::open(this);
+    }else if(sender==ui->actionTemplateCommand){
+        TemplateCommandDialog::open(this);
     }else if(sender==ui->actionFrames_Viewer){
         auto pane = FramesViewerPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
