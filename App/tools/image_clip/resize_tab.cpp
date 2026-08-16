@@ -30,6 +30,14 @@ int ResizeTab::optionBottom(){
     return ui->bottom->value();
 }
 
+int ResizeTab::optionWidth(){
+    return ui->width->value();
+}
+
+int ResizeTab::optionHeight(){
+    return ui->height->value();
+}
+
 bool ResizeTab::optionRelative(){
     return ui->relative->isChecked();
 }

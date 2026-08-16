@@ -18,9 +18,11 @@ struct ResizeOption{
     int top;
     int right;
     int bottom;
+    int width;
+    int height;
     bool relative;
     bool operator==(const ResizeOption& other) const{
-        return this->left==other.left && this->top==other.top && this->right==other.right && this->bottom==other.bottom && this->relative==other.relative;
+        return this->left==other.left && this->top==other.top && this->right==other.right && this->bottom==other.bottom &&this->width==other.width &&this->height==other.height && this->relative==other.relative;
     }
 };
 
@@ -63,7 +65,7 @@ public:
     virtual void run();
 
     void setScaleParams(int width,int height);
-    void setResizeParams(int left,int top,int right,int bottom,bool relative);
+    void setResizeParams(int left,int top,int right,int bottom,int width,int height,bool relative);
     void setCutParams(int left,int top,int right,int bottom,int width=0,int height=0);
 
 

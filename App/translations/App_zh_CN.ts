@@ -2037,7 +2037,17 @@ Please enter a new folder name.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../tools/image_clip/resize_tab.ui" line="80"/>
+        <location filename="../tools/image_clip/resize_tab.ui" line="78"/>
+        <source>Width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/resize_tab.ui" line="85"/>
+        <source>Height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/image_clip/resize_tab.ui" line="108"/>
         <source>Relative</source>
         <translation></translation>
     </message>
