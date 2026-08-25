@@ -611,6 +611,10 @@
    </property>
   </action>
   <action name="actionTemplateCommand">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/ChildWindowTemplate_16x.svg</normaloff>:/Resource/icons/ChildWindowTemplate_16x.svg</iconset>
+   </property>
    <property name="text">
     <string>TemplateCommand</string>
    </property>

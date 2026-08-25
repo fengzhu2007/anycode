@@ -1269,7 +1269,7 @@ for (let i = 0; i &lt; 3; i++) {
         <translation>帧视图</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="615"/>
+        <location filename="../idewindow.ui" line="619"/>
         <source>TemplateCommand</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1867,22 +1867,22 @@ Please enter a new folder name.</source>
         <translation>无效站点ID:%1</translation>
     </message>
     <message>
-        <location filename="../storage/database_helper.cpp" line="84"/>
+        <location filename="../storage/database_helper.cpp" line="85"/>
         <source>SQL Error</source>
         <translation>SQL 错误</translation>
     </message>
     <message>
-        <location filename="../storage/database_helper.cpp" line="247"/>
+        <location filename="../storage/database_helper.cpp" line="252"/>
         <source>Development</source>
         <translation>开发环境</translation>
     </message>
     <message>
-        <location filename="../storage/database_helper.cpp" line="253"/>
+        <location filename="../storage/database_helper.cpp" line="258"/>
         <source>Production</source>
         <translation>生产环境</translation>
     </message>
     <message>
-        <location filename="../storage/database_helper.cpp" line="259"/>
+        <location filename="../storage/database_helper.cpp" line="264"/>
         <source>Other</source>
         <translation>其他</translation>
     </message>
@@ -2520,58 +2520,73 @@ Please enter a new folder name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.ui" line="46"/>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="36"/>
+        <source>Templates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="62"/>
         <source>Add</source>
         <translation type="unfinished">添加</translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.ui" line="53"/>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="69"/>
         <source>Remove</source>
         <translation type="unfinished">移除</translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.ui" line="65"/>
-        <location filename="../tools/template_command/template_command_dialog.ui" line="132"/>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="79"/>
+        <source>History</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="112"/>
+        <source>Delete</source>
+        <translation type="unfinished">删除</translation>
+    </message>
+    <message>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="126"/>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="193"/>
         <source>Run</source>
         <translation type="unfinished">运行</translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.ui" line="119"/>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="180"/>
         <source>font-family:Consolas,monospace;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.ui" line="168"/>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="229"/>
         <source>Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.ui" line="185"/>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="246"/>
         <source>Title:</source>
         <translation type="unfinished">标题：</translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.ui" line="195"/>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="256"/>
         <source>Command Template:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.ui" line="202"/>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="263"/>
         <source>e.g. mkdir &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.ui" line="209"/>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="270"/>
         <source>Shell Type:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.ui" line="240"/>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="301"/>
         <source>Parameter Type Config:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.ui" line="285"/>
+        <location filename="../tools/template_command/template_command_dialog.ui" line="346"/>
         <source>Save</source>
         <translation type="unfinished">保存</translation>
     </message>
@@ -4570,17 +4585,32 @@ files to &quot;%2&quot;?</source>
 <context>
     <name>ady::TemplateCommandDialog</name>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.cpp" line="136"/>
+        <location filename="../tools/template_command/template_command_dialog.cpp" line="95"/>
+        <source>Clear</source>
+        <translation type="unfinished">清除</translation>
+    </message>
+    <message>
+        <location filename="../tools/template_command/template_command_dialog.cpp" line="157"/>
         <source>Template Command</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.cpp" line="308"/>
+        <location filename="../tools/template_command/template_command_dialog.cpp" line="379"/>
         <source>New Command %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../tools/template_command/template_command_dialog.cpp" line="575"/>
+        <location filename="../tools/template_command/template_command_dialog.cpp" line="409"/>
+        <source>Confirm Remove</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/template_command/template_command_dialog.cpp" line="410"/>
+        <source>Are you sure you want to remove &quot;%1&quot;?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../tools/template_command/template_command_dialog.cpp" line="644"/>
         <source>Default value</source>
         <translation type="unfinished"></translation>
     </message>
