@@ -5,10 +5,13 @@
 #include "panes/resource_manager/resource_manager_model.h"
 #include "panes/resource_manager/resource_manager_model_item.h"
 #include "panes/file_transfer/file_transfer_pane.h"
+#include "panes/code_editor/diff_editor_widget.h"
+#include "panes/code_editor/code_editor_manager.h"
 #include "cvs/git/git_repository.h"
 #include "cvs/svn/svn_repository.h"
 #include "cvs/commit_model.h"
 #include "cvs/diff_file_model.h"
+#include "cvs/diff_content.h"
 #include "network/network_response.h"
 #include "version_control_query_commit_task.h"
 #include "version_control_query_diff_task.h"
@@ -35,6 +38,8 @@
 #include <QClipboard>
 #include <QTimer>
 #include <QDebug>
+#include <QVBoxLayout>
+#include <QFileInfo>
 namespace ady{
 
 VersionControlPane* VersionControlPane::instance = nullptr;
@@ -539,6 +544,12 @@ void VersionControlPane::onDiffContextMenu(const QPoint& pos){
     Q_UNUSED(pos);
     QMenu contextMenu(this);
     QModelIndexList indexlist = ui->commitListView->selectionModel()->selectedRows();
+
+    // Add "View Diff" action at the top
+    QAction* viewDiffAction = contextMenu.addAction(tr("View Diff"));
+    connect(viewDiffAction, &QAction::triggered, this, &VersionControlPane::onViewDiff);
+    contextMenu.addSeparator();
+
     contextMenu.addAction(ui->actionOpen_File);
     contextMenu.addAction(ui->actionOpen_Folder);
     contextMenu.addAction(ui->actionCopy_Path);
@@ -560,6 +571,66 @@ void VersionControlPane::onDiffContextMenu(const QPoint& pos){
         contextMenu.addMenu(deleteMenu);
     }
     contextMenu.exec(QCursor::pos());
+}
+
+void VersionControlPane::onViewDiff(){
+    // Get selected file from diffListView
+    QModelIndexList diffIndexes = ui->diffListView->selectionModel()->selectedRows();
+    if(diffIndexes.isEmpty()){
+        return;
+    }
+
+    // Get selected commit from commitListView
+    QModelIndexList commitIndexes = ui->commitListView->selectionModel()->selectedRows();
+    if(commitIndexes.isEmpty()){
+        return;
+    }
+
+    auto diffModel = static_cast<DiffFileModel*>(ui->diffListView->model());
+    auto commitModel = static_cast<CommitModel*>(ui->commitListView->model());
+
+    // Get the first selected file
+    cvs::DiffFile diffFile = diffModel->at(diffIndexes.first().row());
+    QString filePath = diffFile.path();
+
+    // Get the commit OID
+    cvs::Commit commit = commitModel->at(commitIndexes.first().row());
+    QString oid = commit.oid();
+
+    if(oid.isEmpty() || d->repo == nullptr){
+        return;
+    }
+
+    // Get diff content using git repository
+    cvs::DiffContent diffContent = d->repo->diffContent(filePath, oid, QString());
+
+    if(diffContent.isEmpty()){
+        return;
+    }
+
+    // Get the docking manager from CodeEditorManager
+    DockingPaneManager* manager = nullptr;
+    auto editorManager = CodeEditorManager::getInstance();
+    if(editorManager){
+        manager = editorManager->dockingManager();
+    }
+
+    if(manager){
+        // Create a simple pane to show diff
+        DockingPane* diffPane = new DockingPane();
+        diffPane->setWindowTitle(tr("Diff: %1").arg(QFileInfo(filePath).fileName()));
+
+        DiffEditorWidget* diffEditor = new DiffEditorWidget(diffPane);
+        // Pass full file path so DiffEditorWidget can read the complete file
+        QString fullFilePath = d->repo->path() + "/" + filePath;
+        diffEditor->setDiffContent(diffContent, fullFilePath);
+
+        QVBoxLayout* layout = new QVBoxLayout(diffPane);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->addWidget(diffEditor);
+
+        manager->createPane(diffPane, DockingPaneManager::Center, true);
+    }
 }
 
 

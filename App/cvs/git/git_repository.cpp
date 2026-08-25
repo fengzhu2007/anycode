@@ -2,6 +2,7 @@
 #include <git2.h>
 #include <QString>
 #include "cvs/branch.h"
+#include "cvs/diff_content.h"
 #include <QDebug>
 #include <QByteArray>
 #include <QFileInfo>
@@ -513,6 +514,210 @@ void GitRepository::formatDiffLists(QList<DiffFile>& lists)
         }
         iter++;
     }
+}
+
+// Line-level diff callback data structure
+struct DiffContentPayload {
+    DiffContent *content;
+    DiffHunk currentHunk;
+    bool inHunk;
+};
+
+// Hunk callback: called when a new hunk starts
+static int diff_hunk_callback(const git_diff_delta *delta, const git_diff_hunk *hunk, void *payload)
+{
+    Q_UNUSED(delta);
+    DiffContentPayload *p = static_cast<DiffContentPayload*>(payload);
+
+    // Save previous hunk if any
+    if (p->inHunk) {
+        p->content->addHunk(p->currentHunk);
+    }
+
+    // Start new hunk
+    p->currentHunk = DiffHunk();
+    p->currentHunk.setOldStart(hunk->old_start);
+    p->currentHunk.setOldCount(hunk->old_lines);
+    p->currentHunk.setNewStart(hunk->new_start);
+    p->currentHunk.setNewCount(hunk->new_lines);
+    p->currentHunk.setHeader(QString::fromUtf8(hunk->header, hunk->header_len));
+    p->inHunk = true;
+
+    return 0;
+}
+
+// Line callback: called for each line in a hunk
+static int diff_line_callback(const git_diff_delta *delta, const git_diff_hunk *hunk, const git_diff_line *line, void *payload)
+{
+    Q_UNUSED(delta);
+    Q_UNUSED(hunk);
+    DiffContentPayload *p = static_cast<DiffContentPayload*>(payload);
+
+    DiffLine::Type type = DiffLine::Context;
+    QString content = QString::fromUtf8(line->content, line->content_len);
+    // Remove trailing newline
+    if (content.endsWith('\n')) {
+        content.chop(1);
+    }
+
+    int oldLineNo = -1;
+    int newLineNo = -1;
+
+    switch (line->origin) {
+    case GIT_DIFF_LINE_CONTEXT:
+        type = DiffLine::Context;
+        oldLineNo = line->old_lineno;
+        newLineNo = line->new_lineno;
+        break;
+    case GIT_DIFF_LINE_ADDITION:
+        type = DiffLine::Addition;
+        newLineNo = line->new_lineno;
+        break;
+    case GIT_DIFF_LINE_DELETION:
+        type = DiffLine::Deletion;
+        oldLineNo = line->old_lineno;
+        break;
+    case GIT_DIFF_LINE_CONTEXT_EOFNL:
+    case GIT_DIFF_LINE_ADD_EOFNL:
+    case GIT_DIFF_LINE_DEL_EOFNL:
+        // Ignore EOF newline changes
+        return 0;
+    default:
+        // Ignore other line types
+        return 0;
+    }
+
+    DiffLine diffLine(type, content, oldLineNo, newLineNo);
+    p->currentHunk.addLine(diffLine);
+
+    return 0;
+}
+
+DiffContent GitRepository::diffContent(const QString &filePath, QString oid1, QString oid2)
+{
+    DiffContent result;
+
+    if (d->repo == nullptr || oid1.isEmpty()) {
+        return result;
+    }
+
+    git_oid oid_old, oid_new;
+    git_commit *commit_old = nullptr;
+    git_commit *commit_new = nullptr;
+    git_tree *tree_old = nullptr;
+    git_tree *tree_new = nullptr;
+    git_blob *blob_old = nullptr;
+    git_blob *blob_new = nullptr;
+    git_diff *diff = nullptr;
+    git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
+
+    int ret = 0;
+
+    // Parse old version commit
+    ret = git_oid_fromstr(&oid_old, oid1.toStdString().c_str());
+    if (ret != 0) goto cleanup;
+
+    ret = git_commit_lookup(&commit_old, d->repo, &oid_old);
+    if (ret != 0) goto cleanup;
+
+    ret = git_commit_tree(&tree_old, commit_old);
+    if (ret != 0) goto cleanup;
+
+    // Parse new version commit (if oid2 is empty, use HEAD)
+    if (oid2.isEmpty()) {
+        // Use working directory comparison
+        // Simplified: compare commit with its parent
+        int parent_count = git_commit_parentcount(commit_old);
+        if (parent_count > 0) {
+            git_commit *parent = nullptr;
+            ret = git_commit_parent(&parent, commit_old, 0);
+            if (ret != 0) {
+                git_commit_free(parent);
+                goto cleanup;
+            }
+            ret = git_commit_tree(&tree_new, parent);
+            git_commit_free(parent);
+            if (ret != 0) goto cleanup;
+
+            // Swap old and new to show changes from parent to commit
+            git_tree *temp = tree_old;
+            tree_old = tree_new;
+            tree_new = temp;
+        } else {
+            // Initial commit, no parent
+            goto cleanup;
+        }
+    } else {
+        ret = git_oid_fromstr(&oid_new, oid2.toStdString().c_str());
+        if (ret != 0) goto cleanup;
+
+        ret = git_commit_lookup(&commit_new, d->repo, &oid_new);
+        if (ret != 0) goto cleanup;
+
+        ret = git_commit_tree(&tree_new, commit_new);
+        if (ret != 0) goto cleanup;
+    }
+
+    // Get file entries
+    {
+        git_tree_entry *entry_old = nullptr;
+        git_tree_entry *entry_new = nullptr;
+        std::string pathStr = filePath.toStdString();
+
+        // git_tree_entry_bypath returns int, result stored in first parameter
+        ret = git_tree_entry_bypath(&entry_old, tree_old, pathStr.c_str());
+        if (ret != 0 && ret != GIT_ENOTFOUND) goto cleanup;
+        if (ret == GIT_ENOTFOUND) entry_old = nullptr;
+
+        ret = git_tree_entry_bypath(&entry_new, tree_new, pathStr.c_str());
+        if (ret != 0 && ret != GIT_ENOTFOUND) {
+            if (entry_old) git_tree_entry_free(entry_old);
+            goto cleanup;
+        }
+        if (ret == GIT_ENOTFOUND) entry_new = nullptr;
+        ret = 0; // Reset to success
+
+        if (entry_old) {
+            ret = git_blob_lookup(&blob_old, d->repo, git_tree_entry_id(entry_old));
+            git_tree_entry_free(entry_old);
+            if (ret != 0) {
+                if (entry_new) git_tree_entry_free(entry_new);
+                goto cleanup;
+            }
+        }
+
+        if (entry_new) {
+            ret = git_blob_lookup(&blob_new, d->repo, git_tree_entry_id(entry_new));
+            git_tree_entry_free(entry_new);
+            if (ret != 0) goto cleanup;
+        }
+    }
+
+    // Perform line-level diff using git_diff_blobs
+    {
+        DiffContentPayload payload;
+        payload.content = &result;
+        payload.inHunk = false;
+
+        ret = git_diff_blobs(blob_old, nullptr, blob_new, nullptr,
+                             &opts, nullptr, nullptr, diff_hunk_callback, diff_line_callback, &payload);
+
+        if (payload.inHunk) {
+            // Save last hunk
+            result.addHunk(payload.currentHunk);
+        }
+    }
+
+cleanup:
+    if (blob_old) git_blob_free(blob_old);
+    if (blob_new) git_blob_free(blob_new);
+    if (tree_old) git_tree_free(tree_old);
+    if (tree_new) git_tree_free(tree_new);
+    if (commit_old) git_commit_free(commit_old);
+    if (commit_new) git_commit_free(commit_new);
+    if (diff) git_diff_free(diff);
+
+    return result;
 }
 
 

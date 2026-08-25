@@ -22,6 +22,7 @@ class GitRepositoryPrivate;
         virtual QList<DiffFile>* queryDiff(QString oid1=QString(),QString oid2=QString()) override;
         virtual QList<DiffFile>* statusLists() override;
         virtual Error error() const override;
+        virtual DiffContent diffContent(const QString &filePath, QString oid1=QString(), QString oid2=QString()) override;
     private:
 
         void formatDiffLists(QList<DiffFile>& lists);

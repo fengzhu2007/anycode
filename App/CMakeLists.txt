@@ -137,6 +137,7 @@ add_library(App SHARED
         cvs/commit_model.h cvs/commit_model.cpp
         cvs/diff_file.h cvs/diff_file.cpp
         cvs/diff_file_model.h cvs/diff_file_model.cpp
+        cvs/diff_content.h cvs/diff_content.cpp
         cvs/repository.h cvs/repository.cpp
         cvs/error.h cvs/error.cpp
         cvs/git/git_repository.h cvs/git/git_repository.cpp
@@ -230,6 +231,7 @@ add_library(App SHARED
         panes/file_transfer/file_transfer_pane.h panes/file_transfer/file_transfer_pane.cpp panes/file_transfer/file_transfer_pane.ui
         panes/file_transfer/file_transfer_model.h panes/file_transfer/file_transfer_model.cpp
         panes/code_editor/code_editor_view.h panes/code_editor/code_editor_view.cpp
+        panes/code_editor/diff_editor_widget.h panes/code_editor/diff_editor_widget.cpp
         panes/server_manage/server_manage_model.h panes/server_manage/server_manage_model.cpp
         panes/server_manage/server_request_thread.h panes/server_manage/server_request_thread.cpp
         panes/server_manage/new_folder_dialog.h panes/server_manage/new_folder_dialog.cpp

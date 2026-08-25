@@ -5,6 +5,7 @@
 #include <QString>
 #include "commit.h"
 #include "diff_file.h"
+#include "diff_content.h"
 #include "branch.h"
 #include "error.h"
 namespace ady {
@@ -32,6 +33,9 @@ namespace cvs {
         virtual QList<Branch> branchLists()=0;
         virtual const QString headBranch()=0;
         virtual Error error() const=0;
+
+        // Line-level diff: get detailed differences of file content
+        virtual DiffContent diffContent(const QString &filePath, QString oid1=QString(), QString oid2=QString());
 
         //virtual bool switchBranch(const QString& name);
         //virtual bool switchBranch(Branch* branch);

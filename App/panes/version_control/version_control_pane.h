@@ -50,6 +50,7 @@ public slots:
     void onError(int rid,int code,const QString& message);
     void onCommitContextMenu(const QPoint& pos);
     void onDiffContextMenu(const QPoint& pos);
+    void onViewDiff();
     void onMarkAs(bool checked=false);
     void onFinished();
     void onUploadToSite();

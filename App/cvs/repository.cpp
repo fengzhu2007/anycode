@@ -29,6 +29,14 @@ int Repository::rid(){
     return d->rid;
 }
 
+DiffContent Repository::diffContent(const QString &filePath, QString oid1, QString oid2)
+{
+    Q_UNUSED(filePath);
+    Q_UNUSED(oid1);
+    Q_UNUSED(oid2);
+    return DiffContent();
+}
+
 
 }
 }
