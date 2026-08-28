@@ -102,6 +102,7 @@
     <addaction name="separator"/>
     <addaction name="actionFile_Transfer"/>
     <addaction name="actionOutput"/>
+    <addaction name="actionAI_Chat"/>
    </widget>
    <widget class="QMenu" name="menuTool_T">
     <property name="title">
@@ -617,6 +618,14 @@
    </property>
    <property name="text">
     <string>TemplateCommand</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionAI_Chat">
+   <property name="text">
+    <string>AI Chat</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

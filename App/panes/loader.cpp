@@ -14,6 +14,7 @@
 #include "panes/sql/sql_pane.h"
 #include "panes/notification/notification_pane.h"
 #include "panes/db/dbms_pane.h"
+#include "panes/ai_chat/ai_chat_pane.h"
 
 namespace ady{
 
@@ -41,6 +42,8 @@ DockingPane* PaneLoader::init(DockingPaneManager* dockingManager,const QString& 
         pane = NotificationPane::make(dockingManager,data);
     }else if(group == DBMSPane::PANE_GROUP){
         pane = DBMSPane::make(dockingManager,data);
+    }else if(group == AIChatPane::PANE_GROUP){
+        pane = AIChatPane::make(dockingManager,data);
     }else{
         //other editor
         pane = CodeEditorManager::makePane(group,data);
@@ -66,6 +69,8 @@ DockingPane* PaneLoader::open(DockingPaneManager* dockingManager,const QString& 
         pane = OutputPane::open(dockingManager,true);
     }else if(group == NotificationPane::PANE_GROUP){
         pane = NotificationPane::open(dockingManager,true);
+    }else if(group == AIChatPane::PANE_GROUP){
+        pane = AIChatPane::open(dockingManager,true);
     }
     return pane;
 }

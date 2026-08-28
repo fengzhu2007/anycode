@@ -46,3 +46,4 @@ add_subdirectory(src)
 #        ${CMAKE_BINARY_DIR}/destination_file.txt
 #    COMMENT "Copying file to binary directory"
 #)
+add_subdirectory(browser-llm-gateway/libgatewap)

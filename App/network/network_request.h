@@ -23,6 +23,8 @@ namespace ady {
             curl_easy_setopt(this->curl,option,args...);
         }
 
+        CURL* curlHandle() { return curl; }
+
         QString escape(const QString& str);
 
         void setHeaderHolder(QString* header);

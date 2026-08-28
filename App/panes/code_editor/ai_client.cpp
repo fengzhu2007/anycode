@@ -3,7 +3,7 @@
 #include <texteditor.h>
 #include "modules/options/options_settings.h"
 #include "modules/options/ai_settings.h"
-#include "modules/ai/ai_response.h"
+#include "modules/ai/gateway_response.h"
 #include "code_editor_manager.h"
 #include "code_editor_view.h"
 #include <utils/multitextcursor.h>
@@ -115,17 +115,17 @@ void AIClient::requestCompletions(CodeEditorView *editor)
     };
 
     const Utils::FilePath filePath = editor->textDocument()->filePath();
-    auto req = new AiRequest(nullptr,d->m_settings.m_apiKey,data);
+    auto req = new GatewayRequest(nullptr, data);
     qDebug()<<"req"<<req;
-    req->setCallbackResponse([this,position,editor = QPointer<CodeEditorView>(editor)](AIResponse* response){
+    req->setCallbackResponse([this,position,editor = QPointer<CodeEditorView>(editor)](GatewayResponse* response){
         handleCompletions(response,position, editor);
     });
-    connect(req,&AiRequest::finish,this,&AIClient::onRequestFinish);
+    connect(req,&GatewayRequest::finish,this,&AIClient::onRequestFinish);
     m_runningRequests[editor] = req;
     req->call();
 }
 
-void AIClient::handleCompletions(AIResponse *response,const Utils::Text::Position& position,CodeEditorView *editor)
+void AIClient::handleCompletions(GatewayResponse *response,const Utils::Text::Position& position,CodeEditorView *editor)
 {
     response->debug();
     if (response->status()){
@@ -165,11 +165,11 @@ void AIClient::cancelRunningRequest(CodeEditorView *editor)
 }
 
 bool AIClient::enabled(){
-    return d->m_settings.m_enable && d->m_settings.m_apiKey.isEmpty()==false && d->m_settings.m_triggerPolicy==AISettings::Auto;
+    return d->m_settings.m_enable && d->m_settings.m_triggerPolicy==AISettings::Auto;
 }
 
 void AIClient::onRequestFinish(){
-    auto sender = static_cast<AiRequest*>(this->sender());
+    auto sender = static_cast<GatewayRequest*>(this->sender());
     qDebug()<<"onRequestFinish"<<sender;
     auto iter = m_runningRequests.begin();
     while(iter!=m_runningRequests.end()){
