@@ -1,13 +1,13 @@
-#include "chat_message_widget.h"
+﻿#include "chat_message_widget.h"
 #include "ui_chat_message_widget.h"
 #include "core/theme.h"
 
 #include <QDateTime>
 #include <QIcon>
+#include <QMetaObject>
 
 namespace ady{
 
-// role 名称与消息类型映射
 static const char* RoleNames[] = {
     "user",       // User
     "assistant",  // Assistant
@@ -26,6 +26,8 @@ ChatMessageWidget::ChatMessageWidget(Type type, const QString &content, QWidget 
     ui->timeLabel->setText(QDateTime::currentDateTime().toString("HH:mm"));
     this->applyStyle();
     this->setContent(content);
+
+    connect(ui->contentLabel, &QLabel::linkActivated, this, &ChatMessageWidget::onToggleThink);
 }
 
 ChatMessageWidget::~ChatMessageWidget()
@@ -38,12 +40,27 @@ ChatMessageWidget::~ChatMessageWidget()
 void ChatMessageWidget::setContent(const QString &text)
 {
     m_plainContent = text;
-    ui->contentLabel->setText(formatContent(text));
+    doUpdate();
 }
 
 void ChatMessageWidget::appendText(const QString &delta)
 {
     m_plainContent.append(delta);
+    scheduleUpdate();
+}
+
+void ChatMessageWidget::scheduleUpdate()
+{
+    if(m_updateScheduled) return;
+    m_updateScheduled = true;
+    QMetaObject::invokeMethod(this, [this](){
+        m_updateScheduled = false;
+        doUpdate();
+    }, Qt::QueuedConnection);
+}
+
+void ChatMessageWidget::doUpdate()
+{
     ui->contentLabel->setText(formatContent(m_plainContent));
 }
 
@@ -65,6 +82,15 @@ ChatMessageWidget::Type ChatMessageWidget::typeOf(const QString &role)
 }
 
 // ---- style ----
+
+void ChatMessageWidget::paintEvent(QPaintEvent *event)
+{
+    Q_UNUSED(event);
+    QStyleOption opt;
+    opt.initFrom(this);
+    QPainter painter(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
+}
 
 void ChatMessageWidget::applyStyle()
 {
@@ -109,7 +135,6 @@ void ChatMessageWidget::applyStyle()
         ).arg(bg));
         break;
     case Event:
-        // 事件消息: 无边框,居中灰色小字
         ui->iconLabel->hide();
         ui->roleLabel->hide();
         ui->timeLabel->hide();
@@ -127,12 +152,13 @@ QString ChatMessageWidget::formatContent(const QString &text) const
 {
     if(text.isEmpty()) return {};
 
-    // 按 ``` 分割: 偶数段为普通文本, 奇数段为代码块
-    const QStringList parts = text.split("```");
+    QString cleaned;
+    QString thinkHtml = extractAndFormatThinkContent(text, cleaned);
+
+    const QStringList parts = cleaned.split("```");
     QString html;
     for(int i = 0; i < parts.size(); ++i){
         if(i % 2 == 0){
-            // 普通文本: 转义 + 换行转 <br/>
             QString escaped = parts[i].toHtmlEscaped();
             escaped.replace("\n", "<br/>");
             html += escaped;
@@ -140,14 +166,89 @@ QString ChatMessageWidget::formatContent(const QString &text) const
             html += formatCodeBlock(parts[i]);
         }
     }
-    return html;
+
+    return thinkHtml + html;
+}
+
+QString ChatMessageWidget::extractAndFormatThinkContent(const QString &text, QString &cleaned) const
+{
+    QString thinkContent;
+    QString result;
+    int pos = 0;
+    const QString openTag = QStringLiteral("<think>");
+    const QString closeTag = QStringLiteral("</think>");
+
+    while(pos < text.length()){
+        int thinkStart = text.indexOf(openTag, pos);
+        if(thinkStart < 0){
+            result += text.mid(pos);
+            break;
+        }
+        result += text.mid(pos, thinkStart - pos);
+        int thinkEnd = text.indexOf(closeTag, thinkStart + openTag.length());
+        if(thinkEnd < 0){
+            thinkContent += text.mid(thinkStart + openTag.length());
+            break;
+        }
+        thinkContent += text.mid(thinkStart + openTag.length(), thinkEnd - thinkStart - openTag.length());
+        pos = thinkEnd + closeTag.length();
+    }
+
+    cleaned = result.trimmed();
+
+    if(thinkContent.isEmpty()){
+        return QString();
+    }
+
+    const_cast<ChatMessageWidget*>(this)->m_thinkContent = thinkContent.trimmed();
+
+    auto theme = Theme::getInstance();
+    QString thinkColor = (theme->style() == Theme::Dark) ? "#888888" : "#666666";
+    QString thinkBg = (theme->style() == Theme::Dark) ? "#1a1a1a" : "#f0f0f0";
+    QString linkColor = "#4a9eff";
+
+    QString escapedThink = thinkContent.trimmed().toHtmlEscaped();
+    escapedThink.replace("\n", "<br/>");
+
+    if(m_thinkExpanded){
+        return QString(
+            "<div style='background-color:%1;border-left:3px solid %2;padding:8px;margin:4px 0;"
+            "border-radius:4px;color:%2;font-size:12px;'>"
+            "<b>💭 思考过程：</b><br/>%3<br/>"
+            "<a href='collapse' style='color:%4;'>收起 ▲</a>"
+            "</div><br/>"
+        ).arg(thinkBg, thinkColor, escapedThink, linkColor);
+    }else{
+        QString firstLine = thinkContent.trimmed();
+        int nlPos = firstLine.indexOf('\n');
+        if(nlPos > 0){
+            firstLine = firstLine.left(nlPos);
+        }
+        if(firstLine.length() > 80){
+            firstLine = firstLine.left(80) + "...";
+        }
+        QString escapedFirstLine = firstLine.toHtmlEscaped();
+
+        return QString(
+            "<div style='background-color:%1;border-left:3px solid %2;padding:8px;margin:4px 0;"
+            "border-radius:4px;color:%2;font-size:12px;'>"
+            "<b>💭 思考过程：</b> %3 "
+            "<a href='expand' style='color:%4;'>展开 ▼</a>"
+            "</div><br/>"
+        ).arg(thinkBg, thinkColor, escapedFirstLine, linkColor);
+    }
+}
+
+void ChatMessageWidget::onToggleThink()
+{
+    m_thinkExpanded = !m_thinkExpanded;
+    doUpdate();
 }
 
 QString ChatMessageWidget::formatCodeBlock(const QString &code) const
 {
     QString body = code;
 
-    // 代码块首行可能是语言标识 (如 ```cpp)
     int nl = body.indexOf('\n');
     if(nl > 0){
         const QString lang = body.left(nl).trimmed();
@@ -155,12 +256,10 @@ QString ChatMessageWidget::formatCodeBlock(const QString &code) const
             body = body.mid(nl + 1);
         }
     }
-    // 去掉结尾多余空行
     while(body.endsWith('\n')){
         body.chop(1);
     }
 
-    // 根据主题选择代码块配色
     auto theme = Theme::getInstance();
     QString codeBg, codeFg;
     if(theme->style() == Theme::Dark){

@@ -78,6 +78,9 @@ public:
     QAction* actionCopy_Path;
     //QAction* actionUpload;
 
+    QAction* actionAddToChat;
+    QAction* actionAddToNewChat;
+
     //QList<SiteRecord> sites;
     QMap<long long ,SiteRecord> sites;
 };
@@ -167,6 +170,9 @@ void ResourceManagerPane::initView(){
     d->actionRename = new QAction(tr("Rename"),this);
     d->actionDelete = new QAction(QIcon(":/Resource/icons/Cancel_16x.svg"),tr("Delete"),this);
     d->actionCopy_Path = new QAction(tr("Copy Path"),this);
+
+    d->actionAddToChat = new QAction(tr("Add To Chat"),this);
+    d->actionAddToNewChat = new QAction(tr("Add To New Chat"),this);
     //d->actionUpload = new QAction(QIcon(":/Resource/icons/BatchCheckIn_16x.svg"),tr("Upload"),this);
 
     d->actionCut->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_X));
@@ -190,6 +196,9 @@ void ResourceManagerPane::initView(){
     connect(d->actionDelete,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionCopy_Path,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionCut,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
+
+    connect(d->actionAddToChat,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
+    connect(d->actionAddToNewChat,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     //connect(d->actionUpload,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
 
 
@@ -427,6 +436,10 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
         contextMenu.addAction(d->actionOpen_Embedded_Terminal);
 
         contextMenu.addSeparator();
+        contextMenu.addAction(d->actionAddToChat);
+        contextMenu.addAction(d->actionAddToNewChat);
+
+        contextMenu.addSeparator();
         contextMenu.addAction(d->actionPaste);
         contextMenu.addSeparator();
         //contextMenu.addAction(d->actionUpload);
@@ -449,6 +462,11 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
         contextMenu.addAction(d->actionOpen_Folder);
         contextMenu.addAction(d->actionOpen_Terminal);
         contextMenu.addAction(d->actionOpen_Embedded_Terminal);
+
+        contextMenu.addSeparator();
+        contextMenu.addAction(d->actionAddToChat);
+        contextMenu.addAction(d->actionAddToNewChat);
+
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionCut);
         contextMenu.addAction(d->actionCopy);
@@ -474,6 +492,11 @@ void ResourceManagerPane::onContextMenu(const QPoint& pos){
         contextMenu.addAction(d->actionOpen_File);
         contextMenu.addAction(d->actionOpen_Terminal);
         contextMenu.addAction(d->actionOpen_Embedded_Terminal);
+
+        contextMenu.addSeparator();
+        contextMenu.addAction(d->actionAddToChat);
+        contextMenu.addAction(d->actionAddToNewChat);
+
         contextMenu.addSeparator();
         contextMenu.addAction(d->actionCut);
         contextMenu.addAction(d->actionCopy);
@@ -776,12 +799,29 @@ void ResourceManagerPane::onActionTriggered(){
             }
         }
     }else if(sender==d->actionClose_Project){
-        /*if(MessageDialog::confirm(this,tr("Close Confirm"),tr("Are you sure you want to close '%1'?").arg(one->title()),QMessageBox::Ok|QMessageBox::Cancel)==QMessageBox::Ok){
-            d->model->removeItem(one);
-        }*/
         this->closeProject(one);
     }else if(sender==d->actionCopy_Path){
         QApplication::clipboard()->setText(one->path());
+    }else if(sender==d->actionAddToChat){
+        QString path = one->path();
+        ResourceManagerModelItem::Type type = one->type();
+        if(type==ResourceManagerModelItem::File){
+            AiChatData data{"FILE",path};
+            Publisher::getInstance()->post(Type::M_ADD_TO_CHAT,&data);
+        }else if(type==ResourceManagerModelItem::Folder){
+            AiChatData data{"FOLDER",path};
+            Publisher::getInstance()->post(Type::M_ADD_TO_CHAT,&data);
+        }
+    }else if(sender==d->actionAddToNewChat){
+        QString path = one->path();
+        ResourceManagerModelItem::Type type = one->type();
+        if(type==ResourceManagerModelItem::File){
+            AiChatData data{"FILE",path};
+            Publisher::getInstance()->post(Type::M_ADD_TO_NEW_CHAT,&data);
+        }else if(type==ResourceManagerModelItem::Folder){
+            AiChatData data{"FOLDER",path};
+            Publisher::getInstance()->post(Type::M_ADD_TO_NEW_CHAT,&data);
+        }
     }
 }
 

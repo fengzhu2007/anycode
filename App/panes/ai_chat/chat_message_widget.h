@@ -1,7 +1,10 @@
-#ifndef CHAT_MESSAGE_WIDGET_H
+﻿#ifndef CHAT_MESSAGE_WIDGET_H
 #define CHAT_MESSAGE_WIDGET_H
 
 #include <QWidget>
+#include <QPaintEvent>
+#include <QPainter>
+#include <QStyleOption>
 
 namespace Ui {
 class ChatMessageWidget;
@@ -34,21 +37,31 @@ public:
     Type type() const { return m_type; }
     QString content() const { return m_plainContent; }
 
-    void setContent(const QString &text);   // 全量设置内容(重新格式化)
-    void appendText(const QString &delta);  // 流式追加内容
+    void setContent(const QString &text);
+    void appendText(const QString &delta);
 
     static QString roleOf(Type type);
     static Type typeOf(const QString &role);
 
+private slots:
+    void onToggleThink();
+
 private:
+    void paintEvent(QPaintEvent *event) override;
     void applyStyle();
     QString formatContent(const QString &text) const;
+    QString extractAndFormatThinkContent(const QString &text, QString &cleaned) const;
     QString formatCodeBlock(const QString &code) const;
+    void scheduleUpdate();
+    void doUpdate();
 
 private:
     Ui::ChatMessageWidget *ui;
     Type m_type;
     QString m_plainContent;
+    QString m_thinkContent;
+    bool m_thinkExpanded = false;
+    bool m_updateScheduled = false;
 };
 
 }

@@ -1,4 +1,7 @@
 #include "gateway_http_server.h"
+#include "mcp/mcp_handler.h"
+#include "panes/resource_manager/resource_manager_model.h"
+#include "panes/resource_manager/resource_manager_model_item.h"
 #include <QDebug>
 #include <QtConcurrent>
 
@@ -35,6 +38,30 @@ void GatewayHttpServer::start(const GatewayConfig &config)
         return;
     }
 
+    // Register MCP routes before Gateway starts (must be done in main thread)
+    if (!m_mcpHandler) {
+        m_mcpHandler = new McpHandler(this);
+        // Wire up workspace provider: read from ResourceManagerModel (current open projects)
+        m_mcpHandler->setWorkspacesProvider([]() -> QList<McpHandler::WorkspaceInfo> {
+            QList<McpHandler::WorkspaceInfo> result;
+            auto *model = ady::ResourceManagerModel::getInstance();
+            if (!model) return result;
+            auto *root = model->rootItem();
+            if (!root) return result;
+            for (int i = 0; i < root->childrenCount(); ++i) {
+                auto *item = root->childAt(i);
+                if (!item) continue;
+                McpHandler::WorkspaceInfo ws;
+                ws.name = item->title();
+                ws.path = item->path();
+                if (!ws.path.isEmpty())
+                    result.append(ws);
+            }
+            return result;
+        });
+    }
+    m_mcpHandler->registerRoutes();
+
     qDebug() << "[GatewayHttpServer] Starting gateway async..."
              << "host=" << config.host.c_str() << "port=" << config.port;
 
@@ -69,6 +96,11 @@ void GatewayHttpServer::stop()
     qDebug() << "[GatewayHttpServer] Stopping gateway...";
     Gateway::instance().stop();
     m_running = false;
+    // Reset MCP flag so routes can be re-registered on next start
+    if (m_mcpHandler) {
+        delete m_mcpHandler;
+        m_mcpHandler = nullptr;
+    }
     qDebug() << "[GatewayHttpServer] Gateway stopped.";
     emit stopped();
 }

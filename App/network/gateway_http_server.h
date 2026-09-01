@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <gateway.h>
 
+class McpHandler;
+
 /**
  * Gateway HTTP Server 单例
  *
@@ -52,4 +54,5 @@ private:
 
     bool m_running = false;
     QFutureWatcher<bool> *m_startWatcher = nullptr;
+    McpHandler *m_mcpHandler = nullptr;
 };

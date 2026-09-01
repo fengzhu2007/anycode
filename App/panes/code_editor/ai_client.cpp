@@ -11,6 +11,10 @@
 #include <utils/algorithm.h>
 #include <textsuggestion.h>
 #include <QPointer>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <memory>
 
 #include <QTimer>
 
@@ -117,8 +121,68 @@ void AIClient::requestCompletions(CodeEditorView *editor)
     const Utils::FilePath filePath = editor->textDocument()->filePath();
     auto req = new GatewayRequest(nullptr, data);
     qDebug()<<"req"<<req;
-    req->setCallbackResponse([this,position,editor = QPointer<CodeEditorView>(editor)](GatewayResponse* response){
-        handleCompletions(response,position, editor);
+
+    // Streaming state: accumulate text from chunks and update suggestion in real-time
+    struct StreamState {
+        QString accumulatedText;
+        Utils::Text::Position position;
+        QPointer<CodeEditorView> editor;
+    };
+    auto state = std::make_shared<StreamState>();
+    state->position = position;
+    state->editor = editor;
+
+    // Connect chunkReceived signal — called for each SSE chunk as it arrives
+    connect(req, &GatewayRequest::chunkReceived, this,
+        [this, state](const QString &chunkData) {
+            if (!state->editor) return;
+
+            // Parse chunk — supports both OpenAI adapter format and raw DeepSeek format
+            QJsonParseError error;
+            QJsonDocument doc = QJsonDocument::fromJson(chunkData.toUtf8(), &error);
+            if (error.error != QJsonParseError::NoError || !doc.isObject()) return;
+            QJsonObject obj = doc.object();
+
+            QString content;
+
+            // OpenAI adapter format: {"choices":[{"delta":{"content":"text"}}]}
+            QJsonArray choices = obj.value("choices").toArray();
+            if (!choices.isEmpty()) {
+                content = choices.at(0).toObject().value("delta").toObject().value("content").toString();
+            }
+            // Raw DeepSeek fallback: {"v":"text"} or {"o":"APPEND","v":"text"}
+            if (content.isEmpty()) {
+                if (obj.contains("v") && obj["v"].isString()
+                    && !obj.contains("p") && !obj.contains("o")) {
+                    content = obj["v"].toString();
+                } else if (obj.value("o") == "APPEND" && obj["v"].isString()) {
+                    content = obj["v"].toString();
+                }
+            }
+
+            if (content.isEmpty()) return;
+
+            state->accumulatedText += content;
+
+            // Update suggestion in editor
+            auto editor = state->editor.data();
+            if (!editor || !editor->textDocument()) return;
+
+            editor->clearSuggestion();
+
+            auto textCursor = editor->textCursor();
+            bool isEmptyBlock = textCursor.block().text().trimmed().isEmpty();
+            Utils::Text::Position start{state->position.line + 1, isEmptyBlock ? 0 : state->position.column};
+            Utils::Text::Position end{start.line, start.column + state->accumulatedText.length()};
+            Utils::Text::Range range{start, end};
+
+            QList<TextEditor::TextSuggestion::Data> suggestions;
+            suggestions.append(TextEditor::TextSuggestion::Data{range, start, state->accumulatedText});
+            editor->insertSuggestion(std::make_unique<TextEditor::CyclicSuggestion>(suggestions, editor->document()));
+        });
+
+    req->setCallbackResponse([this, state](GatewayResponse* response){
+        handleCompletions(response, state->position, state->editor.data());
     });
     connect(req,&GatewayRequest::finish,this,&AIClient::onRequestFinish);
     m_runningRequests[editor] = req;

@@ -1,9 +1,11 @@
-#include "chat_service.h"
+﻿#include "chat_service.h"
 #include <QJsonDocument>
 #include <QDateTime>
 #include <QDebug>
 #include <QtConcurrent>
 #include <QMetaType>
+#include <QMetaObject>
+#include <QUrl>
 
 namespace ady{
 
@@ -43,23 +45,21 @@ ChatService::ChatService(QObject *parent)
     , m_eventCurl(nullptr)
     , m_eventAbort(false)
 {
-    // 注册自定义类型用于跨线程信号传递
     qRegisterMetaType<OpenCodeSession>("OpenCodeSession");
     qRegisterMetaType<QList<OpenCodeSession>>("QList<OpenCodeSession>");
     qRegisterMetaType<OpenCodeModel>("OpenCodeModel");
     qRegisterMetaType<QList<OpenCodeModel>>("QList<OpenCodeModel>");
+    qRegisterMetaType<OpenCodeMessage>("OpenCodeMessage");
+    qRegisterMetaType<QList<OpenCodeMessage>>("QList<OpenCodeMessage>");
 
-    // 启动时连接事件流
     connectEventStream();
 }
 
 ChatService::~ChatService()
 {
-    // 中止所有请求
     m_abort = true;
     m_eventAbort = true;
 
-    // 等待所有线程结束
     if(m_future.isRunning()){
         m_future.waitForFinished();
     }
@@ -76,7 +76,6 @@ void ChatService::setBaseUrl(const QString &url)
     if(m_baseUrl.endsWith('/')){
         m_baseUrl.chop(1);
     }
-    // 重新连接事件流
     disconnectEventStream();
     connectEventStream();
 }
@@ -141,8 +140,14 @@ void ChatService::listSessions()
             s.id = obj["id"].toString();
             s.title = obj["title"].toString();
             s.agent = obj["agent"].toString();
-            s.timeCreated = obj["timeCreated"].toVariant().toLongLong();
-            s.timeUpdated = obj["timeUpdated"].toVariant().toLongLong();
+            QJsonObject timeObj = obj["time"].toObject();
+            s.timeCreated = timeObj["created"].toVariant().toLongLong();
+            s.timeUpdated = timeObj["updated"].toVariant().toLongLong();
+            QJsonObject modelObj = obj["model"].toObject();
+            if(!modelObj.isEmpty()){
+                s.modelProviderID = modelObj["providerID"].toString();
+                s.modelID = modelObj["id"].toString();
+            }
             if(!s.id.isEmpty()){
                 sessions.append(s);
             }
@@ -155,22 +160,24 @@ void ChatService::listSessions()
 
 // ---- create session: POST /session ----
 
-void ChatService::createSession(const QString &title)
+void ChatService::createSession(const QString &title, const QString &directory)
 {
     if(m_requesting) return;
     m_requesting = true;
     m_abort = false;
 
     QString url = m_baseUrl + "/session";
+    if(!directory.isEmpty()){
+        url += "?directory=" + QUrl::toPercentEncoding(directory);
+    }
 
     QJsonObject body;
     if(!title.isEmpty()){
         body["title"] = title;
     }
-    // model 字段是对象，包含 id 和 providerID
     if(!m_providerID.isEmpty() && !m_modelID.isEmpty()){
         QJsonObject model;
-        model["id"] = m_modelID;           // 使用 id 而不是 modelID
+        model["id"] = m_modelID;
         model["providerID"] = m_providerID;
         body["model"] = model;
     }
@@ -215,8 +222,14 @@ void ChatService::createSession(const QString &title)
         s.id = obj["id"].toString();
         s.title = obj["title"].toString();
         s.agent = obj["agent"].toString();
-        s.timeCreated = obj["timeCreated"].toVariant().toLongLong();
-        s.timeUpdated = obj["timeUpdated"].toVariant().toLongLong();
+        QJsonObject timeObj = obj["time"].toObject();
+        s.timeCreated = timeObj["created"].toVariant().toLongLong();
+        s.timeUpdated = timeObj["updated"].toVariant().toLongLong();
+        QJsonObject modelObj = obj["model"].toObject();
+        if(!modelObj.isEmpty()){
+            s.modelProviderID = modelObj["providerID"].toString();
+            s.modelID = modelObj["id"].toString();
+        }
 
         if(s.id.isEmpty()){
             emit sessionCreated({}, tr("Failed to create session"));
@@ -316,25 +329,40 @@ void ChatService::listModels()
 
         for(const auto &val : data){
             QJsonObject obj = val.toObject();
+            QString modelId = obj["id"].toString();
+            QString providerID = obj["providerID"].toString();
+            bool enabled = obj["enabled"].toBool();
 
-            // 只解析启用的模型
-            if(!obj["enabled"].toBool()) continue;
+            qDebug() << "[ChatService] model:" << modelId
+                     << "provider:" << providerID
+                     << "enabled:" << enabled
+                     << "raw:" << QJsonDocument(obj).toJson(QJsonDocument::Compact);
 
-            // 只解析支持文本输出的模型
+            if(!enabled) {
+                qDebug() << "[ChatService] SKIP (not enabled):" << modelId;
+                continue;
+            }
+
             QJsonObject caps = obj["capabilities"].toObject();
             QJsonArray outputs = caps["output"].toArray();
-            bool supportsText = false;
-            for(const auto &o : outputs){
-                if(o.toString() == "text"){
-                    supportsText = true;
-                    break;
+            if(!outputs.isEmpty()) {
+                bool supportsText = false;
+                for(const auto &o : outputs){
+                    if(o.toString() == "text"){
+                        supportsText = true;
+                        break;
+                    }
+                }
+                if(!supportsText) {
+                    qDebug() << "[ChatService] SKIP (no text output):" << modelId
+                             << "outputs:" << outputs;
+                    continue;
                 }
             }
-            if(!supportsText) continue;
 
             OpenCodeModel m;
             m.providerID = obj["providerID"].toString();
-            m.modelID = obj["id"].toString();  // 使用 id 字段
+            m.modelID = obj["id"].toString();
             m.name = obj["name"].toString();
             if(m.name.isEmpty()){
                 m.name = m.modelID;
@@ -352,11 +380,18 @@ void ChatService::listModels()
 
 // ---- send message: POST /session/{id}/message ----
 
-void ChatService::sendMessage(const QString &sessionId, const QString &content)
+void ChatService::sendMessage(const QString &sessionId, const QString &content, const QString &providerID, const QString &modelID)
 {
-    if(m_requesting) return;
+    qDebug() << "[ChatService] sendMessage called, sessionId=" << sessionId
+             << "m_requesting=" << m_requesting << "contentLen=" << content.length();
+    if(m_requesting) {
+        qDebug() << "[ChatService] sendMessage SKIPPED: m_requesting=true";
+        return;
+    }
     m_requesting = true;
     m_abort = false;
+
+    m_sessionContentSizes[sessionId] += content.toUtf8().size();
 
     QString url = m_baseUrl + "/session/" + sessionId + "/message";
 
@@ -371,11 +406,13 @@ void ChatService::sendMessage(const QString &sessionId, const QString &content)
     QJsonObject body;
     body["parts"] = parts;
 
-    // optional model
-    if(!m_providerID.isEmpty() && !m_modelID.isEmpty()){
+    // use passed model, fallback to global model
+    QString pid = providerID.isEmpty() ? m_providerID : providerID;
+    QString mid = modelID.isEmpty() ? m_modelID : modelID;
+    if(!pid.isEmpty() && !mid.isEmpty()){
         QJsonObject model;
-        model["providerID"] = m_providerID;
-        model["modelID"] = m_modelID;
+        model["providerID"] = pid;
+        model["modelID"] = mid;
         body["model"] = model;
     }
 
@@ -391,10 +428,9 @@ void ChatService::sendMessage(const QString &sessionId, const QString &content)
             return;
         }
 
-        // 发送消息后不等待服务器完整响应，响应通过 SSE 事件流接收
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);     // 连接 + 发送超时
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
         curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
 
         QByteArray responseData;
@@ -412,30 +448,92 @@ void ChatService::sendMessage(const QString &sessionId, const QString &content)
         curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
 
-        // 无论成功还是超时，都认为消息已发送（响应通过 SSE 接收）
-        // 不发射 streamFinished，由 SSE 事件 session.status=idle 触发
         qDebug() << "[ChatService] sendMessage result:" << curl_easy_strerror(res) 
                  << "response:" << responseData;
         
         if(res == CURLE_OK){
-            // 正常响应，检查是否有错误
             QJsonDocument doc = QJsonDocument::fromJson(responseData);
             QJsonObject obj = doc.object();
             if(obj.contains("error")){
                 QString err = obj["error"].toObject()["message"].toString();
-                // 只有真正的错误才报错
                 emit streamFinished(sessionId, err.isEmpty() ? tr("Unknown error") : err);
             }
-            // 正常响应不发射 streamFinished，等待 SSE 事件
         }else if(res == CURLE_OPERATION_TIMEDOUT){
-            // 超时但消息已发送，不报错（响应通过 SSE 接收）
             qDebug() << "[ChatService] sendMessage timeout, waiting for SSE events";
-            // 不发射 streamFinished，等待 SSE 事件 session.status=idle
         }else{
-            // 其他错误（连接失败等）
             emit streamFinished(sessionId, QString::fromUtf8(curl_easy_strerror(res)));
         }
         m_requesting = false;
+    });
+}
+
+// ---- load session messages: GET /session/{id}/message ----
+
+void ChatService::loadSessionMessages(const QString &sessionId, int limit)
+{
+    QString url = m_baseUrl + "/session/" + sessionId + "/message?limit=" + QString::number(limit);
+
+    QtConcurrent::run([this, url, sessionId](){
+        CURL *curl = curl_easy_init();
+        if(!curl){
+            emit messagesReceived(sessionId, {}, tr("Failed to init curl"));
+            return;
+        }
+
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
+        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
+        curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8().constData());
+        curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+
+        QByteArray responseData;
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
+
+        CURLcode res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+
+        if(res != CURLE_OK){
+            emit messagesReceived(sessionId, {}, QString::fromUtf8(curl_easy_strerror(res)));
+            return;
+        }
+
+        QJsonDocument doc = QJsonDocument::fromJson(responseData);
+        QJsonArray arr = doc.array();
+        QList<OpenCodeMessage> messages;
+
+        for(const auto &val : arr){
+            QJsonObject msgObj = val.toObject();
+            QJsonObject info = msgObj["info"].toObject();
+            QJsonArray parts = msgObj["parts"].toArray();
+
+            QString role = info["role"].toString();
+            QString id = info["id"].toString();
+            qint64 timeCreated = static_cast<qint64>(info["time"].toObject()["created"].toDouble());
+
+            QString text;
+            for(const auto &p : parts){
+                QJsonObject partObj = p.toObject();
+                QString type = partObj["type"].toString();
+                if(type == "text"){
+                    if(!text.isEmpty()) text += "\n";
+                    text += partObj["text"].toString();
+                }
+            }
+
+            if((role == "user" || role == "assistant") && !text.isEmpty()){
+                OpenCodeMessage msg;
+                msg.id = id;
+                msg.role = role;
+                msg.text = text;
+                msg.timeCreated = timeCreated;
+                messages.append(msg);
+            }
+        }
+
+        qDebug() << "[ChatService] loaded" << messages.size() << "messages for session" << sessionId;
+        emit messagesReceived(sessionId, messages, {});
     });
 }
 
@@ -460,6 +558,80 @@ void ChatService::abortSession(const QString &sessionId)
     });
 }
 
+// ---- update session title: PATCH /session/{id} ----
+
+void ChatService::updateSessionTitle(const QString &sessionId, const QString &title)
+{
+    QString url = m_baseUrl + "/session/" + sessionId;
+
+    QJsonObject body;
+    body["title"] = title;
+    QByteArray bodyBytes = QJsonDocument(body).toJson(QJsonDocument::Compact);
+
+    QtConcurrent::run([url, bodyBytes](){
+        CURL *curl = curl_easy_init();
+        if(!curl) return;
+
+        struct curl_slist *headers = nullptr;
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+        curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8().constData());
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, bodyBytes.constData());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)bodyBytes.size());
+
+        CURLcode res = curl_easy_perform(curl);
+        if(res != CURLE_OK){
+            qWarning() << "[ChatService] Update title failed:" << curl_easy_strerror(res);
+        }
+
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+    });
+}
+
+// ---- compact session: POST /api/session/{id}/compact ----
+
+void ChatService::compactSession(const QString &sessionId)
+{
+    QString url = m_baseUrl + "/api/session/" + sessionId + "/compact";
+
+    QtConcurrent::run([url, sessionId](){
+        CURL *curl = curl_easy_init();
+        if(!curl){
+            qWarning() << "[ChatService] compactSession: failed to init curl";
+            return;
+        }
+
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
+        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
+        curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8().constData());
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+
+        QByteArray responseData;
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
+
+        CURLcode res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+
+        if(res != CURLE_OK){
+            qWarning() << "[ChatService] compactSession failed:" << curl_easy_strerror(res);
+        }else{
+            qDebug() << "[ChatService] compactSession request sent for session:" << sessionId
+                     << "response:" << responseData;
+        }
+    });
+}
+
 // ---- SSE event stream: GET /global/event ----
 
 void ChatService::connectEventStream()
@@ -470,6 +642,8 @@ void ChatService::connectEventStream()
     QString url = m_baseUrl + "/global/event";
 
     m_eventFuture = QtConcurrent::run([this, url](){
+        registerMcpServer();
+
         m_eventCurl = curl_easy_init();
         if(!m_eventCurl){
             qWarning() << "Failed to create event stream curl handle";
@@ -483,10 +657,8 @@ void ChatService::connectEventStream()
         curl_easy_setopt(m_eventCurl, CURLOPT_WRITEFUNCTION, eventStreamCallback);
         curl_easy_setopt(m_eventCurl, CURLOPT_WRITEDATA, this);
 
-        // 长连接，不设置超时
         curl_easy_setopt(m_eventCurl, CURLOPT_CONNECTTIMEOUT, 10L);
 
-        // 启用进度回调用于中止
         curl_easy_setopt(m_eventCurl, CURLOPT_NOPROGRESS, 0L);
         curl_easy_setopt(m_eventCurl, CURLOPT_XFERINFOFUNCTION, progressCallback);
         curl_easy_setopt(m_eventCurl, CURLOPT_XFERINFODATA, &m_eventAbort);
@@ -504,10 +676,86 @@ void ChatService::connectEventStream()
 void ChatService::disconnectEventStream()
 {
     m_eventAbort = true;
-    // 等待事件流线程结束
     if(m_eventFuture.isRunning()){
         m_eventFuture.waitForFinished();
     }
+}
+
+// ---- MCP server registration: POST /mcp + POST /mcp/{name}/connect ----
+
+void ChatService::registerMcpServer()
+{
+    if(m_mcpRegistered) return;
+
+    QString baseUrl = m_baseUrl;
+    uint16_t gwPort = m_gatewayPort;
+
+    QtConcurrent::run([this, baseUrl, gwPort]() {
+        QString addUrl = baseUrl + "/mcp";
+        CURL *curl = createCurlHandle();
+        if(!curl) return;
+
+        QJsonObject configObj;
+        configObj["type"] = "remote";
+        configObj["url"] = QString("http://127.0.0.1:%1/mcp").arg(gwPort);
+
+        QJsonObject body;
+        body["name"] = "anycode";
+        body["config"] = configObj;
+
+        QByteArray bodyBytes = QJsonDocument(body).toJson(QJsonDocument::Compact);
+
+        struct curl_slist *headers = nullptr;
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+
+        QByteArray responseData;
+        curl_easy_setopt(curl, CURLOPT_URL, addUrl.toUtf8().constData());
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, bodyBytes.constData());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)bodyBytes.size());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
+
+        CURLcode res = curl_easy_perform(curl);
+        curl_slist_free_all(headers);
+
+        if(res != CURLE_OK){
+            qWarning() << "[ChatService] MCP add failed:" << curl_easy_strerror(res);
+            curl_easy_cleanup(curl);
+            return;
+        }
+
+        QJsonDocument respDoc = QJsonDocument::fromJson(responseData);
+        if(respDoc.isNull() || !respDoc.isObject()){
+            qDebug() << "[ChatService] MCP add response (raw):" << responseData;
+        }
+
+        qDebug() << "[ChatService] MCP server added: anycode ->" << configObj["url"].toString();
+        curl_easy_cleanup(curl);
+
+        QString connectUrl = baseUrl + "/mcp/anycode/connect";
+        curl = createCurlHandle();
+        if(!curl) return;
+
+        responseData.clear();
+        curl_easy_setopt(curl, CURLOPT_URL, connectUrl.toUtf8().constData());
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
+
+        res = curl_easy_perform(curl);
+        if(res == CURLE_OK){
+            m_mcpRegistered = true;
+            qDebug() << "[ChatService] MCP server connected: anycode";
+        } else {
+            qWarning() << "[ChatService] MCP connect failed:" << curl_easy_strerror(res);
+        }
+
+        curl_easy_cleanup(curl);
+    });
 }
 
 // ---- process SSE events ----
@@ -516,11 +764,9 @@ void ChatService::processEventStream(const QByteArray &chunk)
 {
     m_sseBuffer.append(chunk);
 
-    // SSE 格式: data: {...}\n\n
     while(true){
         int idx = m_sseBuffer.indexOf("\n\n");
         if(idx < 0){
-            // 尝试 \r\n\r\n
             idx = m_sseBuffer.indexOf("\r\n\r\n");
             if(idx < 0) break;
         }
@@ -534,7 +780,6 @@ void ChatService::processEventStream(const QByteArray &chunk)
             m_sseBuffer = m_sseBuffer.mid(idx + 2);
         }
 
-        // 解析 SSE 事件
         if(event.startsWith("data:")){
             QString jsonStr = event.mid(5).trimmed();
             if(jsonStr.isEmpty()) continue;
@@ -544,26 +789,24 @@ void ChatService::processEventStream(const QByteArray &chunk)
             QJsonDocument doc = QJsonDocument::fromJson(jsonStr.toUtf8());
             QJsonObject obj = doc.object();
             
-            // 事件结构: { payload: { type: "...", properties: {...} } }
             QJsonObject payload = obj["payload"].toObject();
             QString type = payload["type"].toString();
 
             if(type == "message.part.delta"){
-                // 流式增量输出
                 QJsonObject props = payload["properties"].toObject();
                 QString sessionId = props["sessionID"].toString();
                 QString delta = props["delta"].toString();
                 if(!delta.isEmpty()){
-                    emit streamChunk(sessionId, delta);
+                    m_sessionContentSizes[sessionId] += delta.toUtf8().size();
+                    QMetaObject::invokeMethod(this, "streamChunk", Qt::QueuedConnection,
+                                              Q_ARG(QString, sessionId), Q_ARG(QString, delta));
                 }
             }else if(type == "message.part.updated"){
-                // 完整更新（可用于获取完整文本）
                 QJsonObject props = payload["properties"].toObject();
                 QString sessionId = props["sessionID"].toString();
                 QJsonObject part = props["part"].toObject();
                 QString partType = part["type"].toString();
                 if(partType == "text"){
-                    // 完整文本，可用于保存历史
                 }
             }else if(type == "session.status"){
                 QJsonObject props = payload["properties"].toObject();
@@ -573,18 +816,43 @@ void ChatService::processEventStream(const QByteArray &chunk)
                 emit sessionStatusChanged(sessionId, statusType);
 
                 if(statusType == "idle"){
-                    emit streamFinished(sessionId, {});
+                    qint64 size = m_sessionContentSizes.value(sessionId, 0);
+                    if(size > COMPACT_THRESHOLD){
+                        qDebug() << "[ChatService] Auto-compacting session:" << sessionId
+                                 << "size=" << size << "(threshold=" << COMPACT_THRESHOLD << ")";
+                        emit autoCompactionTriggered(sessionId);
+                        compactSession(sessionId);
+                    }
+                    QString error = m_sessionErrors.take(sessionId);
+                    emit streamFinished(sessionId, error);
                 }
+            }else if(type == "session.error"){
+                QJsonObject props = payload["properties"].toObject();
+                QString sessionId = props["sessionID"].toString();
+                QJsonObject errorObj = props["error"].toObject();
+                QString errorMsg = errorObj["message"].toString();
+                if(errorMsg.isEmpty()) errorMsg = errorObj["name"].toString();
+                qDebug() << "[ChatService] session.error for session:" << sessionId << "error:" << errorMsg;
+                m_sessionErrors[sessionId] = errorMsg;
             }else if(type == "session.updated"){
-                // 会话更新事件，表示 AI 响应完成
                 QJsonObject props = payload["properties"].toObject();
                 QString sessionId = props["sessionID"].toString();
                 qDebug() << "[ChatService] session.updated for session:" << sessionId;
-                emit streamFinished(sessionId, {});
             }else if(type == "message.updated"){
-                // 消息完整更新
                 QJsonObject props = payload["properties"].toObject();
                 QString sessionId = props["sessionID"].toString();
+            }else if(type == "session.next.compaction.started.1"){
+                QJsonObject props = payload["properties"].toObject();
+                QString sessionId = props["sessionID"].toString();
+                QString reason = props["reason"].toString();
+                qDebug() << "[ChatService] compaction started for session:" << sessionId << "reason:" << reason;
+                emit compactionStarted(sessionId);
+            }else if(type == "session.next.compaction.ended"){
+                QJsonObject props = payload["properties"].toObject();
+                QString sessionId = props["sessionID"].toString();
+                m_sessionContentSizes[sessionId] = 0;
+                qDebug() << "[ChatService] compaction ended for session:" << sessionId << "(size reset)";
+                emit compactionFinished(sessionId);
             }
         }
     }

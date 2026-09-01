@@ -156,6 +156,7 @@ add_library(App SHARED
         network/http/http_client.h network/http/http_client.cpp
         network/http/http_response.h network/http/http_response.cpp
         network/gateway_http_server.h network/gateway_http_server.cpp
+        network/mcp/mcp_handler.h network/mcp/mcp_handler.cpp
 
         project/open_project_window.ui project/open_project_window.h project/open_project_window.cpp
 
@@ -396,6 +397,8 @@ add_library(App SHARED
         panes/ai_chat/ai_chat_pane.h panes/ai_chat/ai_chat_pane.cpp panes/ai_chat/ai_chat_pane.ui
         panes/ai_chat/chat_service.h panes/ai_chat/chat_service.cpp
         panes/ai_chat/chat_message_widget.h panes/ai_chat/chat_message_widget.cpp panes/ai_chat/chat_message_widget.ui
+        panes/ai_chat/session_page_widget.h panes/ai_chat/session_page_widget.cpp panes/ai_chat/session_page_widget.ui
+        panes/ai_chat/session_list_popup.h panes/ai_chat/session_list_popup.cpp
         tools/image_clip/cut_tab.h tools/image_clip/cut_tab.cpp tools/image_clip/cut_tab.ui
         tools/image_clip/workflow_tab.h tools/image_clip/workflow_tab.cpp tools/image_clip/workflow_tab.ui
         tools/image_clip/workflow_item.h tools/image_clip/workflow_item.cpp tools/image_clip/workflow_item.ui

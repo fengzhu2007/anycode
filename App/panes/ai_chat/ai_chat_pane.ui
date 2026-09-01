@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>650</width>
-    <height>480</height>
+    <height>598</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>AI Chat</string>
   </property>
-  <layout class="QVBoxLayout" name="mainLayout">
+  <layout class="QVBoxLayout" name="mainLayout" stretch="0,1">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -42,6 +42,7 @@
      </property>
      <addaction name="actionNewChat"/>
      <addaction name="actionDeleteChat"/>
+     <addaction name="actionSessions"/>
      <addaction name="separator"/>
      <addaction name="actionClear"/>
      <addaction name="separator"/>
@@ -49,264 +50,12 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="modelLayout">
-     <property name="spacing">
-      <number>4</number>
-     </property>
-     <property name="leftMargin">
-      <number>6</number>
-     </property>
-     <property name="topMargin">
-      <number>4</number>
-     </property>
-     <property name="rightMargin">
-      <number>6</number>
-     </property>
-     <property name="bottomMargin">
-      <number>4</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="modelLabel">
-       <property name="text">
-        <string>Model:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="modelCombo">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="toolTip">
-        <string>Select model from OpenCode server</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QSplitter" name="splitter">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="handleWidth">
-      <number>3</number>
-     </property>
-     <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="sessionLayout">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <widget class="QListWidget" name="sessionList">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>150</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>220</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="layoutWidget2">
-      <layout class="QVBoxLayout" name="chatLayout">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item>
-        <widget class="QScrollArea" name="messageScroll">
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="widgetResizable">
-          <bool>true</bool>
-         </property>
-         <widget class="QWidget" name="messageContainer">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>460</width>
-            <height>300</height>
-           </rect>
-          </property>
-          <layout class="QVBoxLayout" name="messageLayout">
-           <property name="spacing">
-            <number>6</number>
-           </property>
-           <property name="leftMargin">
-            <number>8</number>
-           </property>
-           <property name="topMargin">
-            <number>8</number>
-           </property>
-           <property name="rightMargin">
-            <number>8</number>
-           </property>
-           <property name="bottomMargin">
-            <number>8</number>
-           </property>
-           <item>
-            <spacer name="messageBottomSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Expanding</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </widget>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="statusLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="margin">
-          <number>2</number>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="inputWidget" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>72</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>100</height>
-          </size>
-         </property>
-         <layout class="QHBoxLayout" name="inputLayout">
-          <property name="spacing">
-           <number>4</number>
-          </property>
-          <property name="leftMargin">
-           <number>4</number>
-          </property>
-          <property name="topMargin">
-           <number>4</number>
-          </property>
-          <property name="rightMargin">
-           <number>4</number>
-          </property>
-          <property name="bottomMargin">
-           <number>4</number>
-          </property>
-          <item>
-           <widget class="QTextEdit" name="messageInput">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="acceptRichText">
-             <bool>false</bool>
-            </property>
-            <property name="placeholderText">
-             <string>Input message... (Ctrl+Enter to send)</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="sendBtn">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>60</width>
-              <height>32</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Send</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
+    <widget class="QStackedWidget" name="stackedWidget"/>
    </item>
   </layout>
   <action name="actionNewChat">
    <property name="icon">
-    <iconset resource="../../../r.qrc">
+    <iconset resource="../../r.qrc">
      <normaloff>:/Resource/icons/AddImmediateWindow_16x.svg</normaloff>:/Resource/icons/AddImmediateWindow_16x.svg</iconset>
    </property>
    <property name="text">
@@ -321,14 +70,29 @@
   </action>
   <action name="actionDeleteChat">
    <property name="icon">
-    <iconset resource="../../../r.qrc">
+    <iconset resource="../../r.qrc">
      <normaloff>:/Resource/icons/Trash_16x.svg</normaloff>:/Resource/icons/Trash_16x.svg</iconset>
    </property>
    <property name="text">
     <string>Delete</string>
    </property>
    <property name="toolTip">
-    <string>Delete Selected Chat</string>
+    <string>Delete Current Chat</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionSessions">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/ListView_16x.svg</normaloff>:/Resource/icons/ListView_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Sessions</string>
+   </property>
+   <property name="toolTip">
+    <string>Show Session List</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -336,7 +100,7 @@
   </action>
   <action name="actionClear">
    <property name="icon">
-    <iconset resource="../../../r.qrc">
+    <iconset resource="../../r.qrc">
      <normaloff>:/Resource/icons/CleanData_16x.svg</normaloff>:/Resource/icons/CleanData_16x.svg</iconset>
    </property>
    <property name="text">
@@ -376,7 +140,7 @@
   </action>
   <action name="actionRefreshModels">
    <property name="icon">
-    <iconset resource="../../../r.qrc">
+    <iconset resource="../../r.qrc">
      <normaloff>:/Resource/icons/Refresh_16x.svg</normaloff>:/Resource/icons/Refresh_16x.svg</iconset>
    </property>
    <property name="text">
@@ -389,9 +153,24 @@
     <enum>QAction::NoRole</enum>
    </property>
   </action>
+  <action name="actionCompact">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/CollapseAll_16x.svg</normaloff>:/Resource/icons/CollapseAll_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Compact</string>
+   </property>
+   <property name="toolTip">
+    <string>Compact Session (compress conversation history)</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
  </widget>
  <resources>
-  <include location="../../../r.qrc"/>
+  <include location="../../r.qrc"/>
  </resources>
  <connections/>
 </ui>
