@@ -1,6 +1,9 @@
 ﻿#include "ai_chat_pane.h"
 #include "ui_ai_chat_pane.h"
 #include "chat_message_widget.h"
+#include "components/message_dialog.h"
+#include "message_list_view.h"
+#include "message_model.h"
 #include "session_list_popup.h"
 #include "docking_pane_layout_item_info.h"
 #include "core/event_bus/type.h"
@@ -19,8 +22,6 @@
 #include <QToolBar>
 #include <QTextEdit>
 #include <QComboBox>
-#include <QScrollArea>
-#include <QVBoxLayout>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QFile>
@@ -67,12 +68,6 @@ AIChatPane::AIChatPane(QWidget *parent)
     // create chat service
     m_service = new ChatService(this);
 
-    // toolbar – add send / stop / compact actions
-    ui->toolBar->addSeparator();
-    ui->toolBar->addAction(ui->actionSend);
-    ui->toolBar->addAction(ui->actionStop);
-    ui->toolBar->addAction(ui->actionCompact);
-    ui->actionStop->setEnabled(false);
 
     // sessions popup
     m_sessionPopup = new SessionListPopup(this);
@@ -86,10 +81,9 @@ AIChatPane::AIChatPane(QWidget *parent)
     // toolbar connections
     connect(ui->actionNewChat, &QAction::triggered, this, &AIChatPane::onActionTriggered);
     connect(ui->actionDeleteChat, &QAction::triggered, this, &AIChatPane::onActionTriggered);
+    connect(ui->actionDelete_All_Chat, &QAction::triggered, this, &AIChatPane::onActionTriggered);
     connect(ui->actionClear, &QAction::triggered, this, &AIChatPane::onActionTriggered);
     connect(ui->actionRefreshModels, &QAction::triggered, this, &AIChatPane::onActionTriggered);
-    connect(ui->actionCompact, &QAction::triggered, this, &AIChatPane::onCompactClicked);
-    connect(ui->actionSend, &QAction::triggered, this, &AIChatPane::onSendMessage);
     connect(ui->actionSessions, &QAction::triggered, [this](){
         refreshSessionPopup();
         QPoint topLeft = ui->stackedWidget->mapToGlobal(QPoint(0, 0));
@@ -97,22 +91,24 @@ AIChatPane::AIChatPane(QWidget *parent)
         m_sessionPopup->setFixedWidth(width);
         m_sessionPopup->showAt(topLeft);
     });
-    connect(ui->actionStop, &QAction::triggered, [this](){
-        if(!m_currentSessionId.isEmpty()){
-            m_service->abortSession(m_currentSessionId);
-        }
-        auto *page = findPage(m_currentSessionId);
-        if(page) setSending(page, false);
-    });
-
     // service signals
     connect(m_service, &ChatService::sessionsReceived, this, &AIChatPane::onSessionsReceived);
     connect(m_service, &ChatService::sessionCreated, this, &AIChatPane::onSessionCreated);
     connect(m_service, &ChatService::sessionDeleted, this, &AIChatPane::onSessionDeleted);
     connect(m_service, &ChatService::streamStarted, this, &AIChatPane::onStreamStarted);
     connect(m_service, &ChatService::streamChunk, this, &AIChatPane::onStreamChunk);
+    connect(m_service, &ChatService::streamThinking, this, &AIChatPane::onStreamThinking);
+    connect(m_service, &ChatService::streamToolUse, this, &AIChatPane::onStreamToolUse);
+    connect(m_service, &ChatService::streamToolResult, this, &AIChatPane::onStreamToolResult);
     connect(m_service, &ChatService::streamFinished, this, &AIChatPane::onStreamFinished);
     connect(m_service, &ChatService::sessionStatusChanged, this, &AIChatPane::onSessionStatusChanged);
+    connect(m_service, &ChatService::sessionTitleChanged, this, &AIChatPane::onSessionTitleChanged);
+    connect(m_service, &ChatService::sessionDiffChanged, this, [this](const QString &sessionId, const QString &summary){
+        auto *page = findPage(sessionId);
+        if(page){
+            appendEvent(page, summary);
+        }
+    });
     connect(m_service, &ChatService::modelsReceived, this, &AIChatPane::onModelsReceived);
     connect(m_service, &ChatService::messagesReceived, this, &AIChatPane::onMessagesReceived);
     connect(m_service, &ChatService::compactionStarted, this, &AIChatPane::onCompactionStarted);
@@ -123,6 +119,7 @@ AIChatPane::AIChatPane(QWidget *parent)
             appendEvent(page, tr("Session exceeds 200KB, auto-compacting..."));
         }
     });
+    connect(m_service, &ChatService::connectionChanged, this, &AIChatPane::onConnectionChanged);
 
     Subscriber::reg();
     this->regMessageIds({Type::M_OPEN_PROJECT, Type::M_CLOSE_PROJECT,
@@ -133,6 +130,14 @@ AIChatPane::AIChatPane(QWidget *parent)
     m_workspaceNotifyTimer->setSingleShot(true);
     m_workspaceNotifyTimer->setInterval(2000);
     connect(m_workspaceNotifyTimer, &QTimer::timeout, this, &AIChatPane::notifyWorkspacesChanged);
+
+    // session list retry timer: retry listSessions when server is unreachable
+    m_retryLoadTimer = new QTimer(this);
+    m_retryLoadTimer->setSingleShot(true);
+    m_retryLoadTimer->setInterval(5000);
+    connect(m_retryLoadTimer, &QTimer::timeout, this, [this](){
+        m_service->listSessions();
+    });
 
     this->initView();
 }
@@ -176,6 +181,7 @@ bool AIChatPane::onReceive(Event* e){
         m_workspaceNotifyTimer->start();
         return true;
     }
+    qDebug()<<"111:"<<id;
     if(id == Type::M_ADD_TO_CHAT || id == Type::M_ADD_TO_NEW_CHAT){
         QString text;
         QJsonObject obj = e->toJsonOf<AiChatData>().toObject();
@@ -187,12 +193,20 @@ bool AIChatPane::onReceive(Event* e){
             auto *sd = new SessionData;
             sd->page = page;
             m_sessions.append(sd);
-            m_service->createSession("", primaryWorkspacePath());
-            page->appendInputText(text);
+            // Read model from page's combobox
+            QString pid, mid;
+            QString data = page->modelCombo()->currentData().toString();
+            QStringList parts = data.split("::");
+            if(parts.size() == 2){
+                pid = parts[0];
+                mid = parts[1];
+            }
+            m_service->createSession("", primaryWorkspacePath(), pid, mid);
+            page->appendInputText(text + " ");
         }else{
             auto *page = findPage(m_currentSessionId);
             if(page){
-                page->appendInputText(text);
+                page->appendInputText(text + " ");
             }
         }
         return true;
@@ -213,10 +227,40 @@ QJsonObject AIChatPane::toJson(){
 void AIChatPane::onActionTriggered(){
     auto sender = static_cast<QAction*>(this->sender());
     if(sender == ui->actionNewChat){
-        m_service->createSession("", primaryWorkspacePath());
+        // Read model from current page's combobox
+        QString pid, mid;
+        auto *page = findPage(m_currentSessionId);
+        if(page){
+            QString data = page->modelCombo()->currentData().toString();
+            QStringList parts = data.split("::");
+            if(parts.size() == 2){
+                pid = parts[0];
+                mid = parts[1];
+            }
+        }
+        m_service->createSession("", primaryWorkspacePath(), pid, mid);
     } else if(sender == ui->actionDeleteChat){
         if(!m_currentSessionId.isEmpty()){
-            m_service->deleteSession(m_currentSessionId);
+            if(MessageDialog::confirm(this, tr("Delete Confirm"),
+                    tr("Are you sure you want to delete the current chat?"),
+                    QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok){
+                m_service->deleteSession(m_currentSessionId);
+            }
+        }
+    } else if(sender == ui->actionDelete_All_Chat){
+        auto allSessions = m_service->sessions();
+        if(!allSessions.isEmpty()){
+            if(MessageDialog::confirm(this, tr("Delete All Confirm"),
+                    tr("Are you sure you want to delete all %1 chat(s)?").arg(allSessions.size()),
+                    QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok){
+                m_pendingDeleteIds.clear();
+                for(const auto &s : allSessions){
+                    m_pendingDeleteIds << s.id;
+                }
+                if(!m_pendingDeleteIds.isEmpty()){
+                    m_service->deleteSession(m_pendingDeleteIds.takeFirst());
+                }
+            }
         }
     } else if(sender == ui->actionClear){
         auto *page = findPage(m_currentSessionId);
@@ -228,9 +272,14 @@ void AIChatPane::onActionTriggered(){
 
 void AIChatPane::onSessionsReceived(const QList<OpenCodeSession> &sessions, const QString &error){
     if(!error.isEmpty()){
-        qDebug() << "[AIChatPane] Load sessions failed:" << error;
+        qDebug() << "[AIChatPane] Load sessions failed:" << error
+                 << "- retrying in 5s";
+        m_retryLoadTimer->start();
         return;
     }
+
+    // Stop retry timer on success
+    m_retryLoadTimer->stop();
 
     for(int i = m_sessions.size() - 1; i >= 0; --i){
         bool found = false;
@@ -281,7 +330,7 @@ void AIChatPane::onSessionCreated(const OpenCodeSession &session, const QString 
             // Read model from combobox if not set
             if(sd->modelProviderID.isEmpty() || sd->modelID.isEmpty()){
                 QString data = page->modelCombo()->currentData().toString();
-                QStringList parts = data.split("/");
+                QStringList parts = data.split("::");
                 if(parts.size() == 2){
                     sd->modelProviderID = parts[0];
                     sd->modelID = parts[1];
@@ -311,33 +360,59 @@ void AIChatPane::onSessionCreated(const OpenCodeSession &session, const QString 
 
         renderUserMessage(page, text);
         setSending(page, true);
-        m_service->sendMessage(session.id, text, sd->modelProviderID, sd->modelID);
+
+        // inject workspace directory context on first message of new session
+        // (after renderUserMessage so UI shows clean text, only server receives context)
+        if (sd->workspaceDirty) {
+            QString ctx = buildWorkspaceContext();
+            if (!ctx.isEmpty()) {
+                text = ctx + text;
+                sd->workspaceDirty = false;
+            }
+        }
+
+        if(!m_service->sendMessage(session.id, text, sd->modelProviderID, sd->modelID)){
+            // request dropped because another request is still in flight
+            setSending(page, false);
+            appendEvent(page, tr("Previous request is still in progress, please retry"));
+        }
     }
 }
 
 void AIChatPane::onSessionDeleted(const QString &sessionId, const QString &error){
     if(!error.isEmpty()){
         qDebug() << "[AIChatPane] Delete session failed:" << error;
-        return;
+    } else {
+        int idx = findSessionIndex(sessionId);
+        if(idx >= 0){
+            auto *sd = m_sessions.at(idx);
+            bool wasCurrent = (m_currentSessionId == sessionId);
+
+            if(wasCurrent){
+                m_currentSessionId.clear();
+            }
+
+            removePage(sd->page);
+            if(sd->scrollTimer){
+                sd->scrollTimer->stop();
+                sd->scrollTimer->deleteLater();
+            }
+            m_sessions.removeAt(idx);
+            delete sd;
+
+            refreshSessionPopup();
+
+            if(wasCurrent && !m_sessions.isEmpty()){
+                // Switch to previous session, or next if no previous
+                int targetIdx = (idx > 0) ? idx - 1 : 0;
+                switchToSession(m_sessions.at(targetIdx)->sessionId);
+            }
+        }
     }
 
-    int idx = findSessionIndex(sessionId);
-    if(idx < 0) return;
-
-    auto *sd = m_sessions.at(idx);
-
-    if(m_currentSessionId == sessionId){
-        m_currentSessionId.clear();
-    }
-
-    removePage(sd->page);
-    m_sessions.removeAt(idx);
-    delete sd;
-
-    refreshSessionPopup();
-
-    if(!m_sessions.isEmpty()){
-        switchToSession(m_sessions.first()->sessionId);
+    // Continue deleting pending sessions (delete-all operation)
+    if(!m_pendingDeleteIds.isEmpty()){
+        m_service->deleteSession(m_pendingDeleteIds.takeFirst());
     }
 }
 
@@ -366,7 +441,7 @@ SessionPageWidget* AIChatPane::createSessionPage()
             if(!m_currentSessionId.isEmpty()){
                 m_service->abortSession(m_currentSessionId);
             }
-            setSending(page, false);
+            stopStreaming(m_currentSessionId);
         }else{
             onSendMessage();
         }
@@ -376,7 +451,7 @@ SessionPageWidget* AIChatPane::createSessionPage()
         if(index < 0) return;
         if(page != findPage(m_currentSessionId)) return;
         QString data = page->modelCombo()->itemData(index).toString();
-        QStringList parts = data.split("/");
+        QStringList parts = data.split("::");
         if(parts.size() == 2){
             m_service->setProviderID(parts[0]);
             m_service->setModelID(parts[1]);
@@ -392,9 +467,15 @@ SessionPageWidget* AIChatPane::createSessionPage()
 
     auto models = m_service->models();
     if(!models.isEmpty()){
-        QString defaultData = m_service->providerID() + "/" + m_service->modelID();
+        QString defaultData = m_service->providerID() + "::" + m_service->modelID();
         page->setModels(models, defaultData);
     }
+
+    // Virtual list: restore streaming state when widgets are (re-)created
+    connect(page->messageListView(), &MessageListView::widgetCreated,
+            this, [this, page](int row, ChatMessageWidget *widget) {
+        onWidgetCreated(page, row, widget);
+    });
 
     ui->stackedWidget->addWidget(page);
     return page;
@@ -452,7 +533,7 @@ void AIChatPane::switchToSession(const QString &sessionId)
         auto *sd = m_sessions.at(idx);
         sd->firstUserMessage.clear();
         if(!sd->modelProviderID.isEmpty() && !sd->modelID.isEmpty()){
-            QString modelData = sd->modelProviderID + "/" + sd->modelID;
+            QString modelData = sd->modelProviderID + "::" + sd->modelID;
             auto *combo = page->modelCombo();
             for(int i = 0; i < combo->count(); ++i){
                 if(combo->itemData(i).toString() == modelData){
@@ -464,6 +545,15 @@ void AIChatPane::switchToSession(const QString &sessionId)
     }
 
     ui->stackedWidget->setCurrentWidget(page);
+
+    // Update session title label
+    for(const auto &s : m_service->sessions()){
+        if(s.id == sessionId){
+            page->sessionTitle()->setText(s.title.isEmpty() ? tr("New Chat") : s.title);
+            break;
+        }
+    }
+
     page->messageInput()->setFocus();
 }
 
@@ -483,42 +573,16 @@ void AIChatPane::onMessagesReceived(const QString &sessionId, const QList<OpenCo
     auto *page = findPage(sessionId);
     if(!page) return;
 
-    int sdIdx = findSessionIndex(sessionId);
-    if(sdIdx < 0) return;
-    auto *sd = m_sessions.at(sdIdx);
+    page->clearMessages();
 
-    const QList<OpenCodeMessage> &sorted = messages;
-
-    if(sd->firstUserMessage.isEmpty()){
-        for(const auto &msg : sorted){
-            if(msg.role == "user" && !msg.text.isEmpty()){
-                sd->firstUserMessage = msg.text;
-                break;
-            }
-        }
-    }
-
-    if(!sd->firstUserMessage.isEmpty()){
-        m_sessionPopup->updateSessionTitle(sessionId, sd->firstUserMessage.left(50));
-        QString title = sd->firstUserMessage;
-        if(title.length() > 50) title = title.left(50) + "...";
-        m_service->updateSessionTitle(sessionId, title);
-        QTimer::singleShot(500, this, [this](){
-            m_service->listSessions();
-        });
-    }
-
-    clearMessages(page);
-
-    for(const auto &msg : sorted){
+    for(const auto &msg : messages){
         ChatMessageWidget::Type type = (msg.role == "user")
             ? ChatMessageWidget::User
             : ChatMessageWidget::Assistant;
-        auto *w = new ChatMessageWidget(type, msg.text, page->messageScrollContents());
-        page->messageContainer()->insertWidget(page->messageContainer()->count() - 1, w);
+        page->messageModel()->addMessage(type, msg.text);
     }
 
-    scrollToBottom(page);
+    page->scrollToBottom();
 }
 
 // ---- message sending ----
@@ -540,7 +604,15 @@ void AIChatPane::onSendMessage(){
         sd->pendingMessage = text;
         sd->firstUserMessage = text;
         page->messageInput()->clear();
-        m_service->createSession("", primaryWorkspacePath());
+        // Read model from page's combobox before creating session
+        QString pid, mid;
+        QString data = page->modelCombo()->currentData().toString();
+        QStringList parts = data.split("::");
+        if(parts.size() == 2){
+            pid = parts[0];
+            mid = parts[1];
+        }
+        m_service->createSession("", primaryWorkspacePath(), pid, mid);
         return;
     }
 
@@ -551,64 +623,93 @@ void AIChatPane::onSendMessage(){
         sd->firstUserMessage = text;
     }
 
+    // inject workspace directory context when workspace has changed
+    if (sd->workspaceDirty) {
+        QString ctx = buildWorkspaceContext();
+        if (!ctx.isEmpty()) {
+            text = ctx + text;
+            sd->workspaceDirty = false;
+        }
+    }
+
     setSending(page, true);
 
-    m_service->sendMessage(m_currentSessionId, text, sd->modelProviderID, sd->modelID);
+    if(!m_service->sendMessage(m_currentSessionId, text, sd->modelProviderID, sd->modelID)){
+        // request dropped because another request is still in flight
+        setSending(page, false);
+        appendEvent(page, tr("Previous request is still in progress, please retry"));
+    }
 }
 
 // ---- response callbacks ----
 
 void AIChatPane::onStreamStarted(const QString &sessionId){
-    qDebug() << "[AIChatPane] onStreamStarted, sessionId=" << sessionId;
-
     auto *page = findPage(sessionId);
-    if(!page){
-        qDebug() << "[AIChatPane] onStreamStarted: no page for sessionId";
-        return;
-    }
+    if(!page) return;
 
     int sdIdx = findSessionIndex(sessionId);
     if(sdIdx < 0) return;
     auto *sd = m_sessions.at(sdIdx);
 
     sd->isReceiving = true;
-
     m_sessionPopup->updateSessionStatus(sessionId, true);
 
     if(sessionId == m_currentSessionId){
         setSending(page, true);
     }
 
-    // create the streaming assistant message widget
-    sd->streamingWidget = new ChatMessageWidget(ChatMessageWidget::Assistant, {}, page->messageScrollContents());
-    page->messageContainer()->insertWidget(page->messageContainer()->count() - 1, sd->streamingWidget);
+    ensureStreamingWidget(sd);
 }
 
 void AIChatPane::onStreamChunk(const QString &sessionId, const QString &delta){
-    qDebug() << "[AIChatPane] onStreamChunk, sessionId=" << sessionId
-             << "deltaLen=" << delta.length();
-
-    auto *page = findPage(sessionId);
-    if(!page) return;
-
     int sdIdx = findSessionIndex(sessionId);
     if(sdIdx < 0) return;
     auto *sd = m_sessions.at(sdIdx);
+    if(!sd->page || !sd->isReceiving) return;
 
-    // Auto-create streaming widget if not yet created (lazy init)
-    if(sd->streamingWidget == nullptr){
-        sd->isReceiving = true;
-        sd->streamingWidget = new ChatMessageWidget(ChatMessageWidget::Assistant, {}, page->messageScrollContents());
-        page->messageContainer()->insertWidget(page->messageContainer()->count() - 1, sd->streamingWidget);
-    }
+    // IMPORTANT: ensureStreamingWidget uses streamingContent as the initial
+    // content when creating the model row, so we must append AFTER widget
+    // creation to avoid duplicating the first chunk.
+    auto *w = ensureStreamingWidget(sd);
+    sd->streamingContent.append(delta);
+    if(w) w->appendText(delta);
+    throttledScrollToBottom(sd);
+}
 
-    sd->streamingWidget->appendText(delta);
+void AIChatPane::onStreamThinking(const QString &sessionId, const QString &content){
+    int sdIdx = findSessionIndex(sessionId);
+    if(sdIdx < 0) return;
+    auto *sd = m_sessions.at(sdIdx);
+    if(!sd->page || !sd->isReceiving) return;
+
+    auto *w = ensureStreamingWidget(sd);
+    if(w) w->appendThink(content);
+    throttledScrollToBottom(sd);
+}
+
+void AIChatPane::onStreamToolUse(const QString &sessionId, const QString &toolName, const QString &input){
+    int sdIdx = findSessionIndex(sessionId);
+    if(sdIdx < 0) return;
+    auto *sd = m_sessions.at(sdIdx);
+    if(!sd->page || !sd->isReceiving) return;
+
+    auto *w = ensureStreamingWidget(sd);
+    if(w) w->appendToolBlock(toolName, input, false);
+    throttledScrollToBottom(sd);
+}
+
+void AIChatPane::onStreamToolResult(const QString &sessionId, const QString &toolName, const QString &output){
+    int sdIdx = findSessionIndex(sessionId);
+    if(sdIdx < 0) return;
+    auto *sd = m_sessions.at(sdIdx);
+    if(!sd->page || !sd->isReceiving) return;
+
+    auto *w = ensureStreamingWidget(sd);
+    if(w) w->appendToolBlock(toolName, output, true);
+    throttledScrollToBottom(sd);
 }
 
 void AIChatPane::onStreamFinished(const QString &sessionId, const QString &error){
-    qDebug() << "[AIChatPane] onStreamFinished, sessionId=" << sessionId
-             << "error=" << error;
-
     auto *page = findPage(sessionId);
     if(!page) return;
 
@@ -616,72 +717,69 @@ void AIChatPane::onStreamFinished(const QString &sessionId, const QString &error
     if(sdIdx < 0) return;
     auto *sd = m_sessions.at(sdIdx);
 
-    if(!sd->isReceiving) return;
+    // Stop spinner on visible widget (if any)
+    const int finishedRow = sd->streamingRow;
+    ChatMessageWidget *w = (finishedRow >= 0)
+        ? page->messageListView()->widgetForMessage(finishedRow)
+        : nullptr;
+    if(w) w->setStreaming(false);
+    if(sd->scrollTimer) sd->scrollTimer->stop();
+
+    // Always clear streaming bookkeeping first — even when the user already
+    // pressed Stop (isReceiving=false), the row must not be reused by the
+    // next message, otherwise new chunks would append to the stale widget.
+    const bool wasReceiving = sd->isReceiving;
+    const QString leftoverContent = sd->streamingContent;
+    sd->streamingRow = -1;
+    sd->streamingContent.clear();
+    sd->isStreaming = false;
     sd->isReceiving = false;
+
+    if(!wasReceiving) return;
 
     m_sessionPopup->updateSessionStatus(sessionId, false);
 
     if(!error.isEmpty()){
-        if(sd->streamingWidget && !sd->streamingWidget->content().isEmpty()){
-            sd->streamingWidget->appendText(tr("\n[error: %1]").arg(error));
+        if(w && !leftoverContent.isEmpty()){
+            w->appendText(tr("\n[error: %1]").arg(error));
         }else{
-            if(sd->streamingWidget){
-                delete sd->streamingWidget;
-                sd->streamingWidget = nullptr;
+            // Remove empty streaming row if it exists
+            if(finishedRow >= 0){
+                page->messageModel()->removeMessage(finishedRow);
             }
             appendEvent(page, tr("Error: %1").arg(error));
         }
     }
-    sd->streamingWidget = nullptr;
 
     if(sessionId == m_currentSessionId){
         setSending(page, false);
     }
 
-    if(!sd->firstUserMessage.isEmpty()){
-        QString title = sd->firstUserMessage;
-        if(title.length() > 50){
-            title = title.left(50) + "...";
-        }
-        m_service->updateSessionTitle(sessionId, title);
-        QTimer::singleShot(500, this, [this](){
-            m_service->listSessions();
-        });
-    }
-
-    QMetaObject::invokeMethod(this, [this, page](){ scrollToBottom(page); }, Qt::QueuedConnection);
+    page->scrollToBottom();
 }
 
 void AIChatPane::onSessionStatusChanged(const QString &sessionId, const QString &status){
     auto *page = findPage(sessionId);
     if(!page) return;
 
-    int sdIdx = findSessionIndex(sessionId);
-    if(sdIdx < 0) return;
-    auto *sd = m_sessions.at(sdIdx);
+    if(findSessionIndex(sessionId) < 0) return;
 
     if(status == "busy"){
-        qDebug() << "[AIChatPane] Session busy:" << sessionId;
         m_sessionPopup->updateSessionStatus(sessionId, true);
     }else if(status == "idle"){
-        sd->isReceiving = false;
+        // isReceiving / streaming cleanup and send-button restore are handled
+        // by onStreamFinished, which is always emitted right after this event.
+        // Resetting isReceiving here would make onStreamFinished skip error
+        // display and stale-row cleanup.
         m_sessionPopup->updateSessionStatus(sessionId, false);
+    }
+}
 
-        if(sessionId == m_currentSessionId){
-            setSending(page, false);
-        }
-
-        if(!sd->firstUserMessage.isEmpty()){
-            QString title = sd->firstUserMessage;
-            if(title.length() > 50){
-                title = title.left(50) + "...";
-            }
-            m_service->updateSessionTitle(sessionId, title);
-            sd->firstUserMessage.clear();
-            QTimer::singleShot(500, this, [this](){
-                m_service->listSessions();
-            });
-        }
+void AIChatPane::onSessionTitleChanged(const QString &sessionId, const QString &title){
+    m_sessionPopup->updateSessionTitle(sessionId, title);
+    auto *page = findPage(sessionId);
+    if(page){
+        page->sessionTitle()->setText(title.isEmpty() ? tr("New Chat") : title);
     }
 }
 
@@ -707,7 +805,7 @@ void AIChatPane::updateAllModelCombos(const QList<OpenCodeModel> &models)
     for(auto *sd : m_sessions){
         QString selectedData = defaultData;
         if(!sd->modelProviderID.isEmpty() && !sd->modelID.isEmpty()){
-            selectedData = sd->modelProviderID + "/" + sd->modelID;
+            selectedData = sd->modelProviderID + "::" + sd->modelID;
         }
         sd->page->setModels(models, selectedData);
     }
@@ -750,43 +848,126 @@ void AIChatPane::onCompactionFinished(const QString &sessionId){
     m_service->loadSessionMessages(sessionId);
 }
 
+void AIChatPane::onConnectionChanged(bool connected)
+{
+    qDebug() << "[AIChatPane] Connection state:" << (connected ? "connected" : "disconnected");
+    if(connected){
+        // Server reconnected — reload sessions and models
+        m_service->listSessions();
+        if(!m_modelsLoaded){
+            m_service->listModels();
+        }
+    }
+}
+
 // ---- rendering ----
 
 void AIChatPane::renderUserMessage(SessionPageWidget *page, const QString &content){
-    auto widget = new ChatMessageWidget(ChatMessageWidget::User, content, page->messageScrollContents());
-    page->messageContainer()->insertWidget(page->messageContainer()->count() - 1, widget);
-    scrollToBottom(page);
+    page->addMessage(ChatMessageWidget::User, content);
+    page->scrollToBottom();
 }
 
 void AIChatPane::appendEvent(SessionPageWidget *page, const QString &text){
-    auto widget = new ChatMessageWidget(ChatMessageWidget::Event, text, page->messageScrollContents());
-    page->messageContainer()->insertWidget(page->messageContainer()->count() - 1, widget);
-    scrollToBottom(page);
+    page->addMessage(ChatMessageWidget::Event, text);
+    page->scrollToBottom();
 }
 
 void AIChatPane::clearMessages(SessionPageWidget *page){
-    auto layout = page->messageContainer();
-    QLayoutItem *item;
-    while((item = layout->takeAt(0)) != nullptr){
-        if(item->widget()){
-            delete item->widget();
-        }
-        delete item;
-    }
-    // re-add the bottom spacer so messages stay top-aligned
-    layout->addStretch(1);
-
+    page->clearMessages();
     for(auto *sd : m_sessions){
         if(sd->page == page){
-            sd->streamingWidget = nullptr;
+            sd->streamingRow = -1;
+            sd->streamingContent.clear();
+            sd->isStreaming = false;
             break;
         }
     }
 }
 
 void AIChatPane::scrollToBottom(SessionPageWidget *page){
-    QScrollBar *sb = page->messageScrollArea()->verticalScrollBar();
-    if(sb) sb->setValue(sb->maximum());
+    page->scrollToBottom();
+}
+
+ChatMessageWidget* AIChatPane::ensureStreamingWidget(SessionData *sd)
+{
+    SessionPageWidget *page = sd->page;
+    auto *view = page->messageListView();
+    auto *model = page->messageModel();
+
+    // Create the streaming row if it doesn't exist yet
+    if(sd->streamingRow < 0){
+        sd->isStreaming = true;
+        model->addMessage(ChatMessageWidget::Assistant, sd->streamingContent);
+        sd->streamingRow = model->messageCount() - 1;
+
+        // Force immediate widget creation for the new streaming row
+        // (the deferred timer might not have fired yet)
+        view->updateVisibleWidgets();
+
+        // Create throttled scroll timer (once per session)
+        if(!sd->scrollTimer){
+            sd->scrollTimer = new QTimer(this);
+            sd->scrollTimer->setInterval(300);
+            sd->scrollTimer->setSingleShot(true);
+            SessionPageWidget *p = page;
+            connect(sd->scrollTimer, &QTimer::timeout, this, [this, p](){
+                p->messageListView()->scrollToBottomImmediate();
+            });
+        }
+    }
+
+    // Try to get the widget from the visible viewport
+    ChatMessageWidget *w = view->widgetForMessage(sd->streamingRow);
+    if(w){
+        w->setStreaming(true);
+    }
+    return w;  // may be nullptr if row is off-screen
+}
+
+void AIChatPane::stopStreaming(const QString &sessionId)
+{
+    auto *page = findPage(sessionId);
+    if(!page) return;
+
+    int sdIdx = findSessionIndex(sessionId);
+    if(sdIdx < 0) return;
+    auto *sd = m_sessions.at(sdIdx);
+
+    // Stop spinner immediately — do not wait for the server's idle event,
+    // and make sure the row is never reused by the next message.
+    ChatMessageWidget *w = (sd->streamingRow >= 0)
+        ? page->messageListView()->widgetForMessage(sd->streamingRow)
+        : nullptr;
+    if(w) w->setStreaming(false);
+    if(sd->scrollTimer) sd->scrollTimer->stop();
+
+    sd->streamingRow = -1;
+    sd->streamingContent.clear();
+    sd->isStreaming = false;
+    sd->isReceiving = false;
+
+    m_sessionPopup->updateSessionStatus(sessionId, false);
+    setSending(page, false);
+}
+
+void AIChatPane::throttledScrollToBottom(SessionData *sd)
+{
+    if(!sd->scrollTimer || !sd->page) return;
+    if(!sd->scrollTimer->isActive()){
+        sd->scrollTimer->start();
+    }
+}
+
+void AIChatPane::onWidgetCreated(SessionPageWidget *page, int row, ChatMessageWidget *widget)
+{
+    Q_UNUSED(page);
+    // If this is the active streaming row, restore streaming indicator
+    for(auto *sd : m_sessions){
+        if(sd->page == page && sd->streamingRow == row && sd->isStreaming){
+            widget->setStreaming(true);
+            break;
+        }
+    }
 }
 
 // ---- UI state ----
@@ -812,10 +993,7 @@ void AIChatPane::setSending(SessionPageWidget *page, bool sending){
         page->sendBtn()->setToolTip(tr("Send (Ctrl+Enter)"));
     }
 
-    if(page == findPage(m_currentSessionId)){
-        ui->actionSend->setEnabled(!sending);
-        ui->actionStop->setEnabled(sending);
-    }
+
 }
 
 // ---- model preference persistence ----
@@ -867,6 +1045,11 @@ void AIChatPane::notifyWorkspacesChanged()
     }
 
     qDebug() << "[AIChatPane] workspaces changed, notifying opencode:" << paths;
+
+    // mark all sessions dirty so next message injects updated directory context
+    for (auto *sd : m_sessions) {
+        sd->workspaceDirty = true;
+    }
 }
 
 // ---- workspace helper ----
@@ -879,6 +1062,36 @@ QString AIChatPane::primaryWorkspacePath() const
     if (!root || root->childrenCount() == 0) return {};
     auto *first = root->childAt(0);
     return first ? first->path() : QString();
+}
+
+QStringList AIChatPane::allWorkspacePaths() const
+{
+    QStringList paths;
+    auto *model = ady::ResourceManagerModel::getInstance();
+    if (!model) return paths;
+    auto *root = model->rootItem();
+    if (!root) return paths;
+    for (int i = 0; i < root->childrenCount(); ++i) {
+        auto *item = root->childAt(i);
+        if (item && !item->path().isEmpty())
+            paths << item->path();
+    }
+    return paths;
+}
+
+QString AIChatPane::buildWorkspaceContext() const
+{
+    QStringList paths = allWorkspacePaths();
+    // Filter out directories that no longer exist
+    QStringList validPaths;
+    for (const QString &p : paths) {
+        if (QDir(p).exists())
+            validPaths << p;
+    }
+    if (validPaths.isEmpty()) return {};
+    if (validPaths.size() == 1)
+        return "[Current working directory: " + validPaths.first() + "]\n";
+    return "[Current working directories:\n" + validPaths.join("\n") + "]\n";
 }
 
 // ---- static factory methods ----

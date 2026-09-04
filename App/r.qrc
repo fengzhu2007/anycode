@@ -140,5 +140,7 @@
         <file>Resource/icons/ImageStack_16x.svg</file>
         <file>Resource/icons/EnableDiagnostics_16x.svg</file>
         <file>Resource/icons/ChildWindowTemplate_16x.svg</file>
+        <file>Resource/icons/close.svg</file>
+        <file>Resource/icons/close_hover.svg</file>
     </qresource>
 </RCC>

@@ -28,6 +28,16 @@ AIOptionWidget::AIOptionWidget(QWidget *parent)
     ui->triggerPolicy->view()->setItemDelegate(new ListItemDelegate(22,ui->triggerPolicy));
 
     connect(ui->enableAIAssiant,&QCheckBox::clicked,this,&AIOptionWidget::onEnabled);
+    connect(ui->name,QOverload<int>::of(&QComboBox::currentIndexChanged),this,[this](int index){
+        auto model = static_cast<SelectModel<QString>*>(ui->name->model());
+        QString server = model->value(index);
+        // Update model list based on selected server
+        auto modelModel = new SelectModel<QString>(ui->model);
+        modelModel->setDataSource(AISettings::models(server));
+        ui->model->setModel(modelModel);
+        ui->model->view()->setItemDelegate(new ListItemDelegate(22,ui->model));
+        updateApiKeyVisibility();
+    });
 
     this->initView();
 }
@@ -85,6 +95,12 @@ void AIOptionWidget::apply(int *state){
         changed = true;
     }
 
+    auto geminiApiKey = ui->geminiApiKey->text();
+    if(setting.m_geminiApiKey!=geminiApiKey){
+        setting.m_geminiApiKey = geminiApiKey;
+        changed = true;
+    }
+
     auto timeout = ui->timeout->value();
     if(setting.m_triggerTimeout!=timeout){
         setting.m_triggerTimeout = timeout;
@@ -120,6 +136,7 @@ void AIOptionWidget::initView(){
     }
 
     ui->apiKey->setText(setting.m_apiKey);
+    ui->geminiApiKey->setText(setting.m_geminiApiKey);
     ui->enableAIAssiant->setChecked(setting.m_enable);
     ui->timeout->setValue(setting.m_triggerTimeout);
 
@@ -140,7 +157,13 @@ void AIOptionWidget::onEnabled(bool checked){
     ui->model->setEnabled(checked);
     ui->triggerPolicy->setEnabled(checked);
     ui->timeout->setEnabled(checked);
-    ui->apiKey->setEnabled(checked);
+    updateApiKeyVisibility();
+}
+
+void AIOptionWidget::updateApiKeyVisibility(){
+    bool enabled = ui->enableAIAssiant->isChecked();
+    ui->apiKey->setEnabled(enabled);
+    // geminiApiKey is always enabled — independent of AI Assistant toggle
 }
 
 }

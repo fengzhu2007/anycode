@@ -28,15 +28,19 @@ public:
     explicit SessionListItemWidget(const QString &title, const QString &sessionId, QWidget *parent = nullptr);
 
     QString sessionId() const { return m_sessionId; }
+    void setSessionId(const QString &id) { m_sessionId = id; }
     void setTitle(const QString &title);
     void setStatusIcon(bool busy);
+    void setCurrent(bool current);
 
 signals:
     void clicked(const QString &sessionId);
     void closeClicked(const QString &sessionId);
 
 protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
 private:
     void handleClick();
@@ -103,12 +107,16 @@ signals:
 
 protected:
     void focusOutEvent(QFocusEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
 private:
     QScrollArea *m_scrollArea;
     QWidget *m_container;
     QVBoxLayout *m_itemsLayout;
     QList<SessionListItemWidget*> m_items;
+    QList<OpenCodeSession> m_pendingSessions; // data stored by refresh(), widgets created in showAt()
+    QString m_currentSessionId;
 };
 
 }

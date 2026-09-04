@@ -1,10 +1,13 @@
 ﻿#include "session_page_widget.h"
 #include "ui_session_page_widget.h"
+#include "message_list_view.h"
+#include "message_model.h"
+#include "chat_message_widget.h"
 #include "chat_service.h"
 #include "core/theme.h"
 #include <QKeyEvent>
 #include <QTextCursor>
-#include <QDebug>
+#include <QVBoxLayout>
 
 namespace ady {
 
@@ -14,12 +17,20 @@ SessionPageWidget::SessionPageWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->messageContainer->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    ui->messageContainer->setAlignment(Qt::AlignTop);
-    ui->messageScrollContents->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    // Create virtualized message list (replaces the old QScrollArea + QVBoxLayout)
+    m_messageModel = new MessageModel(this);
+    m_messageListView = new MessageListView(this);
+    m_messageListView->setMessageModel(m_messageModel);
 
-    // Enter 
+    // Place MessageListView inside the messageAreaWidget container
+    auto *msgLayout = new QVBoxLayout(ui->messageAreaWidget);
+    msgLayout->setContentsMargins(0, 0, 0, 0);
+    msgLayout->setSpacing(0);
+    msgLayout->addWidget(m_messageListView);
+
+    // Enter key handling for message input
     ui->messageInput->installEventFilter(this);
+    ui->sessionTitle->setStyleSheet("QLabel{padding:4px}");
 }
 
 SessionPageWidget::~SessionPageWidget()
@@ -27,12 +38,27 @@ SessionPageWidget::~SessionPageWidget()
     delete ui;
 }
 
-QScrollArea* SessionPageWidget::messageScrollArea() const { return ui->messageScrollArea; }
-QWidget* SessionPageWidget::messageScrollContents() const { return ui->messageScrollContents; }
-QVBoxLayout* SessionPageWidget::messageContainer() const { return ui->messageContainer; }
+MessageListView* SessionPageWidget::messageListView() const { return m_messageListView; }
+MessageModel* SessionPageWidget::messageModel() const { return m_messageModel; }
 QComboBox* SessionPageWidget::modelCombo() const { return ui->modelCombo; }
 QTextEdit* SessionPageWidget::messageInput() const { return ui->messageInput; }
 QToolButton* SessionPageWidget::sendBtn() const { return ui->sendBtn; }
+QLabel* SessionPageWidget::sessionTitle() const { return ui->sessionTitle; }
+
+void SessionPageWidget::addMessage(ChatMessageWidget::Type type, const QString &content)
+{
+    m_messageModel->addMessage(type, content);
+}
+
+void SessionPageWidget::clearMessages()
+{
+    m_messageModel->clearMessages();
+}
+
+void SessionPageWidget::scrollToBottom()
+{
+    m_messageListView->scrollToBottomDeferred();
+}
 
 void SessionPageWidget::appendInputText(const QString &text)
 {
@@ -48,10 +74,9 @@ void SessionPageWidget::setModels(const QList<OpenCodeModel> &models, const QStr
 
     for(const auto &m : models){
         QString displayName = m.name.isEmpty() ? m.modelID : m.name;
-        QString data = m.providerID + "/" + m.modelID;
+        QString data = m.providerID + "::" + m.modelID;
         ui->modelCombo->addItem(displayName, data);
     }
-    qDebug()<<"setModels"<<selectedData;
 
     if(!selectedData.isEmpty()){
         int idx = ui->modelCombo->findData(selectedData);

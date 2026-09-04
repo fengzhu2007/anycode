@@ -399,6 +399,10 @@ add_library(App SHARED
         panes/ai_chat/chat_message_widget.h panes/ai_chat/chat_message_widget.cpp panes/ai_chat/chat_message_widget.ui
         panes/ai_chat/session_page_widget.h panes/ai_chat/session_page_widget.cpp panes/ai_chat/session_page_widget.ui
         panes/ai_chat/session_list_popup.h panes/ai_chat/session_list_popup.cpp
+        panes/ai_chat/session_list_popup_v2.h panes/ai_chat/session_list_popup_v2.cpp
+        panes/ai_chat/message_model.h panes/ai_chat/message_model.cpp
+        panes/ai_chat/message_list_view.h panes/ai_chat/message_list_view.cpp
+        panes/ai_chat/message_delegate.h panes/ai_chat/message_delegate.cpp
         tools/image_clip/cut_tab.h tools/image_clip/cut_tab.cpp tools/image_clip/cut_tab.ui
         tools/image_clip/workflow_tab.h tools/image_clip/workflow_tab.cpp tools/image_clip/workflow_tab.ui
         tools/image_clip/workflow_item.h tools/image_clip/workflow_item.cpp tools/image_clip/workflow_item.ui

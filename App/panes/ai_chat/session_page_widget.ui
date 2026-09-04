@@ -16,7 +16,7 @@
     <height>16777215</height>
    </size>
   </property>
-  <layout class="QVBoxLayout" name="mainLayout" stretch="1,0">
+  <layout class="QVBoxLayout" name="mainLayout" stretch="0,1,0">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -33,50 +33,20 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QScrollArea" name="messageScrollArea">
-     <property name="widgetResizable">
-      <bool>true</bool>
+    <widget class="QLabel" name="sessionTitle">
+     <property name="text">
+      <string/>
      </property>
-     <widget class="QWidget" name="messageScrollContents">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>437</width>
-        <height>230</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" name="messageContainer">
-       <property name="spacing">
-        <number>6</number>
-       </property>
-       <property name="leftMargin">
-        <number>10</number>
-       </property>
-       <property name="topMargin">
-        <number>10</number>
-       </property>
-       <property name="rightMargin">
-        <number>10</number>
-       </property>
-       <property name="bottomMargin">
-        <number>10</number>
-       </property>
-       <item>
-        <spacer name="messageBottomSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>0</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="messageAreaWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
     </widget>
    </item>
    <item>

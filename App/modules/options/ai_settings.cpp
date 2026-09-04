@@ -9,6 +9,7 @@ static const char triggerTimeoutKey[] = "TriggerTimeoutKey";
 static const char nameKey[] = "Name";
 static const char modelKey[] = "Model";
 static const char apiKeyKey[] = "APIKey";
+static const char geminiApiKeyKey[] = "GeminiAPIKey";
 
 namespace ady{
 
@@ -37,6 +38,7 @@ QJsonObject AISettings::toJson(){
         {nameKey,m_name},
         {modelKey,m_model},
         {apiKeyKey,m_apiKey},
+        {geminiApiKeyKey,m_geminiApiKey},
     };
 }
 
@@ -59,6 +61,9 @@ void AISettings::fromJson(const QJsonObject& data){
     if(data.contains(apiKeyKey)){
         m_apiKey = data.find(apiKeyKey)->toString();
     }
+    if(data.contains(geminiApiKeyKey)){
+        m_geminiApiKey = data.find(geminiApiKeyKey)->toString();
+    }
 }
 
 QVariantMap AISettings::toMap() const{
@@ -68,7 +73,8 @@ QVariantMap AISettings::toMap() const{
         {triggerTimeoutKey,m_triggerTimeout},
         {nameKey,m_name},
         {modelKey,m_model},
-        {apiKeyKey,m_apiKey}
+        {apiKeyKey,m_apiKey},
+        {geminiApiKeyKey,m_geminiApiKey}
     };
 }
 
@@ -91,6 +97,9 @@ void AISettings::fromMap(const QVariantMap &data){
     if(data.contains(apiKeyKey)){
         m_apiKey = data.find(apiKeyKey)->toString();
     }
+    if(data.contains(geminiApiKeyKey)){
+        m_geminiApiKey = data.find(geminiApiKeyKey)->toString();
+    }
 }
 
 bool AISettings::equals(const AISettings &ts) const{
@@ -99,7 +108,8 @@ bool AISettings::equals(const AISettings &ts) const{
            && m_triggerTimeout == ts.m_triggerTimeout
            && m_name == ts.m_name
            && m_model == ts.m_model
-        && m_apiKey == ts.m_apiKey;
+        && m_apiKey == ts.m_apiKey
+        && m_geminiApiKey == ts.m_geminiApiKey;
 }
 
 QString AISettings::name(){
@@ -109,10 +119,17 @@ QString AISettings::name(){
 QList<QPair<QString,QString>> AISettings::servers(){
     return {
         {"dashscope",QObject::tr("Aliyun Dashscope")},
+        {"gemini",QObject::tr("Google Gemini")},
     };
 }
 
 QList<QPair<QString,QString>> AISettings::models(const QString& server){
+    if(server == "gemini"){
+        return {
+            {"gemini-2.5-flash","gemini-2.5-flash"},
+            {"gemini-2.5-pro","gemini-2.5-pro"},
+        };
+    }
     return {
         {"qwen2.5-coder-32b-instruct","qwen2.5-coder-32b-instruct"},
     };

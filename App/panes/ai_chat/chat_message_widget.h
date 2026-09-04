@@ -5,6 +5,7 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <QStyleOption>
+#include <QTimer>
 
 namespace Ui {
 class ChatMessageWidget;
@@ -40,20 +41,55 @@ public:
     void setContent(const QString &text);
     void appendText(const QString &delta);
 
+    /**
+     * Set streaming state: shows animated loading indicator instead of timestamp.
+     * Call setStreaming(true) when streaming starts, setStreaming(false) when done.
+     */
+    void setStreaming(bool streaming);
+
+    /**
+     * Append thinking content from SSE event (separate from text stream).
+     * Content will be rendered as a collapsible block.
+     */
+    void appendThink(const QString &content);
+
+    /**
+     * Append a tool use/result block to the message.
+     * @param toolName  display name of the tool
+     * @param body      tool input or output content
+     * @param isResult  true for tool_result, false for tool_use
+     */
+    void appendToolBlock(const QString &toolName, const QString &body, bool isResult = false);
+
     static QString roleOf(Type type);
     static Type typeOf(const QString &role);
 
+    // QWidget overrides — public so MessageDelegate can query the
+    // correct row height using the viewport width.
+    QSize sizeHint() const override;
+    bool hasHeightForWidth() const override;
+    int heightForWidth(int w) const override;
+
+signals:
+    /** Emitted after doUpdate() refreshes the rendered content.
+     *  MessageListView uses this to trigger row-height recalculation. */
+    void contentUpdated();
+
 private slots:
     void onToggleThink();
+    void onLinkActivated(const QString &link);
 
 private:
     void paintEvent(QPaintEvent *event) override;
     void applyStyle();
-    QString formatContent(const QString &text) const;
+    QString formatContent(const QString &text);
     QString extractAndFormatThinkContent(const QString &text, QString &cleaned) const;
-    QString formatCodeBlock(const QString &code) const;
+    QString formatCodeBlock(const QString &code, int &outIndex);
+    QString formatThinkBlock(const QString &thinkContent) const;
     void scheduleUpdate();
     void doUpdate();
+    void updateSpinner();
+    void copyCode(int index) const;
 
 private:
     Ui::ChatMessageWidget *ui;
@@ -62,6 +98,13 @@ private:
     QString m_thinkContent;
     bool m_thinkExpanded = false;
     bool m_updateScheduled = false;
+    bool m_streaming = false;
+    bool m_thinkFromEvent = false;   // thinking arrived via SSE, skip tag extraction
+    static int s_spinnerFrame;       // shared animation frame counter
+    QTimer *m_spinnerTimer = nullptr; // drives spinner animation during streaming
+    QStringList m_toolBlocks;        // pending tool block HTML (inserted via markers)
+    QStringList m_codeBlocks;        // raw code text for clipboard copy
+    QStringList m_codeHtml;          // code block HTML (inserted via CODE markers)
 };
 
 }

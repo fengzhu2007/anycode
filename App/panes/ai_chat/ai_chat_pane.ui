@@ -42,6 +42,7 @@
      </property>
      <addaction name="actionNewChat"/>
      <addaction name="actionDeleteChat"/>
+     <addaction name="actionDelete_All_Chat"/>
      <addaction name="actionSessions"/>
      <addaction name="separator"/>
      <addaction name="actionClear"/>
@@ -71,7 +72,7 @@
   <action name="actionDeleteChat">
    <property name="icon">
     <iconset resource="../../r.qrc">
-     <normaloff>:/Resource/icons/Trash_16x.svg</normaloff>:/Resource/icons/Trash_16x.svg</iconset>
+     <normaloff>:/Resource/icons/Cancel_16x.svg</normaloff>:/Resource/icons/Cancel_16x.svg</iconset>
    </property>
    <property name="text">
     <string>Delete</string>
@@ -113,31 +114,6 @@
     <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="actionSend">
-   <property name="text">
-    <string>Send</string>
-   </property>
-   <property name="toolTip">
-    <string>Send Message (Ctrl+Enter)</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Return</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::NoRole</enum>
-   </property>
-  </action>
-  <action name="actionStop">
-   <property name="text">
-    <string>Stop</string>
-   </property>
-   <property name="toolTip">
-    <string>Stop Current Request</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::NoRole</enum>
-   </property>
-  </action>
   <action name="actionRefreshModels">
    <property name="icon">
     <iconset resource="../../r.qrc">
@@ -153,16 +129,13 @@
     <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="actionCompact">
+  <action name="actionDelete_All_Chat">
    <property name="icon">
     <iconset resource="../../r.qrc">
-     <normaloff>:/Resource/icons/CollapseAll_16x.svg</normaloff>:/Resource/icons/CollapseAll_16x.svg</iconset>
+     <normaloff>:/Resource/icons/DeleteAllRows_16x.svg</normaloff>:/Resource/icons/DeleteAllRows_16x.svg</iconset>
    </property>
    <property name="text">
-    <string>Compact</string>
-   </property>
-   <property name="toolTip">
-    <string>Compact Session (compress conversation history)</string>
+    <string>Delete All Chat</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

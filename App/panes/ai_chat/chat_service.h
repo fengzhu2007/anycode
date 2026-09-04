@@ -10,6 +10,7 @@
 #include <QJsonArray>
 #include <QFuture>
 #include <QMap>
+#include <QTimer>
 #include <curl/curl.h>
 
 namespace ady{
@@ -81,10 +82,10 @@ public:
     QString currentSessionId() const { return m_currentSessionId; }
 
     void listSessions();                    // GET /session
-    void createSession(const QString &title = "", const QString &directory = "");  // POST /session
+    void createSession(const QString &title = "", const QString &directory = "", const QString &providerID = QString(), const QString &modelID = "");  // POST /session
     void deleteSession(const QString &sessionId);   // DELETE /session/{id}
     void listModels();                      // GET /api/model
-    void sendMessage(const QString &sessionId, const QString &content, const QString &providerID = QString(), const QString &modelID = QString());  // POST /session/{id}/message
+    bool sendMessage(const QString &sessionId, const QString &content, const QString &providerID = QString(), const QString &modelID = QString());  // POST /session/{id}/message (false = request dropped by in-flight lock)
     void loadSessionMessages(const QString &sessionId, int limit = 20);  // GET /session/{id}/message
     void abortSession(const QString &sessionId);  // POST /session/{id}/abort
     void updateSessionTitle(const QString &sessionId, const QString &title);  // PATCH /session/{id}
@@ -109,18 +110,30 @@ signals:
 
     void streamStarted(const QString &sessionId);
     void streamChunk(const QString &sessionId, const QString &delta);
+    void streamThinking(const QString &sessionId, const QString &content);
+    void streamToolUse(const QString &sessionId, const QString &toolName, const QString &input);
+    void streamToolResult(const QString &sessionId, const QString &toolName, const QString &output);
     void streamFinished(const QString &sessionId, const QString &error);
     void sessionStatusChanged(const QString &sessionId, const QString &status);
+    void sessionTitleChanged(const QString &sessionId, const QString &title);
+    void sessionDiffChanged(const QString &sessionId, const QString &summary);
 
     void compactionStarted(const QString &sessionId);
     void compactionFinished(const QString &sessionId);
     void autoCompactionTriggered(const QString &sessionId);
+
+    void connectionChanged(bool connected);
+    void eventStreamEnded(bool wasConnected);  // internal: event stream thread ended
 
 private:
     void connectEventStream();
     void disconnectEventStream();
 
     void registerMcpServer();
+
+private slots:
+    void onEventStreamEnded(bool wasConnected);
+    void scheduleReconnect();
 
     // curl callbacks
     static size_t writeCallback(void *ptr, size_t size, size_t nmemb, void *userdata);
@@ -156,6 +169,10 @@ private:
 
     QMap<QString, qint64> m_sessionContentSizes;  // sessionId → accumulated bytes
     static const qint64 COMPACT_THRESHOLD = 200 * 1024;  // 200KB
+
+    bool m_connected = false;
+    QTimer *m_reconnectTimer = nullptr;
+    int m_reconnectRetry = 0;
 };
 
 }

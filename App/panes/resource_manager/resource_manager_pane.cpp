@@ -808,7 +808,7 @@ void ResourceManagerPane::onActionTriggered(){
         if(type==ResourceManagerModelItem::File){
             AiChatData data{"FILE",path};
             Publisher::getInstance()->post(Type::M_ADD_TO_CHAT,&data);
-        }else if(type==ResourceManagerModelItem::Folder){
+        }else if(type==ResourceManagerModelItem::Folder || type==ResourceManagerModelItem::Project){
             AiChatData data{"FOLDER",path};
             Publisher::getInstance()->post(Type::M_ADD_TO_CHAT,&data);
         }
@@ -818,7 +818,7 @@ void ResourceManagerPane::onActionTriggered(){
         if(type==ResourceManagerModelItem::File){
             AiChatData data{"FILE",path};
             Publisher::getInstance()->post(Type::M_ADD_TO_NEW_CHAT,&data);
-        }else if(type==ResourceManagerModelItem::Folder){
+        }else if(type==ResourceManagerModelItem::Folder || type==ResourceManagerModelItem::Project){
             AiChatData data{"FOLDER",path};
             Publisher::getInstance()->post(Type::M_ADD_TO_NEW_CHAT,&data);
         }

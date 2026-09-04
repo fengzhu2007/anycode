@@ -3,9 +3,9 @@
 
 #include <QWidget>
 #include <QList>
+#include <QLabel>
+#include "chat_message_widget.h"
 
-class QScrollArea;
-class QVBoxLayout;
 class QComboBox;
 class QTextEdit;
 class QToolButton;
@@ -17,6 +17,8 @@ class SessionPageWidget;
 namespace ady {
 
 struct OpenCodeModel;
+class MessageListView;
+class MessageModel;
 
 /**
  * SessionPageWidget - 单个会话的聊天页面
@@ -31,15 +33,24 @@ public:
     explicit SessionPageWidget(QWidget *parent = nullptr);
     ~SessionPageWidget();
 
-    QScrollArea* messageScrollArea() const;
-    QWidget* messageScrollContents() const;
-    QVBoxLayout* messageContainer() const;
+    MessageListView* messageListView() const;
+    MessageModel* messageModel() const;
     QComboBox* modelCombo() const;
     QTextEdit* messageInput() const;
     QToolButton* sendBtn() const;
+    QLabel* sessionTitle() const;
 
     void appendInputText(const QString &text);
     void setModels(const QList<OpenCodeModel> &models, const QString &selectedData);
+
+    /** Convenience: add a message to the model and auto-scroll. */
+    void addMessage(ChatMessageWidget::Type type, const QString &content);
+
+    /** Convenience: clear all messages. */
+    void clearMessages();
+
+    /** Convenience: scroll to bottom (deferred). */
+    void scrollToBottom();
 
 signals:
     void enterPressed();
@@ -50,6 +61,8 @@ protected:
 
 private:
     Ui::SessionPageWidget *ui;
+    MessageListView *m_messageListView = nullptr;
+    MessageModel *m_messageModel = nullptr;
 };
 
 }

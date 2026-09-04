@@ -2,6 +2,9 @@
 #include "mcp/mcp_handler.h"
 #include "panes/resource_manager/resource_manager_model.h"
 #include "panes/resource_manager/resource_manager_model_item.h"
+#include "modules/options/ai_settings.h"
+#include "modules/options/options_settings.h"
+#include <llmproxy.h>
 #include <QDebug>
 #include <QtConcurrent>
 
@@ -23,7 +26,12 @@ GatewayHttpServer &GatewayHttpServer::instance()
 
 void GatewayHttpServer::start()
 {
-    start(GatewayConfig());
+    //
+    auto config = GatewayConfig();
+#ifndef Q_DEBUG
+    config.port = 3459;
+#endif
+    start(config);
 }
 
 void GatewayHttpServer::start(const GatewayConfig &config)
@@ -62,11 +70,36 @@ void GatewayHttpServer::start(const GatewayConfig &config)
     }
     m_mcpHandler->registerRoutes();
 
-    qDebug() << "[GatewayHttpServer] Starting gateway async..."
-             << "host=" << config.host.c_str() << "port=" << config.port;
+    // Register LLM proxy resolvers for custom models
+    auto mutableConfig = config;
 
-    auto future = QtConcurrent::run([config]() -> bool {
-        return Gateway::instance().start(config);
+    // Reset proxy shutdown flag (in case of restart after previous stop)
+    LlmProxy::resetShutdown();
+
+    // gateway-gemini-2.5 → Google Gemini (OpenAI-compatible endpoint)
+    mutableConfig.models.push_back({"gateway-gemini-3.5-flash", "google"});
+    LlmProxy::registerResolver("gateway-gemini-3.5-flash",
+        [](const std::string &/*model*/, const json &requestBody, RouteConfig &out) -> bool {
+            // Read API key from AISettings
+            auto setting = ady::OptionsSettings::getInstance()->aiSettings();
+            QString key = setting.m_geminiApiKey;
+            if (key.isEmpty()) {
+                qWarning() << "[GatewayHttpServer] Gemini API KEY not set in AI settings";
+                return false;
+            }
+            out.url    = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+            out.apiKey = key.toStdString();
+            // Map gateway model name to actual Gemini model
+            out.body   = requestBody;
+            out.body["model"] = "gemini-3.5-flash";
+            return true;
+        });
+
+    qDebug() << "[GatewayHttpServer] Starting gateway async..."
+             << "host=" << mutableConfig.host.c_str() << "port=" << mutableConfig.port;
+
+    auto future = QtConcurrent::run([mutableConfig]() -> bool {
+        return Gateway::instance().start(mutableConfig);
     });
 
     if (!m_startWatcher) {

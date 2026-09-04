@@ -42,11 +42,15 @@ public:
         QString sessionId;
         SessionPageWidget* page = nullptr;
         bool isReceiving = false;
-        ChatMessageWidget* streamingWidget = nullptr;
         QString pendingMessage;
         QString firstUserMessage;
         QString modelProviderID;
         QString modelID;
+        bool workspaceDirty = true;   // inject directory context on next message
+        QTimer *scrollTimer = nullptr; // throttled scroll-to-bottom during streaming
+        int streamingRow = -1;         // model row of the streaming message (-1 = none)
+        QString streamingContent;      // accumulated streaming text (survives virtualization)
+        bool isStreaming = false;       // whether streaming is active (survives virtualization)
     };
 
 public slots:
@@ -57,13 +61,18 @@ public slots:
     void onSessionDeleted(const QString &sessionId, const QString &error);
     void onStreamStarted(const QString &sessionId);
     void onStreamChunk(const QString &sessionId, const QString &delta);
+    void onStreamThinking(const QString &sessionId, const QString &content);
+    void onStreamToolUse(const QString &sessionId, const QString &toolName, const QString &input);
+    void onStreamToolResult(const QString &sessionId, const QString &toolName, const QString &output);
     void onStreamFinished(const QString &sessionId, const QString &error);
     void onSessionStatusChanged(const QString &sessionId, const QString &status);
+    void onSessionTitleChanged(const QString &sessionId, const QString &title);
     void onModelsReceived(const QList<OpenCodeModel> &models, const QString &error);
     void onMessagesReceived(const QString &sessionId, const QList<OpenCodeMessage> &messages, const QString &error);
     void onCompactClicked();
     void onCompactionStarted(const QString &sessionId);
     void onCompactionFinished(const QString &sessionId);
+    void onConnectionChanged(bool connected);
 
 private:
     explicit AIChatPane(QWidget *parent = nullptr);
@@ -76,6 +85,10 @@ private:
 
     void switchToSession(const QString &sessionId);
     void refreshSessionPopup();
+    ChatMessageWidget* ensureStreamingWidget(SessionData *sd);
+    void stopStreaming(const QString &sessionId);
+    void throttledScrollToBottom(SessionData *sd);
+    void onWidgetCreated(SessionPageWidget *page, int row, ChatMessageWidget *widget);
 
     // ---- model combo (all pages) ----
     void updateAllModelCombos(const QList<OpenCodeModel> &models);
@@ -96,6 +109,8 @@ private:
 
     // ---- workspace ----
     QString primaryWorkspacePath() const;
+    QStringList allWorkspacePaths() const;
+    QString buildWorkspaceContext() const;   // directory context prefix for messages
     void notifyWorkspacesChanged();
 
 private:
@@ -109,6 +124,8 @@ private:
     SessionListPopup *m_sessionPopup = nullptr;
 
     QTimer *m_workspaceNotifyTimer = nullptr;
+    QTimer *m_retryLoadTimer = nullptr;     // retry listSessions on connection failure
+    QStringList m_pendingDeleteIds;          // session IDs queued for deletion
     static AIChatPane* instance;
 
 public:

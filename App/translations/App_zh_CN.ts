@@ -9,84 +9,88 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="71"/>
-        <source>Model:</source>
-        <translation type="unfinished">模型：</translation>
-    </message>
-    <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="84"/>
-        <source>Select model from OpenCode server</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="276"/>
-        <source>Input message... (Ctrl+Enter to send)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="295"/>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="354"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="118"/>
         <source>Send</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="313"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="62"/>
         <source>New Chat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="316"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="65"/>
         <source>New Chat Session</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="328"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="77"/>
         <source>Delete</source>
         <translation type="unfinished">删除</translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="331"/>
-        <source>Delete Selected Chat</source>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="80"/>
+        <source>Delete Current Chat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="343"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="92"/>
+        <source>Sessions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="95"/>
+        <source>Show Session List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="107"/>
         <source>Clear</source>
         <translation type="unfinished">清除</translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="346"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="110"/>
         <source>Clear Current Chat Messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="357"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="121"/>
         <source>Send Message (Ctrl+Enter)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="360"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="124"/>
         <source>Ctrl+Return</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="368"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="132"/>
         <source>Stop</source>
         <translation type="unfinished">停止</translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="371"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="135"/>
         <source>Stop Current Request</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="383"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="147"/>
         <source>Refresh Models</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="386"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="150"/>
         <source>Refresh Available Models</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="162"/>
+        <source>Compact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/ai_chat_pane.ui" line="165"/>
+        <source>Compact Session (compress conversation history)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -215,11 +219,6 @@
     <message>
         <location filename="../panes/ai_chat/chat_message_widget.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../panes/ai_chat/chat_message_widget.ui" line="59"/>
-        <source>Role</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2033,6 +2032,11 @@ Please enter a new folder name.</source>
         <source>Remove</source>
         <translation>移除</translation>
     </message>
+    <message>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="1014"/>
+        <source>Files modified (%1): %2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ReplaceAllProgressDialog</name>
@@ -2478,6 +2482,24 @@ Please enter a new folder name.</source>
     </message>
 </context>
 <context>
+    <name>SessionPageWidget</name>
+    <message>
+        <location filename="../panes/ai_chat/session_page_widget.ui" line="87"/>
+        <source>Input message... (Enter to send, Alt+Enter for newline)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/session_page_widget.ui" line="117"/>
+        <source>Select model from OpenCode server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/session_page_widget.ui" line="137"/>
+        <source>...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>SiteQuickManagerDialog</name>
     <message>
         <location filename="../panes/server_manage/site_quick_manager_dialog.ui" line="14"/>
@@ -2854,39 +2876,71 @@ Please enter a new folder name.</source>
 <context>
     <name>ady::AIChatPane</name>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="46"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="55"/>
         <source>AI Chat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="277"/>
-        <source>Receiving...</source>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="132"/>
+        <source>Session exceeds 200KB, auto-compacting...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="298"/>
-        <source>Request aborted</source>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="370"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="626"/>
+        <source>Previous request is still in progress, please retry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="302"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="450"/>
+        <source>Switched to: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="538"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="768"/>
+        <source>New Chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="730"/>
         <source>
-[disconnected]</source>
+[error: %1]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="319"/>
-        <source>Load models failed: %1</source>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="736"/>
+        <source>Error: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="345"/>
-        <source>Models loaded (%1), using: %2</source>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="812"/>
+        <source>No session selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="353"/>
-        <source>Switched to model: %1</source>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="816"/>
+        <source>Cannot compact while receiving</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="820"/>
+        <source>Compacting conversation...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="833"/>
+        <source>Conversation compacted successfully</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="976"/>
+        <source>Stop</source>
+        <translation type="unfinished">停止</translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="979"/>
+        <source>Send (Ctrl+Enter)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2975,50 +3029,45 @@ Please enter a new folder name.</source>
 <context>
     <name>ady::ChatMessageWidget</name>
     <message>
-        <location filename="../panes/ai_chat/chat_message_widget.cpp" line="81"/>
-        <source>You</source>
+        <location filename="../panes/ai_chat/chat_message_widget.cpp" line="438"/>
+        <source>Copy</source>
+        <translation type="unfinished">复制</translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/chat_message_widget.cpp" line="485"/>
+        <source>Result</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/chat_message_widget.cpp" line="89"/>
-        <source>Assistant</source>
+        <location filename="../panes/ai_chat/chat_message_widget.cpp" line="488"/>
+        <source>Tool</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../panes/ai_chat/chat_message_widget.cpp" line="97"/>
-        <source>System</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../panes/ai_chat/chat_message_widget.cpp" line="105"/>
-        <source>Error</source>
-        <translation type="unfinished">错误</translation>
     </message>
 </context>
 <context>
     <name>ady::ChatService</name>
     <message>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="91"/>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="250"/>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="354"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="120"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="204"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="272"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="317"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="442"/>
         <source>Failed to initialize network</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="133"/>
-        <source>No models available</source>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="248"/>
+        <source>Failed to create session</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="147"/>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="300"/>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="388"/>
-        <source>New Chat</source>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="472"/>
+        <source>Unknown error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="286"/>
-        <source>Unknown response format</source>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="494"/>
+        <source>Failed to init curl</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3700,42 +3749,42 @@ Last Modify:%3</source>
 <context>
     <name>ady::IDEWindow</name>
     <message>
-        <location filename="../idewindow.cpp" line="206"/>
+        <location filename="../idewindow.cpp" line="207"/>
         <source>Command Line</source>
         <translation>命令行</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="209"/>
+        <location filename="../idewindow.cpp" line="210"/>
         <source>Command Prompt</source>
         <translation>命令提示符</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="214"/>
+        <location filename="../idewindow.cpp" line="215"/>
         <source>PowerShell</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="224"/>
+        <location filename="../idewindow.cpp" line="225"/>
         <source>Terminal</source>
         <translation>终端</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="406"/>
+        <location filename="../idewindow.cpp" line="420"/>
         <source>Select Folder</source>
         <translation>选择文件夹</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="409"/>
+        <location filename="../idewindow.cpp" line="423"/>
         <source>Open File</source>
         <translation>打开文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="409"/>
+        <location filename="../idewindow.cpp" line="423"/>
         <source>All Files (*.*)</source>
         <translation>所有文件（*.*）</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="599"/>
+        <location filename="../idewindow.cpp" line="613"/>
         <source>Text &quot;%1&quot; not found</source>
         <translation>文本 &quot;%1&quot; 未找到</translation>
     </message>
@@ -4193,119 +4242,129 @@ This file has been modified by another program.
 <context>
     <name>ady::ResourceManagerPane</name>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="96"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="99"/>
         <source>Resource Manager</source>
         <translation>资源管理器</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="155"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="158"/>
         <source>New Folder</source>
         <translation>新建文件夹</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="156"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="159"/>
         <source>New File</source>
         <translation>新建文件</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="157"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="160"/>
         <source>Open Folder</source>
         <translation>打开文件夹</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="158"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="161"/>
         <source>Add Folder to Workspace</source>
         <translation>添加文件夹到工作区</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="159"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="162"/>
         <source>Open File</source>
         <translation>打开文件</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="160"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="163"/>
         <source>Close Project</source>
         <translation>关闭项目</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="161"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="164"/>
         <source>Find In Folder</source>
         <translation>在文件夹中查找</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="162"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="165"/>
         <source>Open Terminal</source>
         <translation>打开终端</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="163"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="166"/>
         <source>Open Embedded Terminal</source>
         <translation>打开内置终端</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="164"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="167"/>
         <source>Copy</source>
         <translation>复制</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="165"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="168"/>
         <source>Cut</source>
         <translation>剪切</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="166"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="169"/>
         <source>Paste</source>
         <translation>粘贴</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="167"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="170"/>
         <source>Rename</source>
         <translation>重命名</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="168"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="171"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="169"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="172"/>
         <source>Copy Path</source>
         <translation>复制路径</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="573"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="174"/>
+        <source>Add To Chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="175"/>
+        <source>Add To New Chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="596"/>
         <source>Select Folder</source>
         <translation>选择文件夹</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="741"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="764"/>
         <source>Delete Confirm</source>
         <translation>删除确认</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="741"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="764"/>
         <source>Are you sure you want to delete the &apos;%1&apos;?
 You can restore this file from the Recycle Bin.</source>
         <translation>是否确定删除文件“%1”
 您可以从回收站还原此文件。</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="976"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1016"/>
         <source>Upload</source>
         <translation>上传</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1002"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1042"/>
         <source>All Sites</source>
         <translation>所有站点</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1011"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1051"/>
         <source>Close Confirm</source>
         <translation>关闭确认</translation>
     </message>
     <message>
-        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1011"/>
+        <location filename="../panes/resource_manager/resource_manager_pane.cpp" line="1051"/>
         <source>Are you sure you want to close &apos;%1&apos;?</source>
         <translation>是否确定关闭“%1”？</translation>
     </message>
@@ -4588,6 +4647,67 @@ files to &quot;%2&quot;?</source>
         <location filename="../panes/server_manage/server_request_thread.cpp" line="167"/>
         <source>%1 files and directories permission changed successfully, %2 files and directories permission changed failed.</source>
         <translation>%1个文件和目录权限修改成功，%2个文件和目录权限修改失败。</translation>
+    </message>
+</context>
+<context>
+    <name>ady::SessionListItemWidget</name>
+    <message>
+        <location filename="../panes/ai_chat/session_list_popup.cpp" line="43"/>
+        <location filename="../panes/ai_chat/session_list_popup.cpp" line="88"/>
+        <source>Idle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/session_list_popup.cpp" line="85"/>
+        <source>Requesting...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ady::SessionListModel</name>
+    <message>
+        <location filename="../panes/ai_chat/session_list_popup.cpp" line="147"/>
+        <source>No Sessions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/session_list_popup.cpp" line="159"/>
+        <source>New Chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ady::SessionListModelV2</name>
+    <message>
+        <location filename="../panes/ai_chat/session_list_popup_v2.cpp" line="35"/>
+        <source>New Chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ady::SessionListPopup</name>
+    <message>
+        <location filename="../panes/ai_chat/session_list_popup.cpp" line="284"/>
+        <source>New Chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/session_list_popup.cpp" line="313"/>
+        <source>No Sessions</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ady::SessionListPopupV2</name>
+    <message>
+        <location filename="../panes/ai_chat/session_list_popup_v2.cpp" line="136"/>
+        <source>No Sessions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/session_list_popup_v2.cpp" line="244"/>
+        <source>New Chat</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
