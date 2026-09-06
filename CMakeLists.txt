@@ -11,6 +11,11 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# MSVC: force UTF-8 source and execution charset for Chinese string literals
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DUNICODE")
 
@@ -46,3 +51,4 @@ add_subdirectory(src)
 #        ${CMAKE_BINARY_DIR}/destination_file.txt
 #    COMMENT "Copying file to binary directory"
 #)
+add_subdirectory(browser-llm-gateway/libgatewap)

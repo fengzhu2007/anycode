@@ -155,6 +155,8 @@ add_library(App SHARED
         network/network_response.h network/network_response.cpp
         network/http/http_client.h network/http/http_client.cpp
         network/http/http_response.h network/http/http_response.cpp
+        network/gateway_http_server.h network/gateway_http_server.cpp
+        network/mcp/mcp_handler.h network/mcp/mcp_handler.cpp
 
         project/open_project_window.ui project/open_project_window.h project/open_project_window.cpp
 
@@ -352,6 +354,8 @@ add_library(App SHARED
         components/select_model.h
         panes/code_editor/ai_client.h panes/code_editor/ai_client.cpp
         modules/ai/ai_response.h modules/ai/ai_response.cpp
+        modules/ai/gateway_request.h modules/ai/gateway_request.cpp
+        modules/ai/gateway_response.h modules/ai/gateway_response.cpp
         panes/db/dbms_pane.h panes/db/dbms_pane.cpp panes/db/dbms_pane.ui
         panes/db/dbms_model.cpp panes/db/dbms_model.h
         panes/db/dbms_thread.cpp panes/db/dbms_thread.h
@@ -390,6 +394,15 @@ add_library(App SHARED
         panes/frames_viewer/animation_frames_player.h panes/frames_viewer/animation_frames_player.cpp
         panes/frames_viewer/frames_model.h panes/frames_viewer/frames_model.cpp
         panes/frames_viewer/frames_merge_dialog.h panes/frames_viewer/frames_merge_dialog.cpp panes/frames_viewer/frames_merge_dialog.ui
+        panes/ai_chat/ai_chat_pane.h panes/ai_chat/ai_chat_pane.cpp panes/ai_chat/ai_chat_pane.ui
+        panes/ai_chat/chat_service.h panes/ai_chat/chat_service.cpp
+        panes/ai_chat/chat_message_widget.h panes/ai_chat/chat_message_widget.cpp panes/ai_chat/chat_message_widget.ui
+        panes/ai_chat/session_page_widget.h panes/ai_chat/session_page_widget.cpp panes/ai_chat/session_page_widget.ui
+        panes/ai_chat/session_list_popup.h panes/ai_chat/session_list_popup.cpp
+        panes/ai_chat/session_list_popup_v2.h panes/ai_chat/session_list_popup_v2.cpp
+        panes/ai_chat/message_model.h panes/ai_chat/message_model.cpp
+        panes/ai_chat/message_list_view.h panes/ai_chat/message_list_view.cpp
+        panes/ai_chat/message_delegate.h panes/ai_chat/message_delegate.cpp
         tools/image_clip/cut_tab.h tools/image_clip/cut_tab.cpp tools/image_clip/cut_tab.ui
         tools/image_clip/workflow_tab.h tools/image_clip/workflow_tab.cpp tools/image_clip/workflow_tab.ui
         tools/image_clip/workflow_item.h tools/image_clip/workflow_item.cpp tools/image_clip/workflow_item.ui
@@ -405,6 +418,7 @@ add_library(App SHARED
 
 
 target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg   ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt
+    gatewap
     tree-sitter
     tree-sitter-json
     tree-sitter-javascript

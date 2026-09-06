@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QTextCursor>
 #include <utils/textutils.h>
-#include "modules/ai/ai_request.h"
+#include "modules/ai/gateway_request.h"
 namespace TextEditor{
 class TextDocument;
 }
@@ -12,7 +12,7 @@ class TextDocument;
 namespace ady{
 class CodeEditorView;
 class AIClientPrivate;
-class AIResponse;
+class GatewayResponse;
 class ANYENGINE_EXPORT AIClient : public QObject
 {
     Q_OBJECT
@@ -24,7 +24,7 @@ public:
     void request(CodeEditorView* editor,int timeout=0);
     void scheduleRequest(CodeEditorView *editor);
     void requestCompletions(CodeEditorView *editor);
-    void handleCompletions(AIResponse *response,const Utils::Text::Position& position,CodeEditorView *editor);
+    void handleCompletions(GatewayResponse *response,const Utils::Text::Position& position,CodeEditorView *editor);
     void cancelRunningRequest(CodeEditorView *editor);
 
     bool enabled();
@@ -40,7 +40,7 @@ private:
         QTimer *timer = nullptr;
     };
 
-    QHash<CodeEditorView*, AiRequest*> m_runningRequests;
+    QHash<CodeEditorView*, GatewayRequest*> m_runningRequests;
     QHash<CodeEditorView*, ScheduleData> m_scheduledRequests;
 
     AIClientPrivate* d;

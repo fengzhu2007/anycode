@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AIChatPane</class>
+ <widget class="QWidget" name="AIChatPane">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>650</width>
+    <height>598</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>AI Chat</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout" stretch="0,1">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QToolBar" name="toolBar">
+     <property name="movable">
+      <bool>false</bool>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>16</width>
+       <height>16</height>
+      </size>
+     </property>
+     <addaction name="actionNewChat"/>
+     <addaction name="actionDeleteChat"/>
+     <addaction name="actionDelete_All_Chat"/>
+     <addaction name="actionSessions"/>
+     <addaction name="separator"/>
+     <addaction name="actionClear"/>
+     <addaction name="separator"/>
+     <addaction name="actionRefreshModels"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="QStackedWidget" name="stackedWidget"/>
+   </item>
+  </layout>
+  <action name="actionNewChat">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/AddImmediateWindow_16x.svg</normaloff>:/Resource/icons/AddImmediateWindow_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>New Chat</string>
+   </property>
+   <property name="toolTip">
+    <string>New Chat Session</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionDeleteChat">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Cancel_16x.svg</normaloff>:/Resource/icons/Cancel_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete Current Chat</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionSessions">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/ListView_16x.svg</normaloff>:/Resource/icons/ListView_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Sessions</string>
+   </property>
+   <property name="toolTip">
+    <string>Show Session List</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/CleanData_16x.svg</normaloff>:/Resource/icons/CleanData_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Clear</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear Current Chat Messages</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionRefreshModels">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/Refresh_16x.svg</normaloff>:/Resource/icons/Refresh_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh Models</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh Available Models</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionDelete_All_Chat">
+   <property name="icon">
+    <iconset resource="../../r.qrc">
+     <normaloff>:/Resource/icons/DeleteAllRows_16x.svg</normaloff>:/Resource/icons/DeleteAllRows_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Delete All Chat</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../../r.qrc"/>
+ </resources>
+ <connections/>
+</ui>

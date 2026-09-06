@@ -77,6 +77,9 @@ public:
     static const QString M_NEW_CONNECTION;
     static const QString M_UPDATE_CONNECTION;
 
+    static const QString M_ADD_TO_CHAT;
+    static const QString M_ADD_TO_NEW_CHAT;
+
     //output
     enum OutputLevel{
         Text=0,

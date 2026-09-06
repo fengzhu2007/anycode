@@ -26,6 +26,7 @@ public:
 
 public slots:
     void onEnabled(bool checked);
+    void updateApiKeyVisibility();
 
 
 

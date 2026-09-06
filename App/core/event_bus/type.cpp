@@ -63,6 +63,10 @@ const QString Type::M_NEW_CONNECTION = "NewConnection";
 const QString Type::M_UPDATE_CONNECTION = "UpdateConnection";
 
 
+const QString Type::M_ADD_TO_CHAT = "AddToChat";
+const QString Type::M_ADD_TO_NEW_CHAT = "AddToNewChat";
+
+
 Type::Type()
 {
 

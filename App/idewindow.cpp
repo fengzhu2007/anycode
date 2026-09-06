@@ -23,6 +23,7 @@
 #include "panes/notification/notification_pane.h"
 #include "panes/db/dbms_pane.h"
 #include "panes/frames_viewer/frames_viewer_pane.h"
+#include "panes/ai_chat/ai_chat_pane.h"
 
 #include "panes/loader.h"
 #include "core/event_bus/event.h"
@@ -38,6 +39,7 @@
 #include "storage/project_storage.h"
 #include "storage/recent_storage.h"
 #include "network/network_manager.h"
+#include "network/gateway_http_server.h"
 
 
 #include "languages/html/htmlscanner.h"
@@ -162,6 +164,7 @@ Type::M_TOGGLE_NOTIFICATION,Type::M_OPEN_TERMINAL});
     connect(ui->actionTerminal,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionFile_Transfer,&QAction::triggered,this,&IDEWindow::onActionTriggered);
     connect(ui->actionOutput,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionAI_Chat,&QAction::triggered,this,&IDEWindow::onActionTriggered);
 
 
     //tool
@@ -274,11 +277,24 @@ void IDEWindow::delayBoot(){
 
 
     Schedule::start();
+
+    // start gateway server (async)
+    auto &gw = GatewayHttpServer::instance();
+    connect(&gw, &GatewayHttpServer::started, this, [](uint16_t port){
+        qDebug() << "[IDEWindow] Gateway started on port" << port;
+    });
+    connect(&gw, &GatewayHttpServer::startFailed, this, [](const QString &reason){
+        qWarning() << "[IDEWindow] Gateway start failed:" << reason;
+    });
+    gw.start();
 }
 
 void IDEWindow::shutdown(){
     //save setting
     Schedule::stop();
+
+    // stop gateway server
+    GatewayHttpServer::instance().stop();
 
     LayoutSettings::destory();
 
@@ -524,6 +540,10 @@ void IDEWindow::onActionTriggered(){
         pane->activeToCurrent();
     }else if(sender==ui->actionOutput){
         auto pane = OutputPane::open(m_dockingPaneManager,true);
+        pane->activeToCurrent();
+    }else if(sender==ui->actionAI_Chat){
+
+        auto pane = AIChatPane::open(m_dockingPaneManager,true);
         pane->activeToCurrent();
 
     //tool

@@ -154,5 +154,22 @@ struct ANYENGINE_EXPORT NotificationData{
 
 };
 
+struct ANYENGINE_EXPORT AiChatData{
+    QString type;
+    QString text;
+    QJsonObject toJson(){
+        return {
+                {"type",type},
+                {"text",text},
+                };
+    }
+
+    void fromJson(const QJsonObject& data){
+        this->type = data.find("type")->toString();
+        this->text = data.find("text")->toString();
+    }
+};
+
+
 }
 #endif // EVENT_DATA_H
