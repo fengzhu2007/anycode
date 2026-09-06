@@ -39,3 +39,6 @@
 [submodule "react-qt"]
 	path = react-qt
 	url = https://github.com/fengzhu2007/react-qt
+[submodule "browser-llm-gateway"]
+	path = browser-llm-gateway
+	url = https://gitee.com/fengzhu2007/browser-llm-gateway.git
