@@ -33,7 +33,7 @@ QVariant MessageModel::data(const QModelIndex &index, int role) const
     }
 }
 
-void MessageModel::addMessage(ChatMessageWidget::Type type, const QString &content)
+void MessageModel::addMessage(ChatMessageView::Type type, const QString &content)
 {
     int row = m_messages.size();
     beginInsertRows(QModelIndex(), row, row);
@@ -41,7 +41,7 @@ void MessageModel::addMessage(ChatMessageWidget::Type type, const QString &conte
     endInsertRows();
 }
 
-void MessageModel::insertMessage(int row, ChatMessageWidget::Type type, const QString &content)
+void MessageModel::insertMessage(int row, ChatMessageView::Type type, const QString &content)
 {
     if (row < 0 || row > m_messages.size())
         row = m_messages.size();
@@ -75,11 +75,11 @@ MessageData MessageModel::messageAt(int row) const
     return {};
 }
 
-ChatMessageWidget::Type MessageModel::messageType(int row) const
+ChatMessageView::Type MessageModel::messageType(int row) const
 {
     if (row >= 0 && row < m_messages.size())
         return m_messages.at(row).type;
-    return ChatMessageWidget::Assistant;
+    return ChatMessageView::Assistant;
 }
 
 QString MessageModel::messageContent(int row) const

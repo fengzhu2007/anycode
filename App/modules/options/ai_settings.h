@@ -41,6 +41,7 @@ public:
     QString m_model;
     QString m_apiKey;
     QString m_geminiApiKey;  // Google Gemini API key
+    QString m_nvidiaApiKey;  // NVIDIA API key
 
 };
 }

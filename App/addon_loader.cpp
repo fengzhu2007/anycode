@@ -22,6 +22,8 @@ namespace ady {
         this->m_current = nullptr;
     }
 
+
+
     AddonLoader* AddonLoader::getInstance(){
         if(instance==nullptr){
             instance = new AddonLoader;

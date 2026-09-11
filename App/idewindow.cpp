@@ -98,7 +98,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
     qRegisterMetaType<QFileInfoList>("QFileInfoList");
     Subscriber::reg();
     this->regMessageIds({Type::M_OPEN_EDITOR,Type::M_OPEN_FIND,Type::M_GOTO,Type::M_OPEN_FILE_TRANSFTER,Type::M_OPEN_PANE,Type::M_RESTART,
-Type::M_TOGGLE_NOTIFICATION,Type::M_OPEN_TERMINAL});
+Type::M_TOGGLE_NOTIFICATION,Type::M_OPEN_TERMINAL,Type::M_OPEN_RUN_TERMINAL});
     ui->setupUi(this);
 
     this->setWindowIcon(QIcon(":/Resource/images/logo.icns"));
@@ -375,6 +375,18 @@ bool IDEWindow::onReceive(Event* e){
             auto workingDir = static_cast<QString*>(e->data());
             QJsonObject data = {
                 {"currentPath",*workingDir},
+            };
+            auto pane = TerminalPane::open(m_dockingPaneManager,true,data);
+            pane->activeToCurrent();
+        }
+    }else if(e->id()==Type::M_OPEN_RUN_TERMINAL){
+        auto instance = TerminalPane::getInstance();
+        if(instance==nullptr){
+            //first open terminal with a run command
+            auto td = static_cast<TerminalData*>(e->data());
+            QJsonObject data = {
+                {"currentPath",td->workingDir},
+                {"command",td->command},
             };
             auto pane = TerminalPane::open(m_dockingPaneManager,true,data);
             pane->activeToCurrent();

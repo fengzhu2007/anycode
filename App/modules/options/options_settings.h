@@ -6,6 +6,7 @@ namespace ady{
 class EnvironmentSettings;
 class LanguageSettings;
 class AISettings;
+class NetworkSettings;
 class OptionsSettingsPrivate;
 class OptionsSettings : public QObject
 {
@@ -38,6 +39,9 @@ public:
 
     AISettings& aiSettings();
     void setAiSettings(const AISettings& setting);
+
+    NetworkSettings& networkSettings();
+    void setNetworkSettings(const NetworkSettings& setting);
 
 signals:
     void languageChanged(const LanguageSettings&);

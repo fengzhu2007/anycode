@@ -9,6 +9,11 @@
 #include <QRegularExpression>
 #include <QResizeEvent>
 #include <QDebug>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 namespace ady{
 
@@ -17,7 +22,8 @@ static const char* RoleNames[] = {
     "assistant",  // Assistant
     "system",     // System
     "error",      // Error
-    "event"       // Event
+    "event",      // Event
+    "permission"  // Permission
 };
 
 // braille spinner frames for streaming indicator
@@ -45,6 +51,11 @@ ChatMessageWidget::ChatMessageWidget(Type type, const QString &content, QWidget 
     connect(m_spinnerTimer, &QTimer::timeout, this, &ChatMessageWidget::updateSpinner);
 
     connect(ui->contentLabel, &QLabel::linkActivated, this, &ChatMessageWidget::onLinkActivated);
+
+    // Permission type: build interactive card with buttons
+    if(m_type == Permission){
+        setupPermissionUI();
+    }
 }
 
 ChatMessageWidget::~ChatMessageWidget()
@@ -95,7 +106,7 @@ void ChatMessageWidget::updateSpinner()
 
 QString ChatMessageWidget::roleOf(Type type)
 {
-    if(type >= 0 && type <= Event){
+    if(type >= 0 && type <= Permission){
         return QLatin1String(RoleNames[type]);
     }
     return QLatin1String("system");
@@ -107,6 +118,7 @@ ChatMessageWidget::Type ChatMessageWidget::typeOf(const QString &role)
     if(role == "assistant") return Assistant;
     if(role == "error") return Error;
     if(role == "event") return Event;
+    if(role == "permission") return Permission;
     return System;
 }
 
@@ -160,7 +172,14 @@ int ChatMessageWidget::heightForWidth(int w) const
     int labelH = ui->contentLabel->heightForWidth(labelW);
     // Small buffer: QLabel::heightForWidth() already includes font-metric
     // line height; a large buffer adds visible whitespace for short text.
-    return topBot + qMax(labelH, 0) + 2;
+    int total = topBot + qMax(labelH, 0) + 2;
+
+    // Permission type: account for button row height
+    if(m_type == Permission && m_permissionReply.isEmpty() && ui->mainLayout->count() > 1){
+        total += 32;  // button row: ~24px button + 4px margin + 4px spacing
+    }
+
+    return total;
 }
 
 void ChatMessageWidget::applyStyle()
@@ -177,8 +196,8 @@ void ChatMessageWidget::applyStyle()
         // of being stretched to the full row width.
         //ui->contentLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         this->setStyleSheet(QString(
-            "#ady--ChatMessageWidget QLabel{background-color:%1;border:1px solid %2;border-radius:6px;padding:8px;}"
-        ).arg("#1f261f", border));
+            "#ady--ChatMessageWidget QLabel{background-color:%1;border-radius:6px;padding:8px;}"
+        ).arg("#1f261f"));
         break;
     case Assistant:
         break;
@@ -197,6 +216,11 @@ void ChatMessageWidget::applyStyle()
         ui->contentLabel->setStyleSheet(QString(
             "color:%1;font-size:11px;font-style:italic;"
         ).arg(dim));
+        break;
+    case Permission:
+        this->setStyleSheet(QString(
+            "#ady--ChatMessageWidget{background-color:%1;border:1px solid %2;border-radius:6px;}"
+        ).arg(bg, border));
         break;
     }
 }
@@ -247,6 +271,15 @@ QString ChatMessageWidget::formatContent(const QString &text)
         thinkHtml = extractAndFormatThinkContent(displayText, cleaned);
     }
 
+    // Replace tool markers with null-byte placeholders BEFORE HTML escaping,
+    // because toHtmlEscaped() would turn <!--TOOL_0--> into &lt;!--TOOL_0--&gt;
+    // making the later replacement fail.
+    for (int i = 0; i < m_toolBlocks.size(); ++i) {
+        QString marker = QString("<!--TOOL_%1-->").arg(i);
+        QString placeholder = QString("\x00TOOL_%1\x00").arg(i);
+        cleaned.replace(marker, placeholder);
+    }
+
     const QStringList parts = cleaned.split("```");
     QString html;
     int codeIdx = 0;
@@ -261,10 +294,10 @@ QString ChatMessageWidget::formatContent(const QString &text)
         }
     }
 
-    // Replace tool block markers with actual HTML
+    // Replace null-byte placeholders with actual tool block HTML
     for (int i = 0; i < m_toolBlocks.size(); ++i) {
-        QString marker = QString("<!--TOOL_%1-->").arg(i);
-        html.replace(marker, m_toolBlocks[i]);
+        QString placeholder = QString("\x00TOOL_%1\x00").arg(i);
+        html.replace(placeholder, m_toolBlocks[i]);
     }
 
     // Replace code block markers with actual HTML
@@ -468,11 +501,81 @@ void ChatMessageWidget::appendThink(const QString &content)
 
 // ---- tool use / tool result block ----
 
-void ChatMessageWidget::appendToolBlock(const QString &toolName, const QString &body, bool isResult)
+QString ChatMessageWidget::detectShellType(const QString &toolName, const QString &command)
+{
+    QString tn = toolName.toLower();
+    if(tn == "cmd" || tn.contains("cmd.exe") || tn.contains("cmd "))
+        return "cmd";
+    if(tn == "powershell" || tn.contains("powershell") || tn == "ps1")
+        return "powershell";
+
+    QString cmd = command.trimmed();
+    if(cmd.startsWith("$env:", Qt::CaseInsensitive)
+       || cmd.contains("Write-Host", Qt::CaseInsensitive)
+       || cmd.contains("Get-ChildItem", Qt::CaseInsensitive)
+       || cmd.contains("Get-Content", Qt::CaseInsensitive)
+       || cmd.contains("Set-Location", Qt::CaseInsensitive)
+       || cmd.contains("Invoke-WebRequest", Qt::CaseInsensitive))
+        return "powershell";
+    if(cmd.startsWith("@echo", Qt::CaseInsensitive)
+       || cmd.startsWith("dir ", Qt::CaseInsensitive)
+       || cmd.startsWith("set ", Qt::CaseInsensitive)
+       || cmd.startsWith("copy ", Qt::CaseInsensitive))
+        return "cmd";
+
+    return "shell";
+}
+
+void ChatMessageWidget::appendToolBlock(const QString &callID, const QString &toolType, const QString &toolName, const QString &body)
+{
+    ToolCallInfo info;
+    info.callID = callID;
+    info.toolType = toolType;
+    info.toolName = toolName;
+    info.status = ToolProcessing;
+    info.body = body;
+
+    // Detect command-line tools by raw tool type from SSE
+    QString lowerType = toolType.toLower();
+    if(lowerType == "bash" || lowerType == "cmd" || lowerType == "powershell"
+       || lowerType == "shell" || lowerType.contains("terminal")) {
+        info.isCommand = true;
+        info.shellType = detectShellType(toolType, body);
+    }
+
+    info.blockIndex = m_toolBlocks.size();
+    m_toolCalls.append(info);
+
+    QString html = buildToolBlockHtml(info);
+    m_toolBlocks.append(html);
+    m_plainContent += QString("<!--TOOL_%1-->\n").arg(info.blockIndex);
+    scheduleUpdate();
+}
+
+void ChatMessageWidget::updateToolStatus(const QString &callID, ToolStatus status, const QString &output)
+{
+    for(int i = 0; i < m_toolCalls.size(); ++i) {
+        if(m_toolCalls[i].callID == callID) {
+            m_toolCalls[i].status = status;
+            if(!output.isEmpty()) {
+                m_toolCalls[i].body = output;
+            }
+            if(m_toolCalls[i].blockIndex >= 0 && m_toolCalls[i].blockIndex < m_toolBlocks.size()) {
+                m_toolBlocks[m_toolCalls[i].blockIndex] = buildToolBlockHtml(m_toolCalls[i]);
+            }
+            scheduleUpdate();
+            return;
+        }
+    }
+    qDebug() << "[ChatMessageWidget] updateToolStatus: callID not found:" << callID;
+}
+
+QString ChatMessageWidget::buildToolBlockHtml(const ToolCallInfo &info) const
 {
     auto theme = Theme::getInstance();
-    QString blockBg, blockFg, accentColor, label;
-    if (theme->style() == Theme::Dark) {
+    QString blockBg, blockFg, accentColor, statusIcon, statusText;
+
+    if(theme->style() == Theme::Dark) {
         blockBg = "#1e2a1e";
         blockFg = "#c8d6c8";
     } else {
@@ -480,46 +583,214 @@ void ChatMessageWidget::appendToolBlock(const QString &toolName, const QString &
         blockFg = "#2d3b2d";
     }
 
-    if (isResult) {
-        accentColor = "#42b983";
-        label = tr("Result");
-    } else {
+    switch(info.status) {
+    case ToolProcessing:
         accentColor = "#e6a23c";
-        label = tr("Tool");
-    }
-
-    QString escapedBody = body.toHtmlEscaped();
-    escapedBody.replace("\n", "<br/>");
-
-    // truncate long tool results for readability
-    if (isResult && body.length() > 500) {
-        escapedBody = body.left(500).toHtmlEscaped().replace("\n", "<br/>") + "<br/><i>... (truncated)</i>";
+        statusIcon = QChar(0x23F3);
+        statusText = tr("Processing");
+        break;
+    case ToolSuccess:
+        accentColor = "#42b983";
+        statusIcon = QChar(0x2714);
+        statusText = tr("Success");
+        break;
+    case ToolFailure:
+        accentColor = "#e74c3c";
+        statusIcon = QChar(0x2718);
+        statusText = tr("Failure");
+        break;
     }
 
     QString html;
-    if (body.isEmpty()) {
-        // Compact form for pending/running tool states (no body content)
-        html = QString(
-            "<div style='background-color:%1;color:%2;border-left:3px solid %3;"
-            "padding:4px 8px;margin:4px 0;border-radius:4px;font-size:12px;'>"
-            "<b style='color:%3;'>[tool] %4: %5</b>"
-            "</div>"
-        ).arg(blockBg, blockFg, accentColor, label, toolName.toHtmlEscaped());
+    QString displayName = info.toolName.toHtmlEscaped();
+
+    if(info.isCommand) {
+        QString shellBadge = info.shellType.toUpper();
+        QString command = info.body.toHtmlEscaped();
+        command.replace("\n", "<br/>");
+
+        if(info.status == ToolProcessing) {
+            html = QString(
+                "<div style='background-color:%1;color:%2;border-left:3px solid %3;"
+                "padding:8px;margin:4px 0;border-radius:4px;font-size:12px;'>"
+                "<b style='color:%3;'>%4 %5</b> "
+                "<span style='background-color:%3;color:#fff;padding:1px 6px;border-radius:3px;"
+                "font-size:10px;font-weight:bold;'>%6</span><br/>"
+                "<code style='font-family:Consolas,monospace;font-size:11px;color:%2;'>%7</code>"
+                "</div>"
+            ).arg(blockBg, blockFg, accentColor, statusIcon, displayName, shellBadge, command);
+        } else {
+            // Completed: show command with status only, no output content
+            html = QString(
+                "<div style='background-color:%1;color:%2;border-left:3px solid %3;"
+                "padding:8px;margin:4px 0;border-radius:4px;font-size:12px;'>"
+                "<b style='color:%3;'>%4 %5</b> "
+                "<span style='background-color:%3;color:#fff;padding:1px 6px;border-radius:3px;"
+                "font-size:10px;font-weight:bold;'>%6</span> "
+                "<span style='color:%3;font-size:11px;'>%7</span>"
+                "</div>"
+            ).arg(blockBg, blockFg, accentColor, statusIcon, displayName, shellBadge, statusText);
+        }
     } else {
-        html = QString(
-            "<div style='background-color:%1;color:%2;border-left:3px solid %3;"
-            "padding:6px 8px;margin:4px 0;border-radius:4px;font-size:12px;'>"
-            "<b style='color:%3;'>[tool] %4: %5</b><br/>"
-            "<code style='font-family:Consolas,monospace;font-size:11px;'>%6</code>"
-            "</div>"
-        ).arg(blockBg, blockFg, accentColor, label, toolName.toHtmlEscaped(), escapedBody);
+        QString bodyText = info.body.toHtmlEscaped();
+        bodyText.replace("\n", "<br/>");
+
+        if(info.body.length() > 500) {
+            bodyText = info.body.left(500).toHtmlEscaped().replace("\n", "<br/>")
+                       + "<br/><i>... (truncated)</i>";
+        }
+
+        if(info.status == ToolProcessing) {
+            html = QString(
+                "<div style='background-color:%1;color:%2;border-left:3px solid %3;"
+                "padding:8px;margin:4px 0;border-radius:4px;font-size:12px;'>"
+                "<b style='color:%3;'>%4 %5</b> <span style='color:%3;font-size:11px;'>%6</span>"
+                "</div>"
+            ).arg(blockBg, blockFg, accentColor, statusIcon, displayName, statusText);
+        } else {
+            html = QString(
+                "<div style='background-color:%1;color:%2;border-left:3px solid %3;"
+                "padding:8px;margin:4px 0;border-radius:4px;font-size:12px;'>"
+                "<b style='color:%3;'>%4 %5</b> "
+                "<span style='color:%3;font-size:11px;'>%6</span><br/>"
+                "<code style='font-family:Consolas,monospace;font-size:11px;'>%7</code>"
+                "</div>"
+            ).arg(blockBg, blockFg, accentColor, statusIcon, displayName, statusText, bodyText);
+        }
     }
 
-    // Insert a marker in plain text; formatContent replaces it with actual HTML
-    int idx = m_toolBlocks.size();
-    m_toolBlocks.append(html);
-    m_plainContent += QString("<!--TOOL_%1-->\n").arg(idx);
-    scheduleUpdate();
+    return html;
+}
+
+// ---- permission request UI ----
+
+void ChatMessageWidget::setupPermissionUI()
+{
+    auto theme = Theme::getInstance();
+    const QString accent = theme->primaryColor().name(QColor::HexRgb);
+    const QString fg = theme->secondaryTextColor().name(QColor::HexRgb);
+
+    // Parse JSON content to extract permission data
+    QJsonDocument doc = QJsonDocument::fromJson(m_plainContent.toUtf8());
+    QJsonObject obj = doc.object();
+    m_permissionRequestId = obj["requestId"].toString();
+    QString toolName = obj["toolName"].toString();
+    QString detail = obj["detail"].toString();
+
+    // Update content label with permission description
+    ui->contentLabel->setText(QString(
+        "<div style='color:%1;font-size:12px;'>"
+        "<b style='color:%2;'>\u26a0 Permission Request</b><br/>"
+        "Tool [<b>%3</b>] is requesting permission<br/>"
+        "<span style='color:%4;'>%5</span>"
+        "</div>"
+    ).arg(fg, accent, toolName.toHtmlEscaped(), fg, detail.toHtmlEscaped()));
+
+    // If already replied (widget recreated after scroll), show disabled state
+    if(!m_permissionReply.isEmpty()){
+        setPermissionReplied(m_permissionReply);
+        return;
+    }
+
+    // Create button row below the content label
+    auto *btnLayout = new QHBoxLayout();
+    btnLayout->setSpacing(6);
+    btnLayout->setContentsMargins(0, 4, 0, 0);
+
+    auto makeBtn = [&](const QString &text, const QString &bg, const QString &fgColor) -> QPushButton* {
+        auto *btn = new QPushButton(text, this);
+        btn->setCursor(Qt::PointingHandCursor);
+        btn->setStyleSheet(QString(
+            "QPushButton{background-color:%1;color:%2;border:none;border-radius:4px;"
+            "padding:4px 12px;font-size:11px;}"
+            "QPushButton:hover{background-color:%1;}"
+        ).arg(bg, fgColor));
+        return btn;
+    };
+
+    QPushButton *btnOnce   = makeBtn(tr("Allow Once"),   "#2d6a4f", "#ffffff");
+    QPushButton *btnAlways = makeBtn(tr("Allow Always"), "#1a759f", "#ffffff");
+    QPushButton *btnReject = makeBtn(tr("Reject"),       "#6c757d", "#ffffff");
+
+    btnLayout->addStretch();
+    btnLayout->addWidget(btnOnce);
+    btnLayout->addWidget(btnAlways);
+    btnLayout->addWidget(btnReject);
+
+    // Insert button layout into the main layout (after contentLabel)
+    ui->mainLayout->addLayout(btnLayout);
+
+    // Connect button clicks — defer the state transition via QTimer::singleShot
+    // so the button is not destroyed while its own clicked() signal is dispatching.
+    connect(btnOnce, &QPushButton::clicked, this, [this](){
+        QTimer::singleShot(0, this, [this](){
+            setPermissionReplied("once");
+            emit permissionReplied(m_permissionRequestId, "once");
+        });
+    });
+    connect(btnAlways, &QPushButton::clicked, this, [this](){
+        QTimer::singleShot(0, this, [this](){
+            setPermissionReplied("always");
+            emit permissionReplied(m_permissionRequestId, "always");
+        });
+    });
+    connect(btnReject, &QPushButton::clicked, this, [this](){
+        QTimer::singleShot(0, this, [this](){
+            setPermissionReplied("reject");
+            emit permissionReplied(m_permissionRequestId, "reject");
+        });
+    });
+
+    emit contentUpdated();
+}
+
+void ChatMessageWidget::setPermissionReplied(const QString &reply)
+{
+    m_permissionReply = reply;
+
+    // Map reply to display text and color
+    QString displayText;
+    QString color;
+    if(reply == "once"){
+        displayText = tr("\u2714 Allowed (once)");
+        color = "#2d6a4f";
+    }else if(reply == "always"){
+        displayText = tr("\u2714 Allowed (always)");
+        color = "#1a759f";
+    }else{
+        displayText = tr("\u2718 Rejected");
+        color = "#e74c3c";
+    }
+
+    // Remove only the button layout (last item), keep contentLabel.
+    // Widgets use deleteLater() because this runs from a deferred clicked handler.
+    while(ui->mainLayout->count() > 1){
+        QLayoutItem *child = ui->mainLayout->takeAt(ui->mainLayout->count() - 1);
+        if(child->layout()){
+            // Deleting the QLayout also destroys the QLayoutItem wrapper,
+            // so do NOT call 'delete child' afterwards (double-delete).
+            QLayout *btnLayout = child->layout();
+            while(QLayoutItem *item = btnLayout->takeAt(0)){
+                if(item->widget()) item->widget()->deleteLater();
+                delete item;
+            }
+            delete btnLayout;   // also invalidates 'child'
+        }else{
+            // Non-layout item (e.g. spacer) — safe to delete directly
+            if(child->widget() && child->widget() != ui->contentLabel){
+                child->widget()->deleteLater();
+            }
+            delete child;
+        }
+    }
+
+    // Append reply status to content label
+    QString currentHtml = ui->contentLabel->text();
+    ui->contentLabel->setText(currentHtml + QString(
+        "<div style='color:%1;font-size:11px;margin-top:4px;font-weight:bold;'>%2</div>"
+    ).arg(color, displayText));
+
+    emit contentUpdated();
 }
 
 }

@@ -624,6 +624,10 @@
    </property>
   </action>
   <action name="actionAI_Chat">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/EditConversation_16x.svg</normaloff>:/Resource/icons/EditConversation_16x.svg</iconset>
+   </property>
    <property name="text">
     <string>AI Chat</string>
    </property>

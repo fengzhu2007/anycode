@@ -17,6 +17,7 @@ class TerminalWidgetPrivate{
 public:
     QString executable;
     QString workingDir;
+    QString pendingCommand;
     IPtyProcess* process = nullptr;
     bool initialized = false;
 
@@ -82,6 +83,18 @@ QString& TerminalWidget::executablePath() const {
     return d->executable;
 }
 
+void TerminalWidget::writeCommand(const QString& command){
+    // PTY 中命令需要以回车结尾才会被 shell 执行
+    QString cmd = command;
+    if(!cmd.endsWith('\r')){
+        cmd += QLatin1String("\r");
+    }
+    if(d->initialized){
+        this->writeToPty(cmd.toUtf8());
+    }else{
+        d->pendingCommand = cmd;
+    }
+}
 
 qint64 TerminalWidget::writeToPty(const QByteArray &data){
     if(d->process!=nullptr){
@@ -98,6 +111,10 @@ void TerminalWidget::onReadReady(){
     if(!d->initialized){
         d->initialized = true;
         this->setFocus();
+    }
+    if(!d->pendingCommand.isEmpty()){
+        this->writeToPty(d->pendingCommand.toUtf8());
+        d->pendingCommand.clear();
     }
 }
 

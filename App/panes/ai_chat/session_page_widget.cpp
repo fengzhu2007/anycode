@@ -2,7 +2,7 @@
 #include "ui_session_page_widget.h"
 #include "message_list_view.h"
 #include "message_model.h"
-#include "chat_message_widget.h"
+#include "chat_message_view.h"
 #include "chat_service.h"
 #include "core/theme.h"
 #include <QKeyEvent>
@@ -45,7 +45,7 @@ QTextEdit* SessionPageWidget::messageInput() const { return ui->messageInput; }
 QToolButton* SessionPageWidget::sendBtn() const { return ui->sendBtn; }
 QLabel* SessionPageWidget::sessionTitle() const { return ui->sessionTitle; }
 
-void SessionPageWidget::addMessage(ChatMessageWidget::Type type, const QString &content)
+void SessionPageWidget::addMessage(ChatMessageView::Type type, const QString &content)
 {
     m_messageModel->addMessage(type, content);
 }

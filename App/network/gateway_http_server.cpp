@@ -4,6 +4,7 @@
 #include "panes/resource_manager/resource_manager_model_item.h"
 #include "modules/options/ai_settings.h"
 #include "modules/options/options_settings.h"
+#include "modules/options/network_settings.h"
 #include <llmproxy.h>
 #include <QDebug>
 #include <QtConcurrent>
@@ -26,11 +27,22 @@ GatewayHttpServer &GatewayHttpServer::instance()
 
 void GatewayHttpServer::start()
 {
-    //
     auto config = GatewayConfig();
 #ifndef Q_DEBUG
     config.port = 3459;
 #endif
+    // Apply proxy configuration from NetworkSettings if Gateway is enabled
+    {
+        auto networkSetting = ady::OptionsSettings::getInstance()->networkSettings();
+        if (networkSetting.m_gatewayEnabled && !networkSetting.m_host.isEmpty()) {
+            config.proxy.host = networkSetting.m_host.toStdString();
+            config.proxy.port = static_cast<uint16_t>(networkSetting.m_port);
+            config.proxy.username = networkSetting.m_username.toStdString();
+            config.proxy.password = networkSetting.m_password.toStdString();
+            qDebug() << "[GatewayHttpServer] Proxy configured:"
+                     << networkSetting.m_host << ":" << networkSetting.m_port;
+        }
+    }
     start(config);
 }
 
@@ -89,9 +101,60 @@ void GatewayHttpServer::start(const GatewayConfig &config)
             }
             out.url    = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
             out.apiKey = key.toStdString();
+            // Explicit headers (matching: curl -H "Content-Type: application/json" -H "Authorization: Bearer KEY")
+            out.headers["Content-Type"]  = "application/json";
+            out.headers["Authorization"] = "Bearer " + out.apiKey;
             // Map gateway model name to actual Gemini model
             out.body   = requestBody;
             out.body["model"] = "gemini-3.5-flash";
+            // Remove non-standard fields that conflict with Gemini's OpenAI-compatible endpoint
+            out.body.erase("maxTokens");
+            out.body.erase("topP");
+            out.body.erase("topK");
+            out.body.erase("frequencyPenalty");
+            out.body.erase("presencePenalty");
+            // Gemini requires thought_signature in function calls when thinking is enabled.
+            // Add placeholder signature to any tool_calls missing it.
+            if (out.body.contains("messages") && out.body["messages"].is_array()) {
+                for (auto &msg : out.body["messages"]) {
+                    if (msg.contains("tool_calls") && msg["tool_calls"].is_array()) {
+                        for (auto &tc : msg["tool_calls"]) {
+                            if (tc.contains("function") && !tc.contains("thought_signature")) {
+                                tc["thought_signature"] = "";
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        });
+
+    // nvidia-deepseek-v4-pro-0813 → NVIDIA API (DeepSeek V4 Pro)
+    mutableConfig.models.push_back({"nvidia-deepseek-v4-pro-0813", "nvidia"});
+    LlmProxy::registerResolver("nvidia-deepseek-v4-pro-0813",
+        [](const std::string &/*model*/, const json &requestBody, RouteConfig &out) -> bool {
+            auto setting = ady::OptionsSettings::getInstance()->aiSettings();
+            QString key = setting.m_nvidiaApiKey;
+            if (key.isEmpty()) {
+                qWarning() << "[GatewayHttpServer] NVIDIA API KEY not set in AI settings";
+                return false;
+            }
+            out.url    = "https://integrate.api.nvidia.com/v1/chat/completions";
+            out.apiKey = key.toStdString();
+            out.headers["Content-Type"]  = "application/json";
+            out.headers["Authorization"] = "Bearer " + out.apiKey;
+            out.body   = requestBody;
+            out.body["model"] = "deepseek-ai/deepseek-v4-pro-0813";
+            // Disable thinking by default (matching curl reference)
+            if (!out.body.contains("chat_template_kwargs")) {
+                out.body["chat_template_kwargs"] = {{"thinking", false}};
+            }
+            // Remove non-standard camelCase fields
+            out.body.erase("maxTokens");
+            out.body.erase("topP");
+            out.body.erase("topK");
+            out.body.erase("frequencyPenalty");
+            out.body.erase("presencePenalty");
             return true;
         });
 

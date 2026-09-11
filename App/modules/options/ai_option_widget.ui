@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>360</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -127,6 +127,27 @@
        </property>
        <property name="placeholderText">
         <string>Enter Google Gemini API Key</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_nvidia">
+     <item>
+      <widget class="QLabel" name="label_nvidia_key">
+       <property name="text">
+        <string>NVIDIA API KEY:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="nvidiaApiKey">
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
+       </property>
+       <property name="placeholderText">
+        <string>Enter NVIDIA API Key</string>
        </property>
       </widget>
      </item>

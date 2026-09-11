@@ -5,26 +5,26 @@
  * @file message_list_view.h
  * @brief Virtualized QListView for chat messages.
  *
- * Only creates ChatMessageWidget instances for rows visible in the viewport.
- * Widgets for off-screen rows are destroyed to save memory.
+ * Only creates ChatMessageView (bubble) instances for rows visible in the
+ * viewport. Widgets for off-screen rows are destroyed to save memory.
  * A small buffer of widgets above/below the viewport is kept for smooth scrolling.
  */
 
 #include <QListView>
 #include <QHash>
+#include "chat_message_view.h"
 
 class QTimer;
 
 namespace ady {
 
-class ChatMessageWidget;
 class MessageModel;
 
 /**
  * MessageListView - virtualized chat message list.
  *
  * Lifecycle:
- *  - When a row enters the visible viewport (+ buffer), a ChatMessageWidget
+ *  - When a row enters the visible viewport (+ buffer), a ChatMessageView
  *    is created via setIndexWidget() and populated from model data.
  *  - When a row leaves the viewport (+ buffer), the widget is destroyed.
  *  - For streaming rows, the widget can be retrieved via widgetForMessage().
@@ -40,11 +40,11 @@ public:
     /** Set the backing model (must be a MessageModel). */
     void setMessageModel(MessageModel *model);
 
-    /** Get the ChatMessageWidget for a given row (nullptr if off-screen). */
-    ChatMessageWidget* widgetForMessage(int row) const;
+    /** Get the ChatMessageView for a given row (nullptr if off-screen). */
+    ChatMessageView* widgetForMessage(int row) const;
 
     /** Get the row index for a given widget pointer (-1 if not found). */
-    int rowForWidget(ChatMessageWidget *widget) const;
+    int rowForWidget(ChatMessageView *widget) const;
 
     /** Scroll to the bottom (deferred via event loop). */
     void scrollToBottomDeferred();
@@ -62,9 +62,9 @@ public:
     void updateVisibleWidgets();
 
 signals:
-    /** Emitted after a new ChatMessageWidget is created for a visible row.
+    /** Emitted after a new ChatMessageView is created for a visible row.
      *  Allows the session page to restore streaming state, etc. */
-    void widgetCreated(int row, ChatMessageWidget *widget);
+    void widgetCreated(int row, ChatMessageView *widget);
 
 protected:
     void scrollContentsBy(int dx, int dy) override;
@@ -77,8 +77,8 @@ private slots:
 
 private:
 
-    /** Build a ChatMessageWidget for the given row from model data. */
-    ChatMessageWidget* buildWidget(int row);
+    /** Build a ChatMessageView for the given row from model data. */
+    ChatMessageView* buildWidget(int row);
 
     /** Remove all cached widget references. */
     void clearWidgetCache();
@@ -92,7 +92,7 @@ private:
     bool m_autoScrollEnabled = true;
 
     /** Row -> widget cache for O(1) lookup during streaming. */
-    QHash<int, ChatMessageWidget*> m_widgetCache;
+    QHash<int, ChatMessageView*> m_widgetCache;
 };
 
 } // namespace ady

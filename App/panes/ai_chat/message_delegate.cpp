@@ -3,7 +3,7 @@
  * @brief Custom delegate for MessageListView.
  *
  * sizeHint() uses the viewport width (from option.rect) to query the
- * ChatMessageWidget's heightForWidth(), ensuring the row height matches
+ * ChatMessageView's heightForWidth(), ensuring the row height matches
  * the actual rendered content height.
  *
  * paint() positions the index widget at the correct geometry instead of
@@ -11,7 +11,7 @@
  * that is already rendered by the widget).
  */
 #include "message_delegate.h"
-#include "chat_message_widget.h"
+#include "chat_message_view.h"
 
 #include <QPainter>
 #include <QListView>
@@ -38,7 +38,7 @@ QSize MessageDelegate::sizeHint(const QStyleOptionViewItem &option,
         return QStyledItemDelegate::sizeHint(option, index);
 
     QWidget *wgt = view->indexWidget(index);
-    auto *msgWidget = qobject_cast<ChatMessageWidget *>(wgt);
+        auto *msgWidget = qobject_cast<ChatMessageView *>(wgt);
     if (!msgWidget)
         return QStyledItemDelegate::sizeHint(option, index);
 

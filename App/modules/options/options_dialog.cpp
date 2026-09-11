@@ -6,6 +6,7 @@
 #include "texteditor_option_widget.h"
 #include "language_option_widget.h"
 #include "ai_option_widget.h"
+#include "network_option_widget.h"
 #include "storage/common_storage.h"
 #include "components/message_dialog.h"
 #include "core/event_bus/publisher.h"
@@ -69,6 +70,13 @@ void OptionsDialog::initView(){
 
     {
         auto widget = new AIOptionWidget(ui->stacked);
+        d->model->appendItem(widget);
+        ui->stacked->addWidget(widget);
+        d->list <<widget;
+    }
+
+    {
+        auto widget = new NetworkOptionWidget(ui->stacked);
         d->model->appendItem(widget);
         ui->stacked->addWidget(widget);
         d->list <<widget;

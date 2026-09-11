@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QList>
 #include <QLabel>
-#include "chat_message_widget.h"
+#include "chat_message_view.h"
 
 class QComboBox;
 class QTextEdit;
@@ -44,7 +44,7 @@ public:
     void setModels(const QList<OpenCodeModel> &models, const QString &selectedData);
 
     /** Convenience: add a message to the model and auto-scroll. */
-    void addMessage(ChatMessageWidget::Type type, const QString &content);
+    void addMessage(ChatMessageView::Type type, const QString &content);
 
     /** Convenience: clear all messages. */
     void clearMessages();

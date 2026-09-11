@@ -1,26 +1,36 @@
-﻿#ifndef CHAT_MESSAGE_WIDGET_H
-#define CHAT_MESSAGE_WIDGET_H
+#ifndef CHAT_MESSAGE_BUBBLE_H
+#define CHAT_MESSAGE_BUBBLE_H
 
 #include <QWidget>
 #include <QPaintEvent>
-#include <QPainter>
-#include <QStyleOption>
 #include <QTimer>
+#include <QUrl>
+#include <QStringList>
 
-namespace Ui {
-class ChatMessageWidget;
-}
+class QLabel;
+class QTextBrowser;
+class QVBoxLayout;
+class QResizeEvent;
 
 namespace ady{
 
 /**
- * ChatMessageWidget - 单条聊天消息展示控件
+ * ChatMessageBubble - 单条聊天消息展示控件(QTextDocument 渲染版)
  *
- * 支持多种消息类型(用户/助手/系统/错误/事件),
- * 助手消息支持简单的 markdown 代码块渲染,
- * 支持流式追加内容。
+ * 与旧版 ChatMessageWidget(QLabel 实现)公开接口完全一致,可互换使用。
+ * 通过 chat_message_view.h 中的 ADY_USE_CHAT_MESSAGE_BUBBLE 宏切换。
+ *
+ * 与旧版的主要区别:
+ *  - 内容渲染在持久的 QTextDocument 上(经 QTextBrowser 显示),高度计算
+ *    直接使用 document()->setTextWidth() + document()->size(),不依赖
+ *    QLabel 内部的富文本路径;
+ *  - 支持完整 markdown:标题、加粗、斜体、行内代码、删除线、无序/有序/
+ *    任务列表、链接、图片(转为链接)、引用块、分隔线;围栏代码块仍带
+ *    语言标签与复制按钮;
+ *  - 流式 spinner 是独立的 QLabel,动画刷新不再触发整篇文档重渲染;
+ *  - 文本可选中,QTextBrowser 原生支持右键菜单复制。
  */
-class ChatMessageWidget : public QWidget
+class ChatMessageBubble : public QWidget
 {
     Q_OBJECT
 public:
@@ -41,17 +51,17 @@ public:
 
     struct ToolCallInfo {
         QString callID;
-        QString toolType;
-        QString toolName;
+        QString toolType;       // raw tool identifier from SSE: "cmd", "read", "write" etc.
+        QString toolName;       // display name (may include input summary)
         ToolStatus status = ToolProcessing;
-        QString body;
-        bool isCommand = false;
-        QString shellType;
-        int blockIndex = -1;
+        QString body;           // raw input/output text
+        bool isCommand = false; // command-line tool (bash/cmd/powershell)
+        QString shellType;      // "cmd", "powershell", "shell"
+        int blockIndex = -1;    // index in m_toolBlocks
     };
 
-    explicit ChatMessageWidget(Type type, const QString &content, QWidget *parent = nullptr);
-    ~ChatMessageWidget();
+    explicit ChatMessageBubble(Type type, const QString &content, QWidget *parent = nullptr);
+    ~ChatMessageBubble();
 
     Type type() const { return m_type; }
     QString content() const { return m_plainContent; }
@@ -60,8 +70,9 @@ public:
     void appendText(const QString &delta);
 
     /**
-     * Set streaming state: shows animated loading indicator instead of timestamp.
-     * Call setStreaming(true) when streaming starts, setStreaming(false) when done.
+     * Set streaming state: shows/hides the standalone spinner row.
+     * Spinner ticks only update the QLabel text — the document is NOT
+     * re-rendered on animation frames.
      */
     void setStreaming(bool streaming);
 
@@ -96,7 +107,7 @@ public:
     void setupPermissionUI();
 
     /**
-     * Mark permission as replied: disable buttons, show chosen action.
+     * Mark permission as replied: remove buttons, append chosen action.
      * Used when widget is recreated after scroll virtualization.
      */
     void setPermissionReplied(const QString &reply);
@@ -111,7 +122,7 @@ public:
     int heightForWidth(int w) const override;
 
 signals:
-    /** Emitted after doUpdate() refreshes the rendered content.
+    /** Emitted after doUpdate() renders changed content.
      *  MessageListView uses this to trigger row-height recalculation. */
     void contentUpdated();
 
@@ -122,15 +133,34 @@ signals:
 
 private slots:
     void onToggleThink();
-    void onLinkActivated(const QString &link);
+    void onAnchorClicked(const QUrl &url);
 
 private:
     void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+
+    /**
+     * Pin the document's wrap width to the browser's actual display width.
+     * QTextEdit re-wraps at its viewport width only when its own width
+     * changes; a width pinned by a transient heightForWidth() measurement
+     * would otherwise stick and render the content in a narrow column.
+     */
+    void syncDocumentWidth();
+
+    /**
+     * Apply a proportional line height (150%) to every block after each
+     * setHtml(): the generated HTML is mostly bare text + <br/> lines whose
+     * implicit blocks cannot be targeted by a CSS rule, so the line height
+     * is set directly on each QTextBlockFormat instead.
+     */
+    void applyLineHeight();
+
+    void buildUi();
     void applyStyle();
     QString formatContent(const QString &text);
     QString extractAndFormatThinkContent(const QString &text, QString &cleaned) const;
-    QString formatCodeBlock(const QString &code, int &outIndex);
     QString formatThinkBlock(const QString &thinkContent) const;
+    QString formatCodeBlock(const QString &code);
     void scheduleUpdate();
     void doUpdate();
     void updateSpinner();
@@ -139,20 +169,23 @@ private:
     static QString detectShellType(const QString &toolName, const QString &command);
 
 private:
-    Ui::ChatMessageWidget *ui;
     Type m_type;
+    QVBoxLayout *m_mainLayout = nullptr;
+    QLabel *m_spinnerLabel = nullptr;     // 流式指示器(与文档渲染完全解耦)
+    QTextBrowser *m_browser = nullptr;    // 持久 QTextDocument 的内容视图
+    QWidget *m_buttonRow = nullptr;       // Permission 按钮行(可空)
+
     QString m_plainContent;
+    QString m_lastHtml;                   // 上次渲染的 HTML,内容未变化时跳过重渲染
     QString m_thinkContent;
     bool m_thinkExpanded = false;
     bool m_updateScheduled = false;
     bool m_streaming = false;
-    bool m_thinkFromEvent = false;   // thinking arrived via SSE, skip tag extraction
-    static int s_spinnerFrame;       // shared animation frame counter
-    QTimer *m_spinnerTimer = nullptr; // drives spinner animation during streaming
-    QStringList m_toolBlocks;        // pending tool block HTML (inserted via markers)
-    QList<ToolCallInfo> m_toolCalls; // tool call tracking (matched by callID)
-    QStringList m_codeBlocks;        // raw code text for clipboard copy
-    QStringList m_codeHtml;          // code block HTML (inserted via CODE markers)
+    bool m_thinkFromEvent = false;        // thinking 来自 SSE 事件,跳过标签提取
+    QTimer *m_spinnerTimer = nullptr;     // 驱动 spinner 动画
+    QStringList m_toolBlocks;             // tool 块 HTML(通过标记插入)
+    QList<ToolCallInfo> m_toolCalls;      // tool 调用跟踪(按 callID 匹配更新)
+    QStringList m_codeBlocks;             // 代码块原文(供复制按钮使用)
 
     // Permission request state
     QString m_permissionRequestId;   // request ID for reply callback
@@ -161,4 +194,4 @@ private:
 
 }
 
-#endif // CHAT_MESSAGE_WIDGET_H
+#endif // CHAT_MESSAGE_BUBBLE_H

@@ -20,6 +20,7 @@ public:
     QString& workingDir() const;
     QString& executablePath() const;
 
+    void writeCommand(const QString& command);
 
     virtual qint64 writeToPty(const QByteArray &data) override;
 public slots:

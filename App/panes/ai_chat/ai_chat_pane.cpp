@@ -1,6 +1,6 @@
 ﻿#include "ai_chat_pane.h"
 #include "ui_ai_chat_pane.h"
-#include "chat_message_widget.h"
+#include "chat_message_view.h"
 #include "components/message_dialog.h"
 #include "message_list_view.h"
 #include "message_model.h"
@@ -9,9 +9,14 @@
 #include "core/event_bus/type.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/event_data.h"
+#include "core/event_bus/publisher.h"
 #include "core/theme.h"
 #include "panes/resource_manager/resource_manager_model.h"
 #include "panes/resource_manager/resource_manager_model_item.h"
+#include "modules/options/options_settings.h"
+#include "modules/options/network_settings.h"
+
+#include <QDir>
 
 #include <QAction>
 #include <QScrollBar>
@@ -27,6 +32,8 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
+#include <QMessageBox>
+#include <QStandardPaths>
 #include <QCoreApplication>
 #include <QDebug>
 #include <algorithm>
@@ -120,6 +127,9 @@ AIChatPane::AIChatPane(QWidget *parent)
         }
     });
     connect(m_service, &ChatService::connectionChanged, this, &AIChatPane::onConnectionChanged);
+    connect(m_service, &ChatService::pingResult, this, &AIChatPane::onServerPingResult);
+    connect(m_service, &ChatService::permissionAsked, this, &AIChatPane::onPermissionAsked);
+    connect(m_service, &ChatService::memorySaved, this, &AIChatPane::onMemorySaved);
 
     Subscriber::reg();
     this->regMessageIds({Type::M_OPEN_PROJECT, Type::M_CLOSE_PROJECT,
@@ -181,7 +191,6 @@ bool AIChatPane::onReceive(Event* e){
         m_workspaceNotifyTimer->start();
         return true;
     }
-    qDebug()<<"111:"<<id;
     if(id == Type::M_ADD_TO_CHAT || id == Type::M_ADD_TO_NEW_CHAT){
         QString text;
         QJsonObject obj = e->toJsonOf<AiChatData>().toObject();
@@ -274,6 +283,8 @@ void AIChatPane::onSessionsReceived(const QList<OpenCodeSession> &sessions, cons
     if(!error.isEmpty()){
         qDebug() << "[AIChatPane] Load sessions failed:" << error
                  << "- retrying in 5s";
+        // server not reachable - auto-start opencode-cpp via terminal (once)
+        startServerIfNeeded();
         m_retryLoadTimer->start();
         return;
     }
@@ -300,6 +311,12 @@ void AIChatPane::onSessionsReceived(const QList<OpenCodeSession> &sessions, cons
     }
 
     refreshSessionPopup();
+
+    // Set working directories (global, once)
+    QStringList paths = allWorkspacePaths();
+    if (!paths.isEmpty()) {
+        m_service->setWorkingDirectories(paths);
+    }
 
     if(!sessions.isEmpty() && m_currentSessionId.isEmpty()){
         switchToSession(sessions.first().id);
@@ -354,22 +371,18 @@ void AIChatPane::onSessionCreated(const OpenCodeSession &session, const QString 
     switchToSession(session.id);
     refreshSessionPopup();
 
+    // Set working directories (global, once)
+    QStringList paths = allWorkspacePaths();
+    if (!paths.isEmpty()) {
+        m_service->setWorkingDirectories(paths);
+    }
+
     if(!sd->pendingMessage.isEmpty()){
         QString text = sd->pendingMessage;
         sd->pendingMessage.clear();
 
         renderUserMessage(page, text);
         setSending(page, true);
-
-        // inject workspace directory context on first message of new session
-        // (after renderUserMessage so UI shows clean text, only server receives context)
-        if (sd->workspaceDirty) {
-            QString ctx = buildWorkspaceContext();
-            if (!ctx.isEmpty()) {
-                text = ctx + text;
-                sd->workspaceDirty = false;
-            }
-        }
 
         if(!m_service->sendMessage(session.id, text, sd->modelProviderID, sd->modelID)){
             // request dropped because another request is still in flight
@@ -473,8 +486,19 @@ SessionPageWidget* AIChatPane::createSessionPage()
 
     // Virtual list: restore streaming state when widgets are (re-)created
     connect(page->messageListView(), &MessageListView::widgetCreated,
-            this, [this, page](int row, ChatMessageWidget *widget) {
+            this, [this, page](int row, ChatMessageView *widget) {
         onWidgetCreated(page, row, widget);
+        // Restore permission replied state for virtualized widgets
+        if(widget->type() == ChatMessageView::Permission){
+            QJsonDocument doc = QJsonDocument::fromJson(widget->content().toUtf8());
+            QString reqId = doc.object()["requestId"].toString();
+            if(m_permissionReplies.contains(reqId)){
+                widget->setPermissionReplied(m_permissionReplies.value(reqId));
+            }
+        }
+        // Forward permission reply from widget
+        connect(widget, &ChatMessageView::permissionReplied,
+                this, &AIChatPane::onWidgetPermissionReplied);
     });
 
     ui->stackedWidget->addWidget(page);
@@ -576,9 +600,9 @@ void AIChatPane::onMessagesReceived(const QString &sessionId, const QList<OpenCo
     page->clearMessages();
 
     for(const auto &msg : messages){
-        ChatMessageWidget::Type type = (msg.role == "user")
-            ? ChatMessageWidget::User
-            : ChatMessageWidget::Assistant;
+        ChatMessageView::Type type = (msg.role == "user")
+            ? ChatMessageView::User
+            : ChatMessageView::Assistant;
         page->messageModel()->addMessage(type, msg.text);
     }
 
@@ -621,15 +645,6 @@ void AIChatPane::onSendMessage(){
 
     if(sd->firstUserMessage.isEmpty()){
         sd->firstUserMessage = text;
-    }
-
-    // inject workspace directory context when workspace has changed
-    if (sd->workspaceDirty) {
-        QString ctx = buildWorkspaceContext();
-        if (!ctx.isEmpty()) {
-            text = ctx + text;
-            sd->workspaceDirty = false;
-        }
     }
 
     setSending(page, true);
@@ -687,25 +702,33 @@ void AIChatPane::onStreamThinking(const QString &sessionId, const QString &conte
     throttledScrollToBottom(sd);
 }
 
-void AIChatPane::onStreamToolUse(const QString &sessionId, const QString &toolName, const QString &input){
+void AIChatPane::onStreamToolUse(const QString &sessionId, const QString &callID, const QString &toolType, const QString &toolName, const QString &input){
     int sdIdx = findSessionIndex(sessionId);
     if(sdIdx < 0) return;
     auto *sd = m_sessions.at(sdIdx);
     if(!sd->page || !sd->isReceiving) return;
 
     auto *w = ensureStreamingWidget(sd);
-    if(w) w->appendToolBlock(toolName, input, false);
+    if(w) w->appendToolBlock(callID, toolType, toolName, input);
     throttledScrollToBottom(sd);
 }
 
-void AIChatPane::onStreamToolResult(const QString &sessionId, const QString &toolName, const QString &output){
+void AIChatPane::onStreamToolResult(const QString &sessionId, const QString &callID, const QString &toolType, const QString &toolName, const QString &output){
     int sdIdx = findSessionIndex(sessionId);
     if(sdIdx < 0) return;
     auto *sd = m_sessions.at(sdIdx);
     if(!sd->page || !sd->isReceiving) return;
 
+    // Update existing tool block status by callID, do NOT create a new message
     auto *w = ensureStreamingWidget(sd);
-    if(w) w->appendToolBlock(toolName, output, true);
+    if(w) {
+        // Determine success or failure based on output content
+        ChatMessageView::ToolStatus status = ChatMessageView::ToolSuccess;
+        if(output.contains("error", Qt::CaseInsensitive) || output.startsWith("Error:")) {
+            status = ChatMessageView::ToolFailure;
+        }
+        w->updateToolStatus(callID, status, output);
+    }
     throttledScrollToBottom(sd);
 }
 
@@ -719,7 +742,7 @@ void AIChatPane::onStreamFinished(const QString &sessionId, const QString &error
 
     // Stop spinner on visible widget (if any)
     const int finishedRow = sd->streamingRow;
-    ChatMessageWidget *w = (finishedRow >= 0)
+    ChatMessageView *w = (finishedRow >= 0)
         ? page->messageListView()->widgetForMessage(finishedRow)
         : nullptr;
     if(w) w->setStreaming(false);
@@ -734,6 +757,8 @@ void AIChatPane::onStreamFinished(const QString &sessionId, const QString &error
     sd->streamingContent.clear();
     sd->isStreaming = false;
     sd->isReceiving = false;
+    sd->permissionPending = false;
+    sd->permissionRow = -1;
 
     if(!wasReceiving) return;
 
@@ -860,15 +885,96 @@ void AIChatPane::onConnectionChanged(bool connected)
     }
 }
 
+void AIChatPane::onPermissionAsked(const OpenCodePermissionRequest &request)
+{
+    // Build description text
+    QString detail;
+    if(request.toolName == "bash" || request.toolName == "shell"){
+        QJsonObject args = request.metadata.value("arguments").toObject();
+        QString cmd = args.value("command").toString();
+        if(cmd.isEmpty()) cmd = args.value("raw").toString();
+        detail = tr("Command: %1").arg(cmd);
+    }else if(request.toolName == "glob" || request.toolName == "read" || request.toolName == "write"){
+        detail = tr("Patterns: %1").arg(request.patterns.join(", "));
+    }else{
+        detail = tr("Tool: %1").arg(request.toolName);
+    }
+
+    // Build JSON content for the permission widget
+    QJsonObject permData;
+    permData["requestId"] = request.id;
+    permData["toolName"] = request.toolName;
+    permData["detail"] = detail;
+    QString jsonContent = QJsonDocument(permData).toJson(QJsonDocument::Compact);
+
+    // Add permission message to chat area
+    auto *page = findPage(request.sessionId);
+    if(!page) page = findPage(m_currentSessionId);
+    if(page){
+        page->addMessage(ChatMessageView::Permission, jsonContent);
+        page->scrollToBottom();
+
+        // Mark permission as pending so streaming scroll pauses
+        int sdIdx = findSessionIndex(request.sessionId);
+        if(sdIdx < 0) sdIdx = findSessionIndex(m_currentSessionId);
+        if(sdIdx >= 0){
+            auto *sd = m_sessions.at(sdIdx);
+            sd->permissionPending = true;
+            sd->permissionRow = page->messageModel()->messageCount() - 1;
+            // Force immediate scroll to the permission widget
+            page->messageListView()->scrollToBottomImmediate();
+        }
+    }
+}
+
+void AIChatPane::onWidgetPermissionReplied(const QString &requestId, const QString &reply)
+{
+    qDebug() << "[AIChatPane] Permission reply:" << reply << "for" << requestId;
+    m_permissionReplies[requestId] = reply;
+    m_service->replyPermission(requestId, reply);
+
+    // Clear permission pending flag for all sessions (reply is per-request, not per-session)
+    for(auto *sd : m_sessions){
+        if(sd->permissionPending){
+            sd->permissionPending = false;
+            sd->permissionRow = -1;
+        }
+    }
+}
+
+void AIChatPane::onMemorySaved(const QString &sessionId, const QString &type,
+                                const QString &content, const QString &keywords)
+{
+    // Type label mapping
+    static QMap<QString, QString> typeLabels;
+    if(typeLabels.isEmpty()){
+        typeLabels["preference"] = tr("Preference");
+        typeLabels["fact"] = tr("Fact");
+        typeLabels["decision"] = tr("Decision");
+        typeLabels["correction"] = tr("Correction");
+        typeLabels["lesson"] = tr("Lesson");
+    }
+
+    QString label = typeLabels.value(type, type);
+    QString text = QString("\xf0\x9f\x92\xbe ") + tr("Memory saved [%1]: %2").arg(label, content);
+
+    auto *page = findPage(sessionId);
+    if(!page) page = findPage(m_currentSessionId);
+    if(page){
+        page->addMessage(ChatMessageView::Event, text);
+        page->scrollToBottom();
+    }
+}
+
 // ---- rendering ----
 
 void AIChatPane::renderUserMessage(SessionPageWidget *page, const QString &content){
-    page->addMessage(ChatMessageWidget::User, content);
+    page->addMessage(ChatMessageView::User, content);
     page->scrollToBottom();
 }
 
 void AIChatPane::appendEvent(SessionPageWidget *page, const QString &text){
-    page->addMessage(ChatMessageWidget::Event, text);
+    page->addMessage(ChatMessageView::Event, text);
     page->scrollToBottom();
 }
 
@@ -888,7 +994,7 @@ void AIChatPane::scrollToBottom(SessionPageWidget *page){
     page->scrollToBottom();
 }
 
-ChatMessageWidget* AIChatPane::ensureStreamingWidget(SessionData *sd)
+ChatMessageView* AIChatPane::ensureStreamingWidget(SessionData *sd)
 {
     SessionPageWidget *page = sd->page;
     auto *view = page->messageListView();
@@ -897,7 +1003,7 @@ ChatMessageWidget* AIChatPane::ensureStreamingWidget(SessionData *sd)
     // Create the streaming row if it doesn't exist yet
     if(sd->streamingRow < 0){
         sd->isStreaming = true;
-        model->addMessage(ChatMessageWidget::Assistant, sd->streamingContent);
+        model->addMessage(ChatMessageView::Assistant, sd->streamingContent);
         sd->streamingRow = model->messageCount() - 1;
 
         // Force immediate widget creation for the new streaming row
@@ -917,7 +1023,7 @@ ChatMessageWidget* AIChatPane::ensureStreamingWidget(SessionData *sd)
     }
 
     // Try to get the widget from the visible viewport
-    ChatMessageWidget *w = view->widgetForMessage(sd->streamingRow);
+    ChatMessageView *w = view->widgetForMessage(sd->streamingRow);
     if(w){
         w->setStreaming(true);
     }
@@ -935,7 +1041,7 @@ void AIChatPane::stopStreaming(const QString &sessionId)
 
     // Stop spinner immediately — do not wait for the server's idle event,
     // and make sure the row is never reused by the next message.
-    ChatMessageWidget *w = (sd->streamingRow >= 0)
+    ChatMessageView *w = (sd->streamingRow >= 0)
         ? page->messageListView()->widgetForMessage(sd->streamingRow)
         : nullptr;
     if(w) w->setStreaming(false);
@@ -953,12 +1059,15 @@ void AIChatPane::stopStreaming(const QString &sessionId)
 void AIChatPane::throttledScrollToBottom(SessionData *sd)
 {
     if(!sd->scrollTimer || !sd->page) return;
+    // Pause auto-scroll when a permission request is pending — keep the
+    // permission widget visible so the user can respond.
+    if(sd->permissionPending) return;
     if(!sd->scrollTimer->isActive()){
         sd->scrollTimer->start();
     }
 }
 
-void AIChatPane::onWidgetCreated(SessionPageWidget *page, int row, ChatMessageWidget *widget)
+void AIChatPane::onWidgetCreated(SessionPageWidget *page, int row, ChatMessageView *widget)
 {
     Q_UNUSED(page);
     // If this is the active streaming row, restore streaming indicator
@@ -1027,6 +1136,136 @@ void AIChatPane::loadModelPreference(){
     m_service->setModelID(obj["modelID"].toString());
 }
 
+// ---- opencode server auto-start (via terminal) ----
+
+void AIChatPane::appendEventToCurrentPage(const QString &text)
+{
+    auto *page = findPage(m_currentSessionId);
+    if(page){
+        appendEvent(page, text);
+    }
+}
+
+/**
+ * opencode-cpp.exe 位于当前程序（IDE）所在目录
+ */
+QString AIChatPane::findServerExecutable()
+{
+    m_serverPort = ChatService::serverPort();
+    QString exeDir = QCoreApplication::applicationDirPath();
+    QString exe = exeDir + "/opencode-cpp.exe";
+    if(!QFile::exists(exe)){
+        return QString();
+    }
+
+    // Ensure prompts/ directory exists next to the exe.
+    // If missing, try to copy from the source tree (opencode-cpp/prompts/).
+    QString promptsDir = exeDir + "/prompts";
+    if(!QDir(promptsDir).exists()){
+        // Try to find source prompts dir: walk up from exe to find opencode-cpp/prompts
+        QString sourcePrompts;
+        QDir dir(exeDir);
+        for(int i = 0; i < 4; ++i){
+            QString candidate = dir.filePath("opencode-cpp/prompts");
+            if(QDir(candidate).exists()){
+                sourcePrompts = candidate;
+                break;
+            }
+            // Also check if this level itself has a prompts/ with default.txt
+            candidate = dir.filePath("prompts");
+            if(QDir(candidate).exists() && QFile::exists(candidate + "/default.txt")){
+                sourcePrompts = candidate;
+                break;
+            }
+            dir.cdUp();
+        }
+        if(!sourcePrompts.isEmpty()){
+            qDebug() << "[AIChatPane] Copying prompts/ from:" << sourcePrompts << "to:" << promptsDir;
+            QDir().mkpath(promptsDir);
+            // Copy all files from source to dest
+            for(const auto &entry : QDir(sourcePrompts).entryInfoList(QDir::Files)){
+                QFile::copy(entry.filePath(), promptsDir + "/" + entry.fileName());
+            }
+        } else {
+            qDebug() << "[AIChatPane] prompts/ directory not found next to exe or in source tree";
+        }
+    }
+
+    return exe;
+}
+
+/**
+ * listSessions 失败时调用：通过事件让终端打开并运行 opencode-cpp，
+ * 然后链式 ping 等待服务器就绪，就绪后恢复正常的 API 加载流程。
+ */
+void AIChatPane::startServerIfNeeded()
+{
+    if(m_serverStartRequested) return;
+    m_serverStartRequested = true;
+
+    QString exe = findServerExecutable();
+    if(exe.isEmpty()){
+        qDebug() << "[AIChatPane] opencode-cpp executable not found";
+        appendEventToCurrentPage(tr("opencode-cpp executable not found, "
+                                    "please configure data/ai_chat_server.json"));
+        return;
+    }
+
+
+
+
+    TerminalData td;
+    td.workingDir = QFileInfo(exe).absolutePath();
+    td.command = QString("\"%1\" --port %2").arg(exe).arg(m_serverPort);
+
+    // Pass proxy if Opencode-cpp proxy option is enabled
+    auto setting = OptionsSettings::getInstance()->networkSettings();
+    if(setting.m_opencodeCppEnabled && !setting.m_host.isEmpty()){
+        QString proxyUrl;
+        if(!setting.m_username.isEmpty()){
+            proxyUrl = QString("http://%1:%2@%3:%4")
+                .arg(setting.m_username, setting.m_password, setting.m_host)
+                .arg(setting.m_port);
+        } else {
+            proxyUrl = QString("http://%1:%2").arg(setting.m_host).arg(setting.m_port);
+        }
+        td.command += QString(" --proxy %1").arg(proxyUrl);
+        qDebug() << "[AIChatPane] Passing proxy to opencode-cpp:" << proxyUrl;
+    }
+
+    Publisher::getInstance()->post(Type::M_OPEN_RUN_TERMINAL, &td);
+
+    qDebug() << "[AIChatPane] Requested terminal to run:" << td.command;
+    appendEventToCurrentPage(tr("Starting opencode-cpp in terminal..."));
+
+    // chain-ping until the server responds
+    m_pingCount = 0;
+    m_service->pingServer();
+}
+
+void AIChatPane::onServerPingResult(bool ok)
+{
+    if(ok){
+        qDebug() << "[AIChatPane] opencode-cpp server is ready";
+        appendEventToCurrentPage(tr("opencode-cpp server is ready"));
+        // server up - reload sessions (models follow in onSessionsReceived)
+        m_service->listSessions();
+        return;
+    }
+
+    m_pingCount++;
+    if(m_pingCount >= 60){   // ~60 x (500ms + request) ≈ 60s
+        qDebug() << "[AIChatPane] opencode-cpp server start timeout";
+        appendEventToCurrentPage(tr("opencode-cpp start timeout, "
+                                    "please check the terminal output"));
+        return;
+    }
+
+    QTimer::singleShot(500, this, [this](){
+        m_service->pingServer();
+    });
+}
+
 // ---- workspace change notification ----
 
 void AIChatPane::notifyWorkspacesChanged()
@@ -1046,10 +1285,8 @@ void AIChatPane::notifyWorkspacesChanged()
 
     qDebug() << "[AIChatPane] workspaces changed, notifying opencode:" << paths;
 
-    // mark all sessions dirty so next message injects updated directory context
-    for (auto *sd : m_sessions) {
-        sd->workspaceDirty = true;
-    }
+    // Notify opencode-cpp server about working directory changes (global)
+    m_service->setWorkingDirectories(paths);
 }
 
 // ---- workspace helper ----
@@ -1077,21 +1314,6 @@ QStringList AIChatPane::allWorkspacePaths() const
             paths << item->path();
     }
     return paths;
-}
-
-QString AIChatPane::buildWorkspaceContext() const
-{
-    QStringList paths = allWorkspacePaths();
-    // Filter out directories that no longer exist
-    QStringList validPaths;
-    for (const QString &p : paths) {
-        if (QDir(p).exists())
-            validPaths << p;
-    }
-    if (validPaths.isEmpty()) return {};
-    if (validPaths.size() == 1)
-        return "[Current working directory: " + validPaths.first() + "]\n";
-    return "[Current working directories:\n" + validPaths.join("\n") + "]\n";
 }
 
 // ---- static factory methods ----

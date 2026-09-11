@@ -36,6 +36,8 @@ add_subdirectory(App)
 
 add_subdirectory(libsvnpp)
 
+add_subdirectory(opencode-cpp)
+
 
 add_subdirectory(addon)
 

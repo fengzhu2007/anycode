@@ -3,17 +3,17 @@
  * @brief Virtualized QListView implementation for chat messages.
  *
  * Key design:
- *  - Uses QListView::setIndexWidget() to place ChatMessageWidget only for
+ *  - Uses QListView::setIndexWidget() to place ChatMessageView only for
  *    visible rows (+ a buffer of 3 rows above/below).
  *  - When rows scroll out of the visible+buffer range, their widgets are
  *    destroyed, freeing memory and reducing layout cost.
  *  - A coalescing timer prevents excessive widget churn during fast scrolling.
- *  - The widget cache (QHash<int, ChatMessageWidget*>) gives O(1) lookup
+ *  - The widget cache (QHash<int, ChatMessageView*>) gives O(1) lookup
  *    for streaming updates without iterating the entire list.
  */
 #include "message_list_view.h"
 #include "message_model.h"
-#include "chat_message_widget.h"
+#include "chat_message_view.h"
 #include "message_delegate.h"
 
 #include <QScrollBar>
@@ -32,7 +32,7 @@ MessageListView::MessageListView(QWidget *parent)
     setSelectionMode(QAbstractItemView::NoSelection);
     setFocusPolicy(Qt::NoFocus);
     setFrameShape(QFrame::NoFrame);
-    setSpacing(10);
+    setSpacing(2);
     setUniformItemSizes(false);
     setItemDelegate(new MessageDelegate(this));
 
@@ -64,12 +64,12 @@ void MessageListView::setMessageModel(MessageModel *model)
 
 // ---- public API ----
 
-ChatMessageWidget* MessageListView::widgetForMessage(int row) const
+ChatMessageView* MessageListView::widgetForMessage(int row) const
 {
     return m_widgetCache.value(row, nullptr);
 }
 
-int MessageListView::rowForWidget(ChatMessageWidget *widget) const
+int MessageListView::rowForWidget(ChatMessageView *widget) const
 {
     for (auto it = m_widgetCache.cbegin(); it != m_widgetCache.cend(); ++it) {
         if (it.value() == widget)
@@ -214,14 +214,14 @@ void MessageListView::updateVisibleWidgets()
         if (m_widgetCache.contains(row))
             continue;
 
-        ChatMessageWidget *w = buildWidget(row);
+        ChatMessageView *w = buildWidget(row);
         if (!w) continue;
 
         setIndexWidget(m_model->index(row), w);
         m_widgetCache[row] = w;
 
         // Connect signals
-        connect(w, &ChatMessageWidget::contentUpdated, this, [this, row]() {
+        connect(w, &ChatMessageView::contentUpdated, this, [this, row]() {
             onMessageContentChanged(row);
         });
 
@@ -230,13 +230,13 @@ void MessageListView::updateVisibleWidgets()
     }
 }
 
-ChatMessageWidget* MessageListView::buildWidget(int row)
+ChatMessageView* MessageListView::buildWidget(int row)
 {
     if (!m_model || row < 0 || row >= m_model->rowCount())
         return nullptr;
 
     MessageData msg = m_model->messageAt(row);
-    auto *w = new ChatMessageWidget(msg.type, msg.content, viewport());
+    auto *w = new ChatMessageView(msg.type, msg.content, viewport());
     return w;
 }
 

@@ -42,3 +42,6 @@
 [submodule "browser-llm-gateway"]
 	path = browser-llm-gateway
 	url = https://gitee.com/fengzhu2007/browser-llm-gateway.git
+[submodule "opencode-cpp"]
+	path = opencode-cpp
+	url = https://github.com/fengzhu2007/opencode-cpp.git

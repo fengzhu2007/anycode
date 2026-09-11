@@ -9,6 +9,12 @@
 
 namespace ady{
 
+#ifdef QT_DEBUG
+int ChatService::s_serverPort = 3820;
+#else
+int ChatService::s_serverPort = 3710;
+#endif
+
 // ---- curl static callbacks ----
 
 size_t ChatService::writeCallback(void *ptr, size_t size, size_t nmemb, void *userdata)
@@ -39,7 +45,7 @@ int ChatService::progressCallback(void *clientp, curl_off_t /*dltotal*/, curl_of
 
 ChatService::ChatService(QObject *parent)
     : QObject(parent)
-    , m_baseUrl("http://127.0.0.1:4096")
+    , m_baseUrl(QString("http://127.0.0.1:%1").arg(serverPort()))
     , m_requesting(false)
     , m_abort(false)
     , m_eventCurl(nullptr)
@@ -51,6 +57,7 @@ ChatService::ChatService(QObject *parent)
     qRegisterMetaType<QList<OpenCodeModel>>("QList<OpenCodeModel>");
     qRegisterMetaType<OpenCodeMessage>("OpenCodeMessage");
     qRegisterMetaType<QList<OpenCodeMessage>>("QList<OpenCodeMessage>");
+    qRegisterMetaType<OpenCodePermissionRequest>("OpenCodePermissionRequest");
 
     // Reconnect timer for event stream
     m_reconnectTimer = new QTimer(this);
@@ -102,16 +109,48 @@ CURL* ChatService::createCurlHandle()
     return curl;
 }
 
+// ---- ping server: GET /session health check ----
+
+void ChatService::pingServer()
+{
+    QString url = m_baseUrl + "/session";
+
+    QtConcurrent::run([this, url](){
+        CURL *curl = curl_easy_init();
+        if(!curl){
+            emit pingResult(false);
+            return;
+        }
+
+        QByteArray responseData;
+        // short timeout: this is a health check, not a data request
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 2L);
+        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 2L);
+        curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8().constData());
+        curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
+
+        CURLcode res = curl_easy_perform(curl);
+        long code = 0;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+        curl_easy_cleanup(curl);
+
+        // 2xx/3xx/4xx all mean the server is alive (4xx = auth required)
+        bool ok = (res == CURLE_OK && code >= 200 && code < 500);
+        emit pingResult(ok);
+    });
+}
+
 // ---- list sessions: GET /session ----
 
 void ChatService::listSessions()
 {
-    qDebug() << "[ChatService] listSessions called, m_requesting=" << m_requesting;
     if(m_requesting) return;
     m_requesting = true;
     m_abort = false;
 
-    QString url = m_baseUrl + "/experimental/session";
+    QString url = m_baseUrl + "/session";
     //qDebug() << "[ChatService] listSessions requesting:" << url;
 
     m_future = QtConcurrent::run([this, url](){
@@ -138,7 +177,7 @@ void ChatService::listSessions()
         }
 
         // parse response: array of sessions
-        //qDebug() << "[ChatService] listSessions response:" << responseData;
+        qDebug() << "[ChatService] listSessions response:" << responseData;
         QList<OpenCodeSession> sessions;
         QJsonDocument doc = QJsonDocument::fromJson(responseData);
         //qDebug() <<"[ChatService] listSessions response:"<< doc.toJson();
@@ -218,17 +257,22 @@ void ChatService::createSession(const QString &title, const QString &directory, 
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
 
         CURLcode res = curl_easy_perform(curl);
+
+        long httpCode = 0;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
         curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
 
         if(res != CURLE_OK){
+            qDebug() << "[ChatService] createSession CURL error:" << curl_easy_strerror(res);
             emit sessionCreated({}, QString::fromUtf8(curl_easy_strerror(res)));
             m_requesting = false;
             return;
         }
 
         // parse response: created session
-        qDebug() << "[ChatService] createSession response:" << responseData;
+        qDebug() << "[ChatService] createSession HTTP" << httpCode << "response:" << responseData;
         QJsonDocument doc = QJsonDocument::fromJson(responseData);
         QJsonObject obj = doc.object();
         OpenCodeSession s;
@@ -263,7 +307,6 @@ void ChatService::deleteSession(const QString &sessionId)
     m_requesting = true;
     m_abort = false;
 
-    qDebug()<<"[deleteSession]11111111111111111111111111111111111 deleteSession";
     QString url = m_baseUrl + "/session/" + sessionId;
 
     m_future = QtConcurrent::run([this, url, sessionId](){
@@ -326,16 +369,21 @@ void ChatService::listModels()
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
 
         CURLcode res = curl_easy_perform(curl);
+
+        long httpCode = 0;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
         curl_easy_cleanup(curl);
 
         if(res != CURLE_OK){
+            qDebug() << "[ChatService] listModels CURL error:" << curl_easy_strerror(res);
             emit modelsReceived({}, QString::fromUtf8(curl_easy_strerror(res)));
             m_requesting = false;
             return;
         }
 
         // parse response: { location: {...}, data: [...] }
-       // qDebug() << "[ChatService] listModels response:" << responseData;
+        qDebug() << "[ChatService] listModels HTTP" << httpCode << "response:" << responseData;
         QList<OpenCodeModel> models;
         QJsonDocument doc = QJsonDocument::fromJson(responseData);
         QJsonObject root = doc.object();
@@ -520,7 +568,6 @@ void ChatService::loadSessionMessages(const QString &sessionId, int limit)
 
         for(const auto &val : arr){
             QJsonObject msgObj = val.toObject();
-            qDebug()<<"111111111[message object:]"<<msgObj;
             QJsonObject info = msgObj["info"].toObject();
             QJsonArray parts = msgObj["parts"].toArray();
 
@@ -633,6 +680,52 @@ void ChatService::updateSessionTitle(const QString &sessionId, const QString &ti
     });
 }
 
+// ---- set working directories: POST /directories (global) ----
+
+void ChatService::setWorkingDirectories(const QStringList &directories)
+{
+    QString url = m_baseUrl + "/directories";
+
+    static QStringList lastDirectories;
+    if(lastDirectories!=directories){
+        lastDirectories = directories;
+    }
+    QJsonObject body;
+    QJsonArray dirsArray;
+    for (const QString &dir : lastDirectories) {
+        dirsArray.append(dir);
+    }
+    body["directories"] = dirsArray;
+    QByteArray bodyBytes = QJsonDocument(body).toJson(QJsonDocument::Compact);
+
+    qDebug() << "[ChatService] setWorkingDirectories (global):" << lastDirectories;
+
+    QtConcurrent::run([url, bodyBytes](){
+        CURL *curl = curl_easy_init();
+        if(!curl) return;
+
+        struct curl_slist *headers = nullptr;
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+        curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8().constData());
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, bodyBytes.constData());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)bodyBytes.size());
+
+        CURLcode res = curl_easy_perform(curl);
+        if(res != CURLE_OK){
+            qWarning() << "[ChatService] setWorkingDirectories failed:" << curl_easy_strerror(res);
+        }
+
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+    });
+}
+
 // ---- compact session: POST /api/session/{id}/compact ----
 
 void ChatService::compactSession(const QString &sessionId)
@@ -667,6 +760,52 @@ void ChatService::compactSession(const QString &sessionId)
         }else{
             qDebug() << "[ChatService] compactSession request sent for session:" << sessionId
                      << "response:" << responseData;
+        }
+    });
+}
+
+// ---- permission reply: POST /permission/{id}/reply ----
+
+void ChatService::replyPermission(const QString &requestId, const QString &reply)
+{
+    QString url = m_baseUrl + "/permission/" + requestId + "/reply";
+
+    QJsonObject body;
+    body["reply"] = reply;
+    QByteArray postData = QJsonDocument(body).toJson(QJsonDocument::Compact);
+
+    QtConcurrent::run([url, postData, requestId, reply](){
+        CURL *curl = curl_easy_init();
+        if(!curl){
+            qWarning() << "[ChatService] replyPermission: failed to init curl";
+            return;
+        }
+
+        struct curl_slist *headers = nullptr;
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5L);
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8().constData());
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData.constData());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, postData.size());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+
+        QByteArray responseData;
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
+
+        CURLcode res = curl_easy_perform(curl);
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+
+        if(res != CURLE_OK){
+            qWarning() << "[ChatService] replyPermission failed:" << curl_easy_strerror(res);
+        }else{
+            qDebug() << "[ChatService] replyPermission:" << requestId << "reply=" << reply;
         }
     });
 }
@@ -846,191 +985,276 @@ void ChatService::processEventStream(const QByteArray &chunk)
     m_sseBuffer.append(chunk);
 
     while(true){
-        int idx = m_sseBuffer.indexOf("\n\n");
-        if(idx < 0){
-            idx = m_sseBuffer.indexOf("\r\n\r\n");
-            if(idx < 0) break;
-        }
-
-        QString event = m_sseBuffer.left(idx).trimmed();
-        int endPos = m_sseBuffer.indexOf("\n\n", idx);
-        if(endPos < 0){
-            endPos = m_sseBuffer.indexOf("\r\n\r\n", idx);
-            m_sseBuffer = m_sseBuffer.mid(endPos + 4);
+        // Find event block boundary (blank line separator)
+        int sepLen = 0;
+        int idx = m_sseBuffer.indexOf("\r\n\r\n");
+        if(idx >= 0){
+            sepLen = 4;
         }else{
-            m_sseBuffer = m_sseBuffer.mid(idx + 2);
+            idx = m_sseBuffer.indexOf("\n\n");
+            if(idx >= 0) sepLen = 2;
+        }
+        if(idx < 0) break;
+
+        QString eventBlock = m_sseBuffer.left(idx).trimmed();
+        m_sseBuffer = m_sseBuffer.mid(idx + sepLen);
+
+        // Print raw SSE event block for debugging
+        qDebug() << "[SSE]" << eventBlock;
+
+        // Extract data: lines from the event block (SSE spec: multi-line fields)
+        QString dataStr;
+        const QStringList lines = eventBlock.split('\n');
+        for(const QString &line : lines){
+            QString trimmed = line.trimmed();
+            if(trimmed.startsWith("data:")){
+                QString val = trimmed.mid(5).trimmed();
+                if(!dataStr.isEmpty()) dataStr += "\n";
+                dataStr += val;
+            }
+            // Skip event:, id:, retry:, and comment lines (start with :)
         }
 
-        //qDebug()<<event;
-        if(event.startsWith("data:")){
-            QString jsonStr = event.mid(5).trimmed();
-            if(jsonStr.isEmpty()) continue;
+        if(dataStr.isEmpty()) continue;
 
-            QJsonDocument doc = QJsonDocument::fromJson(jsonStr.toUtf8());
-            QJsonObject obj = doc.object();
-            
-            QJsonObject payload = obj["payload"].toObject();
-            QString type = payload["type"].toString();
+        QJsonDocument doc = QJsonDocument::fromJson(dataStr.toUtf8());
+        QJsonObject obj = doc.object();
+        
+        QJsonObject payload = obj["payload"].toObject();
+        QString type = payload["type"].toString();
 
-            if(type == "message.part.delta"){
-                QJsonObject props = payload["properties"].toObject();
-                QString sessionId = props["sessionID"].toString();
-                QString delta = props["delta"].toString();
-                if(!delta.isEmpty()){
-                    m_sessionContentSizes[sessionId] += delta.toUtf8().size();
+        if(type == "message.part.delta"){
+            QJsonObject props = payload["properties"].toObject();
+            QString sessionId = props["sessionID"].toString();
+            QString partID = props["partID"].toString();
+            QString delta = props["delta"].toString();
+            if(!delta.isEmpty()){
+                m_sessionContentSizes[sessionId] += delta.toUtf8().size();
+                // Route by the partID → type mapping learned from
+                // message.part.updated (the server announces each part at its
+                // start): reasoning deltas render as thinking, everything
+                // else as body text
+                if(m_partTypes.value(partID) == QLatin1String("reasoning")){
+                    QString text = m_reasoningTexts[partID] + delta;
+                    m_reasoningTexts[partID] = text;
+                    QMetaObject::invokeMethod(this, "streamThinking", Qt::QueuedConnection,
+                                              Q_ARG(QString, sessionId), Q_ARG(QString, text));
+                }else{
                     QMetaObject::invokeMethod(this, "streamChunk", Qt::QueuedConnection,
                                               Q_ARG(QString, sessionId), Q_ARG(QString, delta));
                 }
-            }else if(type == "message.part.updated"){
-                QJsonObject props = payload["properties"].toObject();
-                QString sessionId = props["sessionID"].toString();
-                QJsonObject part = props["part"].toObject();
-                QString partType = part["type"].toString();
-                if(partType == "text"){
-                    // text content handled via message.part.delta
-                }else if(partType == "thinking"){
-                    QString content = part["content"].toString();
-                    if(!content.isEmpty()){
-                        qDebug() << "[ChatService] thinking part received, length=" << content.length();
-                        QMetaObject::invokeMethod(this, "streamThinking", Qt::QueuedConnection,
-                                                  Q_ARG(QString, sessionId), Q_ARG(QString, content));
-                    }
-                }else if(partType == "tool"){
-                    // OpenCode native tool format: lifecycle states pending → running → completed
-                    QString toolName = part["tool"].toString();
-                    QJsonObject state = part["state"].toObject();
-                    QString status = state["status"].toString();
-                    QJsonObject input = state["input"].toObject();
-
-                    if(status == "running"){
-                        // Tool actively executing - show tool use block with input details
-                        QString display = toolName;
-                        if(input.contains("filePath")){
-                            display += ": " + input["filePath"].toString();
-                        }else if(input.contains("path")){
-                            display += ": " + input["path"].toString();
-                        }else if(input.contains("query")){
-                            QString q = input["query"].toString();
-                            if(q.length() > 60) q = q.left(60) + "...";
-                            display += ": " + q;
-                        }
-                        qDebug() << "[ChatService] tool running:" << toolName;
-                        QMetaObject::invokeMethod(this, "streamToolUse", Qt::QueuedConnection,
-                                                  Q_ARG(QString, sessionId),
-                                                  Q_ARG(QString, display),
-                                                  Q_ARG(QString, QString()));
-                    }else if(status == "completed"){
-                        // Tool finished - show result block
-                        QString output = state["output"].toString();
-                        QString title = part["title"].toString();
-                        QString display = toolName;
-                        if(!title.isEmpty()){
-                            display += ": " + title;
-                        }
-                        qDebug() << "[ChatService] tool completed:" << toolName
-                                 << "output length=" << output.length();
-                        QMetaObject::invokeMethod(this, "streamToolResult", Qt::QueuedConnection,
-                                                  Q_ARG(QString, sessionId),
-                                                  Q_ARG(QString, display),
-                                                  Q_ARG(QString, output));
-                    }
-                    // pending state is silently ignored (input not yet available)
-                }else if(partType == "tool_use" || partType == "tool-use"){
-                    QString toolName = part["name"].toString();
-                    if(toolName.isEmpty()) toolName = part["toolName"].toString();
-                    QJsonObject input = part["input"].toObject();
-                    QString inputStr;
-                    if(input.isEmpty()){
-                        inputStr = part["input"].toString();
-                    }else{
-                        inputStr = QJsonDocument(input).toJson(QJsonDocument::Indented);
-                    }
-                    qDebug() << "[ChatService] tool_use:" << toolName;
-                    QMetaObject::invokeMethod(this, "streamToolUse", Qt::QueuedConnection,
-                                              Q_ARG(QString, sessionId), Q_ARG(QString, toolName), Q_ARG(QString, inputStr));
-                }else if(partType == "tool_result" || partType == "tool-result"){
-                    QString toolName = part["name"].toString();
-                    if(toolName.isEmpty()) toolName = part["toolName"].toString();
-                    QString output = part["output"].toString();
-                    if(output.isEmpty()) output = part["content"].toString();
-                    qDebug() << "[ChatService] tool_result:" << toolName << "output length=" << output.length();
-                    QMetaObject::invokeMethod(this, "streamToolResult", Qt::QueuedConnection,
-                                              Q_ARG(QString, sessionId), Q_ARG(QString, toolName), Q_ARG(QString, output));
-                }
-            }else if(type == "session.status"){
-                QJsonObject props = payload["properties"].toObject();
-                QString sessionId = props["sessionID"].toString();
-                QJsonObject status = props["status"].toObject();
-                QString statusType = status["type"].toString();
-                emit sessionStatusChanged(sessionId, statusType);
-
-                if(statusType == "idle"){
-                    qint64 size = m_sessionContentSizes.value(sessionId, 0);
-                    if(size > COMPACT_THRESHOLD){
-                        qDebug() << "[ChatService] Auto-compacting session:" << sessionId
-                                 << "size=" << size << "(threshold=" << COMPACT_THRESHOLD << ")";
-                        emit autoCompactionTriggered(sessionId);
-                        compactSession(sessionId);
-                    }
-                    QString error = m_sessionErrors.take(sessionId);
-                    emit streamFinished(sessionId, error);
-                }
-            }else if(type == "session.error"){
-                QJsonObject props = payload["properties"].toObject();
-                QString sessionId = props["sessionID"].toString();
-                QJsonObject errorObj = props["error"].toObject();
-                QString errorMsg = errorObj["message"].toString();
-                if(errorMsg.isEmpty()) errorMsg = errorObj["name"].toString();
-                qDebug() << "[ChatService] session.error for session:" << sessionId << "error:" << errorMsg;
-                m_sessionErrors[sessionId] = errorMsg;
-            }else if(type == "session.updated"){
-                QJsonObject props = payload["properties"].toObject();
-                QString sessionId = props["sessionID"].toString();
-                QString title = props["info"].toObject()["title"].toString();
-                if(!title.isEmpty()){
-                    for(int i = 0; i < m_sessions.size(); ++i){
-                        if(m_sessions[i].id == sessionId && m_sessions[i].title != title){
-                            m_sessions[i].title = title;
-                            QMetaObject::invokeMethod(this, "sessionTitleChanged", Qt::QueuedConnection,
-                                                      Q_ARG(QString, sessionId), Q_ARG(QString, title));
-                            break;
-                        }
-                    }
-                }
-            }else if(type == "message.updated"){
-                // message updated events are handled via stream deltas
-            }else if(type == "session.diff"){
-                QJsonObject props = payload["properties"].toObject();
-                QString sessionId = props["sessionID"].toString();
-                QJsonArray diffArr = props["diff"].toArray();
-                if(!diffArr.isEmpty()){
-                    QStringList files;
-                    for(const auto &d : diffArr){
-                        QJsonObject diffObj = d.toObject();
-                        QString file = diffObj["file"].toString();
-                        if(!file.isEmpty()) files.append(file);
-                    }
-                    if(!files.isEmpty()){
-                        QString summary = QObject::tr("Files modified (%1): %2")
-                            .arg(files.size())
-                            .arg(files.join(", "));
-                        qDebug() << "[ChatService] session.diff:" << sessionId << files;
-                        emit sessionDiffChanged(sessionId, summary);
-                    }
-                }
-            }else if(type == "session.next.compaction.started.1"){
-                QJsonObject props = payload["properties"].toObject();
-                QString sessionId = props["sessionID"].toString();
-                QString reason = props["reason"].toString();
-                qDebug() << "[ChatService] compaction started for session:" << sessionId << "reason:" << reason;
-                emit compactionStarted(sessionId);
-            }else if(type == "session.next.compaction.ended"){
-                QJsonObject props = payload["properties"].toObject();
-                QString sessionId = props["sessionID"].toString();
-                m_sessionContentSizes[sessionId] = 0;
-                qDebug() << "[ChatService] compaction ended for session:" << sessionId << "(size reset)";
-                emit compactionFinished(sessionId);
             }
+        }else if(type == "message.part.updated"){
+            QJsonObject props = payload["properties"].toObject();
+            QString sessionId = props["sessionID"].toString();
+            QJsonObject part = props["part"].toObject();
+            QString partType = part["type"].toString();
+            QString partID = part["id"].toString();
+            // Remember partID → type so subsequent message.part.delta events
+            // can be routed
+            if(!partID.isEmpty()) m_partTypes[partID] = partType;
+            if(partType == "text"){
+                // text content handled via message.part.delta
+            }else if(partType == "reasoning" || partType == "thinking"){
+                // opencode-cpp emits "reasoning" parts with a "text" field;
+                // accept "thinking"/"content" for compatibility with older
+                // part shapes. The full text replaces any delta-rendered
+                // content (appendThink is replace-semantics, so this converges)
+                QString content = part["text"].toString();
+                if(content.isEmpty()) content = part["content"].toString();
+                if(!content.isEmpty()){
+                    if(!partID.isEmpty()) m_reasoningTexts[partID] = content;
+                    qDebug() << "[ChatService] thinking part received, length=" << content.length();
+                    QMetaObject::invokeMethod(this, "streamThinking", Qt::QueuedConnection,
+                                              Q_ARG(QString, sessionId), Q_ARG(QString, content));
+                }
+            }else if(partType == "tool"){
+                // OpenCode native tool format: lifecycle states pending → running → completed
+                QString toolName = part["tool"].toString();
+                QJsonObject state = part["state"].toObject();
+                QString status = state["status"].toString();
+                QJsonObject input = state["input"].toObject();
+                QString callID = part["id"].toString();
+                if(callID.isEmpty()) callID = part["callID"].toString();
+                if(callID.isEmpty()) callID = toolName;  // fallback: use tool name
+
+                if(status == "running"){
+                    // Tool actively executing - show tool use block with input details
+                    QString display = toolName;
+                    if(input.contains("filePath")){
+                        display += ": " + input["filePath"].toString();
+                    }else if(input.contains("path")){
+                        display += ": " + input["path"].toString();
+                    }else if(input.contains("query")){
+                        QString q = input["query"].toString();
+                        if(q.length() > 60) q = q.left(60) + "...";
+                        display += ": " + q;
+                    }else if(input.contains("command")){
+                        display += ": " + input["command"].toString();
+                    }
+                    qDebug() << "[ChatService] tool running:" << toolName << "callID:" << callID;
+                    QMetaObject::invokeMethod(this, "streamToolUse", Qt::QueuedConnection,
+                                              Q_ARG(QString, sessionId),
+                                              Q_ARG(QString, callID),
+                                              Q_ARG(QString, toolName),
+                                              Q_ARG(QString, display),
+                                              Q_ARG(QString, input.contains("command") ? input["command"].toString() : QString()));
+                }else if(status == "completed"){
+                    // Tool finished - update existing tool block status
+                    QString output = state["output"].toString();
+                    QString title = part["title"].toString();
+                    QString display = toolName;
+                    if(!title.isEmpty()){
+                        display += ": " + title;
+                    }
+                    qDebug() << "[ChatService] tool completed:" << toolName << "callID:" << callID
+                             << "output length=" << output.length();
+                    QMetaObject::invokeMethod(this, "streamToolResult", Qt::QueuedConnection,
+                                              Q_ARG(QString, sessionId),
+                                              Q_ARG(QString, callID),
+                                              Q_ARG(QString, toolName),
+                                              Q_ARG(QString, display),
+                                              Q_ARG(QString, output));
+                }else if(status == "error"){
+                    // v1 ToolStateError: failure text lives in state.error
+                    // (older builds put it in state.output - accept both)
+                    QString error = state["error"].toString();
+                    if(error.isEmpty()) error = state["output"].toString();
+                    qDebug() << "[ChatService] tool error:" << toolName << "callID:" << callID
+                             << "error=" << error;
+                    QMetaObject::invokeMethod(this, "streamToolResult", Qt::QueuedConnection,
+                                              Q_ARG(QString, sessionId),
+                                              Q_ARG(QString, callID),
+                                              Q_ARG(QString, toolName),
+                                              Q_ARG(QString, toolName),
+                                              Q_ARG(QString, "Error: " + error));
+                }
+                // pending state is silently ignored (input not yet available)
+            }else if(partType == "tool_use" || partType == "tool-use"){
+                QString toolName = part["name"].toString();
+                if(toolName.isEmpty()) toolName = part["toolName"].toString();
+                QString callID = part["id"].toString();
+                if(callID.isEmpty()) callID = part["callID"].toString();
+                if(callID.isEmpty()) callID = toolName;
+                QJsonObject input = part["input"].toObject();
+                QString inputStr;
+                if(input.isEmpty()){
+                    inputStr = part["input"].toString();
+                }else{
+                    inputStr = QJsonDocument(input).toJson(QJsonDocument::Indented);
+                }
+                qDebug() << "[ChatService] tool_use:" << toolName << "callID:" << callID;
+                QMetaObject::invokeMethod(this, "streamToolUse", Qt::QueuedConnection,
+                                          Q_ARG(QString, sessionId), Q_ARG(QString, callID),
+                                          Q_ARG(QString, toolName), Q_ARG(QString, toolName), Q_ARG(QString, inputStr));
+            }else if(partType == "tool_result" || partType == "tool-result"){
+                QString toolName = part["name"].toString();
+                if(toolName.isEmpty()) toolName = part["toolName"].toString();
+                QString callID = part["id"].toString();
+                if(callID.isEmpty()) callID = part["callID"].toString();
+                if(callID.isEmpty()) callID = toolName;
+                QString output = part["output"].toString();
+                if(output.isEmpty()) output = part["content"].toString();
+                qDebug() << "[ChatService] tool_result:" << toolName << "callID:" << callID << "output length=" << output.length();
+                QMetaObject::invokeMethod(this, "streamToolResult", Qt::QueuedConnection,
+                                          Q_ARG(QString, sessionId), Q_ARG(QString, callID),
+                                          Q_ARG(QString, toolName), Q_ARG(QString, toolName), Q_ARG(QString, output));
+            }
+        }else if(type == "session.status"){
+            QJsonObject props = payload["properties"].toObject();
+            QString sessionId = props["sessionID"].toString();
+            QJsonObject status = props["status"].toObject();
+            QString statusType = status["type"].toString();
+            emit sessionStatusChanged(sessionId, statusType);
+
+            if(statusType == "idle"){
+                qint64 size = m_sessionContentSizes.value(sessionId, 0);
+                if(size > COMPACT_THRESHOLD){
+                    qDebug() << "[ChatService] Auto-compacting session:" << sessionId
+                             << "size=" << size << "(threshold=" << COMPACT_THRESHOLD << ")";
+                    emit autoCompactionTriggered(sessionId);
+                    compactSession(sessionId);
+                }
+                QString error = m_sessionErrors.take(sessionId);
+                emit streamFinished(sessionId, error);
+            }
+        }else if(type == "session.error"){
+            QJsonObject props = payload["properties"].toObject();
+            QString sessionId = props["sessionID"].toString();
+            QJsonObject errorObj = props["error"].toObject();
+            QString errorMsg = errorObj["message"].toString();
+            if(errorMsg.isEmpty()) errorMsg = errorObj["name"].toString();
+            qDebug() << "[ChatService] session.error for session:" << sessionId << "error:" << errorMsg;
+            m_sessionErrors[sessionId] = errorMsg;
+        }else if(type == "session.updated"){
+            QJsonObject props = payload["properties"].toObject();
+            QString sessionId = props["sessionID"].toString();
+            QString title = props["info"].toObject()["title"].toString();
+            if(!title.isEmpty()){
+                for(int i = 0; i < m_sessions.size(); ++i){
+                    if(m_sessions[i].id == sessionId && m_sessions[i].title != title){
+                        m_sessions[i].title = title;
+                        QMetaObject::invokeMethod(this, "sessionTitleChanged", Qt::QueuedConnection,
+                                                  Q_ARG(QString, sessionId), Q_ARG(QString, title));
+                        break;
+                    }
+                }
+            }
+        }else if(type == "message.updated"){
+            // message updated events are handled via stream deltas
+        }else if(type == "session.diff"){
+            QJsonObject props = payload["properties"].toObject();
+            QString sessionId = props["sessionID"].toString();
+            QJsonArray diffArr = props["diff"].toArray();
+            if(!diffArr.isEmpty()){
+                QStringList files;
+                for(const auto &d : diffArr){
+                    QJsonObject diffObj = d.toObject();
+                    QString file = diffObj["file"].toString();
+                    if(!file.isEmpty()) files.append(file);
+                }
+                if(!files.isEmpty()){
+                    QString summary = QObject::tr("Files modified (%1): %2")
+                        .arg(files.size())
+                        .arg(files.join(", "));
+                    qDebug() << "[ChatService] session.diff:" << sessionId << files;
+                    emit sessionDiffChanged(sessionId, summary);
+                }
+            }
+        }else if(type == "session.next.compaction.started.1"){
+            QJsonObject props = payload["properties"].toObject();
+            QString sessionId = props["sessionID"].toString();
+            QString reason = props["reason"].toString();
+            qDebug() << "[ChatService] compaction started for session:" << sessionId << "reason:" << reason;
+            emit compactionStarted(sessionId);
+        }else if(type == "session.next.compaction.ended"){
+            QJsonObject props = payload["properties"].toObject();
+            QString sessionId = props["sessionID"].toString();
+            m_sessionContentSizes[sessionId] = 0;
+            qDebug() << "[ChatService] compaction ended for session:" << sessionId << "(size reset)";
+            emit compactionFinished(sessionId);
+        }else if(type == "permission.asked"){
+            QJsonObject props = payload["properties"].toObject();
+            OpenCodePermissionRequest req;
+            req.id = props["id"].toString();
+            req.sessionId = props["sessionID"].toString();
+            req.permission = props["permission"].toString();
+            req.toolName = props["tool"].toString();
+            for(const auto &p : props["patterns"].toArray())
+                req.patterns.append(p.toString());
+            req.metadata = props["metadata"].toObject();
+            qDebug() << "[ChatService] permission.asked:" << req.toolName
+                     << "permission=" << req.permission << "id=" << req.id;
+            emit permissionAsked(req);
+        }else if(type == "memory.created"){
+            QJsonObject props = payload["properties"].toObject();
+            QString sessionId = props["sessionID"].toString();
+            QString memType = props["type"].toString();
+            QString content = props["content"].toString();
+            QString keywords = props["keywords"].toString();
+            qDebug() << "[ChatService] memory.created:" << memType
+                     << "content=" << content << "session=" << sessionId;
+            emit memorySaved(sessionId, memType, content, keywords);
         }
     }
 }

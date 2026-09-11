@@ -5,7 +5,9 @@
 #include "core/event_bus/subscriber.h"
 #include "chat_service.h"
 #include "session_page_widget.h"
+#include "chat_message_view.h"
 #include <QTimer>
+#include <QSet>
 
 namespace Ui {
 class AIChatPane;
@@ -15,7 +17,6 @@ namespace ady{
 
 class AIChatPanePrivate;
 class SessionListPopup;
-class ChatMessageWidget;
 
 class AIChatPane : public DockingPane, public Subscriber
 {
@@ -46,11 +47,12 @@ public:
         QString firstUserMessage;
         QString modelProviderID;
         QString modelID;
-        bool workspaceDirty = true;   // inject directory context on next message
         QTimer *scrollTimer = nullptr; // throttled scroll-to-bottom during streaming
         int streamingRow = -1;         // model row of the streaming message (-1 = none)
         QString streamingContent;      // accumulated streaming text (survives virtualization)
         bool isStreaming = false;       // whether streaming is active (survives virtualization)
+        bool permissionPending = false;  // whether a permission request is awaiting user reply
+        int permissionRow = -1;          // model row of the permission widget
     };
 
 public slots:
@@ -62,8 +64,8 @@ public slots:
     void onStreamStarted(const QString &sessionId);
     void onStreamChunk(const QString &sessionId, const QString &delta);
     void onStreamThinking(const QString &sessionId, const QString &content);
-    void onStreamToolUse(const QString &sessionId, const QString &toolName, const QString &input);
-    void onStreamToolResult(const QString &sessionId, const QString &toolName, const QString &output);
+    void onStreamToolUse(const QString &sessionId, const QString &callID, const QString &toolType, const QString &toolName, const QString &input);
+    void onStreamToolResult(const QString &sessionId, const QString &callID, const QString &toolType, const QString &toolName, const QString &output);
     void onStreamFinished(const QString &sessionId, const QString &error);
     void onSessionStatusChanged(const QString &sessionId, const QString &status);
     void onSessionTitleChanged(const QString &sessionId, const QString &title);
@@ -73,6 +75,10 @@ public slots:
     void onCompactionStarted(const QString &sessionId);
     void onCompactionFinished(const QString &sessionId);
     void onConnectionChanged(bool connected);
+    void onPermissionAsked(const OpenCodePermissionRequest &request);
+    void onWidgetPermissionReplied(const QString &requestId, const QString &reply);
+    void onMemorySaved(const QString &sessionId, const QString &type,
+                       const QString &content, const QString &keywords);
 
 private:
     explicit AIChatPane(QWidget *parent = nullptr);
@@ -85,10 +91,10 @@ private:
 
     void switchToSession(const QString &sessionId);
     void refreshSessionPopup();
-    ChatMessageWidget* ensureStreamingWidget(SessionData *sd);
+    ChatMessageView* ensureStreamingWidget(SessionData *sd);
     void stopStreaming(const QString &sessionId);
     void throttledScrollToBottom(SessionData *sd);
-    void onWidgetCreated(SessionPageWidget *page, int row, ChatMessageWidget *widget);
+    void onWidgetCreated(SessionPageWidget *page, int row, ChatMessageView *widget);
 
     // ---- model combo (all pages) ----
     void updateAllModelCombos(const QList<OpenCodeModel> &models);
@@ -110,8 +116,13 @@ private:
     // ---- workspace ----
     QString primaryWorkspacePath() const;
     QStringList allWorkspacePaths() const;
-    QString buildWorkspaceContext() const;   // directory context prefix for messages
     void notifyWorkspacesChanged();
+
+    // ---- opencode server auto-start (via terminal) ----
+    void startServerIfNeeded();
+    QString findServerExecutable();
+    void onServerPingResult(bool ok);
+    void appendEventToCurrentPage(const QString &text);
 
 private:
     Ui::AIChatPane *ui;
@@ -126,6 +137,16 @@ private:
     QTimer *m_workspaceNotifyTimer = nullptr;
     QTimer *m_retryLoadTimer = nullptr;     // retry listSessions on connection failure
     QStringList m_pendingDeleteIds;          // session IDs queued for deletion
+
+    // opencode server auto-start state
+    bool m_serverStartRequested = false;
+    int m_pingCount = 0;
+    uint16_t m_serverPort = 0;
+
+    // Permission reply tracking (for widget virtualization)
+    QSet<QString> m_repliedPermissions;  // requestId → reply value stored as "id:reply"
+    QMap<QString, QString> m_permissionReplies;  // requestId → "once"/"always"/"reject"
+
     static AIChatPane* instance;
 
 public:

@@ -142,5 +142,6 @@
         <file>Resource/icons/ChildWindowTemplate_16x.svg</file>
         <file>Resource/icons/close.svg</file>
         <file>Resource/icons/close_hover.svg</file>
+        <file>Resource/icons/EditConversation_16x.svg</file>
     </qresource>
 </RCC>

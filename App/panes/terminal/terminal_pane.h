@@ -38,8 +38,8 @@ public:
     virtual bool onReceive(Event* e) override;//event bus receive callback
     virtual QJsonObject toJson() override;
 
-    void newTermnal(TerminalPane::TerminalType type,const QString& workingDir);
-    void newTermnal(const QString& excutablePath,const QString& workingDir);
+    void newTermnal(TerminalPane::TerminalType type,const QString& workingDir,const QString& command={});
+    void newTermnal(const QString& excutablePath,const QString& workingDir,const QString& command={});
 
 
     static TerminalPane* getInstance();
@@ -53,7 +53,7 @@ public slots:
     void onCurrentChanged(int index);
 
 private:
-    explicit TerminalPane(QWidget *parent = nullptr,const QString& executable={},const QString& workingDir={});
+    explicit TerminalPane(QWidget *parent = nullptr,const QString& executable={},const QString& workingDir={},const QString& command={});
     void updateToolBar();
 
 

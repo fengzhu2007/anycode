@@ -9,12 +9,12 @@
 #define MESSAGE_MODEL_H
 
 #include <QAbstractListModel>
-#include "chat_message_widget.h"
+#include "chat_message_view.h"
 
 namespace ady {
 
 struct MessageData {
-    ChatMessageWidget::Type type = ChatMessageWidget::Assistant;
+    ChatMessageView::Type type = ChatMessageView::Assistant;
     QString content;
 };
 
@@ -22,7 +22,7 @@ struct MessageData {
  * MessageModel - data-only model for chat messages.
  *
  * Each row stores a lightweight MessageData struct.
- * The actual ChatMessageWidget instances are created/destroyed
+ * The actual ChatMessageView (bubble) widgets are created/destroyed
  * by MessageListView as rows enter/leave the visible viewport.
  */
 class MessageModel : public QAbstractListModel
@@ -35,10 +35,10 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
 
     /** Append a new message at the end. */
-    void addMessage(ChatMessageWidget::Type type, const QString &content);
+    void addMessage(ChatMessageView::Type type, const QString &content);
 
     /** Insert a message at a specific row. */
-    void insertMessage(int row, ChatMessageWidget::Type type, const QString &content);
+    void insertMessage(int row, ChatMessageView::Type type, const QString &content);
 
     /** Remove a single row. */
     void removeMessage(int row);
@@ -50,7 +50,7 @@ public:
     MessageData messageAt(int row) const;
 
     /** Get message type by row. */
-    ChatMessageWidget::Type messageType(int row) const;
+    ChatMessageView::Type messageType(int row) const;
 
     /** Get raw content by row. */
     QString messageContent(int row) const;

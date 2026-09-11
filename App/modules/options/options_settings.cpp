@@ -3,11 +3,13 @@
 #include "environment_settings.h"
 #include "language_settings.h"
 #include "ai_settings.h"
+#include "network_settings.h"
 #include <texteditorsettings.h>
 
 static const char environmentKey[] = "environment";
 static const char languageKey[] = "language";
 static const char aiKey[] = "ai";
+static const char networkKey[] = "network";
 
 
 namespace ady{
@@ -19,6 +21,7 @@ public:
     EnvironmentSettings environmentSettings;
     LanguageSettings languageSettings;
     AISettings aiSettings;
+    NetworkSettings networkSettings;
     QJsonObject data;
 
     QString empty_string;
@@ -40,6 +43,9 @@ OptionsSettings::OptionsSettings():QObject() {
     }
     if(options.contains(aiKey)){
         d->aiSettings.fromJson(options.find(aiKey)->toObject());
+    }
+    if(options.contains(networkKey)){
+        d->networkSettings.fromJson(options.find(networkKey)->toObject());
     }
 
     {
@@ -136,6 +142,17 @@ void OptionsSettings::setAiSettings(const AISettings& setting){
         return ;
     }
     d->aiSettings = setting;
+}
+
+NetworkSettings& OptionsSettings::networkSettings(){
+    return d->networkSettings;
+}
+
+void OptionsSettings::setNetworkSettings(const NetworkSettings& setting){
+    if(d->networkSettings==setting){
+        return ;
+    }
+    d->networkSettings = setting;
 }
 
 

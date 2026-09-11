@@ -64,6 +64,7 @@ public:
 
     //terminal
     static const QString M_OPEN_TERMINAL;
+    static const QString M_OPEN_RUN_TERMINAL;
 
     //notification
     static const QString M_NOTIFICATION;

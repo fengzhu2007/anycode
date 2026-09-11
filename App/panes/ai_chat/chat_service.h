@@ -10,6 +10,7 @@
 #include <QJsonArray>
 #include <QFuture>
 #include <QMap>
+#include <QHash>
 #include <QTimer>
 #include <curl/curl.h>
 
@@ -54,6 +55,19 @@ Q_DECLARE_METATYPE(OpenCodeMessage)
 Q_DECLARE_METATYPE(QList<OpenCodeMessage>)
 
 /**
+ * OpenCode 权限请求结构（permission.asked 事件）
+ */
+struct OpenCodePermissionRequest {
+    QString id;              // 权限请求 ID
+    QString sessionId;       // 所属会话
+    QString permission;      // 权限类型（如 "glob", "bash"）
+    QString toolName;        // 触发工具名
+    QStringList patterns;    // 匹配模式
+    QJsonObject metadata;    // 额外上下文（command、filePath 等）
+};
+Q_DECLARE_METATYPE(OpenCodePermissionRequest)
+
+/**
  * ChatService - OpenCode Server 原生 API 通信层
  *
  * 使用 opencode serve 的原生 API:
@@ -62,6 +76,7 @@ Q_DECLARE_METATYPE(QList<OpenCodeMessage>)
  * - /global/event - SSE 事件流
  * - /api/model - 模型列表
  * - /session/{id}/abort - 中止请求
+ * - /permission/{id}/reply - 回复权限请求
  */
 class ANYENGINE_EXPORT ChatService : public QObject
 {
@@ -70,8 +85,18 @@ public:
     explicit ChatService(QObject *parent = nullptr);
     ~ChatService();
 
+    /** 获取 opencode-cpp 服务端口号（可通过 setServerPort 在运行时修改） */
+    static int serverPort() { return s_serverPort; }
+    static void setServerPort(int port) { s_serverPort = port; }
+
     void setBaseUrl(const QString &url);
     QString baseUrl() const { return m_baseUrl; }
+
+    /**
+     * 异步健康检查：GET /session（短超时）
+     * 结果通过 pingResult 信号返回（在主线程接收）
+     */
+    void pingServer();
 
     void setProviderID(const QString &id) { m_providerID = id; }
     void setModelID(const QString &id) { m_modelID = id; }
@@ -89,7 +114,15 @@ public:
     void loadSessionMessages(const QString &sessionId, int limit = 20);  // GET /session/{id}/message
     void abortSession(const QString &sessionId);  // POST /session/{id}/abort
     void updateSessionTitle(const QString &sessionId, const QString &title);  // PATCH /session/{id}
+    void setWorkingDirectories(const QStringList &directories);  // POST /directories (global)
     void compactSession(const QString &sessionId);  // POST /api/session/{id}/compact
+
+    /**
+     * 回复权限请求：POST /permission/{id}/reply
+     * @param requestId 权限请求 ID
+     * @param reply     "once" | "always" | "reject"
+     */
+    void replyPermission(const QString &requestId, const QString &reply);
 
     void setGatewayPort(uint16_t port) { m_gatewayPort = port; }
     uint16_t gatewayPort() const { return m_gatewayPort; }
@@ -111,8 +144,8 @@ signals:
     void streamStarted(const QString &sessionId);
     void streamChunk(const QString &sessionId, const QString &delta);
     void streamThinking(const QString &sessionId, const QString &content);
-    void streamToolUse(const QString &sessionId, const QString &toolName, const QString &input);
-    void streamToolResult(const QString &sessionId, const QString &toolName, const QString &output);
+    void streamToolUse(const QString &sessionId, const QString &callID, const QString &toolType, const QString &toolName, const QString &input);
+    void streamToolResult(const QString &sessionId, const QString &callID, const QString &toolType, const QString &toolName, const QString &output);
     void streamFinished(const QString &sessionId, const QString &error);
     void sessionStatusChanged(const QString &sessionId, const QString &status);
     void sessionTitleChanged(const QString &sessionId, const QString &title);
@@ -122,7 +155,13 @@ signals:
     void compactionFinished(const QString &sessionId);
     void autoCompactionTriggered(const QString &sessionId);
 
+    void permissionAsked(const OpenCodePermissionRequest &request);
+
+    void memorySaved(const QString &sessionId, const QString &type,
+                     const QString &content, const QString &keywords);
+
     void connectionChanged(bool connected);
+    void pingResult(bool ok);
     void eventStreamEnded(bool wasConnected);  // internal: event stream thread ended
 
 private:
@@ -170,9 +209,18 @@ private:
     QMap<QString, qint64> m_sessionContentSizes;  // sessionId → accumulated bytes
     static const qint64 COMPACT_THRESHOLD = 200 * 1024;  // 200KB
 
+    // partID → part type, learned from message.part.updated; used to route
+    // message.part.delta events (reasoning deltas render as thinking)
+    QHash<QString, QString> m_partTypes;
+    // partID → accumulated reasoning text (appendThink replaces, so each
+    // reasoning delta re-emits the accumulated full text)
+    QHash<QString, QString> m_reasoningTexts;
+
     bool m_connected = false;
     QTimer *m_reconnectTimer = nullptr;
     int m_reconnectRetry = 0;
+
+    static int s_serverPort;
 };
 
 }

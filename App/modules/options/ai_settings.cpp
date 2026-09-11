@@ -10,6 +10,7 @@ static const char nameKey[] = "Name";
 static const char modelKey[] = "Model";
 static const char apiKeyKey[] = "APIKey";
 static const char geminiApiKeyKey[] = "GeminiAPIKey";
+static const char nvidiaApiKeyKey[] = "NvidiaAPIKey";
 
 namespace ady{
 
@@ -39,6 +40,7 @@ QJsonObject AISettings::toJson(){
         {modelKey,m_model},
         {apiKeyKey,m_apiKey},
         {geminiApiKeyKey,m_geminiApiKey},
+        {nvidiaApiKeyKey,m_nvidiaApiKey},
     };
 }
 
@@ -64,6 +66,9 @@ void AISettings::fromJson(const QJsonObject& data){
     if(data.contains(geminiApiKeyKey)){
         m_geminiApiKey = data.find(geminiApiKeyKey)->toString();
     }
+    if(data.contains(nvidiaApiKeyKey)){
+        m_nvidiaApiKey = data.find(nvidiaApiKeyKey)->toString();
+    }
 }
 
 QVariantMap AISettings::toMap() const{
@@ -74,7 +79,8 @@ QVariantMap AISettings::toMap() const{
         {nameKey,m_name},
         {modelKey,m_model},
         {apiKeyKey,m_apiKey},
-        {geminiApiKeyKey,m_geminiApiKey}
+        {geminiApiKeyKey,m_geminiApiKey},
+        {nvidiaApiKeyKey,m_nvidiaApiKey}
     };
 }
 
@@ -100,6 +106,9 @@ void AISettings::fromMap(const QVariantMap &data){
     if(data.contains(geminiApiKeyKey)){
         m_geminiApiKey = data.find(geminiApiKeyKey)->toString();
     }
+    if(data.contains(nvidiaApiKeyKey)){
+        m_nvidiaApiKey = data.find(nvidiaApiKeyKey)->toString();
+    }
 }
 
 bool AISettings::equals(const AISettings &ts) const{
@@ -109,7 +118,8 @@ bool AISettings::equals(const AISettings &ts) const{
            && m_name == ts.m_name
            && m_model == ts.m_model
         && m_apiKey == ts.m_apiKey
-        && m_geminiApiKey == ts.m_geminiApiKey;
+        && m_geminiApiKey == ts.m_geminiApiKey
+        && m_nvidiaApiKey == ts.m_nvidiaApiKey;
 }
 
 QString AISettings::name(){
@@ -120,6 +130,7 @@ QList<QPair<QString,QString>> AISettings::servers(){
     return {
         {"dashscope",QObject::tr("Aliyun Dashscope")},
         {"gemini",QObject::tr("Google Gemini")},
+        {"nvidia",QObject::tr("NVIDIA")},
     };
 }
 
@@ -128,6 +139,11 @@ QList<QPair<QString,QString>> AISettings::models(const QString& server){
         return {
             {"gemini-2.5-flash","gemini-2.5-flash"},
             {"gemini-2.5-pro","gemini-2.5-pro"},
+        };
+    }
+    if(server == "nvidia"){
+        return {
+            {"deepseek-v4-pro-0813","deepseek-v4-pro-0813"},
         };
     }
     return {

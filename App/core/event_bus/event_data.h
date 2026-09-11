@@ -171,5 +171,22 @@ struct ANYENGINE_EXPORT AiChatData{
 };
 
 
+struct ANYENGINE_EXPORT TerminalData{
+    QString workingDir;
+    QString command;
+    QJsonObject toJson(){
+        return {
+                {"working_dir",workingDir},
+                {"command",command},
+                };
+    }
+
+    void fromJson(const QJsonObject& data){
+        this->workingDir = data.find("working_dir")->toString();
+        this->command = data.find("command")->toString();
+    }
+};
+
+
 }
 #endif // EVENT_DATA_H

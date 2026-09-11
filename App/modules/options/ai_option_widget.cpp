@@ -101,6 +101,12 @@ void AIOptionWidget::apply(int *state){
         changed = true;
     }
 
+    auto nvidiaApiKey = ui->nvidiaApiKey->text();
+    if(setting.m_nvidiaApiKey!=nvidiaApiKey){
+        setting.m_nvidiaApiKey = nvidiaApiKey;
+        changed = true;
+    }
+
     auto timeout = ui->timeout->value();
     if(setting.m_triggerTimeout!=timeout){
         setting.m_triggerTimeout = timeout;
@@ -137,6 +143,7 @@ void AIOptionWidget::initView(){
 
     ui->apiKey->setText(setting.m_apiKey);
     ui->geminiApiKey->setText(setting.m_geminiApiKey);
+    ui->nvidiaApiKey->setText(setting.m_nvidiaApiKey);
     ui->enableAIAssiant->setChecked(setting.m_enable);
     ui->timeout->setValue(setting.m_triggerTimeout);
 
@@ -163,7 +170,7 @@ void AIOptionWidget::onEnabled(bool checked){
 void AIOptionWidget::updateApiKeyVisibility(){
     bool enabled = ui->enableAIAssiant->isChecked();
     ui->apiKey->setEnabled(enabled);
-    // geminiApiKey is always enabled — independent of AI Assistant toggle
+    // geminiApiKey and nvidiaApiKey are always enabled — independent of AI Assistant toggle
 }
 
 }
