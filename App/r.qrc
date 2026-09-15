@@ -143,5 +143,13 @@
         <file>Resource/icons/close.svg</file>
         <file>Resource/icons/close_hover.svg</file>
         <file>Resource/icons/EditConversation_16x.svg</file>
+        <file>Resource/icons/dark/Hourglass_16x.svg</file>
+        <file>Resource/icons/dark/TestCoveredFailing_16x.svg</file>
+        <file>Resource/icons/dark/TestCoveredPassing_16x.svg</file>
+        <file>Resource/icons/dark/IntellisenseLightBulb_16x.svg</file>
+        <file>Resource/icons/dark/Failing.png</file>
+        <file>Resource/icons/dark/Hourglass.png</file>
+        <file>Resource/icons/dark/LightBulb.png</file>
+        <file>Resource/icons/dark/Passing.png</file>
     </qresource>
 </RCC>

@@ -354,6 +354,9 @@ add_library(App SHARED
         modules/options/network_settings.h modules/options/network_settings.cpp
         modules/options/network_option_widget.h modules/options/network_option_widget.cpp modules/options/network_option_widget.ui
         modules/options/network/proxy_tab.h modules/options/network/proxy_tab.cpp modules/options/network/proxy_tab.ui
+        modules/options/agent_settings.h modules/options/agent_settings.cpp
+        modules/options/agent_option_widget.h modules/options/agent_option_widget.cpp modules/options/agent_option_widget.ui
+        modules/options/agent/local_tab.h modules/options/agent/local_tab.cpp modules/options/agent/local_tab.ui
         components/select_model.h
         panes/code_editor/ai_client.h panes/code_editor/ai_client.cpp
         modules/ai/ai_response.h modules/ai/ai_response.cpp
@@ -403,6 +406,7 @@ add_library(App SHARED
         panes/ai_chat/chat_message_bubble.h panes/ai_chat/chat_message_bubble.cpp
         panes/ai_chat/chat_message_view.h
         panes/ai_chat/session_page_widget.h panes/ai_chat/session_page_widget.cpp panes/ai_chat/session_page_widget.ui
+        panes/ai_chat/file_diff_list_widget.h panes/ai_chat/file_diff_list_widget.cpp panes/ai_chat/file_diff_list_widget.ui
         panes/ai_chat/session_list_popup.h panes/ai_chat/session_list_popup.cpp
         panes/ai_chat/session_list_popup_v2.h panes/ai_chat/session_list_popup_v2.cpp
         panes/ai_chat/message_model.h panes/ai_chat/message_model.cpp
@@ -480,8 +484,3 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMENT "Copying file to binary directory"
 )
 
-#copy opencode-cpp
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy        ${CMAKE_BINARY_DIR}/opencode-cpp/opencode-cpp.exe       ${CMAKE_BINARY_DIR}/src/opencode-cpp.exe
-    COMMENT "Copying file to binary directory"
-)

@@ -8,6 +8,7 @@
 #include "chat_message_view.h"
 #include <QTimer>
 #include <QSet>
+#include <QProcess>
 
 namespace Ui {
 class AIChatPane;
@@ -53,6 +54,10 @@ public:
         bool isStreaming = false;       // whether streaming is active (survives virtualization)
         bool permissionPending = false;  // whether a permission request is awaiting user reply
         int permissionRow = -1;          // model row of the permission widget
+        // Pagination state for loading older messages
+        qint64 oldestMessageTimestamp = 0;  // time_created of the oldest message currently loaded
+        bool isLoadingMore = false;          // true while a "load older" request is in flight
+        bool hasMoreMessages = true;         // false once a "load older" returns fewer than limit
     };
 
 public slots:
@@ -71,6 +76,7 @@ public slots:
     void onSessionTitleChanged(const QString &sessionId, const QString &title);
     void onModelsReceived(const QList<OpenCodeModel> &models, const QString &error);
     void onMessagesReceived(const QString &sessionId, const QList<OpenCodeMessage> &messages, const QString &error);
+    void onMessagesPrepended(const QString &sessionId, const QList<OpenCodeMessage> &olderMessages, const QString &error);
     void onCompactClicked();
     void onCompactionStarted(const QString &sessionId);
     void onCompactionFinished(const QString &sessionId);
@@ -79,6 +85,7 @@ public slots:
     void onWidgetPermissionReplied(const QString &requestId, const QString &reply);
     void onMemorySaved(const QString &sessionId, const QString &type,
                        const QString &content, const QString &keywords);
+    void onLoadMoreMessages(const QString &sessionId);
 
 private:
     explicit AIChatPane(QWidget *parent = nullptr);
@@ -142,6 +149,7 @@ private:
     bool m_serverStartRequested = false;
     int m_pingCount = 0;
     uint16_t m_serverPort = 0;
+    QProcess *m_serverProcess = nullptr;
 
     // Permission reply tracking (for widget virtualization)
     QSet<QString> m_repliedPermissions;  // requestId → reply value stored as "id:reply"
@@ -152,6 +160,9 @@ private:
 public:
     static const QString PANE_ID;
     static const QString PANE_GROUP;
+
+    /** Insert a debug test message containing thinking + tool calls + text. */
+    void insertDebugTestMessage();
 };
 
 }

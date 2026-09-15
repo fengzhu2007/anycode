@@ -9,6 +9,7 @@
 class QComboBox;
 class QTextEdit;
 class QToolButton;
+class wPopupPanel;
 
 namespace Ui {
 class SessionPageWidget;
@@ -17,8 +18,11 @@ class SessionPageWidget;
 namespace ady {
 
 struct OpenCodeModel;
+struct FileDiffInfo;
 class MessageListView;
 class MessageModel;
+class FileDiffListWidget;
+class ChatService;
 
 /**
  * SessionPageWidget - 单个会话的聊天页面
@@ -43,6 +47,15 @@ public:
     void appendInputText(const QString &text);
     void setModels(const QList<OpenCodeModel> &models, const QString &selectedData);
 
+    /** 设置 ChatService 用于 API 调用 */
+    void setChatService(ChatService *service);
+
+    /** 设置当前会话 ID */
+    void setSessionId(const QString &sessionId);
+
+    /** 更新文件变更列表 */
+    void setFileDiffs(const QList<FileDiffInfo> &diffs);
+
     /** Convenience: add a message to the model and auto-scroll. */
     void addMessage(ChatMessageView::Type type, const QString &content);
 
@@ -55,6 +68,7 @@ public:
 signals:
     void enterPressed();
     void modelChanged(int index);
+    void scrollToTopRequested();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
@@ -63,6 +77,17 @@ private:
     Ui::SessionPageWidget *ui;
     MessageListView *m_messageListView = nullptr;
     MessageModel *m_messageModel = nullptr;
+
+    ChatService *m_chatService = nullptr;
+    QString m_sessionId;
+
+    wPopupPanel *m_diffPopup = nullptr;
+    FileDiffListWidget *m_diffListWidget = nullptr;
+    QList<FileDiffInfo> m_currentDiffs;
+
+    void setupDiffPopup();
+    void onAcceptAll();
+    void onRejectAll();
 };
 
 }

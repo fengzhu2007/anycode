@@ -11,11 +11,6 @@
 #include <QPalette>
 #include <QFile>
 #include <QStringList>
-#include <QMetaObject>
-#include <QShowEvent>
-#include <core/find/highlightscrollbarcontroller.h>
-#include <utils/id.h>
-#include <utils/theme/theme.h>
 
 namespace ady {
 
@@ -25,7 +20,6 @@ public:
     QString filePath;
     int additions = 0;
     int deletions = 0;
-    Core::HighlightScrollBarController *scrollBarController = nullptr;
 };
 
 DiffEditorWidget::DiffEditorWidget(QWidget *parent)
@@ -43,7 +37,6 @@ DiffEditorWidget::DiffEditorWidget(QWidget *parent)
 
 DiffEditorWidget::~DiffEditorWidget()
 {
-    delete d->scrollBarController;
     delete d;
 }
 
@@ -74,13 +67,8 @@ void DiffEditorWidget::clearDiff()
     d->diffContent = cvs::DiffContent();
     d->additions = 0;
     d->deletions = 0;
-    m_lineInfo.clear();
 
-    // Remove scrollbar diff markers
-    if (d->scrollBarController) {
-        d->scrollBarController->removeHighlights(Utils::Id("DiffEditor.ScrollBarAddition"));
-        d->scrollBarController->removeHighlights(Utils::Id("DiffEditor.ScrollBarDeletion"));
-    }
+    clearDiffHighlights();
 
     QTextCursor cursor(document());
     cursor.select(QTextCursor::Document);
@@ -290,173 +278,6 @@ void DiffEditorWidget::buildDiffDocument()
 }
 
 //----------------------------------------------------------------------------
-// applyLineHighlights
-//
-// Uses ExtraSelection with FullWidthSelection to paint background colours
-// on added (green), deleted (red), and hunk-header (grey) lines.
-//----------------------------------------------------------------------------
-void DiffEditorWidget::applyLineHighlights()
-{
-    const auto &fontSettings = textDocument()->fontSettings();
-    QTextCharFormat addedFormat = fontSettings.toTextCharFormat(TextEditor::C_DIFF_DEST_LINE);
-    QTextCharFormat deletedFormat = fontSettings.toTextCharFormat(TextEditor::C_DIFF_SOURCE_LINE);
-
-    // Dimmed background for hunk headers
-    QTextCharFormat headerFormat;
-    headerFormat.setBackground(QColor(240, 240, 240));
-    headerFormat.setProperty(QTextFormat::FullWidthSelection, true);
-
-    QList<QTextEdit::ExtraSelection> selections;
-
-    for (auto it = m_lineInfo.begin(); it != m_lineInfo.end(); ++it) {
-        int blockNo = it.key();
-        const LineInfo &info = it.value();
-
-        QTextBlock block = document()->findBlockByNumber(blockNo);
-        if (!block.isValid())
-            continue;
-
-        QTextEdit::ExtraSelection sel;
-        sel.cursor = QTextCursor(block);
-        sel.cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
-
-        if (info.isHeader) {
-            sel.format = headerFormat;
-            selections << sel;
-            continue;
-        }
-
-        switch (info.type) {
-        case cvs::DiffLine::Addition:
-            sel.format = addedFormat;
-            sel.format.setProperty(QTextFormat::FullWidthSelection, true);
-            selections << sel;
-            break;
-        case cvs::DiffLine::Deletion:
-            sel.format = deletedFormat;
-            sel.format.setProperty(QTextFormat::FullWidthSelection, true);
-            selections << sel;
-            break;
-        case cvs::DiffLine::Modification:
-            // Treat Modification like Addition for now
-            sel.format = addedFormat;
-            sel.format.setProperty(QTextFormat::FullWidthSelection, true);
-            selections << sel;
-            break;
-        case cvs::DiffLine::Context:
-        default:
-            // No background for context lines
-            break;
-        }
-    }
-
-    setExtraSelections(TextEditorWidget::OtherSelection, selections);
-}
-
-//----------------------------------------------------------------------------
-// resizeEvent
-//
-// The base class resizeEvent updates the scrollbar geometry (range,
-// page step, etc.).  The HighlightScrollBarOverlay's eventFilter ran
-// *before* that, so the overlay has a stale size.  We update the
-// controller's geometry parameters here (after the base class) so
-// that the next overlay paint uses correct values.
-//----------------------------------------------------------------------------
-void DiffEditorWidget::resizeEvent(QResizeEvent *e)
-{
-    CodeEditorView::resizeEvent(e);
-    if (d->scrollBarController) {
-        d->scrollBarController->setLineHeight(fontMetrics().lineSpacing());
-        d->scrollBarController->setVisibleRange(viewport()->rect().height());
-        d->scrollBarController->setMargin(document()->documentMargin());
-    }
-}
-
-//----------------------------------------------------------------------------
-// showEvent
-//
-// On first show the scrollbar gets its final geometry.  Defer overlay
-// recreation so it picks up the correct scrollbar size — the overlay
-// created in updateScrollBarMarkers() may have been sized to (0,0)
-// because the widget wasn't visible yet.
-//----------------------------------------------------------------------------
-void DiffEditorWidget::showEvent(QShowEvent *e)
-{
-    CodeEditorView::showEvent(e);
-    if (d->scrollBarController) {
-        QMetaObject::invokeMethod(this, [this]() {
-            if (d->scrollBarController) {
-                // Recreate overlay with correct scrollbar geometry.
-                // Highlights in m_highlights persist across this.
-                d->scrollBarController->setScrollArea(nullptr);
-                d->scrollBarController->setScrollArea(this);
-            }
-        }, Qt::QueuedConnection);
-    }
-}
-
-//----------------------------------------------------------------------------
-// updateScrollBarMarkers
-//
-// Places colored markers on the vertical scrollbar to indicate the
-// positions of added (green) and deleted (red) lines.  Uses a private
-// HighlightScrollBarController instance (created lazily on first call)
-// to avoid the layout side-effects of setDisplaySettings().
-//----------------------------------------------------------------------------
-void DiffEditorWidget::updateScrollBarMarkers()
-{
-    // Lazily create our own controller (avoids setDisplaySettings side-effects)
-    if (!d->scrollBarController) {
-        d->scrollBarController = new Core::HighlightScrollBarController;
-        d->scrollBarController->setScrollArea(this);
-    }
-    auto *ctrl = d->scrollBarController;
-
-    // Ensure geometry parameters are set (normally done in resizeEvent,
-    // but the controller may not have been configured yet).
-    ctrl->setLineHeight(fontMetrics().lineSpacing());
-    ctrl->setVisibleRange(viewport()->rect().height());
-    ctrl->setMargin(document()->documentMargin());
-
-    // Category identifiers for diff markers
-    static const Utils::Id additionCategory("DiffEditor.ScrollBarAddition");
-    static const Utils::Id deletionCategory("DiffEditor.ScrollBarDeletion");
-
-    // Clear old diff markers before adding new ones
-    ctrl->removeHighlights(additionCategory);
-    ctrl->removeHighlights(deletionCategory);
-
-    // Add a marker for each changed line
-    for (auto it = m_lineInfo.constBegin(); it != m_lineInfo.constEnd(); ++it) {
-        const LineInfo &info = it.value();
-        if (info.isHeader)
-            continue;
-
-        QTextBlock block = document()->findBlockByNumber(it.key());
-        if (!block.isValid())
-            continue;
-
-        const int position = block.firstLineNumber();
-
-        switch (info.type) {
-        case cvs::DiffLine::Addition:
-        case cvs::DiffLine::Modification:
-            ctrl->addHighlight({additionCategory, position,
-                                Utils::Theme::VcsBase_FileAdded_TextColor,
-                                Core::Highlight::NormalPriority});
-            break;
-        case cvs::DiffLine::Deletion:
-            ctrl->addHighlight({deletionCategory, position,
-                                Utils::Theme::VcsBase_FileDeleted_TextColor,
-                                Core::Highlight::NormalPriority});
-            break;
-        default:
-            break;
-        }
-    }
-}
-
-//----------------------------------------------------------------------------
 // extraAreaWidth
 //
 // Gutter layout (left → right):
@@ -473,35 +294,27 @@ void DiffEditorWidget::updateScrollBarMarkers()
 //----------------------------------------------------------------------------
 int DiffEditorWidget::extraAreaWidth(int *markWidthPtr) const
 {
-    // Let the base class update its internal state and viewport margins.
-    int baseWidth = TextEditor::TextEditorWidget::extraAreaWidth(markWidthPtr);
+    // Let the base class handle its diff marker width + viewport margins.
+    int baseWidth = CodeEditorView::extraAreaWidth(markWidthPtr);
+
+    if (!m_showOldLineNumbers)
+        return baseWidth;
 
     const QFontMetrics fm(font());
     const int digitW = fm.horizontalAdvance('9');
 
-    // Determine the widest old / new line number we need to display.
     int maxOld = 1;
-    int maxNew = 1;
     for (const auto &info : m_lineInfo) {
         if (info.oldLineNo > maxOld) maxOld = info.oldLineNo;
-        if (info.newLineNo > maxNew) maxNew = info.newLineNo;
     }
-
     const int oldDigits = QString::number(maxOld).length();
-    const int newDigits = QString::number(maxNew).length();
-    const int oldColW  = digitW * oldDigits;
-    const int newColW  = digitW * newDigits;
-    const int markerW  = digitW + 4;
-    const int pad       = 4;
-    const int sep       = 1;
+    const int oldColW = digitW * oldDigits;
+    const int pad = 4;
+    const int sep = 1;
 
-    int extra = pad;
-    if (m_showOldLineNumbers)
-        extra += oldColW + pad + sep + pad;
-    extra += newColW + pad + markerW + pad;
+    int extra = pad + oldColW + pad + sep + pad;
     int total = baseWidth + extra;
 
-    // Override viewport margins — the base class only reserved baseWidth.
     const_cast<DiffEditorWidget*>(this)->setViewportMargins(
         isLeftToRight() ? total : 0, 0,
         isLeftToRight() ? 0 : total, 0);
@@ -512,54 +325,57 @@ int DiffEditorWidget::extraAreaWidth(int *markWidthPtr) const
 //----------------------------------------------------------------------------
 // extraAreaPaintEvent
 //
-// Fully custom painting — we do NOT call the base class because line
-// numbers, marks, and folding are all disabled for the diff view.
-// We fill the background ourselves and then draw:
-//   1. Old line number (grey, left column) — only when enabled
-//   2. Vertical separator — only when old line numbers enabled
-//   3. New line number (dark grey, right column)
-//   4. Diff marker (+ in green, - in red)
+// When old line numbers are disabled, delegates to the base class which
+// draws standard line numbers + diff markers.
+//
+// When enabled, fully custom painting: [old-line | sep | new-line | marker]
 //----------------------------------------------------------------------------
 void DiffEditorWidget::extraAreaPaintEvent(QPaintEvent *e)
 {
+    if (!m_showOldLineNumbers) {
+        // No old line numbers — delegate to base class (standard gutter + diff markers)
+        CodeEditorView::extraAreaPaintEvent(e);
+        return;
+    }
+
+    // Dual-column gutter: [old-line | sep | new-line | marker]
     QPainter painter(extraArea());
     painter.fillRect(e->rect(), extraArea()->palette().color(QPalette::Window));
 
     const QFontMetrics fm(font());
     const int digitW = fm.horizontalAdvance('9');
 
-    // Recompute column geometry (mirrors extraAreaWidth)
     int maxOld = 1;
-    int maxNew = 1;
     for (const auto &info : m_lineInfo) {
         if (info.oldLineNo > maxOld) maxOld = info.oldLineNo;
-        if (info.newLineNo > maxNew) maxNew = info.newLineNo;
     }
     const int oldDigits = QString::number(maxOld).length();
-    const int newDigits = QString::number(maxNew).length();
-    const int oldColW  = digitW * oldDigits;
-    const int newColW  = digitW * newDigits;
-    const int markerW  = digitW + 4;
-    const int pad       = 4;
-    const int sep       = 1;
+    const int oldColW = digitW * oldDigits;
+    const int pad = 4;
+    const int sep = 1;
 
-    // X positions (old column and separator shown only when enabled)
     int x = pad;
-    int oldX = -1, sepX = -1;
-    if (m_showOldLineNumbers) {
-        oldX = x;
-        x += oldColW + pad;
-        sepX = x;
-        x += sep + pad;
+    const int oldX = x;
+    x += oldColW + pad;
+    const int sepX = x;
+    x += sep + pad;
 
-        // Draw the vertical separator that divides old and new columns
-        painter.setPen(QColor(220, 220, 220));
-        painter.drawLine(sepX, e->rect().top(), sepX, e->rect().bottom());
+    // Draw the vertical separator between old and new columns
+    painter.setPen(QColor(220, 220, 220));
+    painter.drawLine(sepX, e->rect().top(), sepX, e->rect().bottom());
+
+    // New line number column and diff marker column (after separator)
+    int maxNew = 1;
+    for (const auto &info : m_lineInfo) {
+        if (info.newLineNo > maxNew) maxNew = info.newLineNo;
     }
-    const int newX     = x;
-    const int markerX  = newX + newColW + pad;
+    const int newDigits = QString::number(maxNew).length();
+    const int newColW = digitW * newDigits;
+    const int markerW = digitW + 4;
 
-    // Iterate over visible blocks
+    const int newX    = x;
+    const int markerX = newX + newColW + pad;
+
     QTextBlock block = firstVisibleBlock();
     QPointF offset = contentOffset();
 
@@ -574,18 +390,18 @@ void DiffEditorWidget::extraAreaPaintEvent(QPaintEvent *e)
 
             if (it != m_lineInfo.end()) {
                 const LineInfo &info = it.value();
-                const int top  = int(blockRect.top());
-                const int h    = int(blockRect.height());
+                const int top = int(blockRect.top());
+                const int h   = int(blockRect.height());
 
-                // --- Old line number -----------------------------------
-                if (m_showOldLineNumbers && info.oldLineNo > 0) {
+                // Old line number
+                if (info.oldLineNo > 0) {
                     painter.setPen(QColor(150, 150, 150));
                     painter.drawText(QRect(oldX, top, oldColW, h),
                                      Qt::AlignRight | Qt::AlignVCenter,
                                      QString::number(info.oldLineNo));
                 }
 
-                // --- New line number -----------------------------------
+                // New line number
                 if (info.newLineNo > 0) {
                     painter.setPen(QColor(120, 120, 120));
                     painter.drawText(QRect(newX, top, newColW, h),
@@ -593,7 +409,7 @@ void DiffEditorWidget::extraAreaPaintEvent(QPaintEvent *e)
                                      QString::number(info.newLineNo));
                 }
 
-                // --- Diff marker (+ / -) -------------------------------
+                // Diff marker (+ / -)
                 if (!info.isHeader) {
                     switch (info.type) {
                     case cvs::DiffLine::Addition:

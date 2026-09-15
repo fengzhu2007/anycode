@@ -18,6 +18,7 @@ namespace ady {
             COS,
             SFTP,
             S3
+
         };
         enum ExportType{
             Default = 1,

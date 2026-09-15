@@ -9,6 +9,7 @@
 #include "parselint/css_lint.h"
 #include "parselint/xml_lint.h"
 #include "parselint/cpp_lint.h"
+
 #include <QLibrary>
 #include <QDebug>
 #include <QFileInfo>

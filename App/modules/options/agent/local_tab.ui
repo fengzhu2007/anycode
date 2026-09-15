@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ProxyTab</class>
- <widget class="QWidget" name="ProxyTab">
+ <class>LocalTab</class>
+ <widget class="QWidget" name="LocalTab">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,9 +27,9 @@
     <number>8</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="proxyGroup">
+    <widget class="QGroupBox" name="serverGroup">
      <property name="title">
-      <string>Proxy Settings</string>
+      <string>Server</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="spacing">
@@ -56,23 +56,13 @@
          <number>8</number>
         </property>
         <item row="0" column="0">
-         <widget class="QLabel" name="label_host">
-          <property name="text">
-           <string>Host:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="host"/>
-        </item>
-        <item row="1" column="0">
          <widget class="QLabel" name="label_port">
           <property name="text">
            <string>Port:</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
+        <item row="0" column="1">
          <widget class="QSpinBox" name="port">
           <property name="minimumSize">
            <size>
@@ -80,34 +70,26 @@
             <height>0</height>
            </size>
           </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
           <property name="maximum">
            <number>65535</number>
           </property>
+          <property name="value">
+           <number>3710</number>
+          </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_username">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_runMode">
           <property name="text">
-           <string>Username:</string>
+           <string>Run Mode:</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="username"/>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_password">
-          <property name="text">
-           <string>Password:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QLineEdit" name="password">
-          <property name="echoMode">
-           <enum>QLineEdit::Password</enum>
-          </property>
-         </widget>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="runMode"/>
         </item>
        </layout>
       </item>
@@ -115,11 +97,14 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="optionsGroup">
+    <widget class="QGroupBox" name="proxyGroup">
      <property name="title">
-      <string>Options</string>
+      <string>Proxy</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <property name="spacing">
+       <number>8</number>
+      </property>
       <property name="leftMargin">
        <number>6</number>
       </property>
@@ -133,9 +118,9 @@
        <number>6</number>
       </property>
       <item>
-       <widget class="QCheckBox" name="gateway">
+       <widget class="QCheckBox" name="enableProxy">
         <property name="text">
-         <string>Gateway</string>
+         <string>Enable Proxy (use Network proxy settings)</string>
         </property>
        </widget>
       </item>

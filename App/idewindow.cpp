@@ -101,7 +101,7 @@ IDEWindow::IDEWindow(QWidget *parent) :
 Type::M_TOGGLE_NOTIFICATION,Type::M_OPEN_TERMINAL,Type::M_OPEN_RUN_TERMINAL});
     ui->setupUi(this);
 
-    this->setWindowIcon(QIcon(":/Resource/images/logo.icns"));
+    //this->setWindowIcon(QIcon(":/Resource/images/logo.icns"));
 
 
 

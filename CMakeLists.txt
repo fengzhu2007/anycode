@@ -36,7 +36,7 @@ add_subdirectory(App)
 
 add_subdirectory(libsvnpp)
 
-add_subdirectory(opencode-cpp)
+add_subdirectory(openagent-cpp)
 
 
 add_subdirectory(addon)
@@ -46,11 +46,4 @@ add_subdirectory(addon)
 # 添加 MainProject 子目录
 add_subdirectory(src)
 
-
-#add_custom_command(TARGET your_target_name POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy
-#        ${CMAKE_SOURCE_DIR}/source_file.txt
-#        ${CMAKE_BINARY_DIR}/destination_file.txt
-#    COMMENT "Copying file to binary directory"
-#)
 add_subdirectory(browser-llm-gateway/libgatewap)

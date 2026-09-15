@@ -58,6 +58,8 @@ ChatService::ChatService(QObject *parent)
     qRegisterMetaType<OpenCodeMessage>("OpenCodeMessage");
     qRegisterMetaType<QList<OpenCodeMessage>>("QList<OpenCodeMessage>");
     qRegisterMetaType<OpenCodePermissionRequest>("OpenCodePermissionRequest");
+    qRegisterMetaType<FileDiffInfo>("FileDiffInfo");
+    qRegisterMetaType<QList<FileDiffInfo>>("QList<FileDiffInfo>");
 
     // Reconnect timer for event stream
     m_reconnectTimer = new QTimer(this);
@@ -532,14 +534,18 @@ bool ChatService::sendMessage(const QString &sessionId, const QString &content, 
 
 // ---- load session messages: GET /session/{id}/message ----
 
-void ChatService::loadSessionMessages(const QString &sessionId, int limit)
+void ChatService::loadSessionMessages(const QString &sessionId, int limit, qint64 beforeTimestamp)
 {
     QString url = m_baseUrl + "/session/" + sessionId + "/message?limit=" + QString::number(limit);
+    if (beforeTimestamp > 0) {
+        url += "&before=" + QString::number(beforeTimestamp);
+    }
 
-    QtConcurrent::run([this, url, sessionId](){
+    QtConcurrent::run([this, url, sessionId, beforeTimestamp](){
         CURL *curl = curl_easy_init();
         if(!curl){
-            emit messagesReceived(sessionId, {}, tr("Failed to init curl"));
+            if (beforeTimestamp > 0) emit messagesPrepended(sessionId, {}, tr("Failed to init curl"));
+            else emit messagesReceived(sessionId, {}, tr("Failed to init curl"));
             return;
         }
 
@@ -558,7 +564,8 @@ void ChatService::loadSessionMessages(const QString &sessionId, int limit)
         curl_easy_cleanup(curl);
 
         if(res != CURLE_OK){
-            emit messagesReceived(sessionId, {}, QString::fromUtf8(curl_easy_strerror(res)));
+            if (beforeTimestamp > 0) emit messagesPrepended(sessionId, {}, QString::fromUtf8(curl_easy_strerror(res)));
+            else emit messagesReceived(sessionId, {}, QString::fromUtf8(curl_easy_strerror(res)));
             return;
         }
 
@@ -618,8 +625,13 @@ void ChatService::loadSessionMessages(const QString &sessionId, int limit)
             }
         }
 
-        qDebug() << "[ChatService] loaded" << messages.size() << "messages for session" << sessionId;
-        emit messagesReceived(sessionId, messages, {});
+        qDebug() << "[ChatService] loaded" << messages.size() << "messages for session" << sessionId
+                 << "beforeTimestamp=" << beforeTimestamp;
+        if (beforeTimestamp > 0) {
+            emit messagesPrepended(sessionId, messages, {});
+        } else {
+            emit messagesReceived(sessionId, messages, {});
+        }
     });
 }
 
@@ -687,9 +699,12 @@ void ChatService::setWorkingDirectories(const QStringList &directories)
     QString url = m_baseUrl + "/directories";
 
     static QStringList lastDirectories;
-    if(lastDirectories!=directories){
-        lastDirectories = directories;
+    if(lastDirectories==directories){
+        return;
     }
+
+
+    lastDirectories = directories;
     QJsonObject body;
     QJsonArray dirsArray;
     for (const QString &dir : lastDirectories) {
@@ -760,6 +775,93 @@ void ChatService::compactSession(const QString &sessionId)
         }else{
             qDebug() << "[ChatService] compactSession request sent for session:" << sessionId
                      << "response:" << responseData;
+        }
+    });
+}
+
+// ---- confirm changes: POST /session/{id}/changes/confirm ----
+
+void ChatService::confirmChanges(const QString &sessionId)
+{
+    QString url = m_baseUrl + "/session/" + sessionId + "/changes/confirm";
+
+    QtConcurrent::run([url, sessionId](){
+        CURL *curl = curl_easy_init();
+        if(!curl) return;
+
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+        curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8().constData());
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L);
+
+        CURLcode res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+
+        if(res != CURLE_OK){
+            qWarning() << "[ChatService] confirmChanges failed:" << curl_easy_strerror(res);
+        }else{
+            qDebug() << "[ChatService] changes confirmed for session:" << sessionId;
+        }
+    });
+}
+
+// ---- revert session: POST /session/{id}/revert ----
+
+void ChatService::revertSession(const QString &sessionId)
+{
+    QString url = m_baseUrl + "/session/" + sessionId + "/revert";
+
+    QtConcurrent::run([url, sessionId](){
+        CURL *curl = curl_easy_init();
+        if(!curl) return;
+
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+        curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8().constData());
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L);
+
+        CURLcode res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+
+        if(res != CURLE_OK){
+            qWarning() << "[ChatService] revertSession failed:" << curl_easy_strerror(res);
+        }else{
+            qDebug() << "[ChatService] session reverted:" << sessionId;
+        }
+    });
+}
+
+// ---- revert commit: POST /session/{id}/revert/commit ----
+
+void ChatService::revertCommitSession(const QString &sessionId)
+{
+    QString url = m_baseUrl + "/session/" + sessionId + "/revert/commit";
+
+    QtConcurrent::run([url, sessionId](){
+        CURL *curl = curl_easy_init();
+        if(!curl) return;
+
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+        curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8().constData());
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L);
+
+        CURLcode res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+
+        if(res != CURLE_OK){
+            qWarning() << "[ChatService] revertCommit failed:" << curl_easy_strerror(res);
+        }else{
+            qDebug() << "[ChatService] revert committed for session:" << sessionId;
         }
     });
 }
@@ -1129,7 +1231,25 @@ void ChatService::processEventStream(const QByteArray &chunk)
                                               Q_ARG(QString, toolName),
                                               Q_ARG(QString, "Error: " + error));
                 }
-                // pending state is silently ignored (input not yet available)
+                // pending state: create or update the tool bubble immediately so the UI
+                // shows progress as soon as ToolCallStart arrives (before full args stream in)
+                else if(status == "pending"){
+                    QString display = toolName;
+                    if(input.contains("filePath")){
+                        display += ": " + input["filePath"].toString();
+                    }else if(input.contains("path")){
+                        display += ": " + input["path"].toString();
+                    }else if(input.contains("command")){
+                        display += ": " + input["command"].toString();
+                    }
+                    qDebug() << "[ChatService] tool pending:" << toolName << "callID:" << callID;
+                    QMetaObject::invokeMethod(this, "streamToolUse", Qt::QueuedConnection,
+                                              Q_ARG(QString, sessionId),
+                                              Q_ARG(QString, callID),
+                                              Q_ARG(QString, toolName),
+                                              Q_ARG(QString, display),
+                                              Q_ARG(QString, input.contains("command") ? input["command"].toString() : QString()));
+                }
             }else if(partType == "tool_use" || partType == "tool-use"){
                 QString toolName = part["name"].toString();
                 if(toolName.isEmpty()) toolName = part["toolName"].toString();
@@ -1202,25 +1322,48 @@ void ChatService::processEventStream(const QByteArray &chunk)
             }
         }else if(type == "message.updated"){
             // message updated events are handled via stream deltas
-        }else if(type == "session.diff"){
+        }else if(type == "session.files_changed"){
             QJsonObject props = payload["properties"].toObject();
             QString sessionId = props["sessionID"].toString();
             QJsonArray diffArr = props["diff"].toArray();
+            QList<FileDiffInfo> diffs;
+            QStringList files;
             if(!diffArr.isEmpty()){
-                QStringList files;
+                // Full diff data with additions/deletions/patch
                 for(const auto &d : diffArr){
                     QJsonObject diffObj = d.toObject();
-                    QString file = diffObj["file"].toString();
-                    if(!file.isEmpty()) files.append(file);
+                    FileDiffInfo info;
+                    info.file = diffObj["file"].toString();
+                    info.status = diffObj["status"].toString("modified");
+                    info.additions = diffObj["additions"].toInt();
+                    info.deletions = diffObj["deletions"].toInt();
+                    if(!info.file.isEmpty()){
+                        diffs.append(info);
+                        files.append(info.file);
+                    }
                 }
-                if(!files.isEmpty()){
-                    QString summary = QObject::tr("Files modified (%1): %2")
-                        .arg(files.size())
-                        .arg(files.join(", "));
-                    qDebug() << "[ChatService] session.diff:" << sessionId << files;
-                    emit sessionDiffChanged(sessionId, summary);
+            }else{
+                // Fallback: build from simple files array (path + status only)
+                QJsonArray filesArr = props["files"].toArray();
+                for(const auto &f : filesArr){
+                    QJsonObject fObj = f.toObject();
+                    FileDiffInfo info;
+                    info.file = fObj["path"].toString();
+                    info.status = fObj["status"].toString("modified");
+                    if(!info.file.isEmpty()){
+                        diffs.append(info);
+                        files.append(info.file);
+                    }
                 }
             }
+            if(!diffs.isEmpty()){
+                QString summary = QObject::tr("Files modified (%1): %2")
+                    .arg(files.size())
+                    .arg(files.join(", "));
+                qDebug() << "[ChatService] session.files_changed:" << sessionId << files;
+                emit sessionDiffChanged(sessionId, summary);
+            }
+            emit sessionDiffReceived(sessionId, diffs);
         }else if(type == "session.next.compaction.started.1"){
             QJsonObject props = payload["properties"].toObject();
             QString sessionId = props["sessionID"].toString();

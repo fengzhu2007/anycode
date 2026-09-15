@@ -28,7 +28,6 @@ public:
     QString m_username;
     QString m_password;
     bool m_gatewayEnabled;
-    bool m_opencodeCppEnabled;
 };
 }
 

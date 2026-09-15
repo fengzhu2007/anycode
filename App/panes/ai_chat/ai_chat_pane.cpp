@@ -15,6 +15,7 @@
 #include "panes/resource_manager/resource_manager_model_item.h"
 #include "modules/options/options_settings.h"
 #include "modules/options/network_settings.h"
+#include "modules/options/agent_settings.h"
 
 #include <QDir>
 
@@ -116,8 +117,15 @@ AIChatPane::AIChatPane(QWidget *parent)
             appendEvent(page, summary);
         }
     });
+    connect(m_service, &ChatService::sessionDiffReceived, this, [this](const QString &sessionId, const QList<FileDiffInfo> &diffs){
+        auto *page = findPage(sessionId);
+        if(page){
+            page->setFileDiffs(diffs);
+        }
+    });
     connect(m_service, &ChatService::modelsReceived, this, &AIChatPane::onModelsReceived);
     connect(m_service, &ChatService::messagesReceived, this, &AIChatPane::onMessagesReceived);
+    connect(m_service, &ChatService::messagesPrepended, this, &AIChatPane::onMessagesPrepended);
     connect(m_service, &ChatService::compactionStarted, this, &AIChatPane::onCompactionStarted);
     connect(m_service, &ChatService::compactionFinished, this, &AIChatPane::onCompactionFinished);
     connect(m_service, &ChatService::autoCompactionTriggered, this, [this](const QString &sessionId){
@@ -276,6 +284,9 @@ void AIChatPane::onActionTriggered(){
         if(page) clearMessages(page);
     } else if(sender == ui->actionRefreshModels){
         m_service->listModels();
+        // DEBUG: insert test bubble to verify tool rendering
+        // TODO: remove after debugging
+        insertDebugTestMessage();
     }
 }
 
@@ -344,6 +355,7 @@ void AIChatPane::onSessionCreated(const OpenCodeSession &session, const QString 
             sd = s;
             page = s->page;
             sd->sessionId = session.id;
+            page->setSessionId(session.id);
             // Read model from combobox if not set
             if(sd->modelProviderID.isEmpty() || sd->modelID.isEmpty()){
                 QString data = page->modelCombo()->currentData().toString();
@@ -363,6 +375,7 @@ void AIChatPane::onSessionCreated(const OpenCodeSession &session, const QString 
         sd = new SessionData;
         sd->sessionId = session.id;
         sd->page = page;
+        page->setSessionId(session.id);
         sd->modelProviderID = session.modelProviderID;
         sd->modelID = session.modelID;
         m_sessions.append(sd);
@@ -434,6 +447,7 @@ void AIChatPane::onSessionDeleted(const QString &sessionId, const QString &error
 SessionPageWidget* AIChatPane::createSessionPage()
 {
     auto *page = new SessionPageWidget(ui->stackedWidget);
+    page->setChatService(m_service);
 
     QString borderColor = Theme::getInstance()->borderColor().name(QColor::HexRgb);
     page->messageInput()->setStyleSheet("QTextEdit{border:1px solid " + borderColor + ";}");
@@ -536,6 +550,7 @@ void AIChatPane::switchToSession(const QString &sessionId)
         auto *sd = new SessionData;
         sd->sessionId = sessionId;
         sd->page = page;
+        page->setSessionId(sessionId);
         // Copy model info from service's session list
         for(const auto &s : m_service->sessions()){
             if(s.id == sessionId){
@@ -545,6 +560,11 @@ void AIChatPane::switchToSession(const QString &sessionId)
             }
         }
         m_sessions.append(sd);
+
+        // Connect scroll-to-top signal for loading older messages
+        connect(page, &SessionPageWidget::scrollToTopRequested, this, [this, sessionId]() {
+            onLoadMoreMessages(sessionId);
+        });
 
         m_service->loadSessionMessages(sessionId);
     }
@@ -597,6 +617,10 @@ void AIChatPane::onMessagesReceived(const QString &sessionId, const QList<OpenCo
     auto *page = findPage(sessionId);
     if(!page) return;
 
+    int sdIdx = findSessionIndex(sessionId);
+    if(sdIdx < 0) return;
+    auto *sd = m_sessions.at(sdIdx);
+
     page->clearMessages();
 
     for(const auto &msg : messages){
@@ -606,7 +630,95 @@ void AIChatPane::onMessagesReceived(const QString &sessionId, const QList<OpenCo
         page->messageModel()->addMessage(type, msg.text);
     }
 
+    // Track oldest message timestamp for pagination
+    if(!messages.isEmpty()){
+        sd->oldestMessageTimestamp = messages.first().timeCreated;
+        sd->hasMoreMessages = true;  // assume more until a page returns 0
+    } else {
+        sd->hasMoreMessages = false;
+    }
+    sd->isLoadingMore = false;
+
     page->scrollToBottom();
+}
+
+void AIChatPane::onMessagesPrepended(const QString &sessionId, const QList<OpenCodeMessage> &olderMessages, const QString &error){
+    int sdIdx = findSessionIndex(sessionId);
+    if(sdIdx < 0) return;
+    auto *sd = m_sessions.at(sdIdx);
+    auto *page = sd->page;
+    if(!page) return;
+
+    sd->isLoadingMore = false;
+
+    if(!error.isEmpty()){
+        qDebug() << "[AIChatPane] Prepend messages error:" << error;
+        page->messageListView()->setPrependInProgress(false);
+        return;
+    }
+
+    if(olderMessages.isEmpty()){
+        sd->hasMoreMessages = false;
+        page->messageListView()->setPrependInProgress(false);
+        return;
+    }
+
+    // Collect existing messages before rebuild
+    QList<QPair<ChatMessageView::Type, QString>> existingMessages;
+    for (int i = 0; i < page->messageModel()->rowCount(); ++i) {
+        auto msgData = page->messageModel()->messageAt(i);
+        existingMessages.append({msgData.type, msgData.content});
+    }
+
+    // Rebuild model: older messages first, then existing messages
+    page->messageModel()->clearMessages();
+    for (const auto &msg : olderMessages) {
+        ChatMessageView::Type type = (msg.role == "user")
+            ? ChatMessageView::User
+            : ChatMessageView::Assistant;
+        page->messageModel()->addMessage(type, msg.text);
+    }
+    int oldFirstRow = olderMessages.size();
+    for (const auto &existing : existingMessages) {
+        page->messageModel()->addMessage(existing.first, existing.second);
+    }
+
+    // Update oldest timestamp
+    sd->oldestMessageTimestamp = olderMessages.first().timeCreated;
+    sd->hasMoreMessages = true;  // got some, might be more
+
+    // Adjust scroll position after layout settles
+    page->messageListView()->setPrependInProgress(false);
+    QTimer::singleShot(50, page, [page, oldFirstRow]() {
+        // Scroll to keep the old first visible message in view
+        if (page->messageModel()->rowCount() > oldFirstRow) {
+            QModelIndex idx = page->messageModel()->index(oldFirstRow);
+            if (idx.isValid()) {
+                page->messageListView()->scrollTo(idx, QAbstractItemView::PositionAtTop);
+            }
+        }
+    });
+}
+
+void AIChatPane::onLoadMoreMessages(const QString &sessionId)
+{
+    int sdIdx = findSessionIndex(sessionId);
+    if (sdIdx < 0) return;
+    auto *sd = m_sessions.at(sdIdx);
+
+    // Guard: don't fire while already loading, receiving, or when no more history
+    if (sd->isLoadingMore || sd->isReceiving || !sd->hasMoreMessages || sd->oldestMessageTimestamp <= 0) {
+        qDebug() << "[AIChatPane] LoadMore blocked: isLoadingMore=" << sd->isLoadingMore
+                 << "isReceiving=" << sd->isReceiving
+                 << "hasMore=" << sd->hasMoreMessages
+                 << "oldestTs=" << sd->oldestMessageTimestamp;
+        return;
+    }
+
+    qDebug() << "[AIChatPane] Loading older messages before:" << sd->oldestMessageTimestamp;
+    sd->isLoadingMore = true;
+    sd->page->messageListView()->setPrependInProgress(true);
+    m_service->loadSessionMessages(sessionId, 20, sd->oldestMessageTimestamp);
 }
 
 // ---- message sending ----
@@ -1151,22 +1263,24 @@ void AIChatPane::appendEventToCurrentPage(const QString &text)
  */
 QString AIChatPane::findServerExecutable()
 {
-    m_serverPort = ChatService::serverPort();
+    auto agentSetting = OptionsSettings::getInstance()->agentSettings();
+    m_serverPort = agentSetting.m_port;
+    ChatService::setServerPort(m_serverPort);
     QString exeDir = QCoreApplication::applicationDirPath();
-    QString exe = exeDir + "/opencode-cpp.exe";
+    QString exe = exeDir + "/openagent-cpp.exe";
     if(!QFile::exists(exe)){
         return QString();
     }
 
     // Ensure prompts/ directory exists next to the exe.
-    // If missing, try to copy from the source tree (opencode-cpp/prompts/).
+    // If missing, try to copy from the source tree (openagent-cpp/prompts/).
     QString promptsDir = exeDir + "/prompts";
     if(!QDir(promptsDir).exists()){
-        // Try to find source prompts dir: walk up from exe to find opencode-cpp/prompts
+        // Try to find source prompts dir: walk up from exe to find openagent-cpp/prompts
         QString sourcePrompts;
         QDir dir(exeDir);
         for(int i = 0; i < 4; ++i){
-            QString candidate = dir.filePath("opencode-cpp/prompts");
+            QString candidate = dir.filePath("openagent-cpp/prompts");
             if(QDir(candidate).exists()){
                 sourcePrompts = candidate;
                 break;
@@ -1195,7 +1309,7 @@ QString AIChatPane::findServerExecutable()
 }
 
 /**
- * listSessions 失败时调用：通过事件让终端打开并运行 opencode-cpp，
+ * listSessions 失败时调用：通过事件让终端打开并运行 openagent-cpp，
  * 然后链式 ping 等待服务器就绪，就绪后恢复正常的 API 加载流程。
  */
 void AIChatPane::startServerIfNeeded()
@@ -1205,38 +1319,59 @@ void AIChatPane::startServerIfNeeded()
 
     QString exe = findServerExecutable();
     if(exe.isEmpty()){
-        qDebug() << "[AIChatPane] opencode-cpp executable not found";
-        appendEventToCurrentPage(tr("opencode-cpp executable not found, "
+        qDebug() << "[AIChatPane] openagent-cpp executable not found";
+        appendEventToCurrentPage(tr("openagent-cpp executable not found, "
                                     "please configure data/ai_chat_server.json"));
         return;
     }
 
+    auto agentSetting = OptionsSettings::getInstance()->agentSettings();
 
+    // Build command arguments
+    QStringList args;
+    args << "--port" << QString::number(m_serverPort);
 
-
-    TerminalData td;
-    td.workingDir = QFileInfo(exe).absolutePath();
-    td.command = QString("\"%1\" --port %2").arg(exe).arg(m_serverPort);
-
-    // Pass proxy if Opencode-cpp proxy option is enabled
-    auto setting = OptionsSettings::getInstance()->networkSettings();
-    if(setting.m_opencodeCppEnabled && !setting.m_host.isEmpty()){
-        QString proxyUrl;
-        if(!setting.m_username.isEmpty()){
-            proxyUrl = QString("http://%1:%2@%3:%4")
-                .arg(setting.m_username, setting.m_password, setting.m_host)
-                .arg(setting.m_port);
-        } else {
-            proxyUrl = QString("http://%1:%2").arg(setting.m_host).arg(setting.m_port);
+    // Pass proxy if enabled in agent settings (reuse network proxy config)
+    if(agentSetting.m_proxyEnabled){
+        auto netSetting = OptionsSettings::getInstance()->networkSettings();
+        if(!netSetting.m_host.isEmpty()){
+            QString proxyUrl;
+            if(!netSetting.m_username.isEmpty()){
+                proxyUrl = QString("http://%1:%2@%3:%4")
+                    .arg(netSetting.m_username, netSetting.m_password,
+                         netSetting.m_host)
+                    .arg(netSetting.m_port);
+            } else {
+                proxyUrl = QString("http://%1:%2")
+                    .arg(netSetting.m_host).arg(netSetting.m_port);
+            }
+            args << "--proxy" << proxyUrl;
+            qDebug() << "[AIChatPane] Passing proxy to openagent-cpp:" << proxyUrl;
         }
-        td.command += QString(" --proxy %1").arg(proxyUrl);
-        qDebug() << "[AIChatPane] Passing proxy to opencode-cpp:" << proxyUrl;
     }
 
-    Publisher::getInstance()->post(Type::M_OPEN_RUN_TERMINAL, &td);
-
-    qDebug() << "[AIChatPane] Requested terminal to run:" << td.command;
-    appendEventToCurrentPage(tr("Starting opencode-cpp in terminal..."));
+    if(agentSetting.m_runMode == AgentSettings::Terminal){
+        // Run in built-in terminal
+        TerminalData td;
+        td.workingDir = QFileInfo(exe).absolutePath();
+        td.command = QString("\"%1\"").arg(exe);
+        for(const auto &arg : args){
+            td.command += QString(" %1").arg(arg);
+        }
+        Publisher::getInstance()->post(Type::M_OPEN_RUN_TERMINAL, &td);
+        qDebug() << "[AIChatPane] Requested terminal to run:" << td.command;
+        appendEventToCurrentPage(tr("Starting openagent-cpp in terminal..."));
+    } else {
+        // Run in QProcess (background)
+        if(m_serverProcess){
+            m_serverProcess->kill();
+            m_serverProcess->deleteLater();
+        }
+        m_serverProcess = new QProcess(this);
+        m_serverProcess->setWorkingDirectory(QFileInfo(exe).absolutePath());
+        m_serverProcess->start(exe, args);
+        qDebug() << "[AIChatPane] Started openagent-cpp in background:" << exe << args;
+    }
 
     // chain-ping until the server responds
     m_pingCount = 0;
@@ -1246,8 +1381,8 @@ void AIChatPane::startServerIfNeeded()
 void AIChatPane::onServerPingResult(bool ok)
 {
     if(ok){
-        qDebug() << "[AIChatPane] opencode-cpp server is ready";
-        appendEventToCurrentPage(tr("opencode-cpp server is ready"));
+        qDebug() << "[AIChatPane] openagent-cpp server is ready";
+        appendEventToCurrentPage(tr("openagent-cpp server is ready"));
         // server up - reload sessions (models follow in onSessionsReceived)
         m_service->listSessions();
         return;
@@ -1255,8 +1390,8 @@ void AIChatPane::onServerPingResult(bool ok)
 
     m_pingCount++;
     if(m_pingCount >= 60){   // ~60 x (500ms + request) ≈ 60s
-        qDebug() << "[AIChatPane] opencode-cpp server start timeout";
-        appendEventToCurrentPage(tr("opencode-cpp start timeout, "
+        qDebug() << "[AIChatPane] openagent-cpp server start timeout";
+        appendEventToCurrentPage(tr("openagent-cpp start timeout, "
                                     "please check the terminal output"));
         return;
     }
@@ -1283,9 +1418,9 @@ void AIChatPane::notifyWorkspacesChanged()
         }
     }
 
-    qDebug() << "[AIChatPane] workspaces changed, notifying opencode:" << paths;
+    qDebug() << "[AIChatPane] workspaces changed, notifying openagent:" << paths;
 
-    // Notify opencode-cpp server about working directory changes (global)
+    // Notify openagent-cpp server about working directory changes (global)
     m_service->setWorkingDirectories(paths);
 }
 
@@ -1337,6 +1472,65 @@ AIChatPane* AIChatPane::make(DockingPaneManager* dockingManager, const QJsonObje
 
 AIChatPane* AIChatPane::getInstance(){
     return instance;
+}
+
+void AIChatPane::insertDebugTestMessage()
+{
+    auto *page = findPage(m_currentSessionId);
+    if(!page) return;
+
+    // Add an empty assistant message, then populate it with test content
+    page->addMessage(ChatMessageView::Assistant, "");
+    page->messageListView()->updateVisibleWidgets();
+
+    int row = page->messageModel()->messageCount() - 1;
+    auto *w = page->messageListView()->widgetForMessage(row);
+    if(!w) return;
+
+    // 1. Thinking content
+    w->appendThink("Let me analyze the user's request. They want to create a new file with some example code. "
+                   "I should first check the existing project structure, then write the file using the write tool.");
+
+    // 2. Tool call: read (processing)
+    w->appendToolBlock("call_debug_001", "read", "read", "{\"path\": \"D:/Qt/anycode/src/main.cpp\"}");
+
+    // 3. Tool call: cmd (processing -> success)
+    w->appendToolBlock("call_debug_002", "cmd", "cmd", "{\"command\": \"dir D:\\Qt\\anycode\\src\"}");
+
+    // 4. Tool call: write (processing -> success)
+    w->appendToolBlock("call_debug_003", "write", "write", "{\"path\": \"D:/Qt/anycode/src/test_output.cpp\"}");
+
+    // Update read tool to success
+    w->updateToolStatus("call_debug_001", ChatMessageView::ToolSuccess,
+                        "File content: #include <QApplication>\nint main(int argc, char *argv[]) {\n    QApplication app(argc, argv);\n    return app.exec();\n}");
+
+    // Update cmd tool to success
+    w->updateToolStatus("call_debug_002", ChatMessageView::ToolSuccess,
+                        " Volume in drive D is Local Disk\n Directory of D:\\Qt\\anycode\\src\n\n main.cpp\n test_output.cpp\n 2 File(s)");
+
+    // Update write tool to success
+    w->updateToolStatus("call_debug_003", ChatMessageView::ToolSuccess,
+                        "Wrote 256 bytes to D:/Qt/anycode/src/test_output.cpp");
+
+    // 5. Summary text
+    w->appendText("\n\nI've completed the task. Here's what I did:\n\n"
+                  "1. **Read** the existing `main.cpp` to check the project structure\n"
+                  "2. **Listed** files in the `src` directory using `dir` command\n"
+                  "3. **Created** a new test file `test_output.cpp`\n\n"
+                  "```cpp\n"
+                  "#include <iostream>\n"
+                  "#include <vector>\n\n"
+                  "int main() {\n"
+                  "    std::vector<int> nums = {1, 2, 3, 4, 5};\n"
+                  "    for (auto n : nums) {\n"
+                  "        std::cout << n << \" \";\n"
+                  "    }\n"
+                  "    return 0;\n"
+                  "}\n"
+                  "```\n\n"
+                  "The file has been written successfully.");
+
+    page->scrollToBottom();
 }
 
 }

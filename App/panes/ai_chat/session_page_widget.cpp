@@ -4,10 +4,14 @@
 #include "message_model.h"
 #include "chat_message_view.h"
 #include "chat_service.h"
+#include "file_diff_list_widget.h"
 #include "core/theme.h"
+#include "w_popup_panel.h"
 #include <QKeyEvent>
 #include <QTextCursor>
 #include <QVBoxLayout>
+#include <QMouseEvent>
+#include <QTimer>
 
 namespace ady {
 
@@ -28,9 +32,32 @@ SessionPageWidget::SessionPageWidget(QWidget *parent)
     msgLayout->setSpacing(0);
     msgLayout->addWidget(m_messageListView);
 
+    // Forward scroll-to-top signal for loading older messages
+    connect(m_messageListView, &MessageListView::scrollToTopRequested,
+            this, &SessionPageWidget::scrollToTopRequested);
+
     // Enter key handling for message input
     ui->messageInput->installEventFilter(this);
+    ui->fileChanged->installEventFilter(this);
     ui->sessionTitle->setStyleSheet("QLabel{padding:4px}");
+
+    // File diff popup
+    setupDiffPopup();
+
+    // --- TEST DEMO: inject 10 fake file changes ---
+   /* {
+        QList<FileDiffInfo> testDiffs;
+        QStringList statuses = {"modified", "added", "deleted"};
+        for (int i = 0; i < 10; ++i) {
+            FileDiffInfo d;
+            d.file = QString("D:/wamp/www/oa5/src/test_file_%1.cpp").arg(i + 1);
+            d.status = statuses[i % 3];
+            d.additions = (i + 1) * 3;
+            d.deletions = (i + 1);
+            testDiffs.append(d);
+        }
+        setFileDiffs(testDiffs);
+    }*/
 }
 
 SessionPageWidget::~SessionPageWidget()
@@ -89,6 +116,18 @@ void SessionPageWidget::setModels(const QList<OpenCodeModel> &models, const QStr
 
 bool SessionPageWidget::eventFilter(QObject *obj, QEvent *event)
 {
+    // fileChanged label click -> toggle popup
+    if (obj == ui->fileChanged && event->type() == QEvent::MouseButtonPress) {
+        if (!m_currentDiffs.isEmpty()) {
+            if (m_diffPopup->isVisible()) {
+                m_diffPopup->hide();
+            } else {
+                m_diffPopup->showPopup(ui->fileChanged, wPopupPanel::TopLeft);
+            }
+        }
+        return true;
+    }
+
     if (obj == ui->messageInput && event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
         if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
@@ -102,6 +141,98 @@ bool SessionPageWidget::eventFilter(QObject *obj, QEvent *event)
         }
     }
     return QWidget::eventFilter(obj, event);
+}
+
+// ---- File diff popup ----
+
+void SessionPageWidget::setupDiffPopup()
+{
+    // Create popup panel
+    m_diffPopup = new wPopupPanel(this);
+    m_diffPopup->setBorderRadius(8);
+    m_diffPopup->setContentPadding(0);
+    m_diffPopup->setBackgroundColor(QColor(30, 30, 30, 240));
+    m_diffPopup->setAutoClose(true);
+
+    // Create file diff list widget
+    m_diffListWidget = new FileDiffListWidget;
+    m_diffPopup->setContentWidget(m_diffListWidget);
+
+    // Connect file diff list signals
+    connect(m_diffListWidget, &FileDiffListWidget::acceptAll, this, &SessionPageWidget::onAcceptAll);
+    connect(m_diffListWidget, &FileDiffListWidget::rejectAll, this, &SessionPageWidget::onRejectAll);
+
+    // fileChanged label click -> show popup
+    ui->fileChanged->setCursor(Qt::PointingHandCursor);
+
+    // Hide bottom bar initially (no changes yet)
+    ui->fileChanged->hide();
+    ui->accept->hide();
+    ui->reject->hide();
+
+    // Accept/Reject buttons
+    connect(ui->accept, &QPushButton::clicked, this, &SessionPageWidget::onAcceptAll);
+    connect(ui->reject, &QPushButton::clicked, this, &SessionPageWidget::onRejectAll);
+}
+
+void SessionPageWidget::setChatService(ChatService *service)
+{
+    m_chatService = service;
+}
+
+void SessionPageWidget::setSessionId(const QString &sessionId)
+{
+    m_sessionId = sessionId;
+}
+
+void SessionPageWidget::setFileDiffs(const QList<FileDiffInfo> &diffs)
+{
+    m_currentDiffs = diffs;
+
+    bool hasDiffs = !diffs.isEmpty();
+    ui->fileChanged->setVisible(hasDiffs);
+    ui->accept->setVisible(hasDiffs);
+    ui->reject->setVisible(hasDiffs);
+
+    if (hasDiffs) {
+        ui->fileChanged->setText(tr("File Changed List (%1)").arg(diffs.size()));
+        m_diffListWidget->setDiffs(diffs);
+    } else {
+        m_diffListWidget->clear();
+        if (m_diffPopup->isVisible()) {
+            m_diffPopup->hide();
+        }
+    }
+}
+
+void SessionPageWidget::onAcceptAll()
+{
+    if (!m_chatService || m_sessionId.isEmpty()) return;
+    qDebug() << "[SessionPage] Accept all changes for session:" << m_sessionId;
+    m_chatService->confirmChanges(m_sessionId);
+    m_currentDiffs.clear();
+    m_diffListWidget->clear();
+    ui->fileChanged->hide();
+    ui->accept->hide();
+    ui->reject->hide();
+    if (m_diffPopup->isVisible()) {
+        m_diffPopup->hide();
+    }
+}
+
+void SessionPageWidget::onRejectAll()
+{
+    if (!m_chatService || m_sessionId.isEmpty()) return;
+    qDebug() << "[SessionPage] Reject all changes for session:" << m_sessionId;
+    m_chatService->revertSession(m_sessionId);
+    m_currentDiffs.clear();
+    m_diffListWidget->clear();
+    ui->fileChanged->hide();
+    ui->accept->hide();
+    ui->reject->hide();
+    if (m_diffPopup->isVisible()) {
+        m_diffPopup->hide();
+    }
 }
 
 }

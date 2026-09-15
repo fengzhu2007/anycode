@@ -3,12 +3,14 @@
 #include "environment_settings.h"
 #include "language_settings.h"
 #include "ai_settings.h"
+#include "agent_settings.h"
 #include "network_settings.h"
 #include <texteditorsettings.h>
 
 static const char environmentKey[] = "environment";
 static const char languageKey[] = "language";
 static const char aiKey[] = "ai";
+static const char agentKey[] = "agent";
 static const char networkKey[] = "network";
 
 
@@ -21,6 +23,7 @@ public:
     EnvironmentSettings environmentSettings;
     LanguageSettings languageSettings;
     AISettings aiSettings;
+    AgentSettings agentSettings;
     NetworkSettings networkSettings;
     QJsonObject data;
 
@@ -43,6 +46,9 @@ OptionsSettings::OptionsSettings():QObject() {
     }
     if(options.contains(aiKey)){
         d->aiSettings.fromJson(options.find(aiKey)->toObject());
+    }
+    if(options.contains(agentKey)){
+        d->agentSettings.fromJson(options.find(agentKey)->toObject());
     }
     if(options.contains(networkKey)){
         d->networkSettings.fromJson(options.find(networkKey)->toObject());
@@ -142,6 +148,17 @@ void OptionsSettings::setAiSettings(const AISettings& setting){
         return ;
     }
     d->aiSettings = setting;
+}
+
+AgentSettings& OptionsSettings::agentSettings(){
+    return d->agentSettings;
+}
+
+void OptionsSettings::setAgentSettings(const AgentSettings& setting){
+    if(d->agentSettings==setting){
+        return ;
+    }
+    d->agentSettings = setting;
 }
 
 NetworkSettings& OptionsSettings::networkSettings(){

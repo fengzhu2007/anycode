@@ -5,11 +5,10 @@ static const char portKey[] = "Port";
 static const char usernameKey[] = "Username";
 static const char passwordKey[] = "Password";
 static const char gatewayEnabledKey[] = "GatewayEnabled";
-static const char opencodeCppEnabledKey[] = "OpencodeCppEnabled";
 
 namespace ady{
 
-NetworkSettings::NetworkSettings():m_port(0),m_gatewayEnabled(false),m_opencodeCppEnabled(false) {
+NetworkSettings::NetworkSettings():m_port(0),m_gatewayEnabled(false) {
 
 }
 
@@ -20,7 +19,6 @@ QJsonObject NetworkSettings::toJson(){
         {usernameKey,m_username},
         {passwordKey,m_password},
         {gatewayEnabledKey,m_gatewayEnabled},
-        {opencodeCppEnabledKey,m_opencodeCppEnabled},
     };
 }
 
@@ -40,9 +38,6 @@ void NetworkSettings::fromJson(const QJsonObject& data){
     if(data.contains(gatewayEnabledKey)){
         m_gatewayEnabled = data.find(gatewayEnabledKey)->toBool(false);
     }
-    if(data.contains(opencodeCppEnabledKey)){
-        m_opencodeCppEnabled = data.find(opencodeCppEnabledKey)->toBool(false);
-    }
 }
 
 QVariantMap NetworkSettings::toMap() const{
@@ -52,7 +47,6 @@ QVariantMap NetworkSettings::toMap() const{
         {usernameKey,m_username},
         {passwordKey,m_password},
         {gatewayEnabledKey,m_gatewayEnabled},
-        {opencodeCppEnabledKey,m_opencodeCppEnabled},
     };
 }
 
@@ -72,9 +66,6 @@ void NetworkSettings::fromMap(const QVariantMap &data){
     if(data.contains(gatewayEnabledKey)){
         m_gatewayEnabled = data.find(gatewayEnabledKey)->toBool();
     }
-    if(data.contains(opencodeCppEnabledKey)){
-        m_opencodeCppEnabled = data.find(opencodeCppEnabledKey)->toBool();
-    }
 }
 
 bool NetworkSettings::equals(const NetworkSettings &ts) const{
@@ -82,8 +73,7 @@ bool NetworkSettings::equals(const NetworkSettings &ts) const{
            && m_port == ts.m_port
            && m_username == ts.m_username
            && m_password == ts.m_password
-           && m_gatewayEnabled == ts.m_gatewayEnabled
-           && m_opencodeCppEnabled == ts.m_opencodeCppEnabled;
+           && m_gatewayEnabled == ts.m_gatewayEnabled;
 }
 
 QString NetworkSettings::name(){

@@ -61,10 +61,16 @@ public:
     /** Create / destroy widgets based on current visible range (public for streaming sync). */
     void updateVisibleWidgets();
 
+    /** Suppress scroll-to-top signal during message prepend operations. */
+    void setPrependInProgress(bool v) { m_prependInProgress = v; }
+
 signals:
     /** Emitted after a new ChatMessageView is created for a visible row.
      *  Allows the session page to restore streaming state, etc. */
     void widgetCreated(int row, ChatMessageView *widget);
+
+    /** Emitted when the user scrolls near the top (for loading older messages). */
+    void scrollToTopRequested();
 
 protected:
     void scrollContentsBy(int dx, int dy) override;
@@ -90,6 +96,7 @@ private:
     QTimer *m_updateTimer = nullptr;
     bool m_updateScheduled = false;
     bool m_autoScrollEnabled = true;
+    bool m_prependInProgress = false;
 
     /** Row -> widget cache for O(1) lookup during streaming. */
     QHash<int, ChatMessageView*> m_widgetCache;

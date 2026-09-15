@@ -45,10 +45,6 @@ void ProxyTab::apply(int *state){
         setting.m_gatewayEnabled = ui->gateway->isChecked();
         changed = true;
     }
-    if(setting.m_opencodeCppEnabled != ui->opencodeCpp->isChecked()){
-        setting.m_opencodeCppEnabled = ui->opencodeCpp->isChecked();
-        changed = true;
-    }
 
     if(changed){
         instance->setNetworkSettings(setting);
@@ -73,7 +69,6 @@ void ProxyTab::initView(){
     ui->username->setText(setting.m_username);
     ui->password->setText(setting.m_password);
     ui->gateway->setChecked(setting.m_gatewayEnabled);
-    ui->opencodeCpp->setChecked(setting.m_opencodeCppEnabled);
 }
 
 }

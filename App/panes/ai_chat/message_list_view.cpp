@@ -45,9 +45,15 @@ MessageListView::MessageListView(QWidget *parent)
         updateVisibleWidgets();
     });
 
-    // Auto-scroll when scrollbar reaches bottom
+    // Auto-scroll detection
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, [this](int value) {
-        m_autoScrollEnabled = (value >= verticalScrollBar()->maximum() - 10);
+        QScrollBar *sb = verticalScrollBar();
+        // Bottom detection: auto-scroll when near bottom
+        m_autoScrollEnabled = (value >= sb->maximum() - 10);
+        // Top detection: load older messages when scrolled near top
+        if (!m_prependInProgress && value <= 50 && m_model && m_model->rowCount() > 0) {
+            emit scrollToTopRequested();
+        }
     });
 }
 

@@ -68,6 +68,18 @@ struct OpenCodePermissionRequest {
 Q_DECLARE_METATYPE(OpenCodePermissionRequest)
 
 /**
+ * 文件变更信息（session.diff 事件）
+ */
+struct FileDiffInfo {
+    QString file;            // 文件路径
+    QString status;          // "added" | "deleted" | "modified"
+    int additions = 0;       // 新增行数
+    int deletions = 0;       // 删除行数
+};
+Q_DECLARE_METATYPE(FileDiffInfo)
+Q_DECLARE_METATYPE(QList<FileDiffInfo>)
+
+/**
  * ChatService - OpenCode Server 原生 API 通信层
  *
  * 使用 opencode serve 的原生 API:
@@ -111,11 +123,14 @@ public:
     void deleteSession(const QString &sessionId);   // DELETE /session/{id}
     void listModels();                      // GET /api/model
     bool sendMessage(const QString &sessionId, const QString &content, const QString &providerID = QString(), const QString &modelID = QString());  // POST /session/{id}/message (false = request dropped by in-flight lock)
-    void loadSessionMessages(const QString &sessionId, int limit = 20);  // GET /session/{id}/message
+    void loadSessionMessages(const QString &sessionId, int limit = 20, qint64 beforeTimestamp = 0);  // GET /session/{id}/message
     void abortSession(const QString &sessionId);  // POST /session/{id}/abort
     void updateSessionTitle(const QString &sessionId, const QString &title);  // PATCH /session/{id}
     void setWorkingDirectories(const QStringList &directories);  // POST /directories (global)
     void compactSession(const QString &sessionId);  // POST /api/session/{id}/compact
+    void confirmChanges(const QString &sessionId);   // POST /session/{id}/changes/confirm
+    void revertSession(const QString &sessionId);    // POST /session/{id}/revert
+    void revertCommitSession(const QString &sessionId);  // POST /session/{id}/revert/commit
 
     /**
      * 回复权限请求：POST /permission/{id}/reply
@@ -140,6 +155,7 @@ signals:
     void messageSent(const QString &sessionId, const QString &error);
 
     void messagesReceived(const QString &sessionId, const QList<OpenCodeMessage> &messages, const QString &error);
+    void messagesPrepended(const QString &sessionId, const QList<OpenCodeMessage> &olderMessages, const QString &error);
 
     void streamStarted(const QString &sessionId);
     void streamChunk(const QString &sessionId, const QString &delta);
@@ -150,6 +166,7 @@ signals:
     void sessionStatusChanged(const QString &sessionId, const QString &status);
     void sessionTitleChanged(const QString &sessionId, const QString &title);
     void sessionDiffChanged(const QString &sessionId, const QString &summary);
+    void sessionDiffReceived(const QString &sessionId, const QList<FileDiffInfo> &diffs);
 
     void compactionStarted(const QString &sessionId);
     void compactionFinished(const QString &sessionId);

@@ -708,9 +708,9 @@ QString ChatMessageBubble::formatThinkBlock(const QString &thinkContent) const
         return QString(
             "<div style='border-left:3px solid %1;padding:8px;margin:4px 0;"
             "color:%1;font-size:12px;'>"
-            "<b>[thinking]</b><br/>%2<br/>"
+            "<img src=':/Resource/icons/dark/LightBulb.png' height='12'/> %2<br/>"
             "<a href='collapse' style='color:%3;'>collapse</a>"
-            "</div><br/>"
+            "</div>"
         ).arg(thinkColor, escapedThink, linkColor);
     }else{
         // Collapsed: show only first line
@@ -726,9 +726,9 @@ QString ChatMessageBubble::formatThinkBlock(const QString &thinkContent) const
         return QString(
             "<div style='border-left:3px solid %1;padding:8px;margin:4px 0;"
             "color:%1;font-size:12px;'>"
-            "<b>[thinking]</b> %2 "
+            "<img src=':/Resource/icons/dark/LightBulb.png' height='12'/> %2 "
             "<a href='expand' style='color:%3;'>expand</a>"
-            "</div><br/>"
+            "</div>"
         ).arg(thinkColor, escapedFirstLine, linkColor);
     }
 }
@@ -782,7 +782,7 @@ QString ChatMessageBubble::formatCodeBlock(const QString &code)
     auto theme = Theme::getInstance();
     QString codeBg, codeFg, dimColor;
     if(theme->style() == Theme::Dark){
-        codeBg = "#2b2b2b";
+        codeBg = "#1d1d1d";
         codeFg = "#dcdcdc";
         dimColor = "#666666";
     }else{
@@ -793,14 +793,14 @@ QString ChatMessageBubble::formatCodeBlock(const QString &code)
     QString linkColor = "#4a9eff";
 
     return QString(
-        "<div style='background-color:%1;border-radius:4px;margin:4px 0;'>"
-        "<div style='text-align:right;padding:4px 8px 0 8px;'>"
+        "<table cellpadding='6' cellspacing='0' width='100%' style='background-color:%1;color:%2;'>"
+        "<tr><td>"
+        "<div align='right'>"
         "<span style='color:%3;font-size:10px;'>%4</span> "
-        "<a href='copy:%5' style='color:%6;font-size:11px;text-decoration:none;'>[copy] %7</a>"
+        "<a href='copy:%5' style='color:%6;font-size:11px;text-decoration:none;'>%7</a>"
         "</div>"
-        "<pre style='background-color:%1;color:%2;padding:8px;margin:0;"
-        "font-family:Consolas,monospace;font-size:12px;'>%8</pre>"
-        "</div>"
+        "<pre style='background-color:%1;color:%2;font-family:Consolas,monospace;font-size:12px;margin:0;'>%8</pre>"
+        "</td></tr></table>"
     ).arg(codeBg, codeFg, dimColor, lang.toHtmlEscaped(),
           QString::number(idx), linkColor, tr("Copy"),
           body.toHtmlEscaped());
@@ -829,27 +829,34 @@ QString ChatMessageBubble::detectShellType(const QString &toolName, const QStrin
         return "cmd";
     if(tn == "powershell" || tn.contains("powershell") || tn == "ps1")
         return "powershell";
-
-    // Detect from command content
-    QString cmd = command.trimmed();
-    if(cmd.startsWith("$env:", Qt::CaseInsensitive)
-       || cmd.contains("Write-Host", Qt::CaseInsensitive)
-       || cmd.contains("Get-ChildItem", Qt::CaseInsensitive)
-       || cmd.contains("Get-Content", Qt::CaseInsensitive)
-       || cmd.contains("Set-Location", Qt::CaseInsensitive)
-       || cmd.contains("Invoke-WebRequest", Qt::CaseInsensitive))
-        return "powershell";
-    if(cmd.startsWith("@echo", Qt::CaseInsensitive)
-       || cmd.startsWith("dir ", Qt::CaseInsensitive)
-       || cmd.startsWith("set ", Qt::CaseInsensitive)
-       || cmd.startsWith("copy ", Qt::CaseInsensitive))
-        return "cmd";
-
     return "shell";
 }
 
 void ChatMessageBubble::appendToolBlock(const QString &callID, const QString &toolType, const QString &toolName, const QString &body)
 {
+    // Check if a tool block with this callID already exists (from ToolCallStart/ToolCallDelta).
+    // If so, update it in place instead of creating a duplicate.
+    for(int i = 0; i < m_toolCalls.size(); ++i) {
+        if(m_toolCalls[i].callID == callID) {
+            m_toolCalls[i].toolType = toolType;
+            m_toolCalls[i].toolName = toolName;
+            m_toolCalls[i].body = body;
+            // Re-detect command-line tools (toolType may have been empty at Start)
+            QString lowerType = toolType.toLower();
+            if(lowerType == "bash" || lowerType == "cmd" || lowerType == "powershell"
+               || lowerType == "shell" || lowerType.contains("terminal")) {
+                m_toolCalls[i].isCommand = true;
+                m_toolCalls[i].shellType = detectShellType(toolType, body);
+            }
+            if(m_toolCalls[i].blockIndex >= 0 && m_toolCalls[i].blockIndex < m_toolBlocks.size()) {
+                m_toolBlocks[m_toolCalls[i].blockIndex] = buildToolBlockHtml(m_toolCalls[i]);
+            }
+            scheduleUpdate();
+            return;
+        }
+    }
+
+    // New tool block
     ToolCallInfo info;
     info.callID = callID;
     info.toolType = toolType;
@@ -887,6 +894,9 @@ void ChatMessageBubble::updateToolStatus(const QString &callID, ToolStatus statu
             // Rebuild the HTML for this tool block
             if(m_toolCalls[i].blockIndex >= 0 && m_toolCalls[i].blockIndex < m_toolBlocks.size()) {
                 m_toolBlocks[m_toolCalls[i].blockIndex] = buildToolBlockHtml(m_toolCalls[i]);
+                if(i==m_toolCalls.size()-1){
+                    m_toolBlocks[m_toolCalls[i].blockIndex] += "<br/>";
+                }
             }
             scheduleUpdate();
             return;
@@ -912,17 +922,17 @@ QString ChatMessageBubble::buildToolBlockHtml(const ToolCallInfo &info) const
     switch(info.status) {
     case ToolProcessing:
         accentColor = "#e6a23c";  // orange
-        statusIcon = QChar(0x23F3);  // hourglass
+        statusIcon = ":/Resource/icons/dark/Hourglass.png";  // hourglass
         statusText = tr("Processing");
         break;
     case ToolSuccess:
         accentColor = "#42b983";  // green
-        statusIcon = QChar(0x2714);  // checkmark
+        statusIcon = ":/Resource/icons/dark/Passing.png";  // checkmark
         statusText = tr("Success");
         break;
     case ToolFailure:
         accentColor = "#e74c3c";  // red
-        statusIcon = QChar(0x2718);  // cross
+        statusIcon = ":/Resource/icons/dark/Failing.png";  // cross
         statusText = tr("Failure");
         break;
     }
@@ -939,24 +949,26 @@ QString ChatMessageBubble::buildToolBlockHtml(const ToolCallInfo &info) const
         if(info.status == ToolProcessing) {
             // Compact form: just show command with spinner
             html = QString(
-                "<div style='background-color:%1;color:%2;border-left:3px solid %3;"
-                "padding:8px;margin:4px 0;border-radius:4px;font-size:12px;'>"
-                "<b style='color:%3;'>%4 %5</b> "
-                "<span style='background-color:%3;color:#fff;padding:1px 6px;border-radius:3px;"
-                "font-size:10px;font-weight:bold;'>%6</span><br/>"
-                "<code style='font-family:Consolas,monospace;font-size:11px;color:%2;'>%7</code>"
-                "</div>"
+                "<table cellpadding='8'  width='100%' cellspacing='0' style='background-color:%1;"
+                "border-left:3px solid %3;color:%2;'>"
+                "<tr><td>"
+                "<b style='color:%3;'><img src='%4' width='12'/> %5</b> "
+                "<span style='color:%3;"
+                "font-weight:bold;'>%6</span><br/>"
+                "<code style='font-family:Consolas,monospace;color:%2;'>%7</code>"
+                "</td></tr></table>"
             ).arg(blockBg, blockFg, accentColor, statusIcon, displayName, shellBadge, command);
         } else {
             // Completed: show command with status only, no output content
             html = QString(
-                "<div style='background-color:%1;color:%2;border-left:3px solid %3;"
-                "padding:8px;margin:4px 0;border-radius:4px;font-size:12px;'>"
-                "<b style='color:%3;'>%4 %5</b> "
-                "<span style='background-color:%3;color:#fff;padding:1px 6px;border-radius:3px;"
-                "font-size:10px;font-weight:bold;'>%6</span> "
-                "<span style='color:%3;font-size:11px;'>%7</span>"
-                "</div>"
+                "<table cellpadding='8'  width='100%' cellspacing='0' style='background-color:%1;"
+                "border-left:3px solid %3;color:%2;'>"
+                "<tr><td>"
+                "<b style='color:%3;'><img src='%4' width='12'/> %5</b> "
+                "<span style='color:%3;"
+                "font-weight:bold;'>%6</span> "
+                "<span style='color:%3;'>%7</span>"
+                "</td></tr></table>"
             ).arg(blockBg, blockFg, accentColor, statusIcon, displayName, shellBadge, statusText);
         }
     } else {
@@ -973,20 +985,22 @@ QString ChatMessageBubble::buildToolBlockHtml(const ToolCallInfo &info) const
         if(info.status == ToolProcessing) {
             // Compact form: just tool name
             html = QString(
-                "<div style='background-color:%1;color:%2;border-left:3px solid %3;"
-                "padding:8px;margin:4px 0;border-radius:4px;font-size:12px;'>"
-                "<b style='color:%3;'>%4 %5</b> <span style='color:%3;font-size:11px;'>%6</span>"
-                "</div>"
+                "<table cellpadding='8' width='100%' cellspacing='0' style='background-color:%1;"
+                "border-left:3px solid %3;color:%2;'>"
+                "<tr><td>"
+                "<b style='color:%3;'><img src='%4' width='12'/> %5</b> <span style='color:%3;'>%6</span>"
+                "</td></tr></table>"
             ).arg(blockBg, blockFg, accentColor, statusIcon, displayName, statusText);
         } else {
             // Completed: show tool name, status, and body
             html = QString(
-                "<div style='background-color:%1;color:%2;border-left:3px solid %3;"
-                "padding:8px;margin:4px 0;border-radius:4px;font-size:12px;'>"
-                "<b style='color:%3;'>%4 %5</b> "
-                "<span style='color:%3;font-size:11px;'>%6</span><br/>"
-                "<code style='font-family:Consolas,monospace;font-size:11px;'>%7</code>"
-                "</div>"
+                "<table cellpadding='8'  width='100%' cellspacing='0' style='background-color:%1;"
+                "border-left:3px solid %3;color:%2;'>"
+                "<tr><td>"
+                "<b style='color:%3;'><img src='%4' width='12'/> %5</b> "
+                "<span style='color:%3;'>%6</span><br/>"
+                "<code style='font-family:Consolas,monospace;'>%7</code>"
+                "</td></tr></table>"
             ).arg(blockBg, blockFg, accentColor, statusIcon, displayName, statusText, bodyText);
         }
     }

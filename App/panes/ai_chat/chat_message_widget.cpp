@@ -528,6 +528,28 @@ QString ChatMessageWidget::detectShellType(const QString &toolName, const QStrin
 
 void ChatMessageWidget::appendToolBlock(const QString &callID, const QString &toolType, const QString &toolName, const QString &body)
 {
+    // Check if a tool block with this callID already exists (from ToolCallStart/ToolCallDelta).
+    // If so, update it in place instead of creating a duplicate.
+    for(int i = 0; i < m_toolCalls.size(); ++i) {
+        if(m_toolCalls[i].callID == callID) {
+            m_toolCalls[i].toolType = toolType;
+            m_toolCalls[i].toolName = toolName;
+            m_toolCalls[i].body = body;
+            QString lowerType = toolType.toLower();
+            if(lowerType == "bash" || lowerType == "cmd" || lowerType == "powershell"
+               || lowerType == "shell" || lowerType.contains("terminal")) {
+                m_toolCalls[i].isCommand = true;
+                m_toolCalls[i].shellType = detectShellType(toolType, body);
+            }
+            if(m_toolCalls[i].blockIndex >= 0 && m_toolCalls[i].blockIndex < m_toolBlocks.size()) {
+                m_toolBlocks[m_toolCalls[i].blockIndex] = buildToolBlockHtml(m_toolCalls[i]);
+            }
+            scheduleUpdate();
+            return;
+        }
+    }
+
+    // New tool block
     ToolCallInfo info;
     info.callID = callID;
     info.toolType = toolType;
