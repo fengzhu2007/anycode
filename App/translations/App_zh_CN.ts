@@ -3145,22 +3145,22 @@ Please enter a new folder name.</source>
     </message>
     <message>
         <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1323"/>
-        <source>opencode-cpp executable not found, please configure data/ai_chat_server.json</source>
+        <source>openagent-cpp executable not found, please configure data/ai_chat_server.json</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1363"/>
-        <source>Starting opencode-cpp in terminal...</source>
+        <source>Starting openagent-cpp in terminal...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1385"/>
-        <source>opencode-cpp server is ready</source>
+        <source>openagent-cpp server is ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1394"/>
-        <source>opencode-cpp start timeout, please check the terminal output</source>
+        <source>openagent-cpp start timeout, please check the terminal output</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
