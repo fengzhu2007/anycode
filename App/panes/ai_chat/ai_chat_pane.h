@@ -82,7 +82,6 @@ public slots:
     void onCompactionFinished(const QString &sessionId);
     void onConnectionChanged(bool connected);
     void onPermissionAsked(const OpenCodePermissionRequest &request);
-    void onWidgetPermissionReplied(const QString &requestId, const QString &reply);
     void onMemorySaved(const QString &sessionId, const QString &type,
                        const QString &content, const QString &keywords);
     void onLoadMoreMessages(const QString &sessionId);
@@ -98,10 +97,8 @@ private:
 
     void switchToSession(const QString &sessionId);
     void refreshSessionPopup();
-    ChatMessageView* ensureStreamingWidget(SessionData *sd);
     void stopStreaming(const QString &sessionId);
     void throttledScrollToBottom(SessionData *sd);
-    void onWidgetCreated(SessionPageWidget *page, int row, ChatMessageView *widget);
 
     // ---- model combo (all pages) ----
     void updateAllModelCombos(const QList<OpenCodeModel> &models);
@@ -150,10 +147,6 @@ private:
     int m_pingCount = 0;
     uint16_t m_serverPort = 0;
     QProcess *m_serverProcess = nullptr;
-
-    // Permission reply tracking (for widget virtualization)
-    QSet<QString> m_repliedPermissions;  // requestId → reply value stored as "id:reply"
-    QMap<QString, QString> m_permissionReplies;  // requestId → "once"/"always"/"reject"
 
     static AIChatPane* instance;
 

@@ -1,4 +1,6 @@
 ﻿#include "chat_service.h"
+#include "modules/options/options_settings.h"
+#include "modules/options/agent_settings.h"
 #include <QJsonDocument>
 #include <QDateTime>
 #include <QDebug>
@@ -45,12 +47,17 @@ int ChatService::progressCallback(void *clientp, curl_off_t /*dltotal*/, curl_of
 
 ChatService::ChatService(QObject *parent)
     : QObject(parent)
-    , m_baseUrl(QString("http://127.0.0.1:%1").arg(serverPort()))
     , m_requesting(false)
     , m_abort(false)
     , m_eventCurl(nullptr)
     , m_eventAbort(false)
 {
+    // Read port from configuration
+    auto *opt = OptionsSettings::getInstance();
+    if (opt) {
+        s_serverPort = opt->agentSettings().m_port;
+    }
+    m_baseUrl = QString("http://127.0.0.1:%1").arg(s_serverPort);
     qRegisterMetaType<OpenCodeSession>("OpenCodeSession");
     qRegisterMetaType<QList<OpenCodeSession>>("QList<OpenCodeSession>");
     qRegisterMetaType<OpenCodeModel>("OpenCodeModel");
@@ -86,6 +93,15 @@ ChatService::~ChatService()
 }
 
 // ---- configuration ----
+
+void ChatService::setServerPort(int port)
+{
+    if (s_serverPort == port) return;
+    s_serverPort = port;
+    m_baseUrl = QString("http://127.0.0.1:%1").arg(port);
+    disconnectEventStream();
+    connectEventStream();
+}
 
 void ChatService::setBaseUrl(const QString &url)
 {
@@ -540,8 +556,11 @@ void ChatService::loadSessionMessages(const QString &sessionId, int limit, qint6
     if (beforeTimestamp > 0) {
         url += "&before=" + QString::number(beforeTimestamp);
     }
+    qDebug() << "[ChatService] loadSessionMessages URL:" << url;
 
     QtConcurrent::run([this, url, sessionId, beforeTimestamp](){
+        qDebug() << "[ChatService] loadSessionMessages: thread started, beforeTimestamp=" << beforeTimestamp;
+
         CURL *curl = curl_easy_init();
         if(!curl){
             if (beforeTimestamp > 0) emit messagesPrepended(sessionId, {}, tr("Failed to init curl"));
@@ -560,8 +579,11 @@ void ChatService::loadSessionMessages(const QString &sessionId, int limit, qint6
         QByteArray responseData;
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
 
+        qDebug() << "[ChatService] loadSessionMessages: performing request...";
         CURLcode res = curl_easy_perform(curl);
         curl_easy_cleanup(curl);
+        qDebug() << "[ChatService] loadSessionMessages: request done, result=" << res
+                 << "responseSize=" << responseData.size();
 
         if(res != CURLE_OK){
             if (beforeTimestamp > 0) emit messagesPrepended(sessionId, {}, QString::fromUtf8(curl_easy_strerror(res)));
@@ -571,6 +593,9 @@ void ChatService::loadSessionMessages(const QString &sessionId, int limit, qint6
 
         QJsonDocument doc = QJsonDocument::fromJson(responseData);
         QJsonArray arr = doc.array();
+        qDebug() << "[ChatService] loadSessionMessages raw response length:" << responseData.size()
+                 << "array count:" << arr.size();
+        qDebug() << "[ChatService] loadSessionMessages raw JSON:" << responseData;
         QList<OpenCodeMessage> messages;
 
         for(const auto &val : arr){
@@ -588,6 +613,7 @@ void ChatService::loadSessionMessages(const QString &sessionId, int limit, qint6
             qint64 timeCreated = static_cast<qint64>(info["time"].toObject()["created"].toDouble());
 
             QString text;
+            QString thinking;
             for(const auto &p : parts){
                 QJsonObject partObj = p.toObject();
                 QString type = partObj["type"].toString();
@@ -602,8 +628,8 @@ void ChatService::loadSessionMessages(const QString &sessionId, int limit, qint6
                 }else if(type == "reasoning"){
                     QString think = partObj["text"].toString().trimmed();
                     if(!think.isEmpty()){
-                        if(!text.isEmpty()) text += "\n";
-                        text += "<think>" + think + "</think>";
+                        if(!thinking.isEmpty()) thinking += "\n";
+                        thinking += think;
                     }
                 }else if(type == "code"){
                     QString lang = partObj["language"].toString();
@@ -615,11 +641,12 @@ void ChatService::loadSessionMessages(const QString &sessionId, int limit, qint6
                 // step-start, step-finish, and other metadata types are silently skipped
             }
 
-            if((role == "user" || role == "assistant") && !text.isEmpty()){
+            if((role == "user" || role == "assistant") && (!text.isEmpty() || !thinking.isEmpty())){
                 OpenCodeMessage msg;
                 msg.id = id;
                 msg.role = role;
                 msg.text = text;
+                msg.thinking = thinking;
                 msg.timeCreated = timeCreated;
                 messages.append(msg);
             }
@@ -628,9 +655,13 @@ void ChatService::loadSessionMessages(const QString &sessionId, int limit, qint6
         qDebug() << "[ChatService] loaded" << messages.size() << "messages for session" << sessionId
                  << "beforeTimestamp=" << beforeTimestamp;
         if (beforeTimestamp > 0) {
+            qDebug() << "[ChatService] emitting messagesPrepended, count=" << messages.size();
             emit messagesPrepended(sessionId, messages, {});
+            qDebug() << "[ChatService] messagesPrepended emitted";
         } else {
+            qDebug() << "[ChatService] emitting messagesReceived, count=" << messages.size();
             emit messagesReceived(sessionId, messages, {});
+            qDebug() << "[ChatService] messagesReceived emitted";
         }
     });
 }
