@@ -49,6 +49,7 @@ struct OpenCodeMessage {
     QString id;           // msg_xxx
     QString role;         // "user" | "assistant"
     QString text;
+    QString thinking;     // reasoning content (separate from text)
     qint64 timeCreated;
 };
 Q_DECLARE_METATYPE(OpenCodeMessage)
@@ -99,7 +100,7 @@ public:
 
     /** 获取 opencode-cpp 服务端口号（可通过 setServerPort 在运行时修改） */
     static int serverPort() { return s_serverPort; }
-    static void setServerPort(int port) { s_serverPort = port; }
+    void setServerPort(int port);
 
     void setBaseUrl(const QString &url);
     QString baseUrl() const { return m_baseUrl; }

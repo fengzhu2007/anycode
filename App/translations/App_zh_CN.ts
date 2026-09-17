@@ -3011,135 +3011,135 @@ Please enter a new folder name.</source>
 <context>
     <name>ady::AIChatPane</name>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="64"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="62"/>
         <source>AI Chat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="134"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="132"/>
         <source>Session exceeds 200KB, auto-compacting...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="261"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="259"/>
         <source>Delete Confirm</source>
         <translation type="unfinished">删除确认</translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="262"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="260"/>
         <source>Are you sure you want to delete the current chat?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="270"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="268"/>
         <source>Delete All Confirm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="271"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="269"/>
         <source>Are you sure you want to delete all %1 chat(s)?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="403"/>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="767"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="401"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="743"/>
         <source>Previous request is still in progress, please retry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="491"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="489"/>
         <source>Switched to: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="596"/>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="919"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="581"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="895"/>
         <source>New Chat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="881"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="857"/>
         <source>
 [error: %1]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="887"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="863"/>
         <source>Error: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="963"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="939"/>
         <source>No session selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="967"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="943"/>
         <source>Cannot compact while receiving</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="971"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="947"/>
         <source>Compacting conversation...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="984"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="960"/>
         <source>Conversation compacted successfully</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1008"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="984"/>
         <source>Command: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1010"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="986"/>
         <source>Patterns: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1012"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="988"/>
         <source>Tool: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1063"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1023"/>
         <source>Preference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1064"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1024"/>
         <source>Fact</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1065"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1025"/>
         <source>Decision</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1066"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1026"/>
         <source>Correction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1067"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1027"/>
         <source>Lesson</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1071"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1031"/>
         <source>Memory saved [%1]: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1211"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1119"/>
         <source>Stop</source>
         <translation type="unfinished">停止</translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1214"/>
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1122"/>
         <source>Send (Ctrl+Enter)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5078,7 +5078,7 @@ files to &quot;%2&quot;?</source>
 <context>
     <name>ady::SessionPageWidget</name>
     <message>
-        <location filename="../panes/ai_chat/session_page_widget.cpp" line="198"/>
+        <location filename="../panes/ai_chat/session_page_widget.cpp" line="171"/>
         <source>File Changed List (%1)</source>
         <translation type="unfinished"></translation>
     </message>

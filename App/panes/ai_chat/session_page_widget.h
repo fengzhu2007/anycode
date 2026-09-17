@@ -9,6 +9,7 @@
 class QComboBox;
 class QTextEdit;
 class QToolButton;
+class QQuickWidget;
 class wPopupPanel;
 
 namespace Ui {
@@ -19,8 +20,7 @@ namespace ady {
 
 struct OpenCodeModel;
 struct FileDiffInfo;
-class MessageListView;
-class MessageModel;
+class QmlMessageModel;
 class FileDiffListWidget;
 class ChatService;
 
@@ -29,6 +29,8 @@ class ChatService;
  *
  * 每个会话包含独立的消息列表、模型选择、消息输入和发送按钮。
  * 作为 QStackedWidget 的一个 page 使用。
+ *
+ * 使用 QmlMessageModel + QQuickWidget + ListView 虚拟化渲染。
  */
 class SessionPageWidget : public QWidget
 {
@@ -37,8 +39,10 @@ public:
     explicit SessionPageWidget(QWidget *parent = nullptr);
     ~SessionPageWidget();
 
-    MessageListView* messageListView() const;
-    MessageModel* messageModel() const;
+    // ---- QML 接口 ----
+    QmlMessageModel* qmlModel() const { return m_qmlModel; }
+    QQuickWidget*    quickWidget() const { return m_quickWidget; }
+
     QComboBox* modelCombo() const;
     QTextEdit* messageInput() const;
     QToolButton* sendBtn() const;
@@ -56,14 +60,41 @@ public:
     /** 更新文件变更列表 */
     void setFileDiffs(const QList<FileDiffInfo> &diffs);
 
-    /** Convenience: add a message to the model and auto-scroll. */
+    // ---- 通用便捷方法 (自动路由到 QML 模型) ----
+
+    /** Add a message to the model and auto-scroll. */
     void addMessage(ChatMessageView::Type type, const QString &content);
 
-    /** Convenience: clear all messages. */
+    /** Clear all messages. */
     void clearMessages();
 
-    /** Convenience: scroll to bottom (deferred). */
+    /** Scroll to bottom (deferred). */
     void scrollToBottom();
+
+    /** Streaming follow-up: scroll to bottom only if the user hasn't
+     *  dragged away (delegates to MainChatView.autoFollow). */
+    void autoFollowScroll();
+
+    // ---- QML 流式 API ----
+
+    /** Begin a new streaming assistant message. */
+    void beginStreaming();
+
+    /** Append text delta to the streaming message. */
+    void appendStreamingText(const QString &delta);
+
+    /** Append/replace thinking content on the streaming message. */
+    void appendStreamingThinking(const QString &content);
+
+    /** Append or update a tool call on the streaming message. */
+    void appendToolCall(const QString &callID, const QString &toolType,
+                        const QString &toolName, const QString &input);
+
+    /** Update tool call status by callID. */
+    void updateToolCallStatus(const QString &callID, int status, const QString &output);
+
+    /** Mark streaming as finished. */
+    void endStreaming();
 
 signals:
     void enterPressed();
@@ -75,8 +106,10 @@ protected:
 
 private:
     Ui::SessionPageWidget *ui;
-    MessageListView *m_messageListView = nullptr;
-    MessageModel *m_messageModel = nullptr;
+
+    // QML 消息列表
+    QmlMessageModel *m_qmlModel = nullptr;
+    QQuickWidget    *m_quickWidget = nullptr;
 
     ChatService *m_chatService = nullptr;
     QString m_sessionId;
@@ -86,6 +119,7 @@ private:
     QList<FileDiffInfo> m_currentDiffs;
 
     void setupDiffPopup();
+    void setupQmlView();
     void onAcceptAll();
     void onRejectAll();
 };

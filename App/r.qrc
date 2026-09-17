@@ -152,4 +152,21 @@
         <file>Resource/icons/dark/LightBulb.png</file>
         <file>Resource/icons/dark/Passing.png</file>
     </qresource>
+    <qresource prefix="/ai_chat">
+        <file alias="qml/MainChatView.qml">panes/ai_chat/qml/MainChatView.qml</file>
+        <file alias="qml/MessageDelegate.qml">panes/ai_chat/qml/MessageDelegate.qml</file>
+        <file alias="qml/UserMessage.qml">panes/ai_chat/qml/UserMessage.qml</file>
+        <file alias="qml/AssistantMessage.qml">panes/ai_chat/qml/AssistantMessage.qml</file>
+        <file alias="qml/ThinkingBlock.qml">panes/ai_chat/qml/ThinkingBlock.qml</file>
+        <file alias="qml/MarkdownBody.qml">panes/ai_chat/qml/MarkdownBody.qml</file>
+        <file alias="qml/CodeBlock.qml">panes/ai_chat/qml/CodeBlock.qml</file>
+        <file alias="qml/PermissionCard.qml">panes/ai_chat/qml/PermissionCard.qml</file>
+        <file alias="qml/cards/CommandCard.qml">panes/ai_chat/qml/cards/CommandCard.qml</file>
+        <file alias="qml/cards/ReadCard.qml">panes/ai_chat/qml/cards/ReadCard.qml</file>
+        <file alias="qml/cards/WriteCard.qml">panes/ai_chat/qml/cards/WriteCard.qml</file>
+        <file alias="qml/cards/EditCard.qml">panes/ai_chat/qml/cards/EditCard.qml</file>
+        <file alias="qml/cards/GrepCard.qml">panes/ai_chat/qml/cards/GrepCard.qml</file>
+        <file alias="qml/cards/GlobCard.qml">panes/ai_chat/qml/cards/GlobCard.qml</file>
+        <file alias="qml/cards/QuestionCard.qml">panes/ai_chat/qml/cards/QuestionCard.qml</file>
+    </qresource>
 </RCC>

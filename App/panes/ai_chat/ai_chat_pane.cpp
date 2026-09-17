@@ -1,9 +1,7 @@
 ﻿#include "ai_chat_pane.h"
 #include "ui_ai_chat_pane.h"
-#include "chat_message_view.h"
 #include "components/message_dialog.h"
-#include "message_list_view.h"
-#include "message_model.h"
+#include "qml_message_model.h"
 #include "session_list_popup.h"
 #include "docking_pane_layout_item_info.h"
 #include "core/event_bus/type.h"
@@ -15,6 +13,7 @@
 #include "panes/resource_manager/resource_manager_model_item.h"
 #include "modules/options/options_settings.h"
 #include "modules/options/network_settings.h"
+#include <QElapsedTimer>
 #include "modules/options/agent_settings.h"
 
 #include <QDir>
@@ -37,6 +36,7 @@
 #include <QStandardPaths>
 #include <QCoreApplication>
 #include <QDebug>
+#include <QQuickWindow>
 #include <algorithm>
 
 namespace ady{
@@ -62,6 +62,9 @@ AIChatPane::AIChatPane(QWidget *parent)
     ui->setupUi(widget);
     this->setCenterWidget(widget);
     this->setWindowTitle(tr("AI Chat"));
+
+
+    QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
 
     // theme styling
     QString borderColor = Theme::getInstance()->borderColor().name(QColor::HexRgb);
@@ -498,22 +501,9 @@ SessionPageWidget* AIChatPane::createSessionPage()
         page->setModels(models, defaultData);
     }
 
-    // Virtual list: restore streaming state when widgets are (re-)created
-    connect(page->messageListView(), &MessageListView::widgetCreated,
-            this, [this, page](int row, ChatMessageView *widget) {
-        onWidgetCreated(page, row, widget);
-        // Restore permission replied state for virtualized widgets
-        if(widget->type() == ChatMessageView::Permission){
-            QJsonDocument doc = QJsonDocument::fromJson(widget->content().toUtf8());
-            QString reqId = doc.object()["requestId"].toString();
-            if(m_permissionReplies.contains(reqId)){
-                widget->setPermissionReplied(m_permissionReplies.value(reqId));
-            }
-        }
-        // Forward permission reply from widget
-        connect(widget, &ChatMessageView::permissionReplied,
-                this, &AIChatPane::onWidgetPermissionReplied);
-    });
+    // QML model: permission replies are handled via QmlMessageModel::permissionReplied
+    // signal, which is connected in SessionPageWidget::setupQmlView().
+    // No widgetCreated signal needed — QML handles its own rendering.
 
     ui->stackedWidget->addWidget(page);
     return page;
@@ -566,6 +556,12 @@ void AIChatPane::switchToSession(const QString &sessionId)
             onLoadMoreMessages(sessionId);
         });
 
+        // Connect QML model's loadMoreRequested signal (from scroll-to-top in QML)
+        connect(page->qmlModel(), &QmlMessageModel::loadMoreRequested, this, [this, sessionId]() {
+            qDebug() << "[AIChatPane] loadMoreRequested from QML model for session" << sessionId;
+            onLoadMoreMessages(sessionId);
+        });
+
         m_service->loadSessionMessages(sessionId);
     }
 
@@ -609,40 +605,69 @@ void AIChatPane::refreshSessionPopup()
 // ---- history messages ----
 
 void AIChatPane::onMessagesReceived(const QString &sessionId, const QList<OpenCodeMessage> &messages, const QString &error){
+    QElapsedTimer totalTimer;
+    totalTimer.start();
+    qDebug() << "[AIChatPane] onMessagesReceived: session=" << sessionId
+             << "messages=" << messages.size() << "error=" << error;
     if(!error.isEmpty()){
         qDebug() << "[AIChatPane] Load messages error:" << error;
         return;
     }
 
     auto *page = findPage(sessionId);
-    if(!page) return;
+    if(!page){
+        qDebug() << "[AIChatPane] onMessagesReceived: page NOT found for session" << sessionId;
+        return;
+    }
 
     int sdIdx = findSessionIndex(sessionId);
-    if(sdIdx < 0) return;
+    if(sdIdx < 0){
+        qDebug() << "[AIChatPane] onMessagesReceived: session index NOT found";
+        return;
+    }
     auto *sd = m_sessions.at(sdIdx);
 
-    page->clearMessages();
-
+    // Build message list and reset model in one batch
+    QElapsedTimer t;
+    t.start();
+    QList<MsgInput> allMessages;
+    allMessages.reserve(messages.size());
     for(const auto &msg : messages){
-        ChatMessageView::Type type = (msg.role == "user")
+        MsgInput mi;
+        mi.type = (msg.role == "user")
             ? ChatMessageView::User
             : ChatMessageView::Assistant;
-        page->messageModel()->addMessage(type, msg.text);
+        mi.content = msg.text;
+        mi.thinking = msg.thinking;
+        allMessages.append(mi);
     }
+    qDebug() << "[AIChatPane] build MsgInput:" << t.elapsed() << "ms for" << allMessages.size() << "messages";
+
+    t.restart();
+    qDebug() << "[AIChatPane] calling resetMessages...";
+    page->qmlModel()->resetMessages(allMessages);
+    qDebug() << "[AIChatPane] resetMessages done:" << t.elapsed() << "ms, rowCount=" << page->qmlModel()->rowCount();
 
     // Track oldest message timestamp for pagination
     if(!messages.isEmpty()){
         sd->oldestMessageTimestamp = messages.first().timeCreated;
-        sd->hasMoreMessages = true;  // assume more until a page returns 0
+        sd->hasMoreMessages = true;
     } else {
         sd->hasMoreMessages = false;
     }
     sd->isLoadingMore = false;
 
+    t.restart();
     page->scrollToBottom();
+    qDebug() << "[AIChatPane] scrollToBottom:" << t.elapsed() << "ms";
+
+    qDebug() << "[AIChatPane] onMessagesReceived TOTAL:" << totalTimer.elapsed() << "ms";
 }
 
 void AIChatPane::onMessagesPrepended(const QString &sessionId, const QList<OpenCodeMessage> &olderMessages, const QString &error){
+    qDebug() << "[AIChatPane] onMessagesPrepended: session=" << sessionId
+             << "olderCount=" << olderMessages.size() << "error=" << error;
+
     int sdIdx = findSessionIndex(sessionId);
     if(sdIdx < 0) return;
     auto *sd = m_sessions.at(sdIdx);
@@ -653,57 +678,54 @@ void AIChatPane::onMessagesPrepended(const QString &sessionId, const QList<OpenC
 
     if(!error.isEmpty()){
         qDebug() << "[AIChatPane] Prepend messages error:" << error;
-        page->messageListView()->setPrependInProgress(false);
         return;
     }
 
     if(olderMessages.isEmpty()){
         sd->hasMoreMessages = false;
-        page->messageListView()->setPrependInProgress(false);
+        qDebug() << "[AIChatPane] No older messages, hasMoreMessages set to false";
         return;
     }
 
-    // Collect existing messages before rebuild
-    QList<QPair<ChatMessageView::Type, QString>> existingMessages;
-    for (int i = 0; i < page->messageModel()->rowCount(); ++i) {
-        auto msgData = page->messageModel()->messageAt(i);
-        existingMessages.append({msgData.type, msgData.content});
-    }
-
-    // Rebuild model: older messages first, then existing messages
-    page->messageModel()->clearMessages();
+    // Build only the older messages and prepend them in one insert batch.
+    // A full resetMessages() here would destroy and re-create every delegate
+    // (including visible ones) and reset the viewport, which both freezes
+    // the UI on large histories and re-triggers the scroll-to-top load loop.
+    QList<MsgInput> older;
+    older.reserve(olderMessages.size());
     for (const auto &msg : olderMessages) {
-        ChatMessageView::Type type = (msg.role == "user")
+        MsgInput mi;
+        mi.type = (msg.role == "user")
             ? ChatMessageView::User
             : ChatMessageView::Assistant;
-        page->messageModel()->addMessage(type, msg.text);
+        mi.content = msg.text;
+        mi.thinking = msg.thinking;
+        older.append(mi);
     }
-    int oldFirstRow = olderMessages.size();
-    for (const auto &existing : existingMessages) {
-        page->messageModel()->addMessage(existing.first, existing.second);
-    }
+
+    qDebug() << "[AIChatPane] Prepending" << older.size() << "messages (existing:"
+             << page->qmlModel()->rowCount() << ")";
+
+    page->qmlModel()->prependMessages(older);
 
     // Update oldest timestamp
     sd->oldestMessageTimestamp = olderMessages.first().timeCreated;
-    sd->hasMoreMessages = true;  // got some, might be more
+    sd->hasMoreMessages = true;
 
-    // Adjust scroll position after layout settles
-    page->messageListView()->setPrependInProgress(false);
-    QTimer::singleShot(50, page, [page, oldFirstRow]() {
-        // Scroll to keep the old first visible message in view
-        if (page->messageModel()->rowCount() > oldFirstRow) {
-            QModelIndex idx = page->messageModel()->index(oldFirstRow);
-            if (idx.isValid()) {
-                page->messageListView()->scrollTo(idx, QAbstractItemView::PositionAtTop);
-            }
-        }
-    });
+    qDebug() << "[AIChatPane] Prepend complete, new oldestTimestamp=" << sd->oldestMessageTimestamp;
+    // No explicit scroll here: MainChatView.qml re-anchors the previously
+    // topmost message via aboutToPrependMessages (see QML Connections).
 }
 
 void AIChatPane::onLoadMoreMessages(const QString &sessionId)
 {
+    qDebug() << "[AIChatPane] onLoadMoreMessages called for session" << sessionId;
+
     int sdIdx = findSessionIndex(sessionId);
-    if (sdIdx < 0) return;
+    if (sdIdx < 0) {
+        qDebug() << "[AIChatPane] onLoadMoreMessages: session not found";
+        return;
+    }
     auto *sd = m_sessions.at(sdIdx);
 
     // Guard: don't fire while already loading, receiving, or when no more history
@@ -715,10 +737,11 @@ void AIChatPane::onLoadMoreMessages(const QString &sessionId)
         return;
     }
 
-    qDebug() << "[AIChatPane] Loading older messages before:" << sd->oldestMessageTimestamp;
+    qDebug() << "[AIChatPane] Loading older messages before:" << sd->oldestMessageTimestamp
+             << "limit=20";
     sd->isLoadingMore = true;
-    sd->page->messageListView()->setPrependInProgress(true);
     m_service->loadSessionMessages(sessionId, 20, sd->oldestMessageTimestamp);
+    qDebug() << "[AIChatPane] loadSessionMessages called, isLoadingMore set to true";
 }
 
 // ---- message sending ----
@@ -785,7 +808,23 @@ void AIChatPane::onStreamStarted(const QString &sessionId){
         setSending(page, true);
     }
 
-    ensureStreamingWidget(sd);
+    // Begin streaming via QML model (replaces ensureStreamingWidget)
+    page->beginStreaming();
+    sd->streamingRow = page->qmlModel()->messageCount() - 1;
+    sd->isStreaming = true;
+
+    // Create throttled scroll timer (once per session)
+    if(!sd->scrollTimer){
+        sd->scrollTimer = new QTimer(this);
+        sd->scrollTimer->setInterval(300);
+        sd->scrollTimer->setSingleShot(true);
+        SessionPageWidget *p = page;
+        connect(sd->scrollTimer, &QTimer::timeout, this, [this, p](){
+            // Respect the user's scroll position: if they dragged away
+            // from the bottom to read, don't yank the view back.
+            p->autoFollowScroll();
+        });
+    }
 }
 
 void AIChatPane::onStreamChunk(const QString &sessionId, const QString &delta){
@@ -794,12 +833,8 @@ void AIChatPane::onStreamChunk(const QString &sessionId, const QString &delta){
     auto *sd = m_sessions.at(sdIdx);
     if(!sd->page || !sd->isReceiving) return;
 
-    // IMPORTANT: ensureStreamingWidget uses streamingContent as the initial
-    // content when creating the model row, so we must append AFTER widget
-    // creation to avoid duplicating the first chunk.
-    auto *w = ensureStreamingWidget(sd);
     sd->streamingContent.append(delta);
-    if(w) w->appendText(delta);
+    sd->page->appendStreamingText(delta);
     throttledScrollToBottom(sd);
 }
 
@@ -809,8 +844,7 @@ void AIChatPane::onStreamThinking(const QString &sessionId, const QString &conte
     auto *sd = m_sessions.at(sdIdx);
     if(!sd->page || !sd->isReceiving) return;
 
-    auto *w = ensureStreamingWidget(sd);
-    if(w) w->appendThink(content);
+    sd->page->appendStreamingThinking(content);
     throttledScrollToBottom(sd);
 }
 
@@ -820,8 +854,7 @@ void AIChatPane::onStreamToolUse(const QString &sessionId, const QString &callID
     auto *sd = m_sessions.at(sdIdx);
     if(!sd->page || !sd->isReceiving) return;
 
-    auto *w = ensureStreamingWidget(sd);
-    if(w) w->appendToolBlock(callID, toolType, toolName, input);
+    sd->page->appendToolCall(callID, toolType, toolName, input);
     throttledScrollToBottom(sd);
 }
 
@@ -831,16 +864,12 @@ void AIChatPane::onStreamToolResult(const QString &sessionId, const QString &cal
     auto *sd = m_sessions.at(sdIdx);
     if(!sd->page || !sd->isReceiving) return;
 
-    // Update existing tool block status by callID, do NOT create a new message
-    auto *w = ensureStreamingWidget(sd);
-    if(w) {
-        // Determine success or failure based on output content
-        ChatMessageView::ToolStatus status = ChatMessageView::ToolSuccess;
-        if(output.contains("error", Qt::CaseInsensitive) || output.startsWith("Error:")) {
-            status = ChatMessageView::ToolFailure;
-        }
-        w->updateToolStatus(callID, status, output);
+    // Determine success or failure based on output content
+    int status = 1; // ToolSuccess
+    if(output.contains("error", Qt::CaseInsensitive) || output.startsWith("Error:")) {
+        status = 2; // ToolFailure
     }
+    sd->page->updateToolCallStatus(callID, status, output);
     throttledScrollToBottom(sd);
 }
 
@@ -852,19 +881,14 @@ void AIChatPane::onStreamFinished(const QString &sessionId, const QString &error
     if(sdIdx < 0) return;
     auto *sd = m_sessions.at(sdIdx);
 
-    // Stop spinner on visible widget (if any)
-    const int finishedRow = sd->streamingRow;
-    ChatMessageView *w = (finishedRow >= 0)
-        ? page->messageListView()->widgetForMessage(finishedRow)
-        : nullptr;
-    if(w) w->setStreaming(false);
+    // End streaming via QML model (replaces w->setStreaming(false))
+    page->endStreaming();
     if(sd->scrollTimer) sd->scrollTimer->stop();
 
-    // Always clear streaming bookkeeping first — even when the user already
-    // pressed Stop (isReceiving=false), the row must not be reused by the
-    // next message, otherwise new chunks would append to the stale widget.
+    // Always clear streaming bookkeeping first
     const bool wasReceiving = sd->isReceiving;
     const QString leftoverContent = sd->streamingContent;
+    const int finishedRow = sd->streamingRow;
     sd->streamingRow = -1;
     sd->streamingContent.clear();
     sd->isStreaming = false;
@@ -877,12 +901,13 @@ void AIChatPane::onStreamFinished(const QString &sessionId, const QString &error
     m_sessionPopup->updateSessionStatus(sessionId, false);
 
     if(!error.isEmpty()){
-        if(w && !leftoverContent.isEmpty()){
-            w->appendText(tr("\n[error: %1]").arg(error));
+        if(!leftoverContent.isEmpty()){
+            // Append error text to the existing streaming message
+            page->appendStreamingText(tr("\n[error: %1]").arg(error));
         }else{
             // Remove empty streaming row if it exists
             if(finishedRow >= 0){
-                page->messageModel()->removeMessage(finishedRow);
+                page->qmlModel()->removeMessage(finishedRow);
             }
             appendEvent(page, tr("Error: %1").arg(error));
         }
@@ -1032,24 +1057,8 @@ void AIChatPane::onPermissionAsked(const OpenCodePermissionRequest &request)
         if(sdIdx >= 0){
             auto *sd = m_sessions.at(sdIdx);
             sd->permissionPending = true;
-            sd->permissionRow = page->messageModel()->messageCount() - 1;
-            // Force immediate scroll to the permission widget
-            page->messageListView()->scrollToBottomImmediate();
-        }
-    }
-}
-
-void AIChatPane::onWidgetPermissionReplied(const QString &requestId, const QString &reply)
-{
-    qDebug() << "[AIChatPane] Permission reply:" << reply << "for" << requestId;
-    m_permissionReplies[requestId] = reply;
-    m_service->replyPermission(requestId, reply);
-
-    // Clear permission pending flag for all sessions (reply is per-request, not per-session)
-    for(auto *sd : m_sessions){
-        if(sd->permissionPending){
-            sd->permissionPending = false;
-            sd->permissionRow = -1;
+            sd->permissionRow = page->qmlModel()->messageCount() - 1;
+            page->scrollToBottom();
         }
     }
 }
@@ -1106,42 +1115,6 @@ void AIChatPane::scrollToBottom(SessionPageWidget *page){
     page->scrollToBottom();
 }
 
-ChatMessageView* AIChatPane::ensureStreamingWidget(SessionData *sd)
-{
-    SessionPageWidget *page = sd->page;
-    auto *view = page->messageListView();
-    auto *model = page->messageModel();
-
-    // Create the streaming row if it doesn't exist yet
-    if(sd->streamingRow < 0){
-        sd->isStreaming = true;
-        model->addMessage(ChatMessageView::Assistant, sd->streamingContent);
-        sd->streamingRow = model->messageCount() - 1;
-
-        // Force immediate widget creation for the new streaming row
-        // (the deferred timer might not have fired yet)
-        view->updateVisibleWidgets();
-
-        // Create throttled scroll timer (once per session)
-        if(!sd->scrollTimer){
-            sd->scrollTimer = new QTimer(this);
-            sd->scrollTimer->setInterval(300);
-            sd->scrollTimer->setSingleShot(true);
-            SessionPageWidget *p = page;
-            connect(sd->scrollTimer, &QTimer::timeout, this, [this, p](){
-                p->messageListView()->scrollToBottomImmediate();
-            });
-        }
-    }
-
-    // Try to get the widget from the visible viewport
-    ChatMessageView *w = view->widgetForMessage(sd->streamingRow);
-    if(w){
-        w->setStreaming(true);
-    }
-    return w;  // may be nullptr if row is off-screen
-}
-
 void AIChatPane::stopStreaming(const QString &sessionId)
 {
     auto *page = findPage(sessionId);
@@ -1151,12 +1124,8 @@ void AIChatPane::stopStreaming(const QString &sessionId)
     if(sdIdx < 0) return;
     auto *sd = m_sessions.at(sdIdx);
 
-    // Stop spinner immediately — do not wait for the server's idle event,
-    // and make sure the row is never reused by the next message.
-    ChatMessageView *w = (sd->streamingRow >= 0)
-        ? page->messageListView()->widgetForMessage(sd->streamingRow)
-        : nullptr;
-    if(w) w->setStreaming(false);
+    // Stop streaming via QML model
+    page->endStreaming();
     if(sd->scrollTimer) sd->scrollTimer->stop();
 
     sd->streamingRow = -1;
@@ -1176,18 +1145,6 @@ void AIChatPane::throttledScrollToBottom(SessionData *sd)
     if(sd->permissionPending) return;
     if(!sd->scrollTimer->isActive()){
         sd->scrollTimer->start();
-    }
-}
-
-void AIChatPane::onWidgetCreated(SessionPageWidget *page, int row, ChatMessageView *widget)
-{
-    Q_UNUSED(page);
-    // If this is the active streaming row, restore streaming indicator
-    for(auto *sd : m_sessions){
-        if(sd->page == page && sd->streamingRow == row && sd->isStreaming){
-            widget->setStreaming(true);
-            break;
-        }
     }
 }
 
@@ -1265,7 +1222,7 @@ QString AIChatPane::findServerExecutable()
 {
     auto agentSetting = OptionsSettings::getInstance()->agentSettings();
     m_serverPort = agentSetting.m_port;
-    ChatService::setServerPort(m_serverPort);
+    m_service->setServerPort(m_serverPort);
     QString exeDir = QCoreApplication::applicationDirPath();
     QString exe = exeDir + "/openagent-cpp.exe";
     if(!QFile::exists(exe)){
@@ -1479,41 +1436,36 @@ void AIChatPane::insertDebugTestMessage()
     auto *page = findPage(m_currentSessionId);
     if(!page) return;
 
-    // Add an empty assistant message, then populate it with test content
-    page->addMessage(ChatMessageView::Assistant, "");
-    page->messageListView()->updateVisibleWidgets();
-
-    int row = page->messageModel()->messageCount() - 1;
-    auto *w = page->messageListView()->widgetForMessage(row);
-    if(!w) return;
+    // Use the new QML streaming API to build a test message
+    page->beginStreaming();
 
     // 1. Thinking content
-    w->appendThink("Let me analyze the user's request. They want to create a new file with some example code. "
+    page->appendStreamingThinking("Let me analyze the user's request. They want to create a new file with some example code. "
                    "I should first check the existing project structure, then write the file using the write tool.");
 
     // 2. Tool call: read (processing)
-    w->appendToolBlock("call_debug_001", "read", "read", "{\"path\": \"D:/Qt/anycode/src/main.cpp\"}");
+    page->appendToolCall("call_debug_001", "read", "read", "{\"path\": \"D:/Qt/anycode/src/main.cpp\"}");
 
     // 3. Tool call: cmd (processing -> success)
-    w->appendToolBlock("call_debug_002", "cmd", "cmd", "{\"command\": \"dir D:\\Qt\\anycode\\src\"}");
+    page->appendToolCall("call_debug_002", "cmd", "cmd", "{\"command\": \"dir D:\\Qt\\anycode\\src\"}");
 
     // 4. Tool call: write (processing -> success)
-    w->appendToolBlock("call_debug_003", "write", "write", "{\"path\": \"D:/Qt/anycode/src/test_output.cpp\"}");
+    page->appendToolCall("call_debug_003", "write", "write", "{\"path\": \"D:/Qt/anycode/src/test_output.cpp\"}");
 
     // Update read tool to success
-    w->updateToolStatus("call_debug_001", ChatMessageView::ToolSuccess,
+    page->updateToolCallStatus("call_debug_001", 1,
                         "File content: #include <QApplication>\nint main(int argc, char *argv[]) {\n    QApplication app(argc, argv);\n    return app.exec();\n}");
 
     // Update cmd tool to success
-    w->updateToolStatus("call_debug_002", ChatMessageView::ToolSuccess,
+    page->updateToolCallStatus("call_debug_002", 1,
                         " Volume in drive D is Local Disk\n Directory of D:\\Qt\\anycode\\src\n\n main.cpp\n test_output.cpp\n 2 File(s)");
 
     // Update write tool to success
-    w->updateToolStatus("call_debug_003", ChatMessageView::ToolSuccess,
+    page->updateToolCallStatus("call_debug_003", 1,
                         "Wrote 256 bytes to D:/Qt/anycode/src/test_output.cpp");
 
     // 5. Summary text
-    w->appendText("\n\nI've completed the task. Here's what I did:\n\n"
+    page->appendStreamingText("\n\nI've completed the task. Here's what I did:\n\n"
                   "1. **Read** the existing `main.cpp` to check the project structure\n"
                   "2. **Listed** files in the `src` directory using `dir` command\n"
                   "3. **Created** a new test file `test_output.cpp`\n\n"
@@ -1530,6 +1482,7 @@ void AIChatPane::insertDebugTestMessage()
                   "```\n\n"
                   "The file has been written successfully.");
 
+    page->endStreaming();
     page->scrollToBottom();
 }
 

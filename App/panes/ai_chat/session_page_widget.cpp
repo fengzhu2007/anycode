@@ -1,8 +1,6 @@
 ﻿#include "session_page_widget.h"
 #include "ui_session_page_widget.h"
-#include "message_list_view.h"
-#include "message_model.h"
-#include "chat_message_view.h"
+#include "qml_message_model.h"
 #include "chat_service.h"
 #include "file_diff_list_widget.h"
 #include "core/theme.h"
@@ -12,6 +10,10 @@
 #include <QVBoxLayout>
 #include <QMouseEvent>
 #include <QTimer>
+#include <QQuickWidget>
+#include <QQuickItem>
+#include <QQmlContext>
+#include <QQmlEngine>
 
 namespace ady {
 
@@ -21,20 +23,8 @@ SessionPageWidget::SessionPageWidget(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Create virtualized message list (replaces the old QScrollArea + QVBoxLayout)
-    m_messageModel = new MessageModel(this);
-    m_messageListView = new MessageListView(this);
-    m_messageListView->setMessageModel(m_messageModel);
-
-    // Place MessageListView inside the messageAreaWidget container
-    auto *msgLayout = new QVBoxLayout(ui->messageAreaWidget);
-    msgLayout->setContentsMargins(0, 0, 0, 0);
-    msgLayout->setSpacing(0);
-    msgLayout->addWidget(m_messageListView);
-
-    // Forward scroll-to-top signal for loading older messages
-    connect(m_messageListView, &MessageListView::scrollToTopRequested,
-            this, &SessionPageWidget::scrollToTopRequested);
+    // ---- QML 消息列表 ----
+    setupQmlView();
 
     // Enter key handling for message input
     ui->messageInput->installEventFilter(this);
@@ -65,27 +55,10 @@ SessionPageWidget::~SessionPageWidget()
     delete ui;
 }
 
-MessageListView* SessionPageWidget::messageListView() const { return m_messageListView; }
-MessageModel* SessionPageWidget::messageModel() const { return m_messageModel; }
 QComboBox* SessionPageWidget::modelCombo() const { return ui->modelCombo; }
 QTextEdit* SessionPageWidget::messageInput() const { return ui->messageInput; }
 QToolButton* SessionPageWidget::sendBtn() const { return ui->sendBtn; }
 QLabel* SessionPageWidget::sessionTitle() const { return ui->sessionTitle; }
-
-void SessionPageWidget::addMessage(ChatMessageView::Type type, const QString &content)
-{
-    m_messageModel->addMessage(type, content);
-}
-
-void SessionPageWidget::clearMessages()
-{
-    m_messageModel->clearMessages();
-}
-
-void SessionPageWidget::scrollToBottom()
-{
-    m_messageListView->scrollToBottomDeferred();
-}
 
 void SessionPageWidget::appendInputText(const QString &text)
 {
@@ -233,6 +206,121 @@ void SessionPageWidget::onRejectAll()
     if (m_diffPopup->isVisible()) {
         m_diffPopup->hide();
     }
+}
+
+// ---- QML view setup ----
+
+void SessionPageWidget::setupQmlView()
+{
+    // Create QML message model
+    m_qmlModel = new QmlMessageModel(this);
+
+    // Create QQuickWidget
+    m_quickWidget = new QQuickWidget(this);
+    m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    m_quickWidget->setFocusPolicy(Qt::NoFocus);
+
+    // Match QQuickWidget background to theme
+    QColor bgColor = Theme::getInstance()->backgroundColor();
+    m_quickWidget->setStyleSheet("background-color: " + bgColor.name(QColor::HexRgb) + ";");
+
+    // Expose model and theme color to QML
+    m_quickWidget->rootContext()->setContextProperty("messageModel", m_qmlModel);
+    m_quickWidget->rootContext()->setContextProperty("themeBgColor", bgColor.name(QColor::HexRgb));
+
+    // TEST MODE: render fixed-height stub rows instead of real message
+    // bodies (no parts, no markdown TextEdit, no model content access).
+    // Used to isolate the scroll-freeze cause — if the freeze disappears
+    // with this enabled, the problem lives in the rendering pipeline
+    // (MarkdownBody/TextEdit), otherwise in the view/model layer.
+    // Set to false to restore normal rendering after diagnosis.
+    m_quickWidget->rootContext()->setContextProperty("messageTestMode", false);
+
+    // Load main QML
+    m_quickWidget->setSource(QUrl("qrc:/ai_chat/qml/MainChatView.qml"));
+    // Place QQuickWidget inside the messageAreaWidget container
+    auto *msgLayout = new QVBoxLayout(ui->messageAreaWidget);
+    msgLayout->setContentsMargins(0, 0, 0, 0);
+    msgLayout->setSpacing(0);
+    msgLayout->addWidget(m_quickWidget);
+
+    // Forward scroll-to-bottom requests from QML
+    connect(m_qmlModel, &QmlMessageModel::scrollToBottomRequested, this, [this]() {
+        // The QML ListView handles its own scrolling; this is for C++ callers
+    });
+
+    // Forward permission replies from QML parts
+    connect(m_qmlModel, &QmlMessageModel::permissionReplied,
+            this, [this](const QString &requestId, const QString &reply) {
+        if (m_chatService)
+            m_chatService->replyPermission(requestId, reply);
+        // NOTE: do NOT emit scrollToTopRequested here — the pane connects
+        // that signal to onLoadMoreMessages(), which would reload history
+        // and rebuild the model right after the user clicks a permission
+        // button (destroying the card under the cursor).
+    });
+}
+
+// ---- convenience methods (route to QML model) ----
+
+void SessionPageWidget::addMessage(ChatMessageView::Type type, const QString &content)
+{
+    m_qmlModel->addMessage(type, content);
+}
+
+void SessionPageWidget::clearMessages()
+{
+    m_qmlModel->clearMessages();
+}
+
+void SessionPageWidget::scrollToBottom()
+{
+    // Call QML function via the root object
+    if (m_quickWidget && m_quickWidget->rootObject()) {
+        QMetaObject::invokeMethod(static_cast<QObject*>(m_quickWidget->rootObject()), "scrollToBottom");
+    }
+}
+
+void SessionPageWidget::autoFollowScroll()
+{
+    // Streaming follow-up: QML only scrolls when the user hasn't dragged
+    // away from the bottom (autoScroll flag in MainChatView.qml)
+    if (m_quickWidget && m_quickWidget->rootObject()) {
+        QMetaObject::invokeMethod(static_cast<QObject*>(m_quickWidget->rootObject()), "autoFollow");
+    }
+}
+
+// ---- QML streaming API ----
+
+void SessionPageWidget::beginStreaming()
+{
+    m_qmlModel->beginStreaming();
+}
+
+void SessionPageWidget::appendStreamingText(const QString &delta)
+{
+    m_qmlModel->appendStreamingText(delta);
+}
+
+void SessionPageWidget::appendStreamingThinking(const QString &content)
+{
+    m_qmlModel->appendStreamingThinking(content);
+}
+
+void SessionPageWidget::appendToolCall(const QString &callID, const QString &toolType,
+                                        const QString &toolName, const QString &input)
+{
+    m_qmlModel->appendToolCall(callID, toolType, toolName, input);
+}
+
+void SessionPageWidget::updateToolCallStatus(const QString &callID, int status, const QString &output)
+{
+    m_qmlModel->updateToolCallStatus(callID, status, output);
+}
+
+void SessionPageWidget::endStreaming()
+{
+    m_qmlModel->endStreaming();
 }
 
 }
