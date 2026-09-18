@@ -144,8 +144,8 @@ void SessionPageWidget::setupDiffPopup()
     ui->reject->hide();
 
     // Accept/Reject buttons
-    connect(ui->accept, &QPushButton::clicked, this, &SessionPageWidget::onAcceptAll);
-    connect(ui->reject, &QPushButton::clicked, this, &SessionPageWidget::onRejectAll);
+    connect(ui->accept, &QToolButton::clicked, this, &SessionPageWidget::onAcceptAll);
+    connect(ui->reject, &QToolButton::clicked, this, &SessionPageWidget::onRejectAll);
 }
 
 void SessionPageWidget::setChatService(ChatService *service)
@@ -258,6 +258,12 @@ void SessionPageWidget::setupQmlView()
         // that signal to onLoadMoreMessages(), which would reload history
         // and rebuild the model right after the user clicks a permission
         // button (destroying the card under the cursor).
+    });
+
+    // Forward file open requests from QML parts
+    connect(m_qmlModel, &QmlMessageModel::fileOpenRequested,
+            this, [this](const QString &filePath) {
+        emit fileOpenRequested(filePath);
     });
 }
 

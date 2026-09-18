@@ -1,4 +1,5 @@
 import QtQuick 2.15
+import App.MD 1.0
 
 /**
  * MarkdownBody — renders markdown text with custom code block UI.
@@ -69,6 +70,15 @@ Item {
                         if (link.indexOf("http") === 0)
                             Qt.openUrlExternally(link)
                     }
+
+                    Component.onCompleted: {
+                                           if (modelData.type === "text")
+                                               tableStyler.attach(textDocument)
+                                       }
+                                       Component.onDestruction: {
+                                           if (modelData.type === "text")
+                                               tableStyler.detach(textDocument)
+                                       }
                 }
 
                 // Code block segment
@@ -81,9 +91,24 @@ Item {
                     code: modelData.content
                     language: modelData.language || ""
                 }
+
+
             }
         }
     }
+
+    MDStyler {
+            id: tableStyler
+            borderColor:     "#c8d1da"
+            headerBg:        "#eef2f6"
+            rowEvenBg:       "#ffffff"
+            rowOddBg:        "#f7f9fb"
+            headerTextColor: "#1f2328"
+            lineHeight:120
+            cellPadding: 0
+            borderWidth: 0
+        }
+
 
     /**
      * Parse markdown text into segments of text and code blocks.

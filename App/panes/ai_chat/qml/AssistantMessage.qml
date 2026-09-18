@@ -24,7 +24,7 @@ Item {
     Column {
         id: mainColumn
         width: parent.width
-        spacing: 4
+        spacing: 8
         // Calculate height explicitly to avoid implicitHeight recalculation
         height: {
             var h = 0;
@@ -36,27 +36,6 @@ Item {
                 }
             }
             return h > 0 ? h - spacing : 0;  // Remove last spacing
-        }
-
-        // Streaming spinner (shown while waiting for first chunk)
-        Row {
-            visible: streaming && parts.length === 0
-            leftPadding: 12
-            spacing: 6
-            height: 24
-
-            Text {
-                text: "⏳"
-                font.pixelSize: 12
-                color: "#888888"
-                anchors.verticalCenter: parent.verticalCenter
-            }
-            Text {
-                text: "Thinking..."
-                font.pixelSize: 12
-                color: "#888888"
-                anchors.verticalCenter: parent.verticalCenter
-            }
         }
 
         Repeater {
@@ -93,6 +72,8 @@ Item {
                                 return "cards/GrepCard.qml"
                             case "glob":
                                 return "cards/GlobCard.qml"
+                            case "fetch":
+                                return "cards/FetchCard.qml"
                             case "question":
                                 return "cards/QuestionCard.qml"
                             default:
@@ -123,7 +104,7 @@ Item {
 
         // Streaming indicator at the bottom
         Row {
-            visible: streaming && parts.length > 0
+            visible: streaming
             leftPadding: 12
             spacing: 4
             height: 20
@@ -131,7 +112,7 @@ Item {
             Text {
                 text: "▍"
                 font.pixelSize: 14
-                color: "#4a9eff"
+                color: "#9a9a9a"
 
                 SequentialAnimation on opacity {
                     running: streaming

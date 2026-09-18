@@ -3,96 +3,109 @@ import QtQuick 2.15
 /**
  * WriteCard — file write tool card.
  *
- * Shows target file path and write status.
+ * Layout:
+ *   ┌─────────────────────────────────────────┐
+ *   │ filename.cpp              +10       ✔   │
+ *   └─────────────────────────────────────────┘
  */
 Item {
     property var partData: null
 
-    property string toolName: partData ? partData.toolName : "Write"
-    property string content: partData ? partData.content : ""
-    property int    status: partData ? partData.status : 0
+    property string filePath: partData ? partData.content : ""
+    property string fileName: {
+        var parts = filePath.split(/[\/\\]/);
+        return parts[parts.length - 1] || filePath;
+    }
+    property int linesAdded: partData ? partData.linesAdded : 0
+    property int linesRemoved: partData ? partData.linesRemoved : 0
+    property int status: partData ? partData.status : 0
 
-    implicitHeight: cardRect.height
+    implicitHeight: 32
 
     Rectangle {
         id: cardRect
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.leftMargin: 8
-        anchors.rightMargin: 8
         anchors.top: parent.top
-        height: cardCol.implicitHeight + 16
+        height: 32
         radius: 4
-        color: "#1e2a1e"
-        border.color: status === 1 ? "#42b983" : (status === 2 ? "#e74c3c" : "#e6a23c")
-        border.width: status > 0 ? 1 : 0
+        color: "#1e2233"
+        border.color: "#2e3548"
+        border.width: 1
 
-        Rectangle {
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            width: 3
-            radius: 1.5
-            color: status === 1 ? "#42b983" : (status === 2 ? "#e74c3c" : "#e6a23c")
-        }
-
-        Column {
-            id: cardCol
+        Row {
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.leftMargin: 12
-            anchors.topMargin: 8
-            anchors.rightMargin: 8
-            spacing: 4
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: 10
+            anchors.rightMargin: 10
+            height: 20
+            spacing: 8
 
-            Row {
-                width: parent.width
-                spacing: 6
-                height: 20
+            // Filename (clickable)
+            Text {
+                id: fileNameText
+                text: fileName || "write"
+                anchors.left: parent.left
+                anchors.right:parent.right
+                anchors.rightMargin: 80
+                font.pixelSize: 12
+                color: "#c8d6c8"
+                anchors.verticalCenter: parent.verticalCenter
+                elide: Text.ElideMiddle
+                maximumLineCount: 1
 
-                Text {
-                    text: status === 0 ? "⏳" : (status === 1 ? "✔" : "✘")
-                    font.pixelSize: 12
-                    color: status === 0 ? "#e6a23c" : (status === 1 ? "#42b983" : "#e74c3c")
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Text {
-                    text: "✏️ " + toolName
-                    font.pixelSize: 12
-                    font.bold: true
-                    color: "#c8d6c8"
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Text {
-                    visible: status > 0
-                    text: status === 1 ? "Success" : "Failure"
-                    font.pixelSize: 11
-                    color: status === 1 ? "#42b983" : "#e74c3c"
-                    anchors.verticalCenter: parent.verticalCenter
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (partData) partData.openFile();
+                    }
                 }
             }
 
-            // Content preview (truncated)
-            TextEdit {
-                visible: status === 0
-                width: parent.width
+            // Spacer
+
+            // Lines added
+            Text {
+                id: addedText
+                anchors.right: removedText.left
+                text: "+" + linesAdded
+                font.pixelSize: 11
+                color: "#42b983"
+                anchors.verticalCenter: parent.verticalCenter
+                visible: linesAdded > 0
+            }
+
+            // Lines removed
+            Text {
+                id: removedText
+                anchors.right: statusText.left
+                text: "-" + linesRemoved
+                font.pixelSize: 11
+                color: "#e74c3c"
+                anchors.verticalCenter: parent.verticalCenter
+                visible: linesRemoved > 0
+            }
+
+            // Status
+            Text {
+                id: statusText
+                anchors.right: parent.right
                 text: {
-                    var c = content
-                    return c.length > 200 ? c.substring(0, 200) + "..." : c
+                    if (status === 0) return qsTr("Executing")
+                    if (status === 1) return qsTr("Success")
+                    if (status === 2) return qsTr("Failed")
+                    return qsTr("Executing")
                 }
-                wrapMode: TextEdit.Wrap
-                textFormat: TextEdit.PlainText
-                font.family: "Consolas"
-                font.pixelSize: 12
-                color: "#8899aa"
-                readOnly: true
-                selectByMouse: true
-                selectionColor: "#3399ff"
-                selectedTextColor: "#ffffff"
-                mouseSelectionMode: TextEdit.SelectCharacters
+                font.pixelSize: 11
+                color: {
+                    if (status === 0) return "#e6a23c"
+                    if (status === 1) return "#42b983"
+                    if (status === 2) return "#e74c3c"
+                    return "#e6a23c"
+                }
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
     }

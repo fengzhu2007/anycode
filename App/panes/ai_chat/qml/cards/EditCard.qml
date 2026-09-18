@@ -3,96 +3,109 @@ import QtQuick 2.15
 /**
  * EditCard — file edit tool card.
  *
- * Shows file path and edit summary.
+ * Layout:
+ *   ┌─────────────────────────────────────────┐
+ *   │ filename.cpp              +10 -2    ✔   │
+ *   └─────────────────────────────────────────┘
  */
 Item {
     property var partData: null
 
-    property string toolName: partData ? partData.toolName : "Edit"
-    property string content: partData ? partData.content : ""
-    property int    status: partData ? partData.status : 0
+    property string filePath: partData ? partData.content : ""
+    property string fileName: {
+        var parts = filePath.split(/[\/\\]/);
+        return parts[parts.length - 1] || filePath;
+    }
+    property int linesAdded: partData ? partData.linesAdded : 0
+    property int linesRemoved: partData ? partData.linesRemoved : 0
+    property int status: partData ? partData.status : 0
 
-    implicitHeight: cardRect.height
+    implicitHeight: 32
 
     Rectangle {
         id: cardRect
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.leftMargin: 8
-        anchors.rightMargin: 8
         anchors.top: parent.top
-        height: cardCol.implicitHeight + 16
+        height: 32
         radius: 4
-        color: "#2a2218"
-        border.color: status === 1 ? "#42b983" : (status === 2 ? "#e74c3c" : "#e6a23c")
-        border.width: status > 0 ? 1 : 0
+        color: "#1e2233"
+        border.color: "#2e3548"
+        border.width: 1
 
-        Rectangle {
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            width: 3
-            radius: 1.5
-            color: status === 1 ? "#42b983" : (status === 2 ? "#e74c3c" : "#e6a23c")
-        }
-
-        Column {
-            id: cardCol
+        Row {
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.leftMargin: 12
-            anchors.topMargin: 8
-            anchors.rightMargin: 8
-            spacing: 4
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: 10
+            anchors.rightMargin: 10
+            height: 20
+            spacing: 8
 
-            Row {
-                width: parent.width
-                spacing: 6
-                height: 20
+            // Filename (clickable)
+            Text {
+                id: fileNameText
+                text: fileName || "edit"
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.rightMargin: 100
+                font.pixelSize: 12
+                color: "#d6c8a0"
+                anchors.verticalCenter: parent.verticalCenter
+                elide: Text.ElideMiddle
+                maximumLineCount: 1
 
-                Text {
-                    text: status === 0 ? "⏳" : (status === 1 ? "✔" : "✘")
-                    font.pixelSize: 12
-                    color: status === 0 ? "#e6a23c" : (status === 1 ? "#42b983" : "#e74c3c")
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Text {
-                    text: "🔧 " + toolName
-                    font.pixelSize: 12
-                    font.bold: true
-                    color: "#d6c8a0"
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Text {
-                    visible: status > 0
-                    text: status === 1 ? "Success" : "Failure"
-                    font.pixelSize: 11
-                    color: status === 1 ? "#42b983" : "#e74c3c"
-                    anchors.verticalCenter: parent.verticalCenter
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (partData) partData.openFile();
+                    }
                 }
             }
 
-            // Content preview
-            TextEdit {
-                visible: status === 0
-                width: parent.width
+            // Lines added
+            Text {
+                id: addedText
+                anchors.right: linesRemoved>0?removedText.left:statusText.left
+                anchors.rightMargin: linesAdded>0?6:0
+                text: "+" + linesAdded
+                font.pixelSize: 11
+                color: "#42b983"
+                anchors.verticalCenter: parent.verticalCenter
+                visible: linesAdded > 0
+            }
+
+            // Lines removed
+            Text {
+                id: removedText
+                anchors.right: statusText.left
+                anchors.rightMargin: linesRemoved>0?6:0
+                text: "-" + linesRemoved
+                font.pixelSize: 11
+                color: "#e74c3c"
+                anchors.verticalCenter: parent.verticalCenter
+                visible: linesRemoved > 0
+            }
+
+            // Status
+            Text {
+                id: statusText
+                anchors.right: parent.right
                 text: {
-                    var c = content
-                    return c.length > 200 ? c.substring(0, 200) + "..." : c
+                    if (status === 0) return qsTr("Executing")
+                    if (status === 1) return qsTr("Success")
+                    if (status === 2) return qsTr("Failed")
+                    return qsTr("Executing")
                 }
-                wrapMode: TextEdit.Wrap
-                textFormat: TextEdit.PlainText
-                font.family: "Consolas"
-                font.pixelSize: 12
-                color: "#aa9977"
-                readOnly: true
-                selectByMouse: true
-                selectionColor: "#3399ff"
-                selectedTextColor: "#ffffff"
-                mouseSelectionMode: TextEdit.SelectCharacters
+                font.pixelSize: 11
+                color: {
+                    if (status === 0) return "#e6a23c"
+                    if (status === 1) return "#42b983"
+                    if (status === 2) return "#e74c3c"
+                    return "#e6a23c"
+                }
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
     }

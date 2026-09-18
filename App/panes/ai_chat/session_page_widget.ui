@@ -101,16 +101,24 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="reject">
+        <widget class="QToolButton" name="reject">
          <property name="text">
           <string>Reject</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../../r.qrc">
+           <normaloff>:/Resource/icons/dark/TestCoveredFailing_16x.svg</normaloff>:/Resource/icons/dark/TestCoveredFailing_16x.svg</iconset>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="accept">
+        <widget class="QToolButton" name="accept">
          <property name="text">
           <string>Accept</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../../r.qrc">
+           <normaloff>:/Resource/icons/dark/TestCoveredPassing_16x.svg</normaloff>:/Resource/icons/dark/TestCoveredPassing_16x.svg</iconset>
          </property>
         </widget>
        </item>

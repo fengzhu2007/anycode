@@ -72,6 +72,12 @@ public slots:
     void onStreamToolUse(const QString &sessionId, const QString &callID, const QString &toolType, const QString &toolName, const QString &input);
     void onStreamToolResult(const QString &sessionId, const QString &callID, const QString &toolType, const QString &toolName, const QString &output);
     void onStreamFinished(const QString &sessionId, const QString &error);
+    // part-driven rendering (opencode v1 part events)
+    void onPartUpdated(const QString &sessionId, const QString &messageId,
+                       const QString &partId, const QString &partType,
+                       const QJsonObject &part);
+    void onPartDelta(const QString &sessionId, const QString &messageId,
+                     const QString &partId, const QString &delta);
     void onSessionStatusChanged(const QString &sessionId, const QString &status);
     void onSessionTitleChanged(const QString &sessionId, const QString &title);
     void onModelsReceived(const QList<OpenCodeModel> &models, const QString &error);

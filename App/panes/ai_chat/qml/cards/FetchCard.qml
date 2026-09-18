@@ -2,20 +2,18 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 
 /**
- * CommandCard — command-line tool card (bash/cmd/powershell).
+ * FetchCard — fetch tool card.
  *
  * Layout:
  *   ┌─────────────────────────────────────────┐
- *   │ POWERSHELL                      [Copy]  │  ← header
- *   │ > command here...                ✔      │  ← command + status
+ *   │ FETCH                           [Copy]  │  ← header
+ *   │ fetch:https://example.com...      ✔     │  ← content + status
  *   └─────────────────────────────────────────┘
  */
 Item {
     property var partData: null
 
-    property string toolName: partData ? partData.toolName : ""
-    property string shellType: partData ? (partData.shellType || "").toUpperCase() : "SHELL"
-    property string command: partData ? partData.content : ""
+    property string url: partData ? partData.content : ""
     property int    status: partData ? partData.status : 0  // 0=processing, 1=success, 2=failure
 
     implicitHeight: 60
@@ -25,12 +23,10 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.leftMargin: 0
-        anchors.rightMargin: 0
         height: 60
         radius: 4
-        color: "#1e2a1e"
-        border.color: "#3e4e3e"
+        color: "#1e2233"
+        border.color: "#2e3548"
         border.width: 1
 
         // ── Header bar ──
@@ -41,7 +37,7 @@ Item {
             anchors.right: parent.right
             height: 28
             radius: 4
-            color: "#263626"
+            color: "#262d44"
             // Square off bottom corners
             Rectangle {
                 anchors.bottom: parent.bottom
@@ -51,12 +47,12 @@ Item {
                 color: parent.color
             }
 
-            // Shell type label
+            // Tool type label
             Text {
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                text: shellType || "SHELL"
+                text: "FETCH"
                 color: "#8a8a8a"
                 font.pixelSize: 11
                 font.family: "Consolas"
@@ -81,13 +77,14 @@ Item {
 
                 background: Rectangle {
                     radius: 3
-                    color: copyBtn.hovered ? "#3e4e3e" : "transparent"
+                    color: copyBtn.hovered ? "#2e3548" : "transparent"
                 }
 
                 property bool _copied: false
 
                 onClicked: {
-                    copyHelper.text = command
+                    // Copy only the URL, not the "fetch:" prefix
+                    copyHelper.text = url
                     copyHelper.selectAll()
                     copyHelper.copy()
                     copyHelper.text = ""
@@ -103,7 +100,7 @@ Item {
             }
         }
 
-        // ── Command line + status ──
+        // ── Content line + status ──
         Row {
             anchors.top: headerBar.bottom
             anchors.topMargin: 4
@@ -114,25 +111,25 @@ Item {
             height: 22
             spacing: 6
 
-            // ">" prompt prefix
+            // "fetch:" prefix
             Text {
-                text: ">"
+                text: "fetch:"
                 font.family: "Consolas"
                 font.pixelSize: 12
-                color: "#6a8a6a"
+                color: "#6a7a9a"
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-            // Command text — single line, elided
+            // URL text — single line, elided
             Text {
                 anchors.left: parent.left
-                anchors.leftMargin: 16
+                anchors.leftMargin: 50
                 anchors.rightMargin: 50
                 anchors.right: parent.right
-                text: command
+                text: url
                 font.family: "Consolas"
                 font.pixelSize: 12
-                color: "#c8d6c8"
+                color: "#c8d6e8"
                 elide: Text.ElideRight
                 maximumLineCount: 1
                 wrapMode: Text.NoWrap

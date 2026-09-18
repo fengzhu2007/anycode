@@ -168,5 +168,6 @@
         <file alias="qml/cards/GrepCard.qml">panes/ai_chat/qml/cards/GrepCard.qml</file>
         <file alias="qml/cards/GlobCard.qml">panes/ai_chat/qml/cards/GlobCard.qml</file>
         <file alias="qml/cards/QuestionCard.qml">panes/ai_chat/qml/cards/QuestionCard.qml</file>
+		<file alias="qml/cards/FetchCard.qml">panes/ai_chat/qml/cards/FetchCard.qml</file>
     </qresource>
 </RCC>

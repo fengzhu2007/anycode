@@ -50,6 +50,7 @@ struct OpenCodeMessage {
     QString role;         // "user" | "assistant"
     QString text;
     QString thinking;     // reasoning content (separate from text)
+    QJsonArray parts;     // raw parts array (part-driven rendering); text/thinking kept flattened for compatibility
     qint64 timeCreated;
 };
 Q_DECLARE_METATYPE(OpenCodeMessage)
@@ -164,6 +165,18 @@ signals:
     void streamToolUse(const QString &sessionId, const QString &callID, const QString &toolType, const QString &toolName, const QString &input);
     void streamToolResult(const QString &sessionId, const QString &callID, const QString &toolType, const QString &toolName, const QString &output);
     void streamFinished(const QString &sessionId, const QString &error);
+
+    /** Part-level SSE events (opencode v1 part-driven rendering).
+     *  partUpdated fires for every message.part.updated announcement with the
+     *  raw part JSON; partDelta fires for every message.part.delta chunk.
+     *  Only assistant-message parts are emitted (user parts would duplicate
+     *  the locally rendered user bubble). */
+    void partUpdated(const QString &sessionId, const QString &messageId,
+                     const QString &partId, const QString &partType,
+                     const QJsonObject &part);
+    void partDelta(const QString &sessionId, const QString &messageId,
+                   const QString &partId, const QString &delta);
+
     void sessionStatusChanged(const QString &sessionId, const QString &status);
     void sessionTitleChanged(const QString &sessionId, const QString &title);
     void sessionDiffChanged(const QString &sessionId, const QString &summary);
@@ -230,6 +243,12 @@ private:
     // partID → part type, learned from message.part.updated; used to route
     // message.part.delta events (reasoning deltas render as thinking)
     QHash<QString, QString> m_partTypes;
+    // partID → messageID, learned from message.part.updated; lets partDelta
+    // reach the model row that owns the part
+    QHash<QString, QString> m_partMessages;
+    // messageID → role, learned from message.updated; part-level events are
+    // suppressed for user messages (already rendered locally)
+    QHash<QString, QString> m_messageRoles;
     // partID → accumulated reasoning text (appendThink replaces, so each
     // reasoning delta re-emits the accumulated full text)
     QHash<QString, QString> m_reasoningTexts;

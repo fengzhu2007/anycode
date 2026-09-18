@@ -14,15 +14,21 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(COMPILER_INFO "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION} ${CMAKE_SYSTEM_PROCESSOR}")
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Quick QuickWidgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Quick QuickWidgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Qml Quick QuickWidgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Qml Quick QuickWidgets)
 
 
 
 
 #message(STATUS "Qt5 : ${Qt5Widgets_PRIVATE_INCLUDE_DIRS}")
 
-
+if (TARGET Qt5::QuickPrivate)
+    message(STATUS "Qt5::QuickPrivate FOUND")
+    get_target_property(_priv_inc Qt5::QuickPrivate INTERFACE_INCLUDE_DIRECTORIES)
+    message(STATUS "  includes: ${_priv_inc}")
+else()
+    message(WARNING "Qt5::QuickPrivate NOT FOUND")
+endif()
 
 
 
@@ -418,6 +424,7 @@ add_library(App SHARED
         tools/image_clip/workflow_item.h tools/image_clip/workflow_item.cpp tools/image_clip/workflow_item.ui
         tools/image_clip/workflow_model.h tools/image_clip/workflow_model.cpp
         tools/template_command/template_command_dialog.h tools/template_command/template_command_dialog.cpp tools/template_command/template_command_dialog.ui
+        panes/ai_chat/mdstyler.h panes/ai_chat/mdstyler.cpp
 
 
 
@@ -427,7 +434,7 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::QuickWidgets   ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::QuickWidgets  Qt5::QuickPrivate  ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt
     gatewap
     tree-sitter
     tree-sitter-json

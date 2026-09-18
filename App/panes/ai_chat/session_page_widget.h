@@ -100,6 +100,7 @@ signals:
     void enterPressed();
     void modelChanged(int index);
     void scrollToTopRequested();
+    void fileOpenRequested(const QString &filePath);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

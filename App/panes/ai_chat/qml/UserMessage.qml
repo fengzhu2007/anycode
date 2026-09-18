@@ -38,6 +38,7 @@ Item {
             color: "#eeeeee"
             font.pixelSize: 12
             readOnly: true
+            selectByKeyboard: true
             selectByMouse: true
             selectionColor: "#0539a2"
             selectedTextColor: "#ffffff"

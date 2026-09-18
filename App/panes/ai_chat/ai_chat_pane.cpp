@@ -15,7 +15,7 @@
 #include "modules/options/network_settings.h"
 #include <QElapsedTimer>
 #include "modules/options/agent_settings.h"
-
+#include "mdstyler.h"
 #include <QDir>
 
 #include <QAction>
@@ -63,6 +63,7 @@ AIChatPane::AIChatPane(QWidget *parent)
     this->setCenterWidget(widget);
     this->setWindowTitle(tr("AI Chat"));
 
+    qmlRegisterType<MDStyler>("App.MD", 1, 0, "MDStyler");
 
     QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
 
@@ -107,10 +108,13 @@ AIChatPane::AIChatPane(QWidget *parent)
     connect(m_service, &ChatService::sessionCreated, this, &AIChatPane::onSessionCreated);
     connect(m_service, &ChatService::sessionDeleted, this, &AIChatPane::onSessionDeleted);
     connect(m_service, &ChatService::streamStarted, this, &AIChatPane::onStreamStarted);
-    connect(m_service, &ChatService::streamChunk, this, &AIChatPane::onStreamChunk);
-    connect(m_service, &ChatService::streamThinking, this, &AIChatPane::onStreamThinking);
-    connect(m_service, &ChatService::streamToolUse, this, &AIChatPane::onStreamToolUse);
-    connect(m_service, &ChatService::streamToolResult, this, &AIChatPane::onStreamToolResult);
+    // Part-driven rendering: each SSE part (message.part.updated/delta) is
+    // forwarded to the model by its server partID. The flat stream signals
+    // (streamChunk/streamThinking/streamToolUse/streamToolResult) are no
+    // longer connected — merging everything into one text/thinking/tool
+    // bucket lost part order and multi-part content.
+    connect(m_service, &ChatService::partUpdated, this, &AIChatPane::onPartUpdated);
+    connect(m_service, &ChatService::partDelta, this, &AIChatPane::onPartDelta);
     connect(m_service, &ChatService::streamFinished, this, &AIChatPane::onStreamFinished);
     connect(m_service, &ChatService::sessionStatusChanged, this, &AIChatPane::onSessionStatusChanged);
     connect(m_service, &ChatService::sessionTitleChanged, this, &AIChatPane::onSessionTitleChanged);
@@ -639,6 +643,8 @@ void AIChatPane::onMessagesReceived(const QString &sessionId, const QList<OpenCo
             : ChatMessageView::Assistant;
         mi.content = msg.text;
         mi.thinking = msg.thinking;
+        mi.messageId = msg.id;
+        mi.parts = msg.parts;
         allMessages.append(mi);
     }
     qDebug() << "[AIChatPane] build MsgInput:" << t.elapsed() << "ms for" << allMessages.size() << "messages";
@@ -700,6 +706,8 @@ void AIChatPane::onMessagesPrepended(const QString &sessionId, const QList<OpenC
             : ChatMessageView::Assistant;
         mi.content = msg.text;
         mi.thinking = msg.thinking;
+        mi.messageId = msg.id;
+        mi.parts = msg.parts;
         older.append(mi);
     }
 
@@ -881,10 +889,6 @@ void AIChatPane::onStreamFinished(const QString &sessionId, const QString &error
     if(sdIdx < 0) return;
     auto *sd = m_sessions.at(sdIdx);
 
-    // End streaming via QML model (replaces w->setStreaming(false))
-    page->endStreaming();
-    if(sd->scrollTimer) sd->scrollTimer->stop();
-
     // Always clear streaming bookkeeping first
     const bool wasReceiving = sd->isReceiving;
     const QString leftoverContent = sd->streamingContent;
@@ -899,25 +903,74 @@ void AIChatPane::onStreamFinished(const QString &sessionId, const QString &error
     if(!wasReceiving) return;
 
     m_sessionPopup->updateSessionStatus(sessionId, false);
+    if(sd->scrollTimer) sd->scrollTimer->stop();
 
+    // Error handling runs BEFORE endStreaming() so a part-driven error part
+    // can attach to the still-streaming row (upsertPart reuses it).
     if(!error.isEmpty()){
         if(!leftoverContent.isEmpty()){
-            // Append error text to the existing streaming message
+            // legacy flat path: append to the accumulated text
             page->appendStreamingText(tr("\n[error: %1]").arg(error));
         }else{
-            // Remove empty streaming row if it exists
-            if(finishedRow >= 0){
-                page->qmlModel()->removeMessage(finishedRow);
+            const int row = finishedRow >= 0 ? finishedRow
+                                             : page->qmlModel()->rowCount() - 1;
+            if(page->qmlModel()->rowHasParts(row)){
+                // surface the error as a text part on the streamed message
+                page->qmlModel()->upsertPart(QString(), QStringLiteral("__error__"),
+                    QStringLiteral("text"),
+                    QJsonObject{{"text", tr("[error: %1]").arg(error)}});
+            }else{
+                // nothing streamed — drop the empty row, show an event line
+                if(finishedRow >= 0){
+                    page->qmlModel()->removeMessage(finishedRow);
+                }
+                appendEvent(page, tr("Error: %1").arg(error));
             }
-            appendEvent(page, tr("Error: %1").arg(error));
         }
     }
+
+    // End streaming via QML model (replaces w->setStreaming(false))
+    page->endStreaming();
 
     if(sessionId == m_currentSessionId){
         setSending(page, false);
     }
 
     page->scrollToBottom();
+}
+
+void AIChatPane::onPartUpdated(const QString &sessionId, const QString &messageId,
+                               const QString &partId, const QString &partType,
+                               const QJsonObject &part){
+    auto *page = findPage(sessionId);
+    if(!page) return;
+
+    int sdIdx = findSessionIndex(sessionId);
+    if(sdIdx < 0) return;
+    auto *sd = m_sessions.at(sdIdx);
+
+    // Upsert by server part identity: creates the streaming row on the first
+    // part, updates existing parts in place, keeps server arrival order.
+    // User messages are already filtered out by ChatService.
+    page->qmlModel()->upsertPart(messageId, partId, partType, part);
+
+    if(sd->isReceiving)
+        throttledScrollToBottom(sd);
+}
+
+void AIChatPane::onPartDelta(const QString &sessionId, const QString &messageId,
+                             const QString &partId, const QString &delta){
+    auto *page = findPage(sessionId);
+    if(!page) return;
+
+    int sdIdx = findSessionIndex(sessionId);
+    if(sdIdx < 0) return;
+    auto *sd = m_sessions.at(sdIdx);
+
+    page->qmlModel()->appendPartDelta(messageId, partId, delta);
+
+    if(sd->isReceiving)
+        throttledScrollToBottom(sd);
 }
 
 void AIChatPane::onSessionStatusChanged(const QString &sessionId, const QString &status){

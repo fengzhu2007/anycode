@@ -3,10 +3,12 @@ import QtQuick 2.15
 /**
  * ThinkingBlock — collapsible thinking content display.
  *
- * Uses only Text components (reliable implicitHeight in ListView delegate).
- * Collapsed: single-line preview with elide + "thinking..."
- * Expanded: full wrapped text
- * Click to toggle. Right-click to copy.
+ * Collapsed: lightweight Text preview (single line, elide).
+ * Expanded: TextEdit loaded on-demand via Loader (selectByMouse support).
+ *
+ * The TextEdit is NOT created until the user expands the block.
+ * This eliminates TextEdit overhead during streaming — no implicitHeight
+ * recalculation, no QTextDocument allocation, no layout propagation.
  */
 Item {
     id: thinkingRoot
@@ -15,17 +17,17 @@ Item {
     property bool expanded: false
     property string thinkText: partData ? partData.content : ""
 
-    implicitHeight: expanded ? Math.max(icon.height, fullTextLabel.implicitHeight) + 8
-                             : Math.max(icon.height, previewLabel.implicitHeight) + 8
+    implicitHeight: expanded && expandedLoader.item
+                        ? expandedLoader.item.implicitHeight
+                        : previewLabel.implicitHeight
     clip: true
 
     Image {
         id: icon
-        anchors.left: parent.left
+        source: "qrc:/Resource/icons/dark/LightBulb.png"
         anchors.top: parent.top
-        source: "qrc:/Resource/icons/dark/IntellisenseLightBulb_16x.svg"
-        width: 12
-        height: 12
+        width:12
+        height:12
     }
 
     // Collapsed: single-line preview with elide
@@ -35,6 +37,7 @@ Item {
         anchors.left: parent.left
         anchors.leftMargin: 18
         anchors.rightMargin: 30
+        anchors.bottomMargin: 12
         anchors.right: parent.right
         anchors.top: parent.top
         text: thinkText
@@ -48,35 +51,37 @@ Item {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: expanded = true
-
-
         }
     }
 
-    // Expanded: full wrapped text (always laid out, opacity controls visibility)
-    TextEdit {
-        id: fullTextLabel
+    // Expanded: TextEdit loaded on demand.
+    // No TextEdit exists during streaming — zero overhead.
+    Loader {
+        id: expandedLoader
         visible: expanded
         anchors.left: parent.left
-        anchors.leftMargin: 18
-        anchors.rightMargin: 30
         anchors.right: parent.right
         anchors.top: parent.top
-        text: thinkText
-        wrapMode: Text.Wrap
-        textFormat: Text.PlainText
-        color: "#888888"
-        font.pixelSize: 12
-        opacity: expanded ? 1 : 0
-        readOnly: true
-        selectByMouse: true
-        selectionColor: "#0539a2"
-        selectedTextColor: "#ffffff"
-        mouseSelectionMode: TextEdit.SelectCharacters
-        renderType: TextEdit.NativeRendering
+        active: expanded
+        anchors.leftMargin: 18
+        anchors.rightMargin: 30
 
-        // Suppress cursor change on hover
-        cursorDelegate: Item {}
+        sourceComponent: Component {
+            TextEdit {
+                text: thinkText
+                wrapMode: TextEdit.Wrap
+                textFormat: TextEdit.PlainText
+                color: "#888888"
+                font.pixelSize: 12
+                readOnly: true
+                selectByMouse: true
+                selectionColor: "#0539a2"
+                selectedTextColor: "#ffffff"
+                mouseSelectionMode: TextEdit.SelectCharacters
+                renderType: TextEdit.NativeRendering
+                cursorDelegate: Item {}
+            }
+        }
     }
 
     // Toggle arrow at top-right

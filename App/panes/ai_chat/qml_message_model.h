@@ -18,6 +18,7 @@
 #include <QObject>
 #include <QHash>
 #include <QList>
+#include <QJsonArray>
 #include <QQmlEngine>
 #include "chat_message_bubble.h"
 
@@ -29,6 +30,7 @@ namespace ady {
 class PartObject : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString partId READ partId NOTIFY dataChanged)
     Q_PROPERTY(QString partType READ partType NOTIFY dataChanged)
     Q_PROPERTY(QString content READ content WRITE setContent NOTIFY contentChanged)
     Q_PROPERTY(QString callID  READ callID  NOTIFY dataChanged)
@@ -38,10 +40,15 @@ class PartObject : public QObject
     Q_PROPERTY(bool   isCommand READ isCommand NOTIFY dataChanged)
     Q_PROPERTY(QString shellType READ shellType NOTIFY dataChanged)
     Q_PROPERTY(QString output   READ output  WRITE setOutput NOTIFY outputChanged)
+    Q_PROPERTY(int linesAdded READ linesAdded WRITE setLinesAdded NOTIFY dataChanged)
+    Q_PROPERTY(int linesRemoved READ linesRemoved WRITE setLinesRemoved NOTIFY dataChanged)
     Q_PROPERTY(QString permissionRequestId READ permissionRequestId NOTIFY dataChanged)
     Q_PROPERTY(QString permissionReply     READ permissionReply     NOTIFY permissionReplyChanged)
 public:
     explicit PartObject(QObject *parent = nullptr);
+
+    QString partId() const { return m_partId; }
+    void setPartId(const QString &id);
 
     QString partType() const { return m_partType; }
     void setPartType(const QString &t);
@@ -70,6 +77,12 @@ public:
     QString output() const { return m_output; }
     void setOutput(const QString &o);
 
+    int linesAdded() const { return m_linesAdded; }
+    void setLinesAdded(int n);
+
+    int linesRemoved() const { return m_linesRemoved; }
+    void setLinesRemoved(int n);
+
     QString permissionRequestId() const { return m_permRequestId; }
     void setPermissionRequestId(const QString &id);
 
@@ -78,6 +91,9 @@ public:
     /** Called from QML when user clicks Allow Once / Always / Reject. */
     Q_INVOKABLE void replyPermission(const QString &reply);
 
+    /** Called from QML when user clicks on file name in edit/write cards. */
+    Q_INVOKABLE void openFile();
+
 signals:
     void dataChanged();
     void contentChanged();
@@ -85,8 +101,11 @@ signals:
     void permissionReplyChanged();
     /** Emitted by replyPermission() — QmlMessageModel forwards to ChatService. */
     void permissionReplied(const QString &requestId, const QString &reply);
+    /** Emitted by openFile() — contains the file path from content. */
+    void fileOpenRequested(const QString &filePath);
 
 private:
+    QString m_partId;        // server part id (opencode v1 part identity)
     QString m_partType;      // "thinking" | "text" | "tool" | "permission"
     QString m_content;
     QString m_callID;
@@ -96,6 +115,8 @@ private:
     bool    m_isCommand = false;
     QString m_shellType;
     QString m_output;
+    int     m_linesAdded = 0;
+    int     m_linesRemoved = 0;
     QString m_permRequestId;
     QString m_permReply;
 };
@@ -107,6 +128,8 @@ struct MsgInput {
     ChatMessageBubble::Type type;
     QString content;
     QString thinking;
+    QString messageId;       // server message id (part-driven rows)
+    QJsonArray parts;        // raw server parts (assistant only; part-driven rendering)
 };
 
 // ---------------------------------------------------------------------------
@@ -165,6 +188,23 @@ public:
     void updateToolCallStatus(const QString &callID, int status, const QString &output);
     void endStreaming();
 
+    // ---- part-driven API (opencode v1: SSE parts render by identity) ----
+
+    /** Insert or update the part identified by partId inside the message
+     *  identified by messageId (falls back to the last streaming assistant
+     *  row, creating it when absent). Parts keep server arrival order.
+     *  Non-displayable types (step-start/step-finish/...) are ignored. */
+    void upsertPart(const QString &messageId, const QString &partId,
+                    const QString &partType, const QJsonObject &part);
+
+    /** Append a streaming delta to the text/thinking part identified by
+     *  partId. Ignored when the part has not been announced yet. */
+    void appendPartDelta(const QString &messageId, const QString &partId,
+                         const QString &delta);
+
+    /** True when the row exists and carries at least one PartObject. */
+    bool rowHasParts(int row) const;
+
     // ---- scroll helper (forwarded from QML) ----
     Q_INVOKABLE void scrollToBottom();
 
@@ -175,6 +215,7 @@ signals:
     void countChanged();
     void scrollToBottomRequested();
     void permissionReplied(const QString &requestId, const QString &reply);
+    void fileOpenRequested(const QString &filePath);
     void loadMoreRequested();
     /** Emitted right before history rows are inserted at the top. */
     void aboutToPrependMessages(int count);
@@ -185,6 +226,8 @@ private:
         QString content;
         QString thinking;
         bool streaming = false;
+        QString messageId;       // server message id (part-driven rows)
+        bool partsManaged = false; // true: parts list is authoritative (server-driven); buildEntryParts must not rebuild it
         QList<PartObject*> parts;
         mutable QVariantList cachedPartsList; // cached QVariantList for QML (avoids re-creation on every access)
         int partsVersion = 0; // incremented on every rebuildParts, used to trigger QML updates without binding to parts
@@ -198,6 +241,8 @@ private:
             bool isCommand = false;
             QString shellType;
             QString output;
+            int linesAdded = 0;
+            int linesRemoved = 0;
         };
         QList<ToolRef> toolCalls;
     };
@@ -207,6 +252,8 @@ private:
      *  bulk operations so delegates are created with final data in place. */
     void buildEntryParts(MessageEntry &msg);
     static void clearParts(QList<PartObject*> &parts);
+    /** Connect PartObject signals to QmlMessageModel signals. */
+    void connectPartSignals(PartObject *p);
 
     QList<MessageEntry> m_messages;
     QHash<QString, QPair<int,int>> m_callIdMap; // callID → (msgRow, toolIdx)

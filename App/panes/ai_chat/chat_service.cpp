@@ -195,7 +195,7 @@ void ChatService::listSessions()
         }
 
         // parse response: array of sessions
-        qDebug() << "[ChatService] listSessions response:" << responseData;
+        //qDebug() << "[ChatService] listSessions response:" << responseData;
         QList<OpenCodeSession> sessions;
         QJsonDocument doc = QJsonDocument::fromJson(responseData);
         //qDebug() <<"[ChatService] listSessions response:"<< doc.toJson();
@@ -505,7 +505,8 @@ bool ChatService::sendMessage(const QString &sessionId, const QString &content, 
     m_future = QtConcurrent::run([this, url, postData, sessionId](){
         CURL *curl = curl_easy_init();
         if(!curl){
-            emit streamFinished(sessionId, tr("Failed to initialize network"));
+            QMetaObject::invokeMethod(this, "streamFinished", Qt::QueuedConnection,
+                                          Q_ARG(QString, sessionId), Q_ARG(QString, tr("Failed to initialize network")));
             m_requesting = false;
             return;
         }
@@ -535,12 +536,14 @@ bool ChatService::sendMessage(const QString &sessionId, const QString &content, 
             QJsonObject obj = doc.object();
             if(obj.contains("error")){
                 QString err = obj["error"].toObject()["message"].toString();
-                emit streamFinished(sessionId, err.isEmpty() ? tr("Unknown error") : err);
+                QMetaObject::invokeMethod(this, "streamFinished", Qt::QueuedConnection,
+                                              Q_ARG(QString, sessionId), Q_ARG(QString, err.isEmpty() ? tr("Unknown error") : err));
             }
         }else if(res == CURLE_OPERATION_TIMEDOUT){
             // timeout is expected - response comes via SSE events
         }else{
-            emit streamFinished(sessionId, QString::fromUtf8(curl_easy_strerror(res)));
+            QMetaObject::invokeMethod(this, "streamFinished", Qt::QueuedConnection,
+                                          Q_ARG(QString, sessionId), Q_ARG(QString, QString::fromUtf8(curl_easy_strerror(res))));
         }
         m_requesting = false;
     });
@@ -648,7 +651,29 @@ void ChatService::loadSessionMessages(const QString &sessionId, int limit, qint6
                 msg.text = text;
                 msg.thinking = thinking;
                 msg.timeCreated = timeCreated;
+                msg.parts = parts;
                 messages.append(msg);
+            }else if(role == "assistant" && !parts.isEmpty()){
+                // Assistant messages may carry only tool parts (no text /
+                // reasoning); they were previously dropped, losing every tool
+                // card on reload. Keep them and let the UI render the parts.
+                bool hasDisplayPart = false;
+                for(const auto &p : parts){
+                    QString t = p.toObject()["type"].toString();
+                    if(t == "text" || t == "reasoning" || t == "thinking"
+                            || t == "code" || t == "tool"){
+                        hasDisplayPart = true;
+                        break;
+                    }
+                }
+                if(hasDisplayPart){
+                    OpenCodeMessage msg;
+                    msg.id = id;
+                    msg.role = role;
+                    msg.timeCreated = timeCreated;
+                    msg.parts = parts;
+                    messages.append(msg);
+                }
             }
         }
 
@@ -843,25 +868,82 @@ void ChatService::confirmChanges(const QString &sessionId)
 
 void ChatService::revertSession(const QString &sessionId)
 {
-    QString url = m_baseUrl + "/session/" + sessionId + "/revert";
+    QString revertUrl = m_baseUrl + "/session/" + sessionId + "/revert";
+    QString messagesUrl = m_baseUrl + "/session/" + sessionId + "/message?limit=10000";
 
-    QtConcurrent::run([url, sessionId](){
+    QtConcurrent::run([this, revertUrl, messagesUrl, sessionId](){
+        // Step 1: fetch messages to find the first user messageID
+        // (server requires messageID in the revert body to know the target)
         CURL *curl = curl_easy_init();
         if(!curl) return;
 
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
-        curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8().constData());
-        curl_easy_setopt(curl, CURLOPT_POST, 1L);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "");
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L);
+        curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
+        curl_easy_setopt(curl, CURLOPT_URL, messagesUrl.toUtf8().constData());
+        curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+
+        QByteArray responseData;
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
 
         CURLcode res = curl_easy_perform(curl);
         curl_easy_cleanup(curl);
 
         if(res != CURLE_OK){
-            qWarning() << "[ChatService] revertSession failed:" << curl_easy_strerror(res);
+            qWarning() << "[ChatService] revertSession: failed to fetch messages:"
+                       << curl_easy_strerror(res);
+            return;
+        }
+
+        // Parse messages array to find the LAST user message ID
+        // (revert only the most recent round, not the entire session)
+        QJsonDocument doc = QJsonDocument::fromJson(responseData);
+        QJsonArray arr = doc.array();
+        QString lastUserId;
+        for(const auto &val : arr){
+            QJsonObject msgObj = val.toObject();
+            QJsonObject info = msgObj["info"].toObject();
+            QString role = info["role"].toString();
+            QString id = info["id"].toString();
+            if(role == "user" && !id.isEmpty()){
+                lastUserId = id;
+            }
+        }
+        if(lastUserId.isEmpty()){
+            qWarning() << "[ChatService] revertSession: no user message found for session:" << sessionId;
+            return;
+        }
+
+        qDebug() << "[ChatService] revertSession: target messageID=" << lastUserId;
+
+        // Step 2: send revert POST with messageID in body
+        QJsonObject bodyObj;
+        bodyObj["messageID"] = lastUserId;
+        QByteArray bodyBytes = QJsonDocument(bodyObj).toJson(QJsonDocument::Compact);
+
+        CURL *curl2 = curl_easy_init();
+        if(!curl2) return;
+
+        curl_easy_setopt(curl2, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl2, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl2, CURLOPT_TIMEOUT, 10L);
+        curl_easy_setopt(curl2, CURLOPT_URL, revertUrl.toUtf8().constData());
+        curl_easy_setopt(curl2, CURLOPT_POST, 1L);
+        curl_easy_setopt(curl2, CURLOPT_POSTFIELDS, bodyBytes.constData());
+        curl_easy_setopt(curl2, CURLOPT_POSTFIELDSIZE, (long)bodyBytes.size());
+
+        struct curl_slist *headers = nullptr;
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+        curl_easy_setopt(curl2, CURLOPT_HTTPHEADER, headers);
+
+        CURLcode res2 = curl_easy_perform(curl2);
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl2);
+
+        if(res2 != CURLE_OK){
+            qWarning() << "[ChatService] revertSession failed:" << curl_easy_strerror(res2);
         }else{
             qDebug() << "[ChatService] session reverted:" << sessionId;
         }
@@ -1163,6 +1245,12 @@ void ChatService::processEventStream(const QByteArray &chunk)
             QString delta = props["delta"].toString();
             if(!delta.isEmpty()){
                 m_sessionContentSizes[sessionId] += delta.toUtf8().size();
+                // Part-level delta for part-driven rendering; messageId is
+                // resolved from the mapping learned at part announcement
+                QMetaObject::invokeMethod(this, "partDelta", Qt::QueuedConnection,
+                                          Q_ARG(QString, sessionId),
+                                          Q_ARG(QString, m_partMessages.value(partID)),
+                                          Q_ARG(QString, partID), Q_ARG(QString, delta));
                 // Route by the partID → type mapping learned from
                 // message.part.updated (the server announces each part at its
                 // start): reasoning deltas render as thinking, everything
@@ -1186,6 +1274,17 @@ void ChatService::processEventStream(const QByteArray &chunk)
             // Remember partID → type so subsequent message.part.delta events
             // can be routed
             if(!partID.isEmpty()) m_partTypes[partID] = partType;
+            // Remember partID → messageID so partDelta reaches the right row
+            QString messageId = part["messageID"].toString();
+            if(!partID.isEmpty() && !messageId.isEmpty()) m_partMessages[partID] = messageId;
+            // Part-driven rendering: forward the raw part to the UI. User
+            // messages are skipped — their text is already rendered locally.
+            if(m_messageRoles.value(messageId) != QLatin1String("user")){
+                QMetaObject::invokeMethod(this, "partUpdated", Qt::QueuedConnection,
+                                          Q_ARG(QString, sessionId), Q_ARG(QString, messageId),
+                                          Q_ARG(QString, partID), Q_ARG(QString, partType),
+                                          Q_ARG(QJsonObject, part));
+            }
             if(partType == "text"){
                 // text content handled via message.part.delta
             }else if(partType == "reasoning" || partType == "thinking"){
@@ -1327,7 +1426,8 @@ void ChatService::processEventStream(const QByteArray &chunk)
                     compactSession(sessionId);
                 }
                 QString error = m_sessionErrors.take(sessionId);
-                emit streamFinished(sessionId, error);
+                QMetaObject::invokeMethod(this, "streamFinished", Qt::QueuedConnection,
+                                              Q_ARG(QString, sessionId), Q_ARG(QString, error));
             }
         }else if(type == "session.error"){
             QJsonObject props = payload["properties"].toObject();
@@ -1352,7 +1452,18 @@ void ChatService::processEventStream(const QByteArray &chunk)
                 }
             }
         }else if(type == "message.updated"){
-            // message updated events are handled via stream deltas
+            // Learn messageID → role so part-level events can skip user
+            // messages (their text is already rendered locally as the user
+            // bubble; emitting them would duplicate it).
+            QJsonObject props = payload["properties"].toObject();
+            // opencode-cpp puts the message object itself in properties;
+            // official opencode wraps it in "info" — accept both shapes.
+            QJsonObject info = props.contains("info")
+                ? props["info"].toObject() : props;
+            QString msgId = info["id"].toString();
+            QString role = info["role"].toString();
+            if(!msgId.isEmpty() && !role.isEmpty())
+                m_messageRoles[msgId] = role;
         }else if(type == "session.files_changed"){
             QJsonObject props = payload["properties"].toObject();
             QString sessionId = props["sessionID"].toString();

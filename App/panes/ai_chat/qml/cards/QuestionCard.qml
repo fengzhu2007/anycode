@@ -21,7 +21,14 @@ Item {
         anchors.leftMargin: 8
         anchors.rightMargin: 8
         anchors.top: parent.top
-        height: cardCol.implicitHeight + 16
+        height: {
+            var h = 0;
+            for (var i = 0; i < cardCol.children.length; ++i) {
+                var c = cardCol.children[i];
+                if (c.visible) { h += c.height; if (h > 0) h += cardCol.spacing; }
+            }
+            return (h > 0 ? h - cardCol.spacing : 0) + 16;
+        }
         radius: 4
         color: "#2a1e2a"
         border.color: status === 1 ? "#42b983" : (status === 2 ? "#e74c3c" : "#e6a23c")
