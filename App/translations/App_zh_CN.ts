@@ -3235,22 +3235,26 @@ Please enter a new folder name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1333"/>
+
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1323"/>
         <source>openagent-cpp executable not found, please configure data/ai_chat_server.json</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1373"/>
+
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1363"/>
         <source>Starting openagent-cpp in terminal...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1395"/>
+
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1385"/>
         <source>openagent-cpp server is ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1404"/>
+
+        <location filename="../panes/ai_chat/ai_chat_pane.cpp" line="1394"/>
         <source>openagent-cpp start timeout, please check the terminal output</source>
         <translation type="unfinished"></translation>
     </message>
