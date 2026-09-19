@@ -14,6 +14,12 @@
 #include <QQuickItem>
 #include <QQmlContext>
 #include <QQmlEngine>
+#include <QQmlError>
+#include <QFile>
+#include <QTextStream>
+#include <QDateTime>
+#include <QStandardPaths>
+#include <QDir>
 
 namespace ady {
 
@@ -238,6 +244,16 @@ void SessionPageWidget::setupQmlView()
 
     // Load main QML
     m_quickWidget->setSource(QUrl("qrc:/ai_chat/qml/MainChatView.qml"));
+
+    // Log QML load errors to file
+    //qDebug()<<"qml error:"<<m_quickWidget->errors();
+    //logQmlErrors(m_quickWidget->errors());
+
+    // Connect runtime QML warnings to log file
+    /*connect(m_quickWidget->engine(), &QQmlEngine::warnings,
+            this, [this](const QList<QQmlError> &errors) {
+        logQmlErrors(errors);
+    });*/
     // Place QQuickWidget inside the messageAreaWidget container
     auto *msgLayout = new QVBoxLayout(ui->messageAreaWidget);
     msgLayout->setContentsMargins(0, 0, 0, 0);
@@ -265,6 +281,37 @@ void SessionPageWidget::setupQmlView()
             this, [this](const QString &filePath) {
         emit fileOpenRequested(filePath);
     });
+}
+
+// ---- QML error logging ----
+
+void SessionPageWidget::logQmlErrors(const QList<QQmlError> &errors)
+{
+    if (errors.isEmpty())
+        return;
+
+    QString logDir = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+    QDir().mkpath(logDir);
+    QString logPath = logDir + "/qml_errors.log";
+
+    QFile file(logPath);
+    if (!file.open(QIODevice::Append | QIODevice::Text)) {
+        qWarning() << "[SessionPage] Failed to open QML error log:" << logPath;
+        return;
+    }
+
+    QTextStream out(&file);
+    out << "\n========== " << QDateTime::currentDateTime().toString(Qt::ISODate) << " ==========\n";
+    for (const auto &err : errors) {
+        out << err.toString() << "\n";
+    }
+    out << "========================================\n";
+    file.close();
+
+    // Also print to debug output
+    for (const auto &err : errors) {
+        qWarning() << "[QML Error]" << err.toString();
+    }
 }
 
 // ---- convenience methods (route to QML model) ----

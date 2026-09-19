@@ -1,7 +1,6 @@
-﻿#include "ai_chat_pane.h"
+﻿#include "ai_chat_pane.h"//"
 #include "ui_ai_chat_pane.h"
 #include "components/message_dialog.h"
-#include "qml_message_model.h"
 #include "session_list_popup.h"
 #include "docking_pane_layout_item_info.h"
 #include "core/event_bus/type.h"
@@ -15,6 +14,7 @@
 #include "modules/options/network_settings.h"
 #include <QElapsedTimer>
 #include "modules/options/agent_settings.h"
+#include "qml_message_model.h"
 #include "mdstyler.h"
 #include <QDir>
 
@@ -28,6 +28,7 @@
 #include <QTextEdit>
 #include <QComboBox>
 #include <QJsonDocument>
+#include <QCloseEvent>
 #include <QJsonObject>
 #include <QFile>
 #include <QFileInfo>
@@ -180,6 +181,17 @@ AIChatPane::~AIChatPane(){
 
     delete d;
     delete ui;
+}
+
+void AIChatPane::closeEvent(QCloseEvent* e){
+    qDebug()<<"AIChatPane::closeEvent";
+    if(m_service){
+        m_service->shutdown();
+    }
+    if(m_retryLoadTimer){
+        m_retryLoadTimer->stop();
+    }
+    DockingPane::closeEvent(e);
 }
 
 void AIChatPane::initView(){
@@ -1482,6 +1494,15 @@ AIChatPane* AIChatPane::make(DockingPaneManager* dockingManager, const QJsonObje
 
 AIChatPane* AIChatPane::getInstance(){
     return instance;
+}
+
+void AIChatPane::shutdown(){
+    if(m_service){
+        m_service->shutdown();
+    }
+    if(m_retryLoadTimer){
+        m_retryLoadTimer->stop();
+    }
 }
 
 void AIChatPane::insertDebugTestMessage()

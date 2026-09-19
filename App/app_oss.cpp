@@ -9,6 +9,7 @@ QString AppOSS::global(){
 
 
 
+
     /*return QString::fromUtf8(".QStatusBar{background: #007acc;}"
                              ".QStatusBar::item{border:0;}"
                              ".ady--PasswordEdit,.QLineEdit{height:24px;border:1px solid #ccc;font-size:12px;}"

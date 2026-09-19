@@ -48,7 +48,6 @@ IDEApplication::~IDEApplication(){
     OptionsSettings::destory();
     DebugLog::destory();
     wQSS::destory();
-
 }
 
 

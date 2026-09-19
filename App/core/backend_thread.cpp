@@ -81,7 +81,9 @@ BackendThread::~BackendThread(){
     delete d;
 }
 BackendThread* BackendThread::stop(){
+    QMutexLocker locker(&d->mutex);
     d->stopped = true;
+    d->condition.wakeAll();
     qDeleteAll(d->list);
     return this;
 }

@@ -76,6 +76,7 @@ private:
 private:
     HPCON m_ptyHandler{INVALID_HANDLE_VALUE};
     HANDLE m_hPipeIn{INVALID_HANDLE_VALUE}, m_hPipeOut{INVALID_HANDLE_VALUE};
+    HANDLE m_jobObject{nullptr};
 
     QThread *m_readThread{nullptr};
     QMutex m_bufferMutex;

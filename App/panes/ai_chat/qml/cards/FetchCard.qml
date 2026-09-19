@@ -101,7 +101,7 @@ Item {
         }
 
         // ── Content line + status ──
-        Row {
+        Item  {
             anchors.top: headerBar.bottom
             anchors.topMargin: 4
             anchors.left: parent.left
@@ -109,7 +109,6 @@ Item {
             anchors.right: parent.right
             anchors.rightMargin: 10
             height: 22
-            spacing: 6
 
             // "fetch:" prefix
             Text {

@@ -75,6 +75,7 @@
 #include <QFontDatabase>
 #include <QShortcut>
 #include <QDebug>
+#include <QApplication>
 
 namespace ady{
 
@@ -237,7 +238,6 @@ void IDEWindow::initView(){
 
 IDEWindow::~IDEWindow()
 {
-
     delete d;
     delete ui;
     NetworkManager::destory();
@@ -290,22 +290,20 @@ void IDEWindow::delayBoot(){
 }
 
 void IDEWindow::shutdown(){
-    //save setting
     Schedule::stop();
 
-    // stop gateway server
     GatewayHttpServer::instance().stop();
 
     LayoutSettings::destory();
 
     wToastManager::destory();
     auto t = BackendThread::getInstance();
-    t->stop()->quit();
-    // t->wait();
+    t->stop();
+    t->quit();
+    t->wait(3000);
     CodeEditorManager::destory();
     Subscriber::unReg();
 
-    //destory file transfter model
     FileTransferModel::destory();
 }
 
@@ -761,6 +759,7 @@ void IDEWindow::showEvent(QShowEvent* e){
 }
 
 void IDEWindow::closeEvent(QCloseEvent* e){
+
     auto dockpanes = m_dockingPaneManager->toJson();
     auto projects = ResourceManagerModel::getInstance()->toJson();
     auto settings = LayoutSettings::getInstance(this);
@@ -771,7 +770,10 @@ void IDEWindow::closeEvent(QCloseEvent* e){
         return ;
     }
     settings->saveToFile();
+    this->hide();
     this->shutdown();
+    e->accept();
+    QCoreApplication::quit();
 }
 
 

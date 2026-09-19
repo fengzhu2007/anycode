@@ -186,7 +186,12 @@ void GatewayHttpServer::start(const GatewayConfig &config)
 
 void GatewayHttpServer::stop()
 {
-    if (!m_running) {
+    // If gateway is still starting, wait for it to finish
+    if (m_startWatcher && m_startWatcher->isRunning()) {
+        LlmProxy::shutdown();
+        m_startWatcher->waitForFinished();
+    }
+    if (!m_running && !Gateway::instance().isRunning()) {
         return;
     }
     qDebug() << "[GatewayHttpServer] Stopping gateway...";

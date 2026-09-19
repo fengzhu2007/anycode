@@ -10,6 +10,7 @@ class QComboBox;
 class QTextEdit;
 class QToolButton;
 class QQuickWidget;
+class QQmlError;
 class wPopupPanel;
 
 namespace Ui {
@@ -121,6 +122,7 @@ private:
 
     void setupDiffPopup();
     void setupQmlView();
+    void logQmlErrors(const QList<QQmlError> &errors);
     void onAcceptAll();
     void onRejectAll();
 };

@@ -977,6 +977,17 @@ bool ConPtyProcess::startProcess(const QString &executable,
         return false;
     }
 
+    // Create a Job Object to manage the entire process tree.
+    // This ensures all child processes (e.g. openagent-cpp.exe started by cmd.exe)
+    // are terminated when kill() is called, preventing pipe handle leaks.
+    m_jobObject = CreateJobObjectW(nullptr, nullptr);
+    if (m_jobObject) {
+        JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli = {};
+        jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+        SetInformationJobObject(m_jobObject, JobObjectExtendedLimitInformation, &jeli, sizeof(jeli));
+        AssignProcessToJobObject(m_jobObject, m_shellProcessInformation.hProcess);
+    }
+
     m_pid = m_shellProcessInformation.dwProcessId;
 
     // Notify when the shell process has been terminated
@@ -1053,10 +1064,30 @@ bool ConPtyProcess::kill()
     if (m_ptyHandler != INVALID_HANDLE_VALUE) {
         m_aboutToDestruct = true;
 
-        // Close ConPTY - this will terminate client process if running
+        // Step 1: Terminate the entire process tree via Job Object.
+        // This kills shell + all grandchild processes (e.g. openagent-cpp.exe)
+        // so they release all pipe handles.
+        if (m_jobObject) {
+            TerminateJobObject(m_jobObject, 0);
+            WaitForSingleObject(m_shellProcessInformation.hProcess, 2000);
+            CloseHandle(m_jobObject);
+            m_jobObject = nullptr;
+        } else if (m_shellProcessInformation.hProcess != nullptr &&
+                   m_shellProcessInformation.hProcess != INVALID_HANDLE_VALUE) {
+            TerminateProcess(m_shellProcessInformation.hProcess, 0);
+            WaitForSingleObject(m_shellProcessInformation.hProcess, 1000);
+        }
+
+        // Step 2: Close ConPTY
         WindowsContext::instance().closePseudoConsole(m_ptyHandler);
 
-        // Clean-up the pipes
+        // Step 3: Cancel pending I/O on pipes before closing
+        if (INVALID_HANDLE_VALUE != m_hPipeIn)
+            CancelIoEx(m_hPipeIn, nullptr);
+        if (INVALID_HANDLE_VALUE != m_hPipeOut)
+            CancelIoEx(m_hPipeOut, nullptr);
+
+        // Step 4: Clean-up the pipes
         if (INVALID_HANDLE_VALUE != m_hPipeOut)
             CloseHandle(m_hPipeOut);
         if (INVALID_HANDLE_VALUE != m_hPipeIn)
@@ -1080,6 +1111,8 @@ bool ConPtyProcess::kill()
 
         CloseHandle(m_shellProcessInformation.hThread);
         CloseHandle(m_shellProcessInformation.hProcess);
+        m_shellProcessInformation.hThread = nullptr;
+        m_shellProcessInformation.hProcess = nullptr;
 
         // Cleanup attribute list
         if (m_shellStartupInfo.lpAttributeList) {

@@ -1098,9 +1098,29 @@ void ChatService::disconnectEventStream()
     }
 }
 
+void ChatService::shutdown()
+{
+    m_abort = true;
+    m_eventAbort = true;
+    if(m_reconnectTimer) m_reconnectTimer->stop();
+    m_reconnectRetry = 0;
+    if(m_eventFuture.isRunning()){
+        m_eventFuture.waitForFinished();
+    }
+    if(m_future.isRunning()){
+        m_future.waitForFinished();
+    }
+    if(m_connected){
+        m_connected = false;
+        emit connectionChanged(false);
+    }
+}
+
 void ChatService::onEventStreamEnded(bool wasConnected)
 {
     Q_UNUSED(wasConnected);
+    // Don't reconnect if we're shutting down
+    if(m_eventAbort) return;
     // Auto-reconnect unless explicitly disconnected
     if(!m_reconnectTimer->isActive()){
         scheduleReconnect();

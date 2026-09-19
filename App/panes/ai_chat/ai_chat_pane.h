@@ -38,6 +38,11 @@ public:
     static AIChatPane* getInstance();
 
     /**
+     * 停止 SSE 事件流和重连定时器，用于程序退出时清理
+     */
+    void shutdown();
+
+    /**
      * 单个会话的运行时状态数据
      */
     struct SessionData {
@@ -91,6 +96,9 @@ public slots:
     void onMemorySaved(const QString &sessionId, const QString &type,
                        const QString &content, const QString &keywords);
     void onLoadMoreMessages(const QString &sessionId);
+
+protected:
+    virtual void closeEvent(QCloseEvent* e) override;
 
 private:
     explicit AIChatPane(QWidget *parent = nullptr);

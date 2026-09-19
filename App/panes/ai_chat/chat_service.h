@@ -144,6 +144,11 @@ public:
     void setGatewayPort(uint16_t port) { m_gatewayPort = port; }
     uint16_t gatewayPort() const { return m_gatewayPort; }
 
+    /**
+     * 停止 SSE 事件流和所有定时器，用于程序退出时清理
+     */
+    void shutdown();
+
     QList<OpenCodeSession> sessions() const { return m_sessions; }
     QList<OpenCodeModel> models() const { return m_models; }
 
