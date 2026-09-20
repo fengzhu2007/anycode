@@ -34,6 +34,9 @@ class MDStyler : public QObject
     Q_PROPERTY(int lineHeight
                    READ lineHeight WRITE setLineHeight NOTIFY styleChanged)
 
+    Q_PROPERTY(bool paused
+                   READ paused WRITE setPaused NOTIFY pausedChanged)
+
 public:
     explicit MDStyler(QObject *parent = nullptr);
 
@@ -65,11 +68,12 @@ public:
     int lineHeight() const        { return m_lineHeight; }
     void setLineHeight(int h);
 
-
-
+    bool paused() const           { return m_paused; }
+    void setPaused(bool p);
 
 signals:
     void styleChanged();
+    void pausedChanged();
 
 private:
     void apply();
@@ -92,6 +96,8 @@ private:
     int    m_lineHeight = 100;
 
     bool   m_applying = false;
+    bool   m_paused   = false;
+    bool   m_dirty    = false;
 };
 
 #endif // MDSTYLER_H

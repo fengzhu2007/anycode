@@ -20,33 +20,42 @@ Item {
         // Fit the text's natural (unwrapped) width, capped to the item
         // width so long messages wrap instead of overflowing.
         width: Math.min(textItem.implicitWidth + 24, parent.width)
-        implicitHeight: textItem.implicitHeight + 16
+        implicitHeight: Math.min(textItem.implicitHeight, 300) + 16
         radius: 8
         color: "#2f362f"
 
-        TextEdit {
-            id: textItem
+        Flickable {
+            id: textFlick
             anchors.left: parent.left
             anchors.leftMargin: 12
             anchors.right: parent.right
             anchors.rightMargin: 12
             anchors.top: parent.top
             anchors.topMargin: 8
-            text: content
-            wrapMode: TextEdit.Wrap
-            textFormat: TextEdit.MarkdownText
-            color: "#eeeeee"
-            font.pixelSize: 12
-            readOnly: true
-            selectByKeyboard: true
-            selectByMouse: true
-            selectionColor: "#0539a2"
-            selectedTextColor: "#ffffff"
-            mouseSelectionMode: TextEdit.SelectCharacters
-            renderType: TextEdit.NativeRendering
+            height: Math.min(contentHeight, 300)
+            contentHeight: textItem.implicitHeight
+            flickableDirection: Flickable.VerticalFlick
+            clip: true
 
-            // Suppress cursor change on hover
-            cursorDelegate: Item {}
+            TextEdit {
+                id: textItem
+                width: parent.width
+                text: content
+                wrapMode: TextEdit.Wrap
+                textFormat: TextEdit.MarkdownText
+                color: "#eeeeee"
+                font.pixelSize: 12
+                readOnly: true
+                selectByKeyboard: true
+                selectByMouse: true
+                selectionColor: "#0539a2"
+                selectedTextColor: "#ffffff"
+                mouseSelectionMode: TextEdit.SelectCharacters
+                renderType: TextEdit.NativeRendering
+
+                // Suppress cursor change on hover
+                cursorDelegate: Item {}
+            }
         }
     }
 }

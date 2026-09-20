@@ -19,6 +19,8 @@ class SessionPageWidget;
 
 namespace ady {
 
+class SessionConfigDialog;
+
 struct OpenCodeModel;
 struct FileDiffInfo;
 class QmlMessageModel;
@@ -48,6 +50,12 @@ public:
     QTextEdit* messageInput() const;
     QToolButton* sendBtn() const;
     QLabel* sessionTitle() const;
+
+    void setSessionPreference(const QString &preference);
+    QString sessionPreference() const;
+    void setSessionDirectory(const QString &dir);
+    QString sessionDirectory() const;
+    void setDirectoryList(const QStringList &paths);
 
     void appendInputText(const QString &text);
     void setModels(const QList<OpenCodeModel> &models, const QString &selectedData);
@@ -102,6 +110,8 @@ signals:
     void modelChanged(int index);
     void scrollToTopRequested();
     void fileOpenRequested(const QString &filePath);
+    void sessionConfigApplied(const QString &sessionId, const QString &title,
+                              const QString &preference, const QString &directory);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
@@ -125,6 +135,12 @@ private:
     void logQmlErrors(const QList<QQmlError> &errors);
     void onAcceptAll();
     void onRejectAll();
+    void onSessionConfigClicked();
+
+    QString m_sessionPreference;
+    QString m_sessionDir;
+    QStringList m_dirList;
+    SessionConfigDialog *m_configDialog = nullptr;
 };
 
 }

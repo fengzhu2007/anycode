@@ -412,6 +412,7 @@ add_library(App SHARED
         panes/ai_chat/chat_message_bubble.h panes/ai_chat/chat_message_bubble.cpp
         panes/ai_chat/chat_message_view.h
         panes/ai_chat/session_page_widget.h panes/ai_chat/session_page_widget.cpp panes/ai_chat/session_page_widget.ui
+        panes/ai_chat/session_config_dialog.h panes/ai_chat/session_config_dialog.cpp panes/ai_chat/session_config_dialog.ui
         panes/ai_chat/file_diff_list_widget.h panes/ai_chat/file_diff_list_widget.cpp panes/ai_chat/file_diff_list_widget.ui
         panes/ai_chat/session_list_popup.h panes/ai_chat/session_list_popup.cpp
         panes/ai_chat/session_list_popup_v2.h panes/ai_chat/session_list_popup_v2.cpp

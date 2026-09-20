@@ -206,6 +206,8 @@ void ChatService::listSessions()
             s.id = obj["id"].toString();
             s.title = obj["title"].toString();
             s.agent = obj["agent"].toString();
+            s.directory = obj["directory"].toString();
+            s.preference = obj["preference"].toString();
             //qDebug()<<"session:"<<s.id<<s.title<<s.agent;
             QJsonObject timeObj = obj["time"].toObject();
             s.timeCreated = timeObj["created"].toVariant().toLongLong();
@@ -297,6 +299,8 @@ void ChatService::createSession(const QString &title, const QString &directory, 
         s.id = obj["id"].toString();
         s.title = obj["title"].toString();
         s.agent = obj["agent"].toString();
+        s.directory = obj["directory"].toString();
+        s.preference = obj["preference"].toString();
         QJsonObject timeObj = obj["time"].toObject();
         s.timeCreated = timeObj["created"].toVariant().toLongLong();
         s.timeUpdated = timeObj["updated"].toVariant().toLongLong();
@@ -714,12 +718,15 @@ void ChatService::abortSession(const QString &sessionId)
 
 // ---- update session title: PATCH /session/{id} ----
 
-void ChatService::updateSessionTitle(const QString &sessionId, const QString &title)
+void ChatService::updateSession(const QString &sessionId, const QString &title,
+                                const QString &directory, const QString &preference)
 {
     QString url = m_baseUrl + "/session/" + sessionId;
 
     QJsonObject body;
     body["title"] = title;
+    body["directory"] = directory;
+    body["preference"] = preference;
     QByteArray bodyBytes = QJsonDocument(body).toJson(QJsonDocument::Compact);
 
     QtConcurrent::run([url, bodyBytes](){

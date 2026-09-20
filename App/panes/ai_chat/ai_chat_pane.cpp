@@ -237,7 +237,10 @@ bool AIChatPane::onReceive(Event* e){
                 pid = parts[0];
                 mid = parts[1];
             }
-            m_service->createSession("", primaryWorkspacePath(), pid, mid);
+            // Resolve session directory: check if the path belongs to a workspace project
+            QString sessionDir = resolveWorkspacePathForPath(text);
+            sd->directory = sessionDir;
+            m_service->createSession("", sessionDir, pid, mid);
             page->appendInputText(text + " ");
         }else{
             auto *page = findPage(m_currentSessionId);
@@ -274,7 +277,13 @@ void AIChatPane::onActionTriggered(){
                 mid = parts[1];
             }
         }
-        m_service->createSession("", primaryWorkspacePath(), pid, mid);
+        // Use current session's directory for the new session
+        QString dir = primaryWorkspacePath();
+        int sdIdx = findSessionIndex(m_currentSessionId);
+        if(sdIdx >= 0 && !m_sessions.at(sdIdx)->directory.isEmpty()){
+            dir = m_sessions.at(sdIdx)->directory;
+        }
+        m_service->createSession("", dir, pid, mid);
     } else if(sender == ui->actionDeleteChat){
         if(!m_currentSessionId.isEmpty()){
             if(MessageDialog::confirm(this, tr("Delete Confirm"),
@@ -329,6 +338,12 @@ void AIChatPane::onSessionsReceived(const QList<OpenCodeSession> &sessions, cons
                 found = true;
                 m_sessions.at(i)->modelProviderID = s.modelProviderID;
                 m_sessions.at(i)->modelID = s.modelID;
+                if(!s.directory.isEmpty()){
+                    m_sessions.at(i)->directory = s.directory;
+                }
+                if(!s.preference.isEmpty()){
+                    m_sessions.at(i)->preference = s.preference;
+                }
                 break;
             }
         }
@@ -384,6 +399,13 @@ void AIChatPane::onSessionCreated(const OpenCodeSession &session, const QString 
                     sd->modelID = parts[1];
                 }
             }
+            // Sync directory and preference from server response if not set locally
+            if(sd->directory.isEmpty() && !session.directory.isEmpty()){
+                sd->directory = session.directory;
+            }
+            if(sd->preference.isEmpty() && !session.preference.isEmpty()){
+                sd->preference = session.preference;
+            }
             break;
         }
     }
@@ -397,6 +419,8 @@ void AIChatPane::onSessionCreated(const OpenCodeSession &session, const QString 
         page->setSessionId(session.id);
         sd->modelProviderID = session.modelProviderID;
         sd->modelID = session.modelID;
+        sd->directory = session.directory;
+        sd->preference = session.preference;
         m_sessions.append(sd);
     }
 
@@ -521,6 +545,22 @@ SessionPageWidget* AIChatPane::createSessionPage()
     // signal, which is connected in SessionPageWidget::setupQmlView().
     // No widgetCreated signal needed — QML handles its own rendering.
 
+    // Set workspace directory list for session config dialog
+    page->setDirectoryList(allWorkspacePaths());
+
+    // Handle session config updates from the page widget
+    connect(page, &SessionPageWidget::sessionConfigApplied,
+            this, [this](const QString &sessionId, const QString &title,
+                         const QString &preference, const QString &directory) {
+        int idx = findSessionIndex(sessionId);
+        if(idx < 0) return;
+        auto *sd = m_sessions.at(idx);
+        sd->preference = preference;
+        sd->directory = directory;
+        // Update session list popup title
+        m_sessionPopup->updateSessionTitle(sessionId, title);
+    });
+
     ui->stackedWidget->addWidget(page);
     return page;
 }
@@ -557,11 +597,13 @@ void AIChatPane::switchToSession(const QString &sessionId)
         sd->sessionId = sessionId;
         sd->page = page;
         page->setSessionId(sessionId);
-        // Copy model info from service's session list
+        // Copy model info and directory from service's session list
         for(const auto &s : m_service->sessions()){
             if(s.id == sessionId){
                 sd->modelProviderID = s.modelProviderID;
                 sd->modelID = s.modelID;
+                sd->directory = s.directory;
+                sd->preference = s.preference;
                 break;
             }
         }
@@ -598,6 +640,10 @@ void AIChatPane::switchToSession(const QString &sessionId)
                 }
             }
         }
+        // Sync preference and directory to page widget
+        page->setSessionPreference(sd->preference);
+        page->setSessionDirectory(sd->directory);
+        page->setDirectoryList(allWorkspacePaths());
     }
 
     ui->stackedWidget->setCurrentWidget(page);
@@ -792,6 +838,7 @@ void AIChatPane::onSendMessage(){
             mid = parts[1];
         }
         m_service->createSession("", primaryWorkspacePath(), pid, mid);
+        sd->directory = primaryWorkspacePath();
         return;
     }
 
@@ -1471,6 +1518,37 @@ QStringList AIChatPane::allWorkspacePaths() const
             paths << item->path();
     }
     return paths;
+}
+
+/**
+ * Given a file/folder path, find the most specific workspace project that
+ * contains it. Falls back to primaryWorkspacePath() if no match.
+ */
+QString AIChatPane::resolveWorkspacePathForPath(const QString &path) const
+{
+    if (path.isEmpty()) return primaryWorkspacePath();
+
+    // Determine the directory to check (if file, use parent dir)
+    QFileInfo fi(path);
+    QString dir = fi.isDir() ? fi.absoluteFilePath() : fi.absolutePath();
+
+    // Normalize path separators
+    dir = QDir::toNativeSeparators(dir);
+
+    QStringList workspaces = allWorkspacePaths();
+    QString bestMatch;
+    for (const auto &ws : workspaces) {
+        QString wsNorm = QDir::toNativeSeparators(ws);
+        // Check if dir starts with workspace path (is a subpath)
+        if (dir.startsWith(wsNorm, Qt::CaseInsensitive)) {
+            // Pick the longest (most specific) match
+            if (bestMatch.isEmpty() || wsNorm.length() > QDir::toNativeSeparators(bestMatch).length()) {
+                bestMatch = ws;
+            }
+        }
+    }
+
+    return bestMatch.isEmpty() ? primaryWorkspacePath() : bestMatch;
 }
 
 // ---- static factory methods ----

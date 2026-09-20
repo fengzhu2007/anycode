@@ -1,4 +1,5 @@
 import QtQuick 2.15
+import QtQuick.Controls 2.15
 import App.MD 1.0
 
 /**
@@ -13,6 +14,7 @@ Item {
 
     property var partData: null
     property string displayText: partData ? partData.content : ""
+    property bool streaming: false
 
     // Parse displayText into segments: [{type: "text"|"code", content, language}]
     property var segments: parseSegments(displayText)
@@ -59,12 +61,16 @@ Item {
                     textFormat: TextEdit.MarkdownText
                     wrapMode: TextEdit.Wrap
                     readOnly: true
+                    focus: true
                     selectByMouse: true
+                    selectByKeyboard: true
                     color: "#dcdcdc"
                     font.pixelSize: 12
                     selectionColor: "#0539a2"
                     selectedTextColor: "#ffffff"
                     mouseSelectionMode: TextEdit.SelectCharacters
+
+
 
                     onLinkActivated: function(link) {
                         if (link.indexOf("http") === 0)
@@ -72,13 +78,13 @@ Item {
                     }
 
                     Component.onCompleted: {
-                                           if (modelData.type === "text")
-                                               tableStyler.attach(textDocument)
-                                       }
-                                       Component.onDestruction: {
-                                           if (modelData.type === "text")
-                                               tableStyler.detach(textDocument)
-                                       }
+                        if (modelData.type === "text")
+                            tableStyler.attach(textDocument)
+                    }
+                    Component.onDestruction: {
+                        if (modelData.type === "text")
+                            tableStyler.detach(textDocument)
+                    }
                 }
 
                 // Code block segment
@@ -107,6 +113,7 @@ Item {
             lineHeight:120
             cellPadding: 0
             borderWidth: 0
+            paused: markdownRoot.streaming
         }
 
 

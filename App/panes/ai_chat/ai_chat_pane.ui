@@ -41,12 +41,12 @@
       </size>
      </property>
      <addaction name="actionNewChat"/>
-     <addaction name="actionDeleteChat"/>
-     <addaction name="actionDelete_All_Chat"/>
-     <addaction name="actionSessions"/>
      <addaction name="separator"/>
+     <addaction name="actionSessions"/>
      <addaction name="actionClear"/>
      <addaction name="separator"/>
+     <addaction name="actionDeleteChat"/>
+     <addaction name="actionDelete_All_Chat"/>
      <addaction name="actionRefreshModels"/>
     </widget>
    </item>

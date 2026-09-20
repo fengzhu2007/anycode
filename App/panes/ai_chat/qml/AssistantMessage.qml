@@ -90,6 +90,10 @@ Item {
                     if (item && part) {
                         item.partData = part
                     }
+                    // Only pass streaming to the last part (the one actively streaming)
+                    if (item && "streaming" in item && index === parts.length - 1) {
+                        item.streaming = streaming
+                    }
                 }
 
                 // Keep partData in sync when part properties change
@@ -99,13 +103,22 @@ Item {
                     value: part
                     when: partLoader.item !== null
                 }
+
+                // Only the last part receives streaming state.
+                // When parts array grows, previous last part automatically gets false.
+                Binding {
+                    target: partLoader.item
+                    property: "streaming"
+                    value: (index === parts.length - 1) ? streaming : false
+                    when: partLoader.item !== null && ("streaming" in partLoader.item)
+                }
             }
         }
 
         // Streaming indicator at the bottom
         Row {
             visible: streaming
-            leftPadding: 12
+            leftPadding: 0
             spacing: 4
             height: 20
 

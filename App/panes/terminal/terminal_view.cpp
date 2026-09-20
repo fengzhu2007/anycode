@@ -967,18 +967,32 @@ void TerminalView::keyReleaseEvent(QKeyEvent *event)
     }
 }
 
+static constexpr int minTerminalCols = 20;
+static constexpr int minTerminalRows = 5;
+
+QSize TerminalView::minimumSizeHint() const
+{
+    return {
+        (int)std::ceil(minTerminalCols * d->m_cellSize.width()),
+        (int)std::ceil(minTerminalRows * d->m_cellSize.height()),
+    };
+}
+
+QSize TerminalView::pixelSizeToGridSize(QSize pixelSize) const
+{
+    if (d->m_cellSize.width() <= 0 || d->m_cellSize.height() <= 0)
+        return {80, 24};
+    int cols = qMax(minTerminalCols, (int)std::floor(pixelSize.width() / d->m_cellSize.width()));
+    int rows = qMax(minTerminalRows, (int)std::floor(pixelSize.height() / d->m_cellSize.height()));
+    return {cols, rows};
+}
+
 void TerminalView::applySizeChange()
 {
     QSize newLiveSize = {
-        (int)std::floor( (viewport()->size().width()) * 1.0f /  d->m_cellSize.width()),
-        (int)std::floor( (viewport()->size().height()) * 1.0f / d->m_cellSize.height()),
+        qMax(minTerminalCols, (int)std::floor( (viewport()->size().width()) * 1.0f /  d->m_cellSize.width())),
+        qMax(minTerminalRows, (int)std::floor( (viewport()->size().height()) * 1.0f / d->m_cellSize.height())),
     };
-
-    if (newLiveSize.height() <= 0)
-        return;
-
-    if (newLiveSize.width() <= 0)
-        newLiveSize.setWidth(1);
 
     if (d->m_surface->liveSize() == newLiveSize)
         return;

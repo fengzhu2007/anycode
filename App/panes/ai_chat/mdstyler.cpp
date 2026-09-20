@@ -52,6 +52,10 @@ void MDStyler::detach(QQuickTextDocument *doc)
 
 void MDStyler::scheduleRestyle()
 {
+    if (m_paused) {
+        m_dirty = true;
+        return;
+    }
     m_timer->start();
 }
 
@@ -185,6 +189,17 @@ void MDStyler::setLineHeight(int h){
     m_lineHeight = h;
     emit styleChanged();
     scheduleRestyle();
+}
+
+void MDStyler::setPaused(bool p)
+{
+    if (m_paused == p) return;
+    m_paused = p;
+    emit pausedChanged();
+    if (!m_paused && m_dirty) {
+        m_dirty = false;
+        scheduleRestyle();
+    }
 }
 
 

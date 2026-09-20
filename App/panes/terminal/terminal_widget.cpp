@@ -106,6 +106,8 @@ qint64 TerminalWidget::writeToPty(const QByteArray &data){
 }
 
 void TerminalWidget::onReadReady(){
+    if(isDestory || d->process==nullptr)
+        return;
     auto data = d->process->readAll();
     this->writeToTerminal(data,false);
     if(!d->initialized){
@@ -134,9 +136,9 @@ void TerminalWidget::showEvent(QShowEvent* e){
         }
         if(d->process==nullptr){
             d->process = PtyQt::createPtyProcess(IPtyProcess::AutoPty);
-            QSize size = this->geometry().size();
+            QSize gridSize = this->pixelSizeToGridSize(this->geometry().size());
             auto list = QProcessEnvironment::systemEnvironment().toStringList();
-            bool ret = d->process->startProcess(d->executable,{},d->workingDir,list,size.width(),size.height());
+            bool ret = d->process->startProcess(d->executable,{},d->workingDir,list,gridSize.width(),gridSize.height());
             if(ret){
                 connect(d->process->notifier(),&QIODevice::readyRead,this,&TerminalWidget::onReadReady);
                 connect(d->process->notifier(),&QIODevice::aboutToClose,this,&TerminalWidget::onProcessClose);

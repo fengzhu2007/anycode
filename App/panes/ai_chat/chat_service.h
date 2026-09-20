@@ -23,6 +23,8 @@ struct OpenCodeSession {
     QString id;           // ses_xxx
     QString title;
     QString agent;
+    QString directory;
+    QString preference;
     qint64 timeCreated;
     qint64 timeUpdated;
     QString modelProviderID;
@@ -127,7 +129,8 @@ public:
     bool sendMessage(const QString &sessionId, const QString &content, const QString &providerID = QString(), const QString &modelID = QString());  // POST /session/{id}/message (false = request dropped by in-flight lock)
     void loadSessionMessages(const QString &sessionId, int limit = 20, qint64 beforeTimestamp = 0);  // GET /session/{id}/message
     void abortSession(const QString &sessionId);  // POST /session/{id}/abort
-    void updateSessionTitle(const QString &sessionId, const QString &title);  // PATCH /session/{id}
+    void updateSession(const QString &sessionId, const QString &title,
+                       const QString &directory, const QString &preference);  // PATCH /session/{id}
     void setWorkingDirectories(const QStringList &directories);  // POST /directories (global)
     void compactSession(const QString &sessionId);  // POST /api/session/{id}/compact
     void confirmChanges(const QString &sessionId);   // POST /session/{id}/changes/confirm

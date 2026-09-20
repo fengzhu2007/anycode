@@ -361,6 +361,7 @@ bool IDEWindow::onReceive(Event* e){
         if(instance){
             //close
             //instance->close();
+            instance->activeToCurrent();
         }else{
             //show
             auto pane = NotificationPane::open(m_dockingPaneManager,true);

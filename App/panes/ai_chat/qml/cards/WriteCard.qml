@@ -33,14 +33,13 @@ Item {
         border.color: "#2e3548"
         border.width: 1
 
-        Row {
+        Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             anchors.leftMargin: 10
             anchors.rightMargin: 10
             height: 20
-            spacing: 8
 
             // Filename (clickable)
             Text {

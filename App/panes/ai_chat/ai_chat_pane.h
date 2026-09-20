@@ -53,6 +53,8 @@ public:
         QString firstUserMessage;
         QString modelProviderID;
         QString modelID;
+        QString directory;               // session working directory
+        QString preference;              // session preference (system prompt text)
         QTimer *scrollTimer = nullptr; // throttled scroll-to-bottom during streaming
         int streamingRow = -1;         // model row of the streaming message (-1 = none)
         QString streamingContent;      // accumulated streaming text (survives virtualization)
@@ -134,6 +136,7 @@ private:
     // ---- workspace ----
     QString primaryWorkspacePath() const;
     QStringList allWorkspacePaths() const;
+    QString resolveWorkspacePathForPath(const QString &path) const;
     void notifyWorkspacesChanged();
 
     // ---- opencode server auto-start (via terminal) ----

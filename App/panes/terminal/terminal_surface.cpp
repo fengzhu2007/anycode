@@ -132,6 +132,7 @@ struct TerminalSurfacePrivate
         vterm_screen_set_callbacks(m_vtermScreen, &m_vtermScreenCallbacks, this);
         vterm_screen_set_damage_merge(m_vtermScreen, VTERM_DAMAGE_SCROLL);
         vterm_screen_enable_altscreen(m_vtermScreen, true);
+        vterm_screen_enable_reflow(m_vtermScreen, true);
 
         memset(&m_vtermStateFallbacks, 0, sizeof(m_vtermStateFallbacks));
 

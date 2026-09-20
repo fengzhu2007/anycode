@@ -3,6 +3,7 @@
 #include "qml_message_model.h"
 #include "chat_service.h"
 #include "file_diff_list_widget.h"
+#include "session_config_dialog.h"
 #include "core/theme.h"
 #include "w_popup_panel.h"
 #include <QKeyEvent>
@@ -36,6 +37,14 @@ SessionPageWidget::SessionPageWidget(QWidget *parent)
     ui->messageInput->installEventFilter(this);
     ui->fileChanged->installEventFilter(this);
     ui->sessionTitle->setStyleSheet("QLabel{padding:4px}");
+
+    // Session config button
+    ui->sessionConfigBtn->setCursor(Qt::PointingHandCursor);
+    ui->sessionConfigBtn->setStyleSheet(
+        "QToolButton{padding:4px;border:none;}"
+        "QToolButton:hover{background:rgba(128,128,128,40);border-radius:4px;}");
+    connect(ui->sessionConfigBtn, &QToolButton::clicked,
+            this, &SessionPageWidget::onSessionConfigClicked);
 
     // File diff popup
     setupDiffPopup();
@@ -164,6 +173,31 @@ void SessionPageWidget::setSessionId(const QString &sessionId)
     m_sessionId = sessionId;
 }
 
+void SessionPageWidget::setSessionPreference(const QString &preference)
+{
+    m_sessionPreference = preference;
+}
+
+QString SessionPageWidget::sessionPreference() const
+{
+    return m_sessionPreference;
+}
+
+void SessionPageWidget::setSessionDirectory(const QString &dir)
+{
+    m_sessionDir = dir;
+}
+
+QString SessionPageWidget::sessionDirectory() const
+{
+    return m_sessionDir;
+}
+
+void SessionPageWidget::setDirectoryList(const QStringList &paths)
+{
+    m_dirList = paths;
+}
+
 void SessionPageWidget::setFileDiffs(const QList<FileDiffInfo> &diffs)
 {
     m_currentDiffs = diffs;
@@ -224,7 +258,7 @@ void SessionPageWidget::setupQmlView()
     // Create QQuickWidget
     m_quickWidget = new QQuickWidget(this);
     m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
-    m_quickWidget->setFocusPolicy(Qt::NoFocus);
+    //m_quickWidget->setFocusPolicy(Qt::NoFocus);
 
     // Match QQuickWidget background to theme
     QColor bgColor = Theme::getInstance()->backgroundColor();
@@ -374,6 +408,38 @@ void SessionPageWidget::updateToolCallStatus(const QString &callID, int status, 
 void SessionPageWidget::endStreaming()
 {
     m_qmlModel->endStreaming();
+}
+
+// ---- Session config dialog ----
+
+void SessionPageWidget::onSessionConfigClicked()
+{
+    if (!m_configDialog) {
+        m_configDialog = new SessionConfigDialog(this);
+    }
+    m_configDialog->setSessionTitle(ui->sessionTitle->text());
+    m_configDialog->setPreference(m_sessionPreference);
+    m_configDialog->setDirectory(m_sessionDir);
+    m_configDialog->setDirectoryList(m_dirList);
+
+    if (m_configDialog->exec() == QDialog::Accepted) {
+        const QString newTitle = m_configDialog->sessionTitle();
+        const QString newPref = m_configDialog->preference();
+        const QString newDir = m_configDialog->directory();
+
+        // Update local state
+        ui->sessionTitle->setText(newTitle);
+        m_sessionPreference = newPref;
+        m_sessionDir = newDir;
+
+        // Update session via API: title, directory, preference
+        if (m_chatService && !m_sessionId.isEmpty()) {
+            m_chatService->updateSession(m_sessionId, newTitle, newDir, newPref);
+        }
+
+        // Notify parent (AIChatPane) for further handling
+        emit sessionConfigApplied(m_sessionId, newTitle, newPref, newDir);
+    }
 }
 
 }

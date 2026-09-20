@@ -11,7 +11,7 @@ Item {
     property string code: ""
     property string language: ""
 
-    implicitHeight: headerBar.height + codeText.implicitHeight + 16
+    implicitHeight: headerBar.height + Math.min(codeFlick.contentHeight, 300) + 16
 
     // Background
     Rectangle {
@@ -89,28 +89,37 @@ Item {
         }
     }
 
-    // Code text
-    TextEdit {
-        id: codeText
+    // Code text (scrollable, max height 300)
+    Flickable {
+        id: codeFlick
         anchors.top: headerBar.bottom
         anchors.topMargin: 8
         anchors.left: parent.left
         anchors.leftMargin: 12
         anchors.right: parent.right
         anchors.rightMargin: 12
+        height: Math.min(contentHeight, 300)
+        contentHeight: codeText.implicitHeight
+        flickableDirection: Flickable.VerticalFlick
+        clip: true
 
-        text: codeBlockRoot.code
-        textFormat: TextEdit.PlainText
-        wrapMode: TextEdit.Wrap
-        readOnly: true
-        selectByMouse: true
-        color: "#d4d4d4"
-        font.family: "Consolas"
-        font.pixelSize: 12
-        selectionColor: "#264f78"
-        selectedTextColor: "#ffffff"
-        mouseSelectionMode: TextEdit.SelectCharacters
-        textMargin: 0
+        TextEdit {
+            id: codeText
+            width: parent.width
+
+            text: codeBlockRoot.code
+            textFormat: TextEdit.PlainText
+            wrapMode: TextEdit.Wrap
+            readOnly: true
+            selectByMouse: true
+            color: "#d4d4d4"
+            font.family: "Consolas"
+            font.pixelSize: 12
+            selectionColor: "#264f78"
+            selectedTextColor: "#ffffff"
+            mouseSelectionMode: TextEdit.SelectCharacters
+            textMargin: 0
+        }
     }
 
     // Hidden TextInput for clipboard access

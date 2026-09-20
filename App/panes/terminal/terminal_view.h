@@ -151,6 +151,7 @@ protected:
     void focusInEvent(QFocusEvent *event) override;
     void focusOutEvent(QFocusEvent *event) override;
     void inputMethodEvent(QInputMethodEvent *event) override;
+    QSize minimumSizeHint() const override;
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -211,6 +212,8 @@ protected:
 
     void applySizeChange();
     void updateScrollBars();
+
+    QSize pixelSizeToGridSize(QSize pixelSize) const;
 
     void flushVTerm(bool force);
 

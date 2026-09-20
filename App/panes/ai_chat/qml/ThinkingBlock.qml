@@ -18,7 +18,7 @@ Item {
     property string thinkText: partData ? partData.content : ""
 
     implicitHeight: expanded && expandedLoader.item
-                        ? expandedLoader.item.implicitHeight
+                        ? expandedLoader.item.height
                         : previewLabel.implicitHeight
     clip: true
 
@@ -67,19 +67,30 @@ Item {
         anchors.rightMargin: 30
 
         sourceComponent: Component {
-            TextEdit {
-                text: thinkText
-                wrapMode: TextEdit.Wrap
-                textFormat: TextEdit.PlainText
-                color: "#888888"
-                font.pixelSize: 12
-                readOnly: true
-                selectByMouse: true
-                selectionColor: "#0539a2"
-                selectedTextColor: "#ffffff"
-                mouseSelectionMode: TextEdit.SelectCharacters
-                renderType: TextEdit.NativeRendering
-                cursorDelegate: Item {}
+            Flickable {
+                id: flick
+                contentHeight: edit.contentHeight
+                flickableDirection: Flickable.VerticalFlick
+                clip: true
+                implicitHeight: Math.min(edit.contentHeight, 300)
+                height: implicitHeight
+
+                TextEdit {
+                    id: edit
+                    text: thinkText
+                    wrapMode: TextEdit.Wrap
+                    textFormat: TextEdit.PlainText
+                    color: "#888888"
+                    font.pixelSize: 12
+                    readOnly: true
+                    selectByMouse: true
+                    selectionColor: "#0539a2"
+                    selectedTextColor: "#ffffff"
+                    mouseSelectionMode: TextEdit.SelectCharacters
+                    renderType: TextEdit.NativeRendering
+                    cursorDelegate: Item {}
+                    width: parent.width
+                }
             }
         }
     }
