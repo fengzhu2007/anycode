@@ -44,6 +44,9 @@ class PartObject : public QObject
     Q_PROPERTY(int linesRemoved READ linesRemoved WRITE setLinesRemoved NOTIFY dataChanged)
     Q_PROPERTY(QString permissionRequestId READ permissionRequestId NOTIFY dataChanged)
     Q_PROPERTY(QString permissionReply     READ permissionReply     NOTIFY permissionReplyChanged)
+    Q_PROPERTY(QString todoListId READ todoListId NOTIFY dataChanged)
+    Q_PROPERTY(QString todoTitle  READ todoTitle  NOTIFY dataChanged)
+    Q_PROPERTY(QJsonArray todoTasks READ todoTasks WRITE setTodoTasks NOTIFY todoTasksChanged)
 public:
     explicit PartObject(QObject *parent = nullptr);
 
@@ -88,6 +91,15 @@ public:
 
     QString permissionReply() const { return m_permReply; }
 
+    QString todoListId() const { return m_todoListId; }
+    void setTodoListId(const QString &id);
+
+    QString todoTitle() const { return m_todoTitle; }
+    void setTodoTitle(const QString &t);
+
+    QJsonArray todoTasks() const { return m_todoTasks; }
+    void setTodoTasks(const QJsonArray &tasks);
+
     /** Called from QML when user clicks Allow Once / Always / Reject. */
     Q_INVOKABLE void replyPermission(const QString &reply);
 
@@ -99,6 +111,7 @@ signals:
     void contentChanged();
     void outputChanged();
     void permissionReplyChanged();
+    void todoTasksChanged();
     /** Emitted by replyPermission() — QmlMessageModel forwards to ChatService. */
     void permissionReplied(const QString &requestId, const QString &reply);
     /** Emitted by openFile() — contains the file path from content. */
@@ -119,6 +132,9 @@ private:
     int     m_linesRemoved = 0;
     QString m_permRequestId;
     QString m_permReply;
+    QString m_todoListId;
+    QString m_todoTitle;
+    QJsonArray m_todoTasks;
 };
 
 // ---------------------------------------------------------------------------
@@ -201,6 +217,13 @@ public:
      *  partId. Ignored when the part has not been announced yet. */
     void appendPartDelta(const QString &messageId, const QString &partId,
                          const QString &delta);
+
+    // ---- todo plan (todo.updated SSE events drive the todo_write tool
+    // part's TodoCard; the part itself comes from upsertPart/history) ----
+
+    /** Update one task's status/output inside the todo_write tool card. */
+    void todoUpdated(const QString &todoListId, const QString &taskId,
+                     const QString &status, const QString &output);
 
     /** True when the row exists and carries at least one PartObject. */
     bool rowHasParts(int row) const;

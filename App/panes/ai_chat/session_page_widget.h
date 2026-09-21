@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QList>
 #include <QLabel>
+#include <QJsonArray>
 #include "chat_message_view.h"
 
 class QComboBox;
@@ -73,6 +74,10 @@ public:
 
     /** Add a message to the model and auto-scroll. */
     void addMessage(ChatMessageView::Type type, const QString &content);
+
+    /** Update the todo_write tool card (todo.updated SSE event). */
+    void todoUpdated(const QString &todoListId, const QString &taskId,
+                     const QString &status, const QString &output);
 
     /** Clear all messages. */
     void clearMessages();

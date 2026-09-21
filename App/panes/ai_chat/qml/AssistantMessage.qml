@@ -76,6 +76,8 @@ Item {
                                 return "cards/FetchCard.qml"
                             case "question":
                                 return "cards/QuestionCard.qml"
+                            case "todo_write":
+                                return "cards/TodoCard.qml"
                             default:
                                 // Command-line fallback for isCommand
                                 if (part.isCommand) return "cards/CommandCard.qml"

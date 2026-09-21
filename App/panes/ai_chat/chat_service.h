@@ -199,6 +199,10 @@ signals:
     void memorySaved(const QString &sessionId, const QString &type,
                      const QString &content, const QString &keywords);
 
+    void todoUpdated(const QString &sessionId, const QString &todoListId,
+                     const QString &taskId, const QString &status,
+                     const QString &output);
+
     void connectionChanged(bool connected);
     void pingResult(bool ok);
     void eventStreamEnded(bool wasConnected);  // internal: event stream thread ended

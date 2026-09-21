@@ -87,6 +87,22 @@ void PartObject::setPermissionRequestId(const QString &id)
     if (m_permRequestId != id) { m_permRequestId = id; emit dataChanged(); }
 }
 
+void PartObject::setTodoListId(const QString &id)
+{
+    if (m_todoListId != id) { m_todoListId = id; emit dataChanged(); }
+}
+
+void PartObject::setTodoTitle(const QString &t)
+{
+    if (m_todoTitle != t) { m_todoTitle = t; emit dataChanged(); }
+}
+
+void PartObject::setTodoTasks(const QJsonArray &tasks)
+{
+    m_todoTasks = tasks;
+    emit todoTasksChanged();
+}
+
 void PartObject::replyPermission(const QString &reply)
 {
     if (!m_permReply.isEmpty() || m_permRequestId.isEmpty())
@@ -265,6 +281,36 @@ static bool applyServerPart(PartObject *p, const QString &partType,
             int newLines = countLines(input["newText"].toString());
             p->setLinesAdded(newLines);
             p->setLinesRemoved(oldLines);
+        }
+
+        // todo_write: expose the plan (title + tasks) for TodoCard. Input
+        // carries the original task list; state.metadata.tasks (written by
+        // the server at completion) carries the final statuses so history
+        // reloads restore the card without replaying SSE events.
+        if (lt == "todo_write") {
+            p->setTodoTitle(input["title"].toString());
+            QJsonObject meta = state["metadata"].toObject();
+            if (!meta["todo_list_id"].toString().isEmpty())
+                p->setTodoListId(meta["todo_list_id"].toString());
+            QJsonArray metaTasks = meta["tasks"].toArray();
+            QJsonArray todoTasks;
+            const QJsonArray inTasks = input["tasks"].toArray();
+            for (int i = 0; i < inTasks.size(); ++i) {
+                QJsonObject src = inTasks[i].toObject();
+                QJsonObject dst;
+                dst["id"] = src["id"].toString();
+                dst["content"] = src["content"].toString();
+                dst["status"] = QString("pending");
+                for (int k = 0; k < metaTasks.size(); ++k) {
+                    QJsonObject mt = metaTasks[k].toObject();
+                    if (mt["id"].toString() == src["id"].toString()) {
+                        dst["status"] = mt["status"].toString();
+                        break;
+                    }
+                }
+                todoTasks.append(dst);
+            }
+            p->setTodoTasks(todoTasks);
         }
 
         return true;
@@ -880,6 +926,36 @@ void QmlMessageModel::appendPartDelta(const QString &messageId, const QString &p
 bool QmlMessageModel::rowHasParts(int row) const
 {
     return row >= 0 && row < m_messages.size() && !m_messages[row].parts.isEmpty();
+}
+
+// ---- todo plan ----
+
+void QmlMessageModel::todoUpdated(const QString &todoListId, const QString &taskId,
+                                  const QString &status, const QString &output)
+{
+    // The card lives on the todo_write tool part (created by upsertPart), not
+    // on a synthetic row. Scan backwards for the most recent todo_write part —
+    // execution is serial per session, so the running plan is always the
+    // latest one. Once the part carries a todoListId (completion metadata),
+    // require it to match; during execution the metadata is empty.
+    for (int row = m_messages.size() - 1; row >= 0; --row) {
+        for (PartObject *p : m_messages[row].parts) {
+            if (p->partType() != "tool" || p->toolType() != "todo_write") continue;
+            if (!p->todoListId().isEmpty() && p->todoListId() != todoListId) continue;
+            QJsonArray tasks = p->todoTasks();
+            for (int i = 0; i < tasks.size(); ++i) {
+                if (tasks[i].toObject()["id"].toString() != taskId) continue;
+                QJsonObject t = tasks[i].toObject();
+                t["status"] = status;
+                if (!output.isEmpty()) t["output"] = output;
+                tasks[i] = t;
+                // PartObject NOTIFY drives the QML card update directly;
+                // no partsVersion bump needed (part identity unchanged).
+                p->setTodoTasks(tasks);
+                return;
+            }
+        }
+    }
 }
 
 void QmlMessageModel::scrollToBottom()

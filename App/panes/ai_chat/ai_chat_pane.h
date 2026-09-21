@@ -97,6 +97,9 @@ public slots:
     void onPermissionAsked(const OpenCodePermissionRequest &request);
     void onMemorySaved(const QString &sessionId, const QString &type,
                        const QString &content, const QString &keywords);
+    void onTodoUpdated(const QString &sessionId, const QString &todoListId,
+                       const QString &taskId, const QString &status,
+                       const QString &output);
     void onLoadMoreMessages(const QString &sessionId);
 
 protected:

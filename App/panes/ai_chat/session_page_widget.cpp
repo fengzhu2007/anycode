@@ -355,6 +355,12 @@ void SessionPageWidget::addMessage(ChatMessageView::Type type, const QString &co
     m_qmlModel->addMessage(type, content);
 }
 
+void SessionPageWidget::todoUpdated(const QString &todoListId, const QString &taskId,
+                                    const QString &status, const QString &output)
+{
+    m_qmlModel->todoUpdated(todoListId, taskId, status, output);
+}
+
 void SessionPageWidget::clearMessages()
 {
     m_qmlModel->clearMessages();

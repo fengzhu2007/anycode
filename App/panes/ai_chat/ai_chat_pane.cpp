@@ -146,6 +146,7 @@ AIChatPane::AIChatPane(QWidget *parent)
     connect(m_service, &ChatService::pingResult, this, &AIChatPane::onServerPingResult);
     connect(m_service, &ChatService::permissionAsked, this, &AIChatPane::onPermissionAsked);
     connect(m_service, &ChatService::memorySaved, this, &AIChatPane::onMemorySaved);
+    connect(m_service, &ChatService::todoUpdated, this, &AIChatPane::onTodoUpdated);
 
     Subscriber::reg();
     this->regMessageIds({Type::M_OPEN_PROJECT, Type::M_CLOSE_PROJECT,
@@ -1197,6 +1198,16 @@ void AIChatPane::onMemorySaved(const QString &sessionId, const QString &type,
         page->addMessage(ChatMessageView::Event, text);
         page->scrollToBottom();
     }
+}
+
+void AIChatPane::onTodoUpdated(const QString &sessionId, const QString &todoListId,
+                               const QString &taskId, const QString &status,
+                               const QString &output)
+{
+    auto *page = findPage(sessionId);
+    if(!page) page = findPage(m_currentSessionId);
+    if(page)
+        page->todoUpdated(todoListId, taskId, status, output);
 }
 
 // ---- rendering ----

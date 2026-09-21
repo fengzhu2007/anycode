@@ -1567,6 +1567,15 @@ void ChatService::processEventStream(const QByteArray &chunk)
             qDebug() << "[ChatService] memory.created:" << memType
                      << "content=" << content << "session=" << sessionId;
             emit memorySaved(sessionId, memType, content, keywords);
+        }else if(type == "todo.updated"){
+            QJsonObject props = payload["properties"].toObject();
+            QString sessionId = props["session_id"].toString();
+            QString todoListId = props["todo_list_id"].toString();
+            QString taskId = props["task_id"].toString();
+            QString status = props["status"].toString();
+            QString output = props["output"].toString();
+            qDebug() << "[ChatService] todo.updated:" << taskId << status;
+            emit todoUpdated(sessionId, todoListId, taskId, status, output);
         }
     }
 }
