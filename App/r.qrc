@@ -151,6 +151,12 @@
         <file>Resource/icons/dark/Hourglass.png</file>
         <file>Resource/icons/dark/LightBulb.png</file>
         <file>Resource/icons/dark/Passing.png</file>
+        <file>Resource/icons/ExpandRightGroup_16x.svg</file>
+        <file>Resource/icons/TaskList_16x.svg</file>
+        <file>Resource/icons/TaskComplete_16x.svg</file>
+        <file>Resource/icons/BreakpointDisabled_16x.svg</file>
+        <file>Resource/icons/CollapseUp_16x.svg</file>
+        <file>Resource/icons/ExpandDown_16x.svg</file>
     </qresource>
     <qresource prefix="/ai_chat">
         <file alias="qml/MainChatView.qml">panes/ai_chat/qml/MainChatView.qml</file>
@@ -168,7 +174,7 @@
         <file alias="qml/cards/GrepCard.qml">panes/ai_chat/qml/cards/GrepCard.qml</file>
         <file alias="qml/cards/GlobCard.qml">panes/ai_chat/qml/cards/GlobCard.qml</file>
         <file alias="qml/cards/QuestionCard.qml">panes/ai_chat/qml/cards/QuestionCard.qml</file>
-		<file alias="qml/cards/FetchCard.qml">panes/ai_chat/qml/cards/FetchCard.qml</file>
+        <file alias="qml/cards/FetchCard.qml">panes/ai_chat/qml/cards/FetchCard.qml</file>
         <file alias="qml/cards/TodoCard.qml">panes/ai_chat/qml/cards/TodoCard.qml</file>
     </qresource>
 </RCC>

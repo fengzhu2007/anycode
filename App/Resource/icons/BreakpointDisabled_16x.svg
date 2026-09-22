@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 19.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px"
+	 height="16px" viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve">
+<style type="text/css">
+	.icon_x002D_canvas_x002D_transparent{opacity:0;fill:#F6F6F6;}
+	.icon_x002D_vs_x002D_out{fill:#F6F6F6;}
+	.icon_x002D_vs_x002D_red{fill:#eee;}
+	.icon_x002D_white{fill:#FFFFFF;}
+</style>
+
+<g id="iconBg">
+	<path class="icon_x002D_vs_x002D_red" d="M8,3.5
+		C10.485,3.5,12.5,5.515,12.5,8
+		C12.5,10.485,10.485,12.5,8,12.5
+		C5.515,12.5,3.5,10.485,3.5,8
+		C3.5,5.515,5.515,3.5,8,3.5
+		z
+		M8,4.5
+		C6.067,4.5,4.5,6.067,4.5,8
+		C4.5,9.933,6.067,11.5,8,11.5
+		C9.933,11.5,11.5,9.933,11.5,8
+		C11.5,6.067,9.933,4.5,8,4.5
+		z"/>
+</g>
+</svg>

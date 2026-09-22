@@ -114,7 +114,6 @@ signals:
     void enterPressed();
     void modelChanged(int index);
     void scrollToTopRequested();
-    void fileOpenRequested(const QString &filePath);
     void sessionConfigApplied(const QString &sessionId, const QString &title,
                               const QString &preference, const QString &directory);
 

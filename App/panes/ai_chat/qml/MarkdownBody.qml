@@ -66,7 +66,7 @@ Item {
                     selectByKeyboard: true
                     color: "#dcdcdc"
                     font.pixelSize: 12
-                    selectionColor: "#0539a2"
+                    selectionColor: "#264f78"
                     selectedTextColor: "#ffffff"
                     mouseSelectionMode: TextEdit.SelectCharacters
 

@@ -1268,6 +1268,10 @@ void ChatService::processEventStream(const QByteArray &chunk)
         if(type == "message.part.delta"){
             QJsonObject props = payload["properties"].toObject();
             QString sessionId = props["sessionID"].toString();
+            // Route child session events to parent page
+            if(m_childToParent.contains(sessionId)){
+                sessionId = m_childToParent.value(sessionId);
+            }
             QString partID = props["partID"].toString();
             QString delta = props["delta"].toString();
             if(!delta.isEmpty()){
@@ -1295,6 +1299,10 @@ void ChatService::processEventStream(const QByteArray &chunk)
         }else if(type == "message.part.updated"){
             QJsonObject props = payload["properties"].toObject();
             QString sessionId = props["sessionID"].toString();
+            // Route child session events to parent page
+            if(m_childToParent.contains(sessionId)){
+                sessionId = m_childToParent.value(sessionId);
+            }
             QJsonObject part = props["part"].toObject();
             QString partType = part["type"].toString();
             QString partID = part["id"].toString();
@@ -1303,7 +1311,13 @@ void ChatService::processEventStream(const QByteArray &chunk)
             if(!partID.isEmpty()) m_partTypes[partID] = partType;
             // Remember partID → messageID so partDelta reaches the right row
             QString messageId = part["messageID"].toString();
-            if(!partID.isEmpty() && !messageId.isEmpty()) m_partMessages[partID] = messageId;
+            // Child session parts: clear messageId so they attach to the
+            // last assistant message in the parent session instead of
+            // creating a new synthetic row
+            if(m_childToParent.contains(props["sessionID"].toString())){
+                messageId = QString();
+            }
+            if(!partID.isEmpty()) m_partMessages[partID] = messageId;
             // Part-driven rendering: forward the raw part to the UI. User
             // messages are skipped — their text is already rendered locally.
             if(m_messageRoles.value(messageId) != QLatin1String("user")){
@@ -1464,6 +1478,14 @@ void ChatService::processEventStream(const QByteArray &chunk)
             if(errorMsg.isEmpty()) errorMsg = errorObj["name"].toString();
             qDebug() << "[ChatService] session.error for session:" << sessionId << "error:" << errorMsg;
             m_sessionErrors[sessionId] = errorMsg;
+        }else if(type == "subsession.started"){
+            QJsonObject props = payload["properties"].toObject();
+            QString parentSessionId = props["sessionID"].toString();
+            QString childSessionId = props["childSessionID"].toString();
+            if(!parentSessionId.isEmpty() && !childSessionId.isEmpty()){
+                m_childToParent[childSessionId] = parentSessionId;
+                qDebug() << "[ChatService] subsession.started:" << childSessionId << "->" << parentSessionId;
+            }
         }else if(type == "session.updated"){
             QJsonObject props = payload["properties"].toObject();
             QString sessionId = props["sessionID"].toString();

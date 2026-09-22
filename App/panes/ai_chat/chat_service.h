@@ -261,6 +261,9 @@ private:
     // messageID → role, learned from message.updated; part-level events are
     // suppressed for user messages (already rendered locally)
     QHash<QString, QString> m_messageRoles;
+    // childSessionId → parentSessionId, learned from subsession.started;
+    // routes child session events to the parent page for rendering
+    QHash<QString, QString> m_childToParent;
     // partID → accumulated reasoning text (appendThink replaces, so each
     // reasoning delta re-emits the accumulated full text)
     QHash<QString, QString> m_reasoningTexts;

@@ -72,7 +72,7 @@ Item {
                 contentHeight: edit.contentHeight
                 flickableDirection: Flickable.VerticalFlick
                 clip: true
-                implicitHeight: Math.min(edit.contentHeight, 300)
+                implicitHeight: Math.min(edit.contentHeight, 240)
                 height: implicitHeight
 
                 TextEdit {
@@ -84,7 +84,7 @@ Item {
                     font.pixelSize: 12
                     readOnly: true
                     selectByMouse: true
-                    selectionColor: "#0539a2"
+                    selectionColor: "#264f78"
                     selectedTextColor: "#ffffff"
                     mouseSelectionMode: TextEdit.SelectCharacters
                     renderType: TextEdit.NativeRendering
@@ -104,10 +104,11 @@ Item {
         cursorShape: Qt.PointingHandCursor
         onClicked: expanded = !expanded
 
-        Text {
-            text: expanded ? "▲" : "▼"
-            font.pixelSize: 10
-            color: "#888888"
+        Image {
+            source: expanded ? "qrc:/Resource/icons/CollapseUp_16x.svg" : "qrc:/Resource/icons/ExpandDown_16x.svg"
+            sourceSize: Qt.size(16, 16)
+            width: 16
+            height: 16
             anchors.centerIn: parent
         }
     }

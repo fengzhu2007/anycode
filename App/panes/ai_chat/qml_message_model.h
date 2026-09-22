@@ -114,8 +114,6 @@ signals:
     void todoTasksChanged();
     /** Emitted by replyPermission() — QmlMessageModel forwards to ChatService. */
     void permissionReplied(const QString &requestId, const QString &reply);
-    /** Emitted by openFile() — contains the file path from content. */
-    void fileOpenRequested(const QString &filePath);
 
 private:
     QString m_partId;        // server part id (opencode v1 part identity)
@@ -238,7 +236,6 @@ signals:
     void countChanged();
     void scrollToBottomRequested();
     void permissionReplied(const QString &requestId, const QString &reply);
-    void fileOpenRequested(const QString &filePath);
     void loadMoreRequested();
     /** Emitted right before history rows are inserted at the top. */
     void aboutToPrependMessages(int count);

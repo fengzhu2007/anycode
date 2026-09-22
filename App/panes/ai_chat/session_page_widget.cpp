@@ -309,12 +309,6 @@ void SessionPageWidget::setupQmlView()
         // and rebuild the model right after the user clicks a permission
         // button (destroying the card under the cursor).
     });
-
-    // Forward file open requests from QML parts
-    connect(m_qmlModel, &QmlMessageModel::fileOpenRequested,
-            this, [this](const QString &filePath) {
-        emit fileOpenRequested(filePath);
-    });
 }
 
 // ---- QML error logging ----

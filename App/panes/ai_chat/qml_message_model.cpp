@@ -5,6 +5,9 @@
 #include <QJsonObject>
 #include <QQmlEngine>
 #include <QElapsedTimer>
+#include "core/event_bus/type.h"
+#include "core/event_bus/event_data.h"
+#include "core/event_bus/publisher.h"
 
 namespace ady {
 
@@ -78,8 +81,10 @@ void PartObject::setLinesRemoved(int n)
 
 void PartObject::openFile()
 {
-    if (!m_content.isEmpty())
-        emit fileOpenRequested(m_content);
+    if (!m_content.isEmpty()) {
+        OpenEditorData data{m_content, 0, 0, false};
+        Publisher::getInstance()->post(Type::M_OPEN_EDITOR, &data);
+    }
 }
 
 void PartObject::setPermissionRequestId(const QString &id)
@@ -120,7 +125,6 @@ void QmlMessageModel::connectPartSignals(PartObject *p)
 {
     if (!p) return;
     connect(p, &PartObject::permissionReplied, this, &QmlMessageModel::permissionReplied);
-    connect(p, &PartObject::fileOpenRequested, this, &QmlMessageModel::fileOpenRequested);
 }
 
 // ============================================================================
@@ -844,11 +848,17 @@ void QmlMessageModel::upsertPart(const QString &messageId, const QString &partId
         for (int i = m_messages.size() - 1; i >= 0; --i) {
             if (m_messages[i].messageId == messageId) { row = i; break; }
         }
-    }
-    if (row < 0 && !m_messages.isEmpty()
-        && m_messages.last().type == ChatMessageBubble::Assistant
-        && m_messages.last().streaming) {
-        row = m_messages.size() - 1;
+        if (row < 0 && !m_messages.isEmpty()
+            && m_messages.last().type == ChatMessageBubble::Assistant
+            && m_messages.last().streaming) {
+            row = m_messages.size() - 1;
+        }
+    } else {
+        // Empty messageId (child session parts): attach to the last
+        // assistant message so child output flows into the parent stream
+        for (int i = m_messages.size() - 1; i >= 0; --i) {
+            if (m_messages[i].type == ChatMessageBubble::Assistant) { row = i; break; }
+        }
     }
 
     if (row < 0) {
@@ -903,8 +913,11 @@ void QmlMessageModel::appendPartDelta(const QString &messageId, const QString &p
         for (int i = m_messages.size() - 1; i >= 0; --i) {
             if (m_messages[i].messageId == messageId) { row = i; break; }
         }
-    } else if (!m_messages.isEmpty() && m_messages.last().streaming) {
-        row = m_messages.size() - 1;
+    } else {
+        // Empty messageId (child session): find last assistant message
+        for (int i = m_messages.size() - 1; i >= 0; --i) {
+            if (m_messages[i].type == ChatMessageBubble::Assistant) { row = i; break; }
+        }
     }
     if (row < 0) return;
 

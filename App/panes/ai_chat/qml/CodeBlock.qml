@@ -11,7 +11,7 @@ Item {
     property string code: ""
     property string language: ""
 
-    implicitHeight: headerBar.height + Math.min(codeFlick.contentHeight, 300) + 16
+    implicitHeight: headerBar.height + Math.min(codeFlick.contentHeight, 240) + 16
 
     // Background
     Rectangle {
@@ -46,7 +46,7 @@ Item {
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
-            text: codeBlockRoot.language || "code"
+            text: codeBlockRoot.language || "Plaintext"
             color: "#888888"
             font.pixelSize: 11
             font.family: "Consolas"
@@ -61,7 +61,7 @@ Item {
             height: 24
 
             contentItem: Text {
-                text: copyBtn._copied ? "✓" : "Copy"
+                text: copyBtn._copied ? "✓" : qsTr("Copy")
                 color: copyBtn._copied ? "#4ec9b0" : "#888888"
                 font.pixelSize: 11
                 horizontalAlignment: Text.AlignHCenter
@@ -98,7 +98,7 @@ Item {
         anchors.leftMargin: 12
         anchors.right: parent.right
         anchors.rightMargin: 12
-        height: Math.min(contentHeight, 300)
+        height: Math.min(contentHeight, 240)
         contentHeight: codeText.implicitHeight
         flickableDirection: Flickable.VerticalFlick
         clip: true

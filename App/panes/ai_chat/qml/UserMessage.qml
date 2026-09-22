@@ -20,7 +20,7 @@ Item {
         // Fit the text's natural (unwrapped) width, capped to the item
         // width so long messages wrap instead of overflowing.
         width: Math.min(textItem.implicitWidth + 24, parent.width)
-        implicitHeight: Math.min(textItem.implicitHeight, 300) + 16
+        implicitHeight: Math.min(textItem.implicitHeight, 240) + 16
         radius: 8
         color: "#2f362f"
 
@@ -32,7 +32,7 @@ Item {
             anchors.rightMargin: 12
             anchors.top: parent.top
             anchors.topMargin: 8
-            height: Math.min(contentHeight, 300)
+            height: Math.min(contentHeight, 240)
             contentHeight: textItem.implicitHeight
             flickableDirection: Flickable.VerticalFlick
             clip: true
@@ -48,7 +48,7 @@ Item {
                 readOnly: true
                 selectByKeyboard: true
                 selectByMouse: true
-                selectionColor: "#0539a2"
+                selectionColor: "#264f78"
                 selectedTextColor: "#ffffff"
                 mouseSelectionMode: TextEdit.SelectCharacters
                 renderType: TextEdit.NativeRendering
