@@ -35,6 +35,12 @@ public:
     void addSemanticError(int line,int column,int length,const QString& message);
     void clearSemanticError();
 
+    // Set diff content and apply visual annotations (line highlights,
+    // scrollbar markers, gutter markers).  When diff is empty, clears
+    // all annotations.
+    void setDiffHighlights(const cvs::DiffContent &content);
+    void clearDiffHighlights();
+
 protected:
     virtual void contextMenuEvent(QContextMenuEvent *e) override;
     virtual void showEvent(QShowEvent *e) override;
@@ -52,16 +58,10 @@ protected:
         bool isHeader = false;
     };
 
-    // Set diff content and apply visual annotations (line highlights,
-    // scrollbar markers, gutter markers).  When diff is empty, clears
-    // all annotations.
-    void setDiffHighlights(const cvs::DiffContent &content);
-
     // Individual rendering steps (called by setDiffHighlights, but also
     // available for manual control)
     void applyLineHighlights();
     void updateScrollBarMarkers();
-    void clearDiffHighlights();
 
     // Gutter: reserves width for diff markers when diff data is present
     virtual int extraAreaWidth(int *markWidthPtr = nullptr) const;

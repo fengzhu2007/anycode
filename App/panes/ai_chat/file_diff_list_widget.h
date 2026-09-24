@@ -2,6 +2,7 @@
 #define FILE_DIFF_LIST_WIDGET_H
 
 #include "chat_service.h"
+#include "file_diff_item_widget.h"
 #include <QWidget>
 #include <QListWidget>
 
@@ -29,30 +30,28 @@ public:
     explicit FileDiffListWidget(QWidget *parent = nullptr);
     ~FileDiffListWidget();
 
-    /** 设置文件变更列表 */
-    void setDiffs(const QList<FileDiffInfo> &diffs);
+    /** 追加文件变更到列表 */
+    void appendDiffs(const QList<FileDiffInfo> &diffs);
 
     /** 清空列表 */
     void clear();
 
-    /** 获取当前 diff 数据 */
-    QList<FileDiffInfo> diffs() const { return m_diffs; }
+    /** 标记所有未操作项为已接受 */
+    void markAllAccepted();
+
+    /** 标记所有未操作项为已拒绝 */
+    void markAllRejected();
+
+    /** 是否存在未操作的项 */
+    bool hasPendingItems() const;
 
 signals:
-    /** 全局确认变更 */
-    void acceptAll();
-    /** 全局拒绝变更 */
-    void rejectAll();
     /** 单个文件拒绝（file path） */
     void fileRejected(const QString &filePath);
     /** 单个文件确认（file path） */
     void fileAccepted(const QString &filePath);
 
 private:
-    void createFileItem(int index);
-    static QString statusIcon(const QString &status);
-    static QString statusColor(const QString &status);
-
     Ui::FileDiffListWidget *ui;
     QList<FileDiffInfo> m_diffs;
 };

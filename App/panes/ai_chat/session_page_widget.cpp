@@ -49,11 +49,11 @@ SessionPageWidget::SessionPageWidget(QWidget *parent)
     // File diff popup
     setupDiffPopup();
 
-    // --- TEST DEMO: inject 10 fake file changes ---
-   /* {
+    // --- TEST DEMO: inject fake file changes ---
+    /*{
         QList<FileDiffInfo> testDiffs;
         QStringList statuses = {"modified", "added", "deleted"};
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 5; ++i) {
             FileDiffInfo d;
             d.file = QString("D:/wamp/www/oa5/src/test_file_%1.cpp").arg(i + 1);
             d.status = statuses[i % 3];
@@ -106,12 +106,10 @@ bool SessionPageWidget::eventFilter(QObject *obj, QEvent *event)
 {
     // fileChanged label click -> toggle popup
     if (obj == ui->fileChanged && event->type() == QEvent::MouseButtonPress) {
-        if (!m_currentDiffs.isEmpty()) {
-            if (m_diffPopup->isVisible()) {
-                m_diffPopup->hide();
-            } else {
-                m_diffPopup->showPopup(ui->fileChanged, wPopupPanel::TopLeft);
-            }
+        if (m_diffPopup->isVisible()) {
+            m_diffPopup->hide();
+        } else {
+            m_diffPopup->showPopup(ui->fileChanged, wPopupPanel::TopLeft);
         }
         return true;
     }
@@ -146,9 +144,7 @@ void SessionPageWidget::setupDiffPopup()
     m_diffListWidget = new FileDiffListWidget;
     m_diffPopup->setContentWidget(m_diffListWidget);
 
-    // Connect file diff list signals
-    connect(m_diffListWidget, &FileDiffListWidget::acceptAll, this, &SessionPageWidget::onAcceptAll);
-    connect(m_diffListWidget, &FileDiffListWidget::rejectAll, this, &SessionPageWidget::onRejectAll);
+    // Connect file diff list signals (per-item only, no bulk buttons)
 
     // fileChanged label click -> show popup
     ui->fileChanged->setCursor(Qt::PointingHandCursor);
@@ -200,52 +196,39 @@ void SessionPageWidget::setDirectoryList(const QStringList &paths)
 
 void SessionPageWidget::setFileDiffs(const QList<FileDiffInfo> &diffs)
 {
-    m_currentDiffs = diffs;
+    if (diffs.isEmpty()) return;
 
-    bool hasDiffs = !diffs.isEmpty();
+    m_currentDiffs.append(diffs);
+    m_diffListWidget->appendDiffs(diffs);
+
+    bool hasDiffs = !m_currentDiffs.isEmpty();
     ui->fileChanged->setVisible(hasDiffs);
     ui->accept->setVisible(hasDiffs);
     ui->reject->setVisible(hasDiffs);
 
     if (hasDiffs) {
-        ui->fileChanged->setText(tr("File Changed List (%1)").arg(diffs.size()));
-        m_diffListWidget->setDiffs(diffs);
-    } else {
-        m_diffListWidget->clear();
-        if (m_diffPopup->isVisible()) {
-            m_diffPopup->hide();
-        }
+        ui->fileChanged->setText(tr("File Changed List (%1)").arg(m_currentDiffs.size()));
     }
 }
 
 void SessionPageWidget::onAcceptAll()
 {
     if (!m_chatService || m_sessionId.isEmpty()) return;
+    if (!m_diffListWidget->hasPendingItems()) return;
     qDebug() << "[SessionPage] Accept all changes for session:" << m_sessionId;
     m_chatService->confirmChanges(m_sessionId);
+    m_diffListWidget->markAllAccepted();
     m_currentDiffs.clear();
-    m_diffListWidget->clear();
-    ui->fileChanged->hide();
-    ui->accept->hide();
-    ui->reject->hide();
-    if (m_diffPopup->isVisible()) {
-        m_diffPopup->hide();
-    }
 }
 
 void SessionPageWidget::onRejectAll()
 {
     if (!m_chatService || m_sessionId.isEmpty()) return;
+    if (!m_diffListWidget->hasPendingItems()) return;
     qDebug() << "[SessionPage] Reject all changes for session:" << m_sessionId;
     m_chatService->revertSession(m_sessionId);
+    m_diffListWidget->markAllRejected();
     m_currentDiffs.clear();
-    m_diffListWidget->clear();
-    ui->fileChanged->hide();
-    ui->accept->hide();
-    ui->reject->hide();
-    if (m_diffPopup->isVisible()) {
-        m_diffPopup->hide();
-    }
 }
 
 // ---- QML view setup ----

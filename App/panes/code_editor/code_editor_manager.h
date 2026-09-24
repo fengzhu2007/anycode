@@ -20,6 +20,8 @@ class CodeEditorView;
 class Editor;
 class LanguageSettings;
 class CodeEditorManagerPrivate;
+class AgentDiffService;
+namespace cvs { class DiffContent; }
 class ANYENGINE_EXPORT CodeEditorManager : public QObject,public Subscriber
 {
     Q_OBJECT
@@ -88,6 +90,7 @@ public slots:
     void onEditorActionTrigger(bool checked=false);
     void onTabActionTrigger();
     void onLanguageSettingChanged(const LanguageSettings& setting);
+    void onAgentDiffReady(const QString &filePath, const cvs::DiffContent &content);
 
 private:
     CodeEditorManager(DockingPaneManager* docking_manager);

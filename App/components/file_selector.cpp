@@ -4,8 +4,12 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QFileInfo>
 
 namespace ady{
+
+static QString s_lastDir;
+
 class FileSelectorPrivate{
 public:
     QLineEdit* edit;
@@ -31,7 +35,7 @@ FileSelector::FileSelector(QWidget *parent,const QString& filter)
     layout->setMargin(0);
     layout->setContentsMargins(0,0,0,0);
     layout->setSpacing(2);
-    d->dir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    d->dir = "";
     connect(d->button,&QPushButton::clicked,this,&FileSelector::onSelectFile);
 }
 
@@ -70,10 +74,20 @@ QString FileSelector::text() const{
 }
 
 void FileSelector::onSelectFile(){
-
-    auto filePath = QFileDialog::getOpenFileName(this,tr("Select File"),d->dir,d->filter);
+    QString defaultDir;
+    if (!d->edit->text().isEmpty()) {
+        defaultDir = QFileInfo(d->edit->text()).path();
+    } else if (!d->dir.isEmpty()) {
+        defaultDir = d->dir;
+    } else if (!s_lastDir.isEmpty()) {
+        defaultDir = s_lastDir;
+    } else {
+        defaultDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    }
+    auto filePath = QFileDialog::getOpenFileName(this,tr("Select File"),defaultDir,d->filter);
     if(!filePath.isEmpty()){
         d->edit->setText(filePath);
+        s_lastDir = QFileInfo(filePath).path();
         emit fileChanged(filePath);
     }
 }

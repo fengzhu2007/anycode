@@ -211,7 +211,7 @@ bool CodeEditorPane::save(bool rename){
     /*if(!list.isEmpty()){
         m->appendWatchDirectory(list.at(0));
     }*/
-    //instance->appendWatchFile(path);
+    instance->appendWatchFile(path);
     //DebugLog::write(QString::fromUtf8("File save"),QString::fromUtf8("folder:%1;%2").arg(folder).arg(m->allWatchDirectory().join("|")));
     return ret;
 }

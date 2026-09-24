@@ -738,6 +738,39 @@ for (let i = 0; i &lt; 3; i++) {
     </message>
 </context>
 <context>
+    <name>FileDiffItemWidget</name>
+    <message>
+        <location filename="../panes/ai_chat/file_diff_item_widget.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/file_diff_item_widget.ui" line="47"/>
+        <source>M</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/file_diff_item_widget.ui" line="78"/>
+        <source>filename.cpp</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/file_diff_item_widget.ui" line="88"/>
+        <source>path/to/dir  +10 -5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/file_diff_item_widget.ui" line="136"/>
+        <source>×</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/file_diff_item_widget.ui" line="163"/>
+        <source>✓</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FileDiffListWidget</name>
     <message>
         <location filename="../panes/ai_chat/file_diff_list_widget.ui" line="20"/>
@@ -752,16 +785,6 @@ for (let i = 0; i &lt; 3; i++) {
     <message>
         <location filename="../panes/ai_chat/file_diff_list_widget.ui" line="108"/>
         <source>No file changes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../panes/ai_chat/file_diff_list_widget.ui" line="152"/>
-        <source>Reject All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../panes/ai_chat/file_diff_list_widget.ui" line="178"/>
-        <source>Accept All</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3539,112 +3562,112 @@ Please enter a new folder name.</source>
 <context>
     <name>ady::CodeEditorManager</name>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="567"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="597"/>
         <source>Undo</source>
         <translation>撤回</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="568"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="598"/>
         <source>Redo</source>
         <translation>重做</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="569"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="599"/>
         <source>Copy</source>
         <translation>复制</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="570"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="600"/>
         <source>Copy Html</source>
         <translation>复制HTML</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="571"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="601"/>
         <source>Cut</source>
         <translation>剪切</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="572"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="602"/>
         <source>Paste</source>
         <translation>粘贴</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="573"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="603"/>
         <source>Select All</source>
         <translation>全选</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="574"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="604"/>
         <source>Enable Text &amp;Wrapping</source>
         <translation>启用文本换行</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="575"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="605"/>
         <source>Visualize Whitespace</source>
         <translation>显示空白符</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="576"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="606"/>
         <source>Indent Selection</source>
         <translation>缩进选择行</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="577"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="607"/>
         <source>Auto Format</source>
         <translation>自动格式化</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="578"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="608"/>
         <source>Add/Remove Comment</source>
         <translation>添加/移除注释</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="579"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="609"/>
         <source>AI Suggestion</source>
         <translation>AI代码补全</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="580"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="610"/>
         <source>Copy Line</source>
         <translation>复制当前行</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="582"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="612"/>
         <source>Test</source>
         <translation>连接测试</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="656"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="686"/>
         <source>Save(&amp;S)</source>
         <translation>保存(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="657"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="687"/>
         <source>Close(&amp;C)</source>
         <translation>关闭(&amp;C)</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="658"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="688"/>
         <source>Close Other(&amp;A)</source>
         <translation>关闭其他(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="659"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="689"/>
         <source>Close All(&amp;L)</source>
         <translation>关闭所有(&amp;L)</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="660"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="690"/>
         <source>Copy Path(&amp;U)</source>
         <translation>复制文件路径(&amp;U)</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="661"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="691"/>
         <source>Open Folder(&amp;O)</source>
         <translation>打开目录(&amp;O)</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_manager.cpp" line="662"/>
+        <location filename="../panes/code_editor/code_editor_manager.cpp" line="692"/>
         <source>Float Tab(&amp;F)</source>
         <translation>悬浮标签页(&amp;F)</translation>
     </message>
@@ -3949,15 +3972,27 @@ Last Modify:%3</source>
     </message>
 </context>
 <context>
-    <name>ady::FileDiffListWidget</name>
+    <name>ady::FileDiffItemWidget</name>
     <message>
-        <location filename="../panes/ai_chat/file_diff_list_widget.cpp" line="127"/>
+        <location filename="../panes/ai_chat/file_diff_item_widget.cpp" line="54"/>
         <source>Reject this file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/file_diff_list_widget.cpp" line="144"/>
+        <location filename="../panes/ai_chat/file_diff_item_widget.cpp" line="63"/>
         <source>Accept this file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/file_diff_item_widget.cpp" line="72"/>
+        <location filename="../panes/ai_chat/file_diff_item_widget.cpp" line="118"/>
+        <source>已拒绝</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/ai_chat/file_diff_item_widget.cpp" line="81"/>
+        <location filename="../panes/ai_chat/file_diff_item_widget.cpp" line="118"/>
+        <source>已接受</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5239,7 +5274,7 @@ files to &quot;%2&quot;?</source>
 <context>
     <name>ady::SessionPageWidget</name>
     <message>
-        <location filename="../panes/ai_chat/session_page_widget.cpp" line="211"/>
+        <location filename="../panes/ai_chat/session_page_widget.cpp" line="210"/>
         <source>File Changed List (%1)</source>
         <translation type="unfinished"></translation>
     </message>

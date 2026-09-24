@@ -30,6 +30,8 @@
 #include "network/http/http_response.h"
 
 #include "ai_client.h"
+#include "agent_diff_service.h"
+#include "cvs/diff_content.h"
 
 
 #include <QFileInfo>
@@ -63,6 +65,7 @@ public:
     Editor* current = nullptr;
     CodeEditorView* editor;
     AIClient* ai;
+    AgentDiffService* agentDiff;
 
     bool tabChanged = true;
 
@@ -121,6 +124,10 @@ CodeEditorManager::CodeEditorManager(DockingPaneManager* docking_manager)
 
     //init ai client
     d->ai = new AIClient(this);
+
+    //init agent diff service
+    d->agentDiff = new AgentDiffService(this);
+    connect(d->agentDiff, &AgentDiffService::diffReady, this, &CodeEditorManager::onAgentDiffReady);
 
     //init register editor
     this->initEditors();
@@ -450,6 +457,8 @@ void CodeEditorManager::onFileChanged(const QString &path){
             if(pane->isModification()==false){
                 //reload file
                 pane->reload();
+                //fetch diff from openagent-cpp
+                d->agentDiff->fetchDiff(path);
             }else{
                 if(pane->isVisible()){
                     int state = pane->fileState();
@@ -464,6 +473,27 @@ void CodeEditorManager::onFileChanged(const QString &path){
                 }
             }
         }
+        // Re-add watch: atomic save (write-to-temp + rename) from external
+        // editors causes QFileSystemWatcher to drop the path on Windows.
+        if(!d->watcher->files().contains(path)){
+            d->watcher->addPath(path);
+        }
+    }
+}
+
+void CodeEditorManager::onAgentDiffReady(const QString &filePath, const cvs::DiffContent &content){
+    auto pane = this->get(filePath);
+    if(pane==nullptr){
+        return;
+    }
+    auto editor = pane->editor();
+    if(editor==nullptr){
+        return;
+    }
+    if(content.isEmpty()){
+        editor->clearDiffHighlights();
+    }else{
+        editor->setDiffHighlights(content);
     }
 }
 

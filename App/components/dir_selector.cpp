@@ -4,7 +4,11 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QFileInfo>
 namespace ady{
+
+static QString s_lastDir;
+
 class DirSelectorPrivate{
 public:
     QLineEdit* edit;
@@ -59,13 +63,18 @@ QString DirSelector::text() const{
 }
 
 void DirSelector::onSelectDir(){
-    auto defaultFolder = d->edit->text();
-    if(defaultFolder.isEmpty()){
+    QString defaultFolder;
+    if (!d->edit->text().isEmpty()) {
+        defaultFolder = d->edit->text();
+    } else if (!s_lastDir.isEmpty()) {
+        defaultFolder = s_lastDir;
+    } else {
         defaultFolder = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
     }
     auto folderPath = QFileDialog::getExistingDirectory(this,tr("Select Folder"),defaultFolder);
     if(!folderPath.isEmpty()){
         d->edit->setText(folderPath);
+        s_lastDir = QFileInfo(folderPath).path();
         emit dirChanged(folderPath);
     }
 }

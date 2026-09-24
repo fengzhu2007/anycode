@@ -365,6 +365,7 @@ add_library(App SHARED
         modules/options/agent/local_tab.h modules/options/agent/local_tab.cpp modules/options/agent/local_tab.ui
         components/select_model.h
         panes/code_editor/ai_client.h panes/code_editor/ai_client.cpp
+        panes/code_editor/agent_diff_service.h panes/code_editor/agent_diff_service.cpp
         modules/ai/ai_response.h modules/ai/ai_response.cpp
         modules/ai/gateway_request.h modules/ai/gateway_request.cpp
         modules/ai/gateway_response.h modules/ai/gateway_response.cpp
@@ -414,6 +415,7 @@ add_library(App SHARED
         panes/ai_chat/session_page_widget.h panes/ai_chat/session_page_widget.cpp panes/ai_chat/session_page_widget.ui
         panes/ai_chat/session_config_dialog.h panes/ai_chat/session_config_dialog.cpp panes/ai_chat/session_config_dialog.ui
         panes/ai_chat/file_diff_list_widget.h panes/ai_chat/file_diff_list_widget.cpp panes/ai_chat/file_diff_list_widget.ui
+        panes/ai_chat/file_diff_item_widget.h panes/ai_chat/file_diff_item_widget.cpp panes/ai_chat/file_diff_item_widget.ui
         panes/ai_chat/session_list_popup.h panes/ai_chat/session_list_popup.cpp
         panes/ai_chat/session_list_popup_v2.h panes/ai_chat/session_list_popup_v2.cpp
         panes/ai_chat/message_model.h panes/ai_chat/message_model.cpp
