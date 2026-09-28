@@ -3,17 +3,22 @@
 #include "network/network_request.h"
 #include "network/network_manager.h"
 #include "storage/addon_storage.h"
+#include <languages/loader.h>
 #include <QStandardPaths>
 #include <QCoreApplication>
 #include <QMessageBox>
 #include <QTranslator>
 #include <QDebug>
+#include <QTextDocument>
 
 
 typedef size_t (*GET_FORMPANELSIZE_FUN) (QString);
 typedef ady::FormPanel*(*GET_FORMPANEL_FUN) (QWidget*,QString,size_t);
 typedef int (*REQUEST_CONNECT_FUN) (void*);
 typedef ady::NetworkRequest* (*INIT_REQUEST_FUN) (long long);
+typedef bool (*ADDON_INSTALL_FUN) ();
+typedef bool (*ADDON_UNINSTALL_FUN) ();
+typedef TextEditor::LanguageLoader* (*CREATE_LANGUAGE_LOADER_FUN) (QString, QTextDocument*);
 
 namespace ady {
     AddonLoader* AddonLoader::instance = nullptr;
@@ -171,6 +176,34 @@ namespace ady {
         }
     }
 
+    bool AddonLoader::install()
+    {
+        if (this->m_current == nullptr)
+            return false;
+        ADDON_INSTALL_FUN fun = (ADDON_INSTALL_FUN)this->m_current->resolve("addonInstall");
+        if (fun)
+            return fun();
+        return false;
+    }
 
+    bool AddonLoader::uninstall()
+    {
+        if (this->m_current == nullptr)
+            return false;
+        ADDON_UNINSTALL_FUN fun = (ADDON_UNINSTALL_FUN)this->m_current->resolve("addonUninstall");
+        if (fun)
+            return fun();
+        return false;
+    }
+
+    TextEditor::LanguageLoader* AddonLoader::createLanguageLoader(const QString& languageName, QTextDocument* doc)
+    {
+        if (this->m_current == nullptr)
+            return nullptr;
+        CREATE_LANGUAGE_LOADER_FUN fun = (CREATE_LANGUAGE_LOADER_FUN)this->m_current->resolve("createLanguageLoader");
+        if (fun)
+            return fun(languageName, doc);
+        return nullptr;
+    }
 
 }

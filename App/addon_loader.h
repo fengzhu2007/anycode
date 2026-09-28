@@ -3,10 +3,19 @@
 #include <QString>
 #include <QMap>
 #include <QLibrary>
+#include "global.h"
+
+class QTextDocument;
+
+namespace TextEditor{
+class LanguageLoader;
+}
+
+
 namespace ady {
     class FormPanel;
     class NetworkRequest;
-    class AddonLoader
+    class  AddonLoader
     {
     private:
         AddonLoader();
@@ -43,6 +52,17 @@ namespace ady {
         FormPanel* getFormPanel(QWidget* parent,const QString& name,size_t n);
         int requestConnect(void* ptr);
         NetworkRequest* initRequest(long long id);
+
+
+
+        bool install();
+        bool uninstall();
+        TextEditor::LanguageLoader* createLanguageLoader(const QString& languageName, QTextDocument* doc);
+
+
+
+
+
         static void destory();
 
 

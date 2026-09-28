@@ -47,3 +47,5 @@ add_subdirectory(addon)
 add_subdirectory(src)
 
 add_subdirectory(browser-llm-gateway/libgatewap)
+
+

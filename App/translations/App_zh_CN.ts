@@ -3753,12 +3753,12 @@ This file has been modified by another program.
 <context>
     <name>ady::CodeEditorView</name>
     <message>
-        <location filename="../panes/code_editor/code_editor_view.cpp" line="113"/>
+        <location filename="../panes/code_editor/code_editor_view.cpp" line="133"/>
         <source>Code Semantic Error</source>
         <translation>代码语法错误</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_view.cpp" line="120"/>
+        <location filename="../panes/code_editor/code_editor_view.cpp" line="140"/>
         <source>Copy</source>
         <translation>复制</translation>
     </message>
@@ -3866,7 +3866,7 @@ Last Modify:%3</source>
 <context>
     <name>ady::DirSelector</name>
     <message>
-        <location filename="../components/dir_selector.cpp" line="66"/>
+        <location filename="../components/dir_selector.cpp" line="74"/>
         <source>Select Folder</source>
         <translation>选择文件夹</translation>
     </message>
@@ -3999,7 +3999,7 @@ Last Modify:%3</source>
 <context>
     <name>ady::FileSelector</name>
     <message>
-        <location filename="../components/file_selector.cpp" line="74"/>
+        <location filename="../components/file_selector.cpp" line="87"/>
         <source>Select File</source>
         <translation>选择文件</translation>
     </message>

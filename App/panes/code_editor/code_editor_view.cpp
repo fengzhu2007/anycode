@@ -10,6 +10,9 @@
 #include <textmark.h>
 #include <texteditorsettings.h>
 #include <fontsettings.h>
+#include <colorpreviewhoverhandler.h>
+#include <languages/loader.h>
+#include <texteditorenvironment.h>
 #include <utils/id.h>
 #include <utils/theme/theme.h>
 
@@ -34,6 +37,7 @@ public:
     int line=0;
     int column=0;
     TextEditor::DocumentContentCompletionProvider* provider;
+    TextEditor::ColorPreviewHoverHandler* colorHoverHandler = nullptr;
 };
 
 CodeEditorView::CodeEditorView(QWidget* parent)
@@ -44,11 +48,15 @@ CodeEditorView::CodeEditorView(QWidget* parent)
     auto doc = QSharedPointer<TextEditor::TextDocument>(new TextEditor::TextDocument(Core::Constants::K_DEFAULT_TEXT_EDITOR_ID));
     this->setTextDocument(doc);
     doc->setCompletionAssistProvider(d->provider);
+
+    d->colorHoverHandler = new TextEditor::ColorPreviewHoverHandler;
+    this->addHoverHandler(d->colorHoverHandler);
 }
 
 CodeEditorView::~CodeEditorView(){
     delete m_diffScrollBarController;
     delete d->provider;
+    delete d->colorHoverHandler;
     delete d;
 }
 
@@ -88,6 +96,18 @@ void CodeEditorView::resizeEvent(QResizeEvent *e)
 
 void CodeEditorView::rename(const QString& name){
     this->textDocument()->setFilePath(Utils::FilePath::fromString(name));
+}
+
+TextEditor::LanguageLoader *CodeEditorView::createLanguageLoader(const QString &languageName, QTextDocument *doc)
+{
+    // TODO: Add custom language loader logic here, e.g.:
+    if(languageName=="Markdown" || languageName=="JSON"){
+        this->applySyntaxHighlighter(languageName);
+        return nullptr;
+    }
+
+    // Fall back to built-in registry
+    return TextEditor::TextEditorWidget::createLanguageLoader(languageName, doc);
 }
 
 

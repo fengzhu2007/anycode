@@ -45,6 +45,7 @@ protected:
     virtual void contextMenuEvent(QContextMenuEvent *e) override;
     virtual void showEvent(QShowEvent *e) override;
     virtual void resizeEvent(QResizeEvent *e) override;
+    TextEditor::LanguageLoader *createLanguageLoader(const QString &languageName, QTextDocument *doc) override;
 
     void clearSemanticErrorMarks();
 
