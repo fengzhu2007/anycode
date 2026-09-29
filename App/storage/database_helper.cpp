@@ -209,6 +209,8 @@ namespace ady {
                 upgradeV10();
             case 11:
                 upgradeV11();
+            case 12:
+                upgradeV12();
             default:
 
                 break;
@@ -439,7 +441,7 @@ namespace ady {
          int type = this->dbType();
          if(type==1){
              //add db table
-             QString sql = QString("CREATE TABLE [%1] (\
+             QString sql = QString("CREATE TABLE IF NOT EXISTS [%1] (\
                                        [%2] INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT,\
                                         [%3] VARCHAR(100)  NULL,\
                                         [%4] VARCHAR(100)  NULL,\
@@ -448,9 +450,7 @@ namespace ady {
                                         [%7] VARCHAR(250)  NULL,\
                                         [%8] VARCHAR(250)  NULL\
                                    )").arg(DBStorage::TABLE_NAME).arg(COL_ID).arg(DBStorage::COL_NAME).arg(DBStorage::COL_DRIVER).arg(DBStorage::COL_HOST).arg(DBStorage::COL_PORT).arg(DBStorage::COL_USERNAME).arg(DBStorage::COL_PASSWORD);
-            auto query = this->db.exec(sql);
-            auto error = query.lastError();
-            Q_ASSERT(error.type()==QSqlError::NoError);
+            this->db.exec(sql);
          }
      }
 
@@ -515,6 +515,21 @@ void DatabaseHelper::upgradeV11(){
         this->db.exec(QString("ALTER TABLE [%1] ADD COLUMN [%2] TEXT NULL")
                           .arg(TemplateCommandHistoryStorage::TABLE_NAME)
                           .arg(TemplateCommandHistoryStorage::COL_PARAM_TYPES));
+    }
+}
+
+void DatabaseHelper::upgradeV12(){
+    int type = this->dbType();
+    if(type==1 && tableExists(AddonStorage::TABLE_NAME)){
+        this->db.exec(QString("ALTER TABLE [%1] ADD COLUMN [%2] TEXT NULL")
+                          .arg(AddonStorage::TABLE_NAME)
+                          .arg(AddonStorage::COL_DESCRIPTION));
+        this->db.exec(QString("ALTER TABLE [%1] ADD COLUMN [%2] VARCHAR(250) NULL")
+                          .arg(AddonStorage::TABLE_NAME)
+                          .arg(AddonStorage::COL_AUTHOR));
+        this->db.exec(QString("ALTER TABLE [%1] ADD COLUMN [%2] VARCHAR(50) NULL")
+                          .arg(AddonStorage::TABLE_NAME)
+                          .arg(AddonStorage::COL_VERSION));
     }
 }
 

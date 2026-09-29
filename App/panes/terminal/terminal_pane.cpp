@@ -118,10 +118,12 @@ QString TerminalPane::group(){
 
 bool TerminalPane::onReceive(Event* e) {
     if(e->id()==Type::M_OPEN_TERMINAL){
+        this->activeToCurrent();
         auto workingDir = static_cast<QString*>(e->data());
         this->newTermnal(Unkown,*workingDir);
         return true;
     }else if(e->id()==Type::M_OPEN_RUN_TERMINAL){
+        this->activeToCurrent();
         auto td = static_cast<TerminalData*>(e->data());
         this->newTermnal(Unkown,td->workingDir,td->command);
         return true;

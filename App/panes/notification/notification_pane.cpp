@@ -3,6 +3,7 @@
 #include "core/event_bus/type.h"
 #include "core/event_bus/event.h"
 #include "core/event_bus/event_data.h"
+#include "core/event_bus/publisher.h"
 #include <docking_pane_layout_item_info.h>
 #include "notification_model.h"
 #include "core/theme.h"
@@ -92,6 +93,8 @@ void NotificationPane::onActionTriggered(){
     if(sender==ui->actionClear_All){
         d->model->setDataSource({});
         NotificationPane::list.clear();
+        //notify statusbar to clear the notification badge
+        Publisher::getInstance()->post(Type::M_NOTIFICATION_CLEARED);
     }
 }
 

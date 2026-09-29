@@ -84,8 +84,14 @@ ChatService::~ChatService()
     m_abort = true;
     m_eventAbort = true;
 
+    if(m_pingFuture.isRunning()){
+        m_pingFuture.waitForFinished();
+    }
     if(m_future.isRunning()){
         m_future.waitForFinished();
+    }
+    if(m_messagesFuture.isRunning()){
+        m_messagesFuture.waitForFinished();
     }
     if(m_eventFuture.isRunning()){
         m_eventFuture.waitForFinished();
@@ -133,7 +139,7 @@ void ChatService::pingServer()
 {
     QString url = m_baseUrl + "/session";
 
-    QtConcurrent::run([this, url](){
+    m_pingFuture = QtConcurrent::run([this, url](){
         CURL *curl = curl_easy_init();
         if(!curl){
             emit pingResult(false);
@@ -565,7 +571,7 @@ void ChatService::loadSessionMessages(const QString &sessionId, int limit, qint6
     }
     qDebug() << "[ChatService] loadSessionMessages URL:" << url;
 
-    QtConcurrent::run([this, url, sessionId, beforeTimestamp](){
+    m_messagesFuture = QtConcurrent::run([this, url, sessionId, beforeTimestamp](){
         qDebug() << "[ChatService] loadSessionMessages: thread started, beforeTimestamp=" << beforeTimestamp;
 
         CURL *curl = curl_easy_init();

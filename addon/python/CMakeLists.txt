@@ -27,6 +27,10 @@ add_library(python SHARED
   pythonhighlighter.cpp
   pythonindenter.h
   pythonindenter.cpp
+  pythonautocompleter.h
+  pythonautocompleter.cpp
+  pythoncodeformatter.h
+  pythoncodeformatter.cpp
 )
 
 target_link_libraries(python PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql App texteditor)

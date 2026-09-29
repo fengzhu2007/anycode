@@ -20,6 +20,9 @@ public:
 
 public slots:
     void onItemClicked(int index);
+    void onInstall();
+    void onEnable();
+    void onUninstall();
 
 private:
     explicit AddonManagerDialog(QWidget *parent = nullptr);

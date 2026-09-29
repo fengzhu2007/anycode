@@ -75,7 +75,7 @@ void Schedule::addFileAutoSave(int msec){
 
 
 void Schedule::addNetworkAutoClose(int msec){
-    if(d->file_auto_save_task==nullptr){
+    if(d->network_auto_close_task==nullptr){
         d->queue<<(d->network_auto_close_task = new NetworkAutoCloseTask(msec));
     }else{
         d->network_auto_close_task->m_interval = msec;
@@ -100,13 +100,15 @@ void Schedule::onTimeout(){
     long long mtime = QDateTime::currentDateTime().toMSecsSinceEpoch();
     long long duration = mtime - d->start_time;
     DebugLog::write("Schedule",QString::fromUtf8("Schedule:onTimeout:%1").arg(d->queue.size()));
-    for(auto one:d->queue){
+    //iterate in reverse so removing once tasks is safe
+    for(int i=d->queue.size()-1;i>=0;i--){
+        auto one = d->queue.at(i);
         if(one->isShouldExecute(mtime,duration)){
             one->doing();
             one->execute();
             one->done();
             if(one->isOnce()){
-                d->queue.removeOne(one);
+                d->queue.removeAt(i);
                 delete one;
             }
         }

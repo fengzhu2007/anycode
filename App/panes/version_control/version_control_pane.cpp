@@ -459,7 +459,7 @@ void VersionControlPane::onActionTriggered(){
             files << path +item.path();
         }
 
-        this->uploadFiles(-1ll,files);
+        this->deleteFiles(-1ll,files);
 
     }else if(sender==ui->actionClear_Flags){
         QModelIndexList indexlist = ui->commitListView->selectionModel()->selectedRows();
@@ -677,7 +677,7 @@ void VersionControlPane::onMarkAs(bool checked){
 }
 
 void VersionControlPane::onFinished(){
-    //this->hideLoading();
+    this->hideLoading();
     //d->thread->wait();
     d->thread->deleteLater();
     d->thread = nullptr;
@@ -772,7 +772,8 @@ void VersionControlPane::onSynchronousToGroup(){
     }
 }
 
-void VersionControlPane::onOutput(NetworkResponse* response){
+void VersionControlPane::onOutput(void* p){
+    auto response = static_cast<NetworkResponse*>(p);
     if(response!=nullptr){
         bool status = response->status();
         QJsonObject json = {
@@ -842,21 +843,37 @@ void VersionControlPane::deleteFiles(long long siteid,const QStringList& files){
     if(this->isThreadRunning()){
         return ;
     }
+    if(files.isEmpty()){
+        wToast::showText(tr("No files to delete."));
+        return ;
+    }
     if(siteid==-1ll){
-        QList<VersionControlDeleteFileTask*> tasks;
+        QList<BackendThreadTask*> tasks;
         for(auto site:d->sites){
-            tasks<<new VersionControlDeleteFileTask(site.id,files);
+            tasks<<new VersionControlDeleteFileTask(site.id,d->current_path,site.path,files);
         }
         if(tasks.size()>0){
             this->showLoading();
-            d->thread = new VersionControllerThread(new VersionControlDeleteFileTask(siteid,files));
+            d->thread = new VersionControllerThread(tasks);
             connect(d->thread,&VersionControllerThread::finished,this,&VersionControlPane::onFinished);
             d->thread->start();
         }
         return ;
     }
+    QString remoteRoot;
+    bool found = false;
+    for(auto site:d->sites){
+        if(site.id==siteid){
+            remoteRoot = site.path;
+            found = true;
+            break;
+        }
+    }
+    if(!found){
+        return ;
+    }
     this->showLoading();
-    d->thread = new VersionControllerThread(new VersionControlDeleteFileTask(siteid,files));
+    d->thread = new VersionControllerThread(new VersionControlDeleteFileTask(siteid,d->current_path,remoteRoot,files));
     connect(d->thread,&VersionControllerThread::finished,this,&VersionControlPane::onFinished);
     d->thread->start();
 }

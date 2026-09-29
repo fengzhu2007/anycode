@@ -16,6 +16,9 @@ namespace ady {
         int status;
         int is_system;
         long long export_type;
+        QString description;
+        QString author;
+        QString version;
     };
 
 
@@ -29,6 +32,9 @@ namespace ady {
         constexpr const static char COL_EXPORT_TYPE[] = "export_type";
         constexpr const static char COL_STATUS[] = "status";
         constexpr const static char COL_IS_SYSTEM[] = "is_system";
+        constexpr const static char COL_DESCRIPTION[] = "description";
+        constexpr const static char COL_AUTHOR[] = "author";
+        constexpr const static char COL_VERSION[] = "version";
 
 
         AddonStorage();

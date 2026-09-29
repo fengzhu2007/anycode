@@ -199,7 +199,27 @@
         <translation>插件管理</translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.ui" line="160"/>
+        <location filename="../modules/addon/addon_manager_dialog.ui" line="145"/>
+        <source>Enable</source>
+        <translation type="unfinished">启用</translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.ui" line="152"/>
+        <source>Uninstall</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.ui" line="197"/>
+        <source>Select Addon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.ui" line="207"/>
+        <source>Install</source>
+        <translation type="unfinished">安装</translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.ui" line="234"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
@@ -1177,330 +1197,335 @@ for (let i = 0; i &lt; 3; i++) {
         <translation>扩展(&amp;X)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="128"/>
+        <location filename="../idewindow.ui" line="129"/>
         <source>&amp;Help</source>
         <translation>帮助(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="160"/>
+        <location filename="../idewindow.ui" line="161"/>
         <source>toolBar</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="190"/>
-        <location filename="../idewindow.ui" line="230"/>
+        <location filename="../idewindow.ui" line="191"/>
+        <location filename="../idewindow.ui" line="231"/>
         <source>Project</source>
         <translation>项目</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="193"/>
+        <location filename="../idewindow.ui" line="194"/>
         <source>New Project</source>
         <translation>新建项目</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="196"/>
+        <location filename="../idewindow.ui" line="197"/>
         <source>Ctrl+Alt+N</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="205"/>
-        <location filename="../idewindow.ui" line="260"/>
+        <location filename="../idewindow.ui" line="206"/>
+        <location filename="../idewindow.ui" line="261"/>
         <source>File</source>
         <translation>文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="208"/>
+        <location filename="../idewindow.ui" line="209"/>
         <source>New File</source>
         <translation>新建文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="211"/>
+        <location filename="../idewindow.ui" line="212"/>
         <source>Ctrl+N</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="216"/>
+        <location filename="../idewindow.ui" line="217"/>
         <source>Close(&amp;C)</source>
         <translation>关闭(&amp;C)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="221"/>
+        <location filename="../idewindow.ui" line="222"/>
         <source>Quit(Q)	Alt+F4</source>
         <translation>退出(Q)	Alt+F4</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="233"/>
+        <location filename="../idewindow.ui" line="234"/>
         <source>Open Project</source>
         <translation>打开项目</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="236"/>
+        <location filename="../idewindow.ui" line="237"/>
         <source>Ctrl+Alt+O</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="245"/>
+        <location filename="../idewindow.ui" line="246"/>
         <source>Folder</source>
         <translation>文件夹</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="248"/>
+        <location filename="../idewindow.ui" line="249"/>
         <source>Open Folder</source>
         <translation>打开文件夹</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="251"/>
+        <location filename="../idewindow.ui" line="252"/>
         <source>Ctrl+Alt+Shift+O</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="263"/>
+        <location filename="../idewindow.ui" line="264"/>
         <source>Open File</source>
         <translation>打开文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="266"/>
+        <location filename="../idewindow.ui" line="267"/>
         <source>Ctrl+O</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="275"/>
+        <location filename="../idewindow.ui" line="276"/>
         <source>Save(&amp;S)</source>
         <translation>保存(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="278"/>
+        <location filename="../idewindow.ui" line="279"/>
         <source>Ctrl+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="287"/>
+        <location filename="../idewindow.ui" line="288"/>
         <source>Save As(&amp;A)</source>
         <translation>另存为(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="296"/>
+        <location filename="../idewindow.ui" line="297"/>
         <source>Save All(&amp;L)</source>
         <translation>全部保存(&amp;L)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="299"/>
+        <location filename="../idewindow.ui" line="300"/>
         <source>Ctrl+Shift+S</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="308"/>
+        <location filename="../idewindow.ui" line="309"/>
         <source>Undo	Ctrl+Z</source>
         <translation>撤回	Ctrl+Z</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="317"/>
+        <location filename="../idewindow.ui" line="318"/>
         <source>Redo	Ctrl+Y</source>
         <translation>重做	Ctrl+Y</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="326"/>
+        <location filename="../idewindow.ui" line="327"/>
         <source>Cut(&amp;T)	Ctrl+X</source>
         <translation>剪切(&amp;T)	Ctrl+X</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="335"/>
+        <location filename="../idewindow.ui" line="336"/>
         <source>Copy(&amp;C)	Ctrl+C</source>
         <translation>复制(&amp;C)	Ctrl+C</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="344"/>
+        <location filename="../idewindow.ui" line="345"/>
         <source>Paste(&amp;P)	Ctrl+V</source>
         <translation>粘贴(&amp;P)	Ctrl+V</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="353"/>
+        <location filename="../idewindow.ui" line="354"/>
         <source>Delete(&amp;D)</source>
         <translation>删除(&amp;D)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="356"/>
+        <location filename="../idewindow.ui" line="357"/>
         <source>Del</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="361"/>
+        <location filename="../idewindow.ui" line="362"/>
         <source>Find Replace(&amp;F)</source>
         <translation>查找和替换(&amp;F)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="364"/>
+        <location filename="../idewindow.ui" line="365"/>
         <source>Ctrl+F</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="369"/>
+        <location filename="../idewindow.ui" line="370"/>
         <source>Goto(&amp;G)</source>
         <translation>跳转到(&amp;G)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="372"/>
+        <location filename="../idewindow.ui" line="373"/>
         <source>Ctrl+G</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="381"/>
+        <location filename="../idewindow.ui" line="382"/>
         <source>Select All(&amp;A)	Ctl+A</source>
         <translation>全选(&amp;A)	Ctl+A</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="384"/>
+        <location filename="../idewindow.ui" line="385"/>
         <source>Select All(A)</source>
         <translation>全选(A)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="393"/>
+        <location filename="../idewindow.ui" line="394"/>
         <source>Resource Manager</source>
         <translation>资源管理器</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="402"/>
+        <location filename="../idewindow.ui" line="403"/>
         <source>Version Control</source>
         <translation>版本控制器</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="411"/>
+        <location filename="../idewindow.ui" line="412"/>
         <source>Terminal</source>
         <translation>终端</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="420"/>
+        <location filename="../idewindow.ui" line="421"/>
         <source>Log</source>
         <translation>日志</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="429"/>
+        <location filename="../idewindow.ui" line="430"/>
         <source>File Transfer</source>
         <translation>文件传输</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="438"/>
+        <location filename="../idewindow.ui" line="439"/>
         <source>Server</source>
         <translation>服务器</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="447"/>
+        <location filename="../idewindow.ui" line="448"/>
         <source>Options(&amp;O)...</source>
         <translation>选项(&amp;O)...</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="456"/>
+        <location filename="../idewindow.ui" line="457"/>
         <source>View Help(&amp;V)</source>
         <translation>查看帮助(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="461"/>
+        <location filename="../idewindow.ui" line="462"/>
         <source>About...</source>
         <translation>关于...</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="470"/>
+        <location filename="../idewindow.ui" line="471"/>
         <source>Home</source>
         <translation>主页</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="479"/>
+        <location filename="../idewindow.ui" line="480"/>
         <source>Addon Manage</source>
         <translation>插件管理</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="484"/>
+        <location filename="../idewindow.ui" line="485"/>
         <source>Donate</source>
         <translation>捐赠</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="489"/>
+        <location filename="../idewindow.ui" line="490"/>
         <source>Clear Projects</source>
         <translation>清除项目</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="494"/>
+        <location filename="../idewindow.ui" line="495"/>
         <source>Clear Files</source>
         <translation>清除文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="499"/>
+        <location filename="../idewindow.ui" line="500"/>
         <source>Close Project</source>
         <translation>关闭项目</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="504"/>
+        <location filename="../idewindow.ui" line="505"/>
         <source>Update</source>
         <translation>更新</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="513"/>
+        <location filename="../idewindow.ui" line="514"/>
         <source>Command Prompt</source>
         <translation>命令提示符</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="522"/>
+        <location filename="../idewindow.ui" line="523"/>
         <source>PowerShell</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="531"/>
+        <location filename="../idewindow.ui" line="532"/>
         <source>Output</source>
         <translation>输出</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="540"/>
+        <location filename="../idewindow.ui" line="541"/>
         <source>Debug</source>
         <translation>调试</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="548"/>
+        <location filename="../idewindow.ui" line="549"/>
         <source>Import And Export...</source>
         <translation>导入和导出...</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="557"/>
+        <location filename="../idewindow.ui" line="558"/>
         <source>SSL Querier</source>
         <translation>证书查询</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="566"/>
+        <location filename="../idewindow.ui" line="567"/>
         <source>Auto Format</source>
         <translation>自动格式化</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="569"/>
+        <location filename="../idewindow.ui" line="570"/>
         <source>Ctrl+K</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="581"/>
+        <location filename="../idewindow.ui" line="582"/>
         <source>Database</source>
         <translation>数据库</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="593"/>
+        <location filename="../idewindow.ui" line="594"/>
         <source>Color Tool</source>
         <translation>颜色工具</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="602"/>
+        <location filename="../idewindow.ui" line="603"/>
         <source>Image Clip</source>
         <translation>图片剪裁</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="611"/>
+        <location filename="../idewindow.ui" line="612"/>
         <source>Frames Viewer</source>
         <translation>帧视图</translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="620"/>
+        <location filename="../idewindow.ui" line="621"/>
         <source>TemplateCommand</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../idewindow.ui" line="632"/>
+        <location filename="../idewindow.ui" line="633"/>
         <source>AI Chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../idewindow.ui" line="645"/>
+        <source>Open Addon Folder</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2196,17 +2221,17 @@ Please enter a new folder name.</source>
         <translation>SQL 错误</translation>
     </message>
     <message>
-        <location filename="../storage/database_helper.cpp" line="252"/>
+        <location filename="../storage/database_helper.cpp" line="254"/>
         <source>Development</source>
         <translation>开发环境</translation>
     </message>
     <message>
-        <location filename="../storage/database_helper.cpp" line="258"/>
+        <location filename="../storage/database_helper.cpp" line="260"/>
         <source>Production</source>
         <translation>生产环境</translation>
     </message>
     <message>
-        <location filename="../storage/database_helper.cpp" line="264"/>
+        <location filename="../storage/database_helper.cpp" line="266"/>
         <source>Other</source>
         <translation>其他</translation>
     </message>
@@ -2251,7 +2276,7 @@ Please enter a new folder name.</source>
         <translation>移除</translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="1551"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="1557"/>
         <source>Files modified (%1): %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3374,19 +3399,83 @@ Please enter a new folder name.</source>
 <context>
     <name>ady::AddonManagerDialog</name>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="53"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="82"/>
         <source>&lt;strong&gt;Author:&lt;/strong&gt;%1</source>
         <translation>&lt;strong&gt;作者：&lt;/strong&gt;%1</translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="54"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="83"/>
         <source>&lt;strong&gt;Version:&lt;/strong&gt;%1</source>
         <translation>&lt;strong&gt;版本：&lt;/strong&gt;%1</translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="55"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="84"/>
         <source>&lt;strong&gt;Home Page:&lt;/strong&gt;%1</source>
         <translation>&lt;strong&gt;主页：&lt;/strong&gt;%1</translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="87"/>
+        <source>Disable</source>
+        <translation type="unfinished">禁用</translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="87"/>
+        <source>Enable</source>
+        <translation type="unfinished">启用</translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="155"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="161"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="167"/>
+        <source>Warning</source>
+        <translation type="unfinished">警告</translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="155"/>
+        <source>Please select an addon file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="161"/>
+        <source>File does not exist.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="167"/>
+        <source>Unsupported file type.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="205"/>
+        <source>Success</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="205"/>
+        <source>Addon installed successfully. Please restart the application.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="207"/>
+        <source>Error</source>
+        <translation type="unfinished">错误</translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="207"/>
+        <source>Failed to install addon.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="220"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="232"/>
+        <source>Info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="220"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="232"/>
+        <source>Changes will take effect after restart.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3534,27 +3623,27 @@ Please enter a new folder name.</source>
 <context>
     <name>ady::ChatService</name>
     <message>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="177"/>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="263"/>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="337"/>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="382"/>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="513"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="183"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="269"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="343"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="388"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="519"/>
         <source>Failed to initialize network</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="314"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="320"/>
         <source>Failed to create session</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="544"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="550"/>
         <source>Unknown error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="573"/>
-        <location filename="../panes/ai_chat/chat_service.cpp" line="574"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="579"/>
+        <location filename="../panes/ai_chat/chat_service.cpp" line="580"/>
         <source>Failed to init curl</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3753,12 +3842,12 @@ This file has been modified by another program.
 <context>
     <name>ady::CodeEditorView</name>
     <message>
-        <location filename="../panes/code_editor/code_editor_view.cpp" line="133"/>
+        <location filename="../panes/code_editor/code_editor_view.cpp" line="141"/>
         <source>Code Semantic Error</source>
         <translation>代码语法错误</translation>
     </message>
     <message>
-        <location filename="../panes/code_editor/code_editor_view.cpp" line="140"/>
+        <location filename="../panes/code_editor/code_editor_view.cpp" line="148"/>
         <source>Copy</source>
         <translation>复制</translation>
     </message>
@@ -4262,42 +4351,42 @@ Last Modify:%3</source>
 <context>
     <name>ady::IDEWindow</name>
     <message>
-        <location filename="../idewindow.cpp" line="208"/>
+        <location filename="../idewindow.cpp" line="210"/>
         <source>Command Line</source>
         <translation>命令行</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="211"/>
+        <location filename="../idewindow.cpp" line="213"/>
         <source>Command Prompt</source>
         <translation>命令提示符</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="216"/>
+        <location filename="../idewindow.cpp" line="218"/>
         <source>PowerShell</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="226"/>
+        <location filename="../idewindow.cpp" line="228"/>
         <source>Terminal</source>
         <translation>终端</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="431"/>
+        <location filename="../idewindow.cpp" line="433"/>
         <source>Select Folder</source>
         <translation>选择文件夹</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="434"/>
+        <location filename="../idewindow.cpp" line="436"/>
         <source>Open File</source>
         <translation>打开文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="434"/>
+        <location filename="../idewindow.cpp" line="436"/>
         <source>All Files (*.*)</source>
         <translation>所有文件 (*.*)</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="624"/>
+        <location filename="../idewindow.cpp" line="631"/>
         <source>Text &quot;%1&quot; not found</source>
         <translation>文本 &quot;%1&quot; 未找到</translation>
     </message>
@@ -4577,50 +4666,50 @@ This file has been modified by another program.
 <context>
     <name>ady::NewProjectTwoWidget</name>
     <message>
-        <location filename="../project/new_project_two_widget.cpp" line="206"/>
+        <location filename="../project/new_project_two_widget.cpp" line="205"/>
         <source>Are you want to delete selected site[%1]?</source>
         <translation>是否确定删除选择的站点[%1]？</translation>
     </message>
     <message>
-        <location filename="../project/new_project_two_widget.cpp" line="236"/>
-        <location filename="../project/new_project_two_widget.cpp" line="241"/>
-        <location filename="../project/new_project_two_widget.cpp" line="246"/>
+        <location filename="../project/new_project_two_widget.cpp" line="235"/>
+        <location filename="../project/new_project_two_widget.cpp" line="240"/>
+        <location filename="../project/new_project_two_widget.cpp" line="245"/>
         <source>Warning</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="../project/new_project_two_widget.cpp" line="236"/>
+        <location filename="../project/new_project_two_widget.cpp" line="235"/>
         <source>Name required</source>
         <translation>名称不能为空</translation>
     </message>
     <message>
-        <location filename="../project/new_project_two_widget.cpp" line="241"/>
+        <location filename="../project/new_project_two_widget.cpp" line="240"/>
         <source>Type required</source>
         <translation>请选择类型</translation>
     </message>
     <message>
-        <location filename="../project/new_project_two_widget.cpp" line="246"/>
+        <location filename="../project/new_project_two_widget.cpp" line="245"/>
         <source>Group required</source>
         <translation>请选择分组</translation>
     </message>
     <message>
-        <location filename="../project/new_project_two_widget.cpp" line="268"/>
-        <location filename="../project/new_project_two_widget.cpp" line="286"/>
+        <location filename="../project/new_project_two_widget.cpp" line="267"/>
+        <location filename="../project/new_project_two_widget.cpp" line="285"/>
         <source>Save successful</source>
         <translation>保存成功</translation>
     </message>
     <message>
-        <location filename="../project/new_project_two_widget.cpp" line="289"/>
+        <location filename="../project/new_project_two_widget.cpp" line="288"/>
         <source>Save failed</source>
         <translation>保存失败</translation>
     </message>
     <message>
-        <location filename="../project/new_project_two_widget.cpp" line="299"/>
+        <location filename="../project/new_project_two_widget.cpp" line="298"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
     <message>
-        <location filename="../project/new_project_two_widget.cpp" line="302"/>
+        <location filename="../project/new_project_two_widget.cpp" line="301"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
@@ -4654,9 +4743,22 @@ This file has been modified by another program.
     </message>
 </context>
 <context>
+    <name>ady::NotificationCard</name>
+    <message>
+        <location filename="../panes/notification/notification_card.cpp" line="41"/>
+        <source>Copy</source>
+        <translation type="unfinished">复制</translation>
+    </message>
+    <message>
+        <location filename="../panes/notification/notification_card.cpp" line="45"/>
+        <source>Copy Text</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ady::NotificationPane</name>
     <message>
-        <location filename="../panes/notification/notification_pane.cpp" line="36"/>
+        <location filename="../panes/notification/notification_pane.cpp" line="37"/>
         <source>Notification</source>
         <translation>通知</translation>
     </message>
@@ -5330,12 +5432,12 @@ files to &quot;%2&quot;?</source>
         <translation>网络状态：异常</translation>
     </message>
     <message>
-        <location filename="../components/statusbar/status_bar_view.cpp" line="106"/>
+        <location filename="../components/statusbar/status_bar_view.cpp" line="109"/>
         <source>Ready</source>
         <translation>就绪</translation>
     </message>
     <message>
-        <location filename="../components/statusbar/status_bar_view.cpp" line="116"/>
+        <location filename="../components/statusbar/status_bar_view.cpp" line="119"/>
         <source>Upload:%1/s, Download:%2/s</source>
         <translation>上传：%1/s， 下载：%2/s</translation>
     </message>
@@ -5508,17 +5610,17 @@ files to &quot;%2&quot;?</source>
         <translation>终端</translation>
     </message>
     <message>
-        <location filename="../panes/terminal/terminal_pane.cpp" line="240"/>
+        <location filename="../panes/terminal/terminal_pane.cpp" line="242"/>
         <source>Command Prompt</source>
         <translation>命令提示符</translation>
     </message>
     <message>
-        <location filename="../panes/terminal/terminal_pane.cpp" line="244"/>
+        <location filename="../panes/terminal/terminal_pane.cpp" line="246"/>
         <source>PowerShell</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../panes/terminal/terminal_pane.cpp" line="251"/>
+        <location filename="../panes/terminal/terminal_pane.cpp" line="253"/>
         <source>Bash</source>
         <translation></translation>
     </message>
@@ -5593,17 +5695,22 @@ files to &quot;%2&quot;?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../panes/version_control/version_control_pane.cpp" line="814"/>
+        <location filename="../panes/version_control/version_control_pane.cpp" line="815"/>
         <source>Compressed successfully</source>
         <translation>压缩成功</translation>
     </message>
     <message>
-        <location filename="../panes/version_control/version_control_pane.cpp" line="870"/>
+        <location filename="../panes/version_control/version_control_pane.cpp" line="847"/>
+        <source>No files to delete.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../panes/version_control/version_control_pane.cpp" line="887"/>
         <source>Upload To</source>
         <translation>上传到</translation>
     </message>
     <message>
-        <location filename="../panes/version_control/version_control_pane.cpp" line="870"/>
+        <location filename="../panes/version_control/version_control_pane.cpp" line="887"/>
         <source>Synchronous Deletion To</source>
         <translation>同步删除到</translation>
     </message>

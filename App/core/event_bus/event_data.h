@@ -133,6 +133,7 @@ struct ANYENGINE_EXPORT NotificationData{
     QString title;
     QString description;
     QString time;
+    QString copyText;
     QJsonObject data;
     QJsonObject toJson(){
         return {
@@ -140,6 +141,7 @@ struct ANYENGINE_EXPORT NotificationData{
             {"title",title},
             {"description",description},
             {"time",time},
+            {"copyText",copyText},
             {"data",data},
         };
     }
@@ -149,6 +151,7 @@ struct ANYENGINE_EXPORT NotificationData{
         this->title = data.find("title")->toString();
         this->description = data.find("description")->toString();
         this->time = data.find("time")->toString();
+        this->copyText = data.find("copyText")->toString();
         this->data = data.find("data")->toObject();
     }
 

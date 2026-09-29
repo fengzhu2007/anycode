@@ -5,7 +5,7 @@
 
 static QString id = "texteditor::python";
 // Addon exported functions (resolved by AddonLoader via QLibrary)
-bool addonInstall()
+bool install()
 {
     // TODO: Python addon initialization on install
     ady::AddonStorage db;
@@ -17,15 +17,19 @@ bool addonInstall()
     }else{
         one.name = id;
         one.title = QString{"Texteditor::Python"};
+        one.label = one.title;
         one.file = "python/python";
         one.status = 1;
         one.is_system = 0;
         one.export_type = ady::AddonLoader::CodeAutoComplate;
+        one.version = "1.0";
+        one.author = "Official";
+        one.description = QObject::tr("Python language support addon providing syntax highlighting, code indentation and grammar checking for the code editor.");
         return db.insert(one)>0;
     }
 }
 
-bool addonUninstall()
+bool uninstall()
 {
     // TODO: Python addon cleanup on uninstall
     ady::AddonStorage db;
@@ -35,6 +39,9 @@ bool addonUninstall()
 
 TextEditor::LanguageLoader* createLanguageLoader(QString languageName, QTextDocument* doc)
 {
-    Q_UNUSED(languageName);
-    return new Python::Loader(doc);
+    if(languageName=="Python"){
+        return new Python::Loader(doc);
+    }
+    return nullptr;
+
 }

@@ -3,6 +3,7 @@
 
 #include <QScrollArea>
 #include <QPixmap>
+#include <QWheelEvent>
 namespace ady{
 class AnimationFramesPlayerPrivate;
 class AnimationFramesPlayer : public QScrollArea
@@ -18,6 +19,7 @@ signals:
 
 protected:
     virtual void resizeEvent(QResizeEvent* e) override;
+    virtual void wheelEvent(QWheelEvent* e) override;
     //virtual void scrollContentsBy(int dx, int dy) override;
 private:
     AnimationFramesPlayerPrivate* d;

@@ -10,6 +10,7 @@
 #include <QTextDocument>
 #include <QPalette>
 #include <QFile>
+#include <QMargins>
 #include <QStringList>
 
 namespace ady {
@@ -315,9 +316,9 @@ int DiffEditorWidget::extraAreaWidth(int *markWidthPtr) const
     int extra = pad + oldColW + pad + sep + pad;
     int total = baseWidth + extra;
 
-    const_cast<DiffEditorWidget*>(this)->setViewportMargins(
-        isLeftToRight() ? total : 0, 0,
-        isLeftToRight() ? 0 : total, 0);
+    QMargins desired{isLeftToRight() ? total : 0, 0, isLeftToRight() ? 0 : total, 0};
+    if (viewportMargins() != desired)
+        const_cast<DiffEditorWidget*>(this)->setViewportMargins(desired.left(), desired.top(), desired.right(), desired.bottom());
 
     return total;
 }

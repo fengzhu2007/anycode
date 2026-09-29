@@ -16,32 +16,39 @@ public:
     }
 
     void load(const QPixmap& image){
-        //qDebug()<<"image"<<image;
-        //qDebug()<<"load"<<image.size();
+        this->originalImage = image;
         this->imageSize = image.size();
-        this->imageViewer->setPixmap(image);
+        applyZoom();
+    }
 
+    void setZoomFactor(qreal factor){
+        if(factor < 0.1) factor = 0.1;
+        if(factor > 10.0) factor = 10.0;
+        this->zoomFactor = factor;
+        applyZoom();
+    }
 
-        this->imageViewer->setFixedSize(this->imageSize);
-        //this->imageViewer->setGeometry({0,0,this->imageSize.width(),this->imageSize.height()});
+    qreal zoomFactorValue() const { return zoomFactor; }
 
-        //qDebug()<<this->imageViewer->geometry()<<this->geometry();
+    void applyZoom(){
+        if(originalImage.isNull()) return;
+        QSize scaledSize = originalImage.size() * zoomFactor;
+        QPixmap scaled = originalImage.scaled(scaledSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        this->imageViewer->setPixmap(scaled);
+        this->imageViewer->setFixedSize(scaledSize);
 
         auto rc = QRect(0,0,this->rangeSize.width(),this->rangeSize.height());
-
-        if(this->rangeSize.width()<this->imageSize.width()){
-            rc.setWidth(this->imageSize.width());
+        if(this->rangeSize.width()<scaledSize.width()){
+            rc.setWidth(scaledSize.width());
         }
-        if(this->rangeSize.height()<this->imageSize.height()){
-            rc.setHeight(this->imageSize.height());
+        if(this->rangeSize.height()<scaledSize.height()){
+            rc.setHeight(scaledSize.height());
         }
         auto rect = this->geometry();
         if(rect.width()!=rc.width() || rect.height()!=rc.height()){
             this->setGeometry(rc);
-            //qDebug()<<this->imageViewer->geometry()<<this->geometry()<<rc;
             this->adjustSize(this->rangeSize);
         }
-
     }
 
     void adjustSize(const QSize& cSize){
@@ -89,10 +96,10 @@ protected:
 
 private:
     QLabel *imageViewer;
+    QPixmap originalImage;
     QSize imageSize;
     QSize rangeSize;
-    // int scrollTop = 0;
-    // int scrollLeft = 0;
+    qreal zoomFactor = 1.0;
 
     friend class AnimationFramesPlayer;
 };
@@ -150,6 +157,17 @@ void AnimationFramesPlayer::resizeEvent(QResizeEvent* e){
     //d->label->move(10,e->size().height() - 30);
 
     d->label->setGeometry({10,e->size().height() - 10 - 20,200,20});
+}
+
+void AnimationFramesPlayer::wheelEvent(QWheelEvent* e){
+    if(e->modifiers() & Qt::ControlModifier){
+        qreal delta = e->angleDelta().y() > 0 ? 1.1 : 0.9;
+        qreal newZoom = d->player->zoomFactorValue() * delta;
+        d->player->setZoomFactor(newZoom);
+        e->accept();
+        return;
+    }
+    QScrollArea::wheelEvent(e);
 }
 
 // void AnimationFramesPlayer::scrollContentsBy(int dx, int dy){

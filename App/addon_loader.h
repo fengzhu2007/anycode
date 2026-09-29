@@ -2,8 +2,11 @@
 #define ADDON_LOADER_H
 #include <QString>
 #include <QMap>
+#include <QList>
 #include <QLibrary>
+#include <QJsonObject>
 #include "global.h"
+#include "storage/addon_storage.h"
 
 class QTextDocument;
 
@@ -12,9 +15,13 @@ class LanguageLoader;
 }
 
 
+
+
 namespace ady {
     class FormPanel;
     class NetworkRequest;
+    class DockingPaneManager;
+    class DockingPane;
     class  AddonLoader
     {
     private:
@@ -32,7 +39,7 @@ namespace ady {
         enum ExportType{
             Default = 1,
             RemoteConnector=Default,//remote connector like ftp,sftp
-            OptionCategory = Default<<1,
+            OptionCategory = Default<<1,//option tab
             CodeLint = Default<<2,
             CodeAutoComplate = Default<<3,
             Pane = Default<<4,
@@ -44,6 +51,8 @@ namespace ady {
         };
 
         static AddonLoader* getInstance();
+        void init();
+        QList<AddonRecord> filter(ExportType type);
         bool loadFile(const QString& file);
         bool load(AddonName name);
         bool load(const QString name);
@@ -61,6 +70,10 @@ namespace ady {
 
 
 
+        DockingPane* makePane(DockingPaneManager* dockingManager,const QString& group,const QJsonObject& data);
+
+
+
 
 
         static void destory();
@@ -71,8 +84,11 @@ namespace ady {
 
 
     protected:
+        QList<AddonRecord> m_addons;
         QMap<QString,QLibrary*> m_loadLists;
         QMap<QString,QString> m_nameList;
+        QMap<QString,void*> m_langLoaderFuns;
+        QMap<QString,void*> m_paneFuns;
         QLibrary* m_current;
 
     };

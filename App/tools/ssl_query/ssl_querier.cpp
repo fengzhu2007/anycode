@@ -115,7 +115,7 @@ QDateTime SSLQuerier::parseDateTime(const QString& dateTimeString){
 
 void SSLQuerier::onNotify(const QString& domain,const QString& expireDate){
     QDateTime current = QDateTime::currentDateTime();
-    NotificationData data{"SSL",tr("Certificate expiration reminder"),tr("The expiration time of the SSL certificate for the <font color='#318DDE'>%1</font> domain name is <font color='#318DDE'>%2</font>, please note!").arg(domain).arg(parseDateTime(expireDate).toString("yyyy-MM-dd HH:mm")),current.toString("MM-dd HH:mm"),{}};
+    NotificationData data{"SSL",tr("Certificate expiration reminder"),tr("The expiration time of the SSL certificate for the <font color='#318DDE'>%1</font> domain name is <font color='#318DDE'>%2</font>, please note!").arg(domain).arg(parseDateTime(expireDate).toString("yyyy-MM-dd HH:mm")),current.toString("MM-dd HH:mm"),domain};
     Publisher::getInstance()->post(Type::M_NOTIFICATION,&data);
 }
 

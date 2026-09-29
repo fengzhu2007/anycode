@@ -121,6 +121,7 @@
     <property name="title">
      <string>E&amp;xtension</string>
     </property>
+    <addaction name="actionOpen_Addon_Folder"/>
     <addaction name="actionAddon_Manage"/>
    </widget>
    <widget class="QMenu" name="menuHelp_H">
@@ -630,6 +631,18 @@
    </property>
    <property name="text">
     <string>AI Chat</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionOpen_Addon_Folder">
+   <property name="icon">
+    <iconset resource="r.qrc">
+     <normaloff>:/Resource/icons/OpenFolder_16x.svg</normaloff>:/Resource/icons/OpenFolder_16x.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Open Addon Folder</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
