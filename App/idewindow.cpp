@@ -71,6 +71,7 @@
 #include <QTextCodec>
 #include <QProcess>
 #include <QDesktopServices>
+#include <QDir>
 #include <QLayout>
 #include <QFontDatabase>
 #include <QShortcut>
@@ -179,6 +180,7 @@ Type::M_TOGGLE_NOTIFICATION,Type::M_OPEN_TERMINAL,Type::M_OPEN_RUN_TERMINAL});
 
     //addon
     connect(ui->actionAddon_Manage,&QAction::triggered,this,&IDEWindow::onActionTriggered);
+    connect(ui->actionOpen_Addon_Folder,&QAction::triggered,this,&IDEWindow::onActionTriggered);
 
     //help
     connect(ui->actionHome,&QAction::triggered,this,&IDEWindow::onActionTriggered);
@@ -577,6 +579,11 @@ void IDEWindow::onActionTriggered(){
     //addon
     }else if(sender==ui->actionAddon_Manage){
         AddonManagerDialog::open(this);
+
+    }else if(sender==ui->actionOpen_Addon_Folder){
+        QString addonDir = QCoreApplication::applicationDirPath() + "/addon";
+        QDir().mkpath(addonDir);
+        QDesktopServices::openUrl(QUrl::fromLocalFile(addonDir));
     //help
     }else if(sender==ui->actionView_Help_H){
         this->openUrl(APP_HELP_URL);

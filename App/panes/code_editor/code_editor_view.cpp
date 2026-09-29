@@ -10,6 +10,10 @@
 #include <textmark.h>
 #include <texteditorsettings.h>
 #include <fontsettings.h>
+#include <colorpreviewhoverhandler.h>
+#include <languages/loader.h>
+#include <texteditorenvironment.h>
+#include "addon_loader.h"
 #include <utils/id.h>
 #include <utils/theme/theme.h>
 
@@ -24,6 +28,7 @@
 #include <QTextBlock>
 #include <QTextCursor>
 #include <QMetaObject>
+#include <QMargins>
 
 
 namespace ady{
@@ -34,6 +39,7 @@ public:
     int line=0;
     int column=0;
     TextEditor::DocumentContentCompletionProvider* provider;
+    TextEditor::ColorPreviewHoverHandler* colorHoverHandler = nullptr;
 };
 
 CodeEditorView::CodeEditorView(QWidget* parent)
@@ -44,11 +50,15 @@ CodeEditorView::CodeEditorView(QWidget* parent)
     auto doc = QSharedPointer<TextEditor::TextDocument>(new TextEditor::TextDocument(Core::Constants::K_DEFAULT_TEXT_EDITOR_ID));
     this->setTextDocument(doc);
     doc->setCompletionAssistProvider(d->provider);
+
+    d->colorHoverHandler = new TextEditor::ColorPreviewHoverHandler;
+    this->addHoverHandler(d->colorHoverHandler);
 }
 
 CodeEditorView::~CodeEditorView(){
     delete m_diffScrollBarController;
     delete d->provider;
+    delete d->colorHoverHandler;
     delete d;
 }
 
@@ -90,7 +100,25 @@ void CodeEditorView::rename(const QString& name){
     this->textDocument()->setFilePath(Utils::FilePath::fromString(name));
 }
 
+static QMap<QString,QString> s_languageAddonMap;
 
+TextEditor::LanguageLoader *CodeEditorView::createLanguageLoader(const QString &languageName, QTextDocument *doc)
+{
+    auto loader = AddonLoader::getInstance();
+
+    //try addon language loaders (AddonLoader handles filter + match + cache internally)
+    if(auto langLoader = loader->createLanguageLoader(languageName, doc)){
+        return langLoader;
+    }
+
+    //built-in syntax highlighter for Markdown/JSON
+    if(languageName=="Markdown" || languageName=="JSON"){
+        this->applySyntaxHighlighter(languageName, /*useEditorThemeColors=*/true);
+        return nullptr;
+    }
+    // Fall back to built-in registry
+    return TextEditor::TextEditorWidget::createLanguageLoader(languageName, doc);
+}
 
 
 void CodeEditorView::addSemanticError(int line,int column,int length,const QString& message){
@@ -177,6 +205,10 @@ void CodeEditorView::setDiffHighlights(const cvs::DiffContent &content)
         return;
     }
 
+    // Disable syntax highlighting — diff content is not valid source code.
+    if (!m_savedHighlighter)
+        m_savedHighlighter = textDocument()->takeSyntaxHighlighter();
+
     // Build m_lineInfo from the diff hunks (diff-only mode — just the hunk
     // lines without reading the full file from disk).
     int docLine = 0;
@@ -203,9 +235,13 @@ void CodeEditorView::setDiffHighlights(const cvs::DiffContent &content)
         }
     }
 
+    // Update viewport margins BEFORE applying highlights so the gutter is
+    // wide enough when the first paint event arrives.  Defer via timer to
+    // avoid re-entering the layout cascade from within this call.
+    updateDiffGutterWidth();
+
     applyLineHighlights();
     updateScrollBarMarkers();
-    viewport()->update();
 }
 
 void CodeEditorView::clearDiffHighlights()
@@ -218,6 +254,19 @@ void CodeEditorView::clearDiffHighlights()
     }
 
     setExtraSelections(TextEditorWidget::OtherSelection, {});
+
+    // Restore syntax highlighter if we took it away.
+    if (m_savedHighlighter) {
+        textDocument()->setSyntaxHighlighter(m_savedHighlighter);
+        m_savedHighlighter = nullptr;
+    }
+
+    // Restore viewport margins to the base-class width (no diff markers).
+    int baseWidth = TextEditor::TextEditorWidget::extraAreaWidth();
+    QMargins desired{isLeftToRight() ? baseWidth : 0, 0, isLeftToRight() ? 0 : baseWidth, 0};
+    if (viewportMargins() != desired)
+        setViewportMargins(desired.left(), desired.top(), desired.right(), desired.bottom());
+
     extraArea()->update();
     viewport()->update();
 }
@@ -324,6 +373,33 @@ void CodeEditorView::updateScrollBarMarkers()
     }
 }
 
+void CodeEditorView::updateDiffGutterWidth()
+{
+    if (m_lineInfo.isEmpty())
+        return;
+
+    int baseWidth = TextEditor::TextEditorWidget::extraAreaWidth();
+    const QFontMetrics fm(font());
+    const int digitW = fm.horizontalAdvance('9');
+
+    int maxLineNo = 1;
+    for (const auto &info : m_lineInfo) {
+        if (info.newLineNo > maxLineNo) maxLineNo = info.newLineNo;
+        if (info.oldLineNo > maxLineNo) maxLineNo = info.oldLineNo;
+    }
+    const int digits = QString::number(maxLineNo).length();
+    const int lineColW = digitW * digits;
+    const int markerW  = digitW + 4;
+    const int pad      = 4;
+
+    int extra = pad + lineColW + pad + markerW + pad;
+    int total = baseWidth + extra;
+
+    QMargins desired{isLeftToRight() ? total : 0, 0, isLeftToRight() ? 0 : total, 0};
+    if (viewportMargins() != desired)
+        setViewportMargins(desired.left(), desired.top(), desired.right(), desired.bottom());
+}
+
 int CodeEditorView::extraAreaWidth(int *markWidthPtr) const
 {
     int baseWidth = TextEditor::TextEditorWidget::extraAreaWidth(markWidthPtr);
@@ -345,13 +421,7 @@ int CodeEditorView::extraAreaWidth(int *markWidthPtr) const
     const int pad      = 4;
 
     int extra = pad + lineColW + pad + markerW + pad;
-    int total = baseWidth + extra;
-
-    const_cast<CodeEditorView*>(this)->setViewportMargins(
-        isLeftToRight() ? total : 0, 0,
-        isLeftToRight() ? 0 : total, 0);
-
-    return total;
+    return baseWidth + extra;
 }
 
 void CodeEditorView::extraAreaPaintEvent(QPaintEvent *e)

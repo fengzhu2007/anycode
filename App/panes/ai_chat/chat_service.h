@@ -238,6 +238,8 @@ private:
     bool m_requesting;
     volatile bool m_abort;
     QFuture<void> m_future;
+    QFuture<void> m_pingFuture;
+    QFuture<void> m_messagesFuture;
 
     CURL *m_eventCurl;
     QFuture<void> m_eventFuture;

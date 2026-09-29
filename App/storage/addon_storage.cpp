@@ -2,6 +2,7 @@
 #include "database_helper.h"
 #include <QVariant>
 #include <QDebug>
+#include <QDateTime>
 namespace ady {
 constexpr const  char AddonStorage::TABLE_NAME[];
 constexpr const  char AddonStorage::COL_TITLE[];
@@ -11,6 +12,9 @@ constexpr const  char AddonStorage::COL_FILE[] ;
 constexpr const  char AddonStorage::COL_EXPORT_TYPE[] ;
 constexpr const  char AddonStorage::COL_STATUS[] ;
 constexpr const  char AddonStorage::COL_IS_SYSTEM[] ;
+constexpr const  char AddonStorage::COL_DESCRIPTION[] ;
+constexpr const  char AddonStorage::COL_AUTHOR[] ;
+constexpr const  char AddonStorage::COL_VERSION[] ;
 AddonStorage::AddonStorage()
 {
 
@@ -88,7 +92,7 @@ QList<AddonRecord> AddonStorage::list(int status)
 
 bool AddonStorage::update(AddonRecord record)
 {
-    QString sql = QString("UPDATE [%1] SET [%2]=?,[%3]=?,[%4]=?,[%5]=?,[%6]=?,[%7]=? WHERE [%8]=?").arg(TABLE_NAME).arg(COL_TITLE).arg(COL_TYPENAME).arg(COL_TYPELABEL).arg(COL_STATUS).arg(COL_IS_SYSTEM).arg(COL_EXPORT_TYPE).arg(DatabaseHelper::COL_ID);
+    QString sql = QString("UPDATE [%1] SET [%2]=?,[%3]=?,[%4]=?,[%5]=?,[%6]=?,[%7]=?,[%8]=?,[%9]=?,[%10]=? WHERE [%11]=?").arg(TABLE_NAME).arg(COL_TITLE).arg(COL_TYPENAME).arg(COL_TYPELABEL).arg(COL_STATUS).arg(COL_IS_SYSTEM).arg(COL_EXPORT_TYPE).arg(COL_DESCRIPTION).arg(COL_AUTHOR).arg(COL_VERSION).arg(DatabaseHelper::COL_ID);
     QSqlQuery query(DatabaseHelper::getDatabase()->get());
     query.prepare(sql);
     query.bindValue(0,record.title);
@@ -97,7 +101,10 @@ bool AddonStorage::update(AddonRecord record)
     query.bindValue(3,record.status);
     query.bindValue(4,record.is_system);
     query.bindValue(5,record.export_type);
-    query.bindValue(6,record.id);
+    query.bindValue(6,record.description);
+    query.bindValue(7,record.author);
+    query.bindValue(8,record.version);
+    query.bindValue(9,record.id);
     bool ret = query.exec();
     this->error = query.lastError();
     return ret;
@@ -105,15 +112,20 @@ bool AddonStorage::update(AddonRecord record)
 
 long long AddonStorage::insert(AddonRecord record)
 {
-    QString sql = QString("INSERT INTO [%1] ([%2],[%3],[%4],[%5],[%6],[%7]) VALUES (?,?,?,?,?,?)").arg(TABLE_NAME).arg(COL_TITLE).arg(COL_TYPENAME).arg(COL_TYPELABEL).arg(COL_STATUS).arg(COL_IS_SYSTEM).arg(COL_EXPORT_TYPE);
+    QString sql = QString("INSERT INTO [%1] ([%2],[%3],[%4],[%5],[%6],[%7],[%8],[%9],[%10],[%11],[%12]) VALUES (?,?,?,?,?,?,?,?,?,?,?)").arg(TABLE_NAME).arg(COL_TITLE).arg(COL_TYPENAME).arg(COL_TYPELABEL).arg(COL_FILE).arg(COL_STATUS).arg(COL_IS_SYSTEM).arg(COL_EXPORT_TYPE).arg(COL_DESCRIPTION).arg(COL_AUTHOR).arg(COL_VERSION).arg(DatabaseHelper::COL_DATETIME);
     QSqlQuery query(DatabaseHelper::getDatabase()->get());
     query.prepare(sql);
     query.bindValue(0,record.title);
     query.bindValue(1,record.name);
     query.bindValue(2,record.label);
-    query.bindValue(3,record.status);
-    query.bindValue(4,record.is_system);
-    query.bindValue(5,record.export_type);
+    query.bindValue(3,record.file);
+    query.bindValue(4,record.status);
+    query.bindValue(5,record.is_system);
+    query.bindValue(6,record.export_type);
+    query.bindValue(7,record.description);
+    query.bindValue(8,record.author);
+    query.bindValue(9,record.version);
+    query.bindValue(10,QDateTime::currentDateTime().toSecsSinceEpoch());
     bool ret = query.exec();
     this->error = query.lastError();
     if(ret){
@@ -167,6 +179,9 @@ AddonRecord AddonStorage::toRecord(QSqlQuery& query)
     record.status = query.value(COL_STATUS).toInt();
     record.is_system = query.value(COL_IS_SYSTEM).toInt();
     record.export_type = query.value(COL_EXPORT_TYPE).toLongLong();
+    record.description = query.value(COL_DESCRIPTION).toString();
+    record.author = query.value(COL_AUTHOR).toString();
+    record.version = query.value(COL_VERSION).toString();
     return record;
 }
 

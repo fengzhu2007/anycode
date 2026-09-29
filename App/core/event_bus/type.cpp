@@ -55,6 +55,7 @@ const QString Type::M_OPEN_RUN_TERMINAL = "OpenRunTerminal";
 
 const QString Type::M_NOTIFICATION = "Notification";
 const QString Type::M_TOGGLE_NOTIFICATION = "ToggleNotification";
+const QString Type::M_NOTIFICATION_CLEARED = "NotificationCleared";
 
 const QString Type::M_RESOURCE_LOCATION = "ResourceLocation";
 

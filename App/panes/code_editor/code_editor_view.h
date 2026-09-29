@@ -17,6 +17,7 @@
 #include <QHash>
 
 namespace Core { class HighlightScrollBarController; }
+namespace TextEditor { class SyntaxHighlighter; }
 
 namespace ady{
 namespace cvs { class DiffContent; }
@@ -45,6 +46,7 @@ protected:
     virtual void contextMenuEvent(QContextMenuEvent *e) override;
     virtual void showEvent(QShowEvent *e) override;
     virtual void resizeEvent(QResizeEvent *e) override;
+    TextEditor::LanguageLoader *createLanguageLoader(const QString &languageName, QTextDocument *doc) override;
 
     void clearSemanticErrorMarks();
 
@@ -62,6 +64,7 @@ protected:
     // available for manual control)
     void applyLineHighlights();
     void updateScrollBarMarkers();
+    void updateDiffGutterWidth();
 
     // Gutter: reserves width for diff markers when diff data is present
     virtual int extraAreaWidth(int *markWidthPtr = nullptr) const;
@@ -71,6 +74,7 @@ protected:
     QHash<int, LineInfo> m_lineInfo;
     bool m_showOldLineNumbers = true;
     Core::HighlightScrollBarController *m_diffScrollBarController = nullptr;
+    TextEditor::SyntaxHighlighter *m_savedHighlighter = nullptr;
 
 private:
     CodeEditorViewPrivate* d;

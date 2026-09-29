@@ -10,7 +10,7 @@ class VersionControlDeleteFileTask : public BackendThreadTask
 {
 public:
 
-    VersionControlDeleteFileTask(long long id,const QStringList& files);
+    VersionControlDeleteFileTask(long long id,const QString& projectPath,const QString& remoteRoot,const QStringList& files);
     virtual ~VersionControlDeleteFileTask();
     virtual bool exec() override;
 private:

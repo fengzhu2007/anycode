@@ -5,6 +5,7 @@
 #include "themes/light_theme.h"
 #include "themes/dark_theme.h"
 #include "core/debug_log.h"
+#include "addon_loader.h"
 #include <w_qss.h>
 #include <QTranslator>
 namespace ady{
@@ -41,7 +42,8 @@ IDEApplication::IDEApplication(int &argc, char **argv):QApplication(argc,argv) {
         }
     }
 
-
+    //load installed addons from database
+    AddonLoader::getInstance()->init();
 }
 
 IDEApplication::~IDEApplication(){

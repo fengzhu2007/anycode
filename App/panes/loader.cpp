@@ -15,7 +15,7 @@
 #include "panes/notification/notification_pane.h"
 #include "panes/db/dbms_pane.h"
 #include "panes/ai_chat/ai_chat_pane.h"
-
+#include "addon_loader.h"
 namespace ady{
 
 DockingPane* PaneLoader::init(DockingPaneManager* dockingManager,const QString& group,const QJsonObject& data){
@@ -45,6 +45,10 @@ DockingPane* PaneLoader::init(DockingPaneManager* dockingManager,const QString& 
     }else if(group == AIChatPane::PANE_GROUP){
         pane = AIChatPane::make(dockingManager,data);
     }else{
+        pane = AddonLoader::getInstance()->makePane(dockingManager,group,data);
+        if(pane){
+            return pane;
+        }
         //other editor
         pane = CodeEditorManager::makePane(group,data);
     }

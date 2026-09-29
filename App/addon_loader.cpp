@@ -3,17 +3,24 @@
 #include "network/network_request.h"
 #include "network/network_manager.h"
 #include "storage/addon_storage.h"
+#include <languages/loader.h>
 #include <QStandardPaths>
 #include <QCoreApplication>
 #include <QMessageBox>
 #include <QTranslator>
 #include <QDebug>
+#include <QTextDocument>
+#include <QJsonObject>
 
 
 typedef size_t (*GET_FORMPANELSIZE_FUN) (QString);
 typedef ady::FormPanel*(*GET_FORMPANEL_FUN) (QWidget*,QString,size_t);
 typedef int (*REQUEST_CONNECT_FUN) (void*);
 typedef ady::NetworkRequest* (*INIT_REQUEST_FUN) (long long);
+typedef bool (*ADDON_INSTALL_FUN) ();
+typedef bool (*ADDON_UNINSTALL_FUN) ();
+typedef TextEditor::LanguageLoader* (*CREATE_LANGUAGE_LOADER_FUN) (QString, QTextDocument*);
+typedef ady::DockingPane* (*MAKE_PANE_FUN) (ady::DockingPaneManager*, QString, QJsonObject);
 
 namespace ady {
     AddonLoader* AddonLoader::instance = nullptr;
@@ -29,6 +36,22 @@ namespace ady {
             instance = new AddonLoader;
         }
         return instance;
+    }
+
+    void AddonLoader::init(){
+        AddonStorage storage;
+        m_addons = storage.list(1);
+    }
+
+    QList<AddonRecord> AddonLoader::filter(ExportType type){
+        QList<AddonRecord> result;
+        int flag = static_cast<int>(type);
+        for(const auto& record : m_addons){
+            if((record.export_type & flag) == flag){
+                result.append(record);
+            }
+        }
+        return result;
     }
 
 
@@ -171,6 +194,74 @@ namespace ady {
         }
     }
 
+    bool AddonLoader::install()
+    {
+        if (this->m_current == nullptr)
+            return false;
+        ADDON_INSTALL_FUN fun = (ADDON_INSTALL_FUN)this->m_current->resolve("install");
+        if (fun)
+            return fun();
+        return false;
+    }
 
+    bool AddonLoader::uninstall()
+    {
+        if (this->m_current == nullptr)
+            return false;
+        ADDON_UNINSTALL_FUN fun = (ADDON_UNINSTALL_FUN)this->m_current->resolve("uninstall");
+        if (fun)
+            return fun();
+        return false;
+    }
+
+    TextEditor::LanguageLoader* AddonLoader::createLanguageLoader(const QString& languageName, QTextDocument* doc)
+    {
+        //check cache by languageName
+        auto it = m_langLoaderFuns.find(languageName);
+        if(it!=m_langLoaderFuns.end()){
+            CREATE_LANGUAGE_LOADER_FUN fun = (CREATE_LANGUAGE_LOADER_FUN)it.value();
+            return fun(languageName, doc);
+        }
+
+        //search installed CodeAutoComplate addons
+        auto addons = filter(CodeAutoComplate);
+        for(const auto& addon : addons){
+            if(addon.name.contains(languageName, Qt::CaseInsensitive)){
+                if(loadFile(addon.file)){
+                    CREATE_LANGUAGE_LOADER_FUN fun = (CREATE_LANGUAGE_LOADER_FUN)m_current->resolve("createLanguageLoader");
+                    if(fun){
+                        m_langLoaderFuns[languageName] = (void*)fun;
+                        return fun(languageName, doc);
+                    }
+                }
+            }
+        }
+        return nullptr;
+    }
+
+    DockingPane* AddonLoader::makePane(DockingPaneManager* dockingManager, const QString& group, const QJsonObject& data)
+    {
+        //check cache by group
+        auto it = m_paneFuns.find(group);
+        if(it!=m_paneFuns.end()){
+            MAKE_PANE_FUN fun = (MAKE_PANE_FUN)it.value();
+            return fun(dockingManager, group, data);
+        }
+
+        //search installed Pane addons
+        auto addons = filter(Pane);
+        for(const auto& addon : addons){
+            if(addon.name==group){
+                if(loadFile(addon.file)){
+                    MAKE_PANE_FUN fun = (MAKE_PANE_FUN)m_current->resolve("makePane");
+                    if(fun){
+                        m_paneFuns[group] = (void*)fun;
+                        return fun(dockingManager, group, data);
+                    }
+                }
+            }
+        }
+        return nullptr;
+    }
 
 }

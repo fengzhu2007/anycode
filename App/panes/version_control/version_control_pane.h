@@ -57,7 +57,7 @@ public slots:
     void onSynchronousToSite();
     void onUploadToGroup();
     void onSynchronousToGroup();
-    void onOutput(NetworkResponse* response);
+    void onOutput(void* response);
 
 private:
     explicit VersionControlPane(QWidget *parent = nullptr);

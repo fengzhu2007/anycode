@@ -9,6 +9,7 @@ namespace ady{
 class AddonItem{
 public:
     bool installed;
+    bool is_system;
     QString title;
     QString description;
     QString author;

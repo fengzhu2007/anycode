@@ -67,8 +67,7 @@ NewProjectTwoWidget::NewProjectTwoWidget(QWidget *parent) :
 
 
 
-    AddonStorage addonStorage;
-    d->addons = addonStorage.list(1);
+    d->addons = AddonLoader::getInstance()->filter(AddonLoader::Default);
 
     //fill combobox
     auto model = new SiteTypeListModel(ui->type);

@@ -19,6 +19,9 @@ public:
 protected:
     virtual void paintEvent(QPaintEvent *e) override;
 
+private slots:
+    void onContextMenu(const QPoint& pos);
+
 private:
     NotificationCardPrivate* d;
 };
