@@ -10,6 +10,7 @@ class AddonItem{
 public:
     bool installed;
     bool is_system;
+    QString name;
     QString title;
     QString description;
     QString author;

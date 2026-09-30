@@ -21,6 +21,8 @@ typedef bool (*ADDON_INSTALL_FUN) ();
 typedef bool (*ADDON_UNINSTALL_FUN) ();
 typedef TextEditor::LanguageLoader* (*CREATE_LANGUAGE_LOADER_FUN) (QString, QTextDocument*);
 typedef ady::DockingPane* (*MAKE_PANE_FUN) (ady::DockingPaneManager*, QString, QJsonObject);
+typedef QList<ady::MenuData> (*GET_MENUS_FUN) (QWidget*);
+typedef GET_MENUS_FUN (*GET_GET_MENUS_FUN) ();
 
 namespace ady {
     AddonLoader* AddonLoader::instance = nullptr;
@@ -262,6 +264,25 @@ namespace ady {
             }
         }
         return nullptr;
+    }
+
+    QList<MenuData> AddonLoader::getMenus(QWidget* parent)
+    {
+        QList<MenuData> result;
+        //search installed Menu addons
+        auto addons = filter(Menu);
+        for(const auto& addon : addons){
+            if(loadFile(addon.file)){
+                GET_GET_MENUS_FUN getter = (GET_GET_MENUS_FUN)m_current->resolve("getGetMenus");
+                if(getter){
+                    GET_MENUS_FUN fun = getter();
+                    if(fun){
+                        result.append(fun(parent));
+                    }
+                }
+            }
+        }
+        return result;
     }
 
 }

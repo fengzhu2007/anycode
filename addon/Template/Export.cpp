@@ -71,3 +71,23 @@ int requestConnect(void* ptr)
         return -1;//unknow network type
     }
 }
+
+GetMenusFun getGetMenus()
+{
+    return &getMenus;
+}
+
+QList<ady::MenuData> getMenus(QWidget* parent)
+{
+    QList<ady::MenuData> menus;
+
+    //add an action to the "Extend" top menu
+    ady::MenuData data;
+    data.menu_kind = ady::AddonLoader::Extend;
+    data.position = ady::AddonLoader::After;
+    data.kind = ady::MenuData::Action;
+    data.ptr.action = new QAction(QString::fromUtf8("{TPL}"),parent);
+    menus.append(data);
+
+    return menus;
+}

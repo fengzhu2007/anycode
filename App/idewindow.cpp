@@ -60,6 +60,7 @@
 #include "common.h"
 //#include "app_oss.h"
 #include "core/theme.h"
+#include "addon_loader.h"
 
 #include <w_toast.h>
 #include <w_window.h>
@@ -257,6 +258,9 @@ void IDEWindow::boot(){
 }
 
 void IDEWindow::delayBoot(){
+
+    this->applyAddonMenus();
+
     //add font
     QFontDatabase::addApplicationFont(":/Resource/fonts/SourceCodePro-Regular.ttf");
 
@@ -845,6 +849,90 @@ void IDEWindow::restoreProjects(){
 
 void IDEWindow::openProject(ProjectRecord& proj){
     Publisher::getInstance()->post(new Event(Type::M_OPEN_PROJECT,&proj));
+}
+
+void IDEWindow::applyAddonMenus(){
+    auto list = AddonLoader::getInstance()->getMenus(this);
+
+    auto currentMenu = [&](int kind) -> QMenu* {
+        switch(kind){
+            case AddonLoader::File:
+                return ui->menuFile_F;
+            case AddonLoader::File_New:
+                return ui->menuNew_N;
+            case AddonLoader::File_Open:
+                return ui->menuOpen_O;
+            case AddonLoader::Edit:
+                return ui->menuEdit_E;
+            case AddonLoader::View:
+                return ui->menuView_V;
+            case AddonLoader::Tool:
+                return ui->menuTool_T;
+            case AddonLoader::Extend:
+                return ui->menuExtend_X;
+            case AddonLoader::Help:
+                return ui->menuHelp_H;
+        }
+
+        return nullptr;
+    };
+
+    for(auto one : list){
+        auto menu = currentMenu(one.menu_kind);
+        if(menu){
+            if(one.position==AddonLoader::After || one.position==AddonLoader::Before){
+                //one.ptr is a sibling of menu,insert before/after it in the menubar(or parent menu)
+                QWidget* container = ui->menubar;
+                if(one.menu_kind==AddonLoader::File_New || one.menu_kind==AddonLoader::File_Open){
+                    container = ui->menuFile_F;
+                }
+                QAction* before = nullptr;
+                if(one.position==AddonLoader::Before){
+                    before = menu->menuAction();
+                }else{
+                    auto actions = container->actions();
+                    int at = actions.indexOf(menu->menuAction());
+                    if(at>=0 && at+1<actions.size()){
+                        before = actions.at(at+1);
+                    }
+                }
+                if(one.kind==MenuData::Menu){
+                    container->insertAction(before,one.ptr.menu->menuAction());
+                }else if(one.kind==MenuData::Separator){
+                    if(auto* m = qobject_cast<QMenu*>(container)){
+                        m->insertSeparator(before);
+                    }
+                }else{
+                    container->insertAction(before,one.ptr.action);
+                }
+            }else{
+                auto actions = menu->actions();
+                int count = actions.size();
+                int index = count;
+                if(one.position>=0){
+                    index = one.position;
+                }else{
+                    index = count + one.position + 1;//-1:append,-2:second to last
+                }
+                if(index<0){
+                    index = 0;
+                }else if(index>count){
+                    index = count;
+                }
+                QAction* before = nullptr;
+                if(index<count){
+                    before = actions.at(index);
+                }
+                if(one.kind==MenuData::Menu){
+                    menu->insertMenu(before,one.ptr.menu);
+                }else if(one.kind==MenuData::Separator){
+                    menu->insertSeparator(before);
+                }else{
+                    menu->insertAction(before,one.ptr.action);
+                }
+            }
+        }
+    }
 }
 
 void IDEWindow::forTest(){

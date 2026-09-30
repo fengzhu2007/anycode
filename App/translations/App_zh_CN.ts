@@ -3399,81 +3399,83 @@ Please enter a new folder name.</source>
 <context>
     <name>ady::AddonManagerDialog</name>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="82"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="85"/>
         <source>&lt;strong&gt;Author:&lt;/strong&gt;%1</source>
         <translation>&lt;strong&gt;作者：&lt;/strong&gt;%1</translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="83"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="86"/>
         <source>&lt;strong&gt;Version:&lt;/strong&gt;%1</source>
         <translation>&lt;strong&gt;版本：&lt;/strong&gt;%1</translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="84"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="87"/>
         <source>&lt;strong&gt;Home Page:&lt;/strong&gt;%1</source>
         <translation>&lt;strong&gt;主页：&lt;/strong&gt;%1</translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="87"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="90"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="225"/>
         <source>Disable</source>
         <translation type="unfinished">禁用</translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="87"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="90"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="225"/>
         <source>Enable</source>
         <translation type="unfinished">启用</translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="155"/>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="161"/>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="167"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="158"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="164"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="170"/>
         <source>Warning</source>
         <translation type="unfinished">警告</translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="155"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="158"/>
         <source>Please select an addon file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="161"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="164"/>
         <source>File does not exist.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="167"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="170"/>
         <source>Unsupported file type.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="205"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="208"/>
         <source>Success</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="205"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="208"/>
         <source>Addon installed successfully. Please restart the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="207"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="210"/>
         <source>Error</source>
         <translation type="unfinished">错误</translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="207"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="210"/>
         <source>Failed to install addon.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="220"/>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="232"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="229"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="241"/>
         <source>Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="220"/>
-        <location filename="../modules/addon/addon_manager_dialog.cpp" line="232"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="229"/>
+        <location filename="../modules/addon/addon_manager_dialog.cpp" line="241"/>
         <source>Changes will take effect after restart.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4351,42 +4353,42 @@ Last Modify:%3</source>
 <context>
     <name>ady::IDEWindow</name>
     <message>
-        <location filename="../idewindow.cpp" line="210"/>
+        <location filename="../idewindow.cpp" line="211"/>
         <source>Command Line</source>
         <translation>命令行</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="213"/>
+        <location filename="../idewindow.cpp" line="214"/>
         <source>Command Prompt</source>
         <translation>命令提示符</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="218"/>
+        <location filename="../idewindow.cpp" line="219"/>
         <source>PowerShell</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="228"/>
+        <location filename="../idewindow.cpp" line="229"/>
         <source>Terminal</source>
         <translation>终端</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="433"/>
+        <location filename="../idewindow.cpp" line="437"/>
         <source>Select Folder</source>
         <translation>选择文件夹</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="436"/>
+        <location filename="../idewindow.cpp" line="440"/>
         <source>Open File</source>
         <translation>打开文件</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="436"/>
+        <location filename="../idewindow.cpp" line="440"/>
         <source>All Files (*.*)</source>
         <translation>所有文件 (*.*)</translation>
     </message>
     <message>
-        <location filename="../idewindow.cpp" line="631"/>
+        <location filename="../idewindow.cpp" line="635"/>
         <source>Text &quot;%1&quot; not found</source>
         <translation>文本 &quot;%1&quot; 未找到</translation>
     </message>

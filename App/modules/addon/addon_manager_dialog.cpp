@@ -21,6 +21,7 @@ class AddonManagerDialogPrivate{
 public:
     AddonManagerModel* model;
     QString currentName;
+    int currentIndex = -1;
 };
 
 AddonManagerDialog::AddonManagerDialog(QWidget *parent)
@@ -61,6 +62,7 @@ void AddonManagerDialog::initView(){
         AddonItem item;
         item.installed = (record.status == 1);
         item.is_system = record.is_system;
+        item.name = record.name;
         item.title = record.title;
         item.description = record.description;
         item.author = record.author;
@@ -78,7 +80,8 @@ AddonManagerDialog::~AddonManagerDialog()
 
 void AddonManagerDialog::onItemClicked(int index){
     auto item = d->model->itemAt(index);
-    d->currentName = item.title;
+    d->currentName = item.name;
+    d->currentIndex = index;
     ui->author->setText(tr("<strong>Author:</strong>%1").arg(item.author));
     ui->version->setText(tr("<strong>Version:</strong>%1").arg(item.version));
     ui->url->setText(tr("<strong>Home Page:</strong>%1").arg(item.url));
@@ -217,6 +220,12 @@ void AddonManagerDialog::onEnable()
     record.status = (record.status == 1) ? 0 : 1;
     storage.update(record);
     initView();
+    if(d->currentIndex >= 0){
+        auto item = d->model->itemAt(d->currentIndex);
+        ui->enableButton->setText(item.installed ? tr("Disable") : tr("Enable"));
+        ui->enableButton->setEnabled(!item.is_system);
+        ui->uninstallButton->setEnabled(!item.is_system);
+    }
     QMessageBox::information(this, tr("Info"), tr("Changes will take effect after restart."));
 }
 
