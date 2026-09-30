@@ -5,10 +5,12 @@
 #include <QList>
 #include <QLibrary>
 #include <QJsonObject>
+#include <QAction>
 #include "global.h"
 #include "storage/addon_storage.h"
 
 class QTextDocument;
+class QMenu;
 
 namespace TextEditor{
 class LanguageLoader;
@@ -22,6 +24,17 @@ namespace ady {
     class NetworkRequest;
     class DockingPaneManager;
     class DockingPane;
+
+    struct MenuData{
+        int menu_kind;
+        int position;
+        enum Kind { Action, Menu,Separator } kind;
+        union {
+            QAction* action;
+            QMenu* menu;
+        } ptr;
+    };
+
     class  AddonLoader
     {
     private:
@@ -50,6 +63,28 @@ namespace ady {
 
         };
 
+        enum MenuKind{
+            None=0,
+            File,
+            Edit,
+            View,
+            Tool,
+            Extend,
+            Help,
+
+            //sub menu
+            File_New,
+            File_Open
+        };
+
+        enum  MenuPosition{
+            Before=999,
+            After=1000
+        };
+
+
+
+
         static AddonLoader* getInstance();
         void init();
         QList<AddonRecord> filter(ExportType type);
@@ -71,6 +106,8 @@ namespace ady {
 
 
         DockingPane* makePane(DockingPaneManager* dockingManager,const QString& group,const QJsonObject& data);
+
+        QList<MenuData> getMenus(QWidget* parent);
 
 
 

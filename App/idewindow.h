@@ -64,8 +64,8 @@ namespace ady{
         void restoreFromSettings();
         void restoreDockpanes();
         void restoreProjects();
-
         void openProject(ProjectRecord& proj);
+        void applyAddonMenus();
 
     private:
         Ui::IDEWindow *ui;

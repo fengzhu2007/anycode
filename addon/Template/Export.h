@@ -3,6 +3,9 @@
 #include "{tpl}_global.h"
 #include "interface/form_panel.h"
 #include "network/network_request.h"
+#include "addon_loader.h"
+
+typedef QList<ady::MenuData> (*GetMenusFun)(QWidget*);
 
 
 #ifdef __cplusplus
@@ -13,10 +16,13 @@ extern "C" {
 {TPL}_EXPORT ady::FormPanel* getFormPanel(QWidget* parent,QString,size_t n);
 {TPL}_EXPORT ady::NetworkRequest* getRequest(QString name);
 {TPL}_EXPORT int requestConnect(void* ptr);
+{TPL}_EXPORT GetMenusFun getGetMenus();
 
 #ifdef __cplusplus
 }
 #endif
+
+QList<ady::MenuData> getMenus(QWidget* parent);
 
 
 #endif // {TPL}EXPORT_H
