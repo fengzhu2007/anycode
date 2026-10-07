@@ -5,10 +5,67 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QFileInfo>
+#include <QMimeData>
+#include <QUrl>
 
 namespace ady{
 
 static QString s_lastDir;
+
+// match fileName against QFileDialog style filter eg. "Images (*.png *.jpg);;All (*)"
+static bool matchFilter(const QString& filter, const QString& fileName)
+{
+    if (filter.isEmpty()) {
+        return true;
+    }
+    bool hasPattern = false;
+    int pos = 0;
+    while (true) {
+        const int left = filter.indexOf(QLatin1Char('('), pos);
+        if (left < 0) {
+            break;
+        }
+        const int right = filter.indexOf(QLatin1Char(')'), left);
+        if (right < 0) {
+            break;
+        }
+        const QStringList patterns = filter.mid(left + 1, right - left - 1).split(QLatin1Char(' '));
+        for (const QString& pattern : patterns) {
+            if (pattern.isEmpty()) {
+                continue;
+            }
+            hasPattern = true;
+            if (pattern == QLatin1String("*")) {
+                return true;
+            }
+            if (pattern.startsWith(QLatin1String("*."))) {
+                if (fileName.endsWith(pattern.mid(1), Qt::CaseInsensitive)) {
+                    return true;
+                }
+            } else if (fileName.compare(pattern, Qt::CaseInsensitive) == 0) {
+                return true;
+            }
+        }
+        pos = right + 1;
+    }
+    return !hasPattern;
+}
+
+static bool checkDroppedFile(const QMimeData* mimeData, const QString& filter, bool enabled, QString& filePath)
+{
+    if (!enabled || !mimeData->hasUrls()) {
+        return false;
+    }
+    const QList<QUrl> urls = mimeData->urls();
+    if (urls.isEmpty()) {
+        return false;
+    }
+    filePath = urls.first().toLocalFile();
+    if (filePath.isEmpty() || !QFileInfo(filePath).isFile()) {
+        return false;
+    }
+    return matchFilter(filter, filePath);
+}
 
 class FileSelectorPrivate{
 public:
@@ -37,6 +94,8 @@ FileSelector::FileSelector(QWidget *parent,const QString& filter)
     layout->setSpacing(2);
     d->dir = "";
     connect(d->button,&QPushButton::clicked,this,&FileSelector::onSelectFile);
+    this->setAcceptDrops(true);
+    d->edit->setAcceptDrops(false);
 }
 
 
@@ -89,6 +148,40 @@ void FileSelector::onSelectFile(){
         d->edit->setText(filePath);
         s_lastDir = QFileInfo(filePath).path();
         emit fileChanged(filePath);
+    }
+}
+
+void FileSelector::dragEnterEvent(QDragEnterEvent* event)
+{
+    QString filePath;
+    if (checkDroppedFile(event->mimeData(), d->filter, d->edit->isEnabled(), filePath)) {
+        event->setDropAction(Qt::CopyAction);
+        event->acceptProposedAction();
+    } else {
+        event->ignore();
+    }
+}
+
+void FileSelector::dragMoveEvent(QDragMoveEvent* event)
+{
+    QString filePath;
+    if (checkDroppedFile(event->mimeData(), d->filter, d->edit->isEnabled(), filePath)) {
+        event->acceptProposedAction();
+    } else {
+        event->ignore();
+    }
+}
+
+void FileSelector::dropEvent(QDropEvent* event)
+{
+    QString filePath;
+    if (checkDroppedFile(event->mimeData(), d->filter, d->edit->isEnabled(), filePath)) {
+        d->edit->setText(filePath);
+        s_lastDir = QFileInfo(filePath).path();
+        emit fileChanged(filePath);
+        event->acceptProposedAction();
+    } else {
+        event->ignore();
     }
 }
 

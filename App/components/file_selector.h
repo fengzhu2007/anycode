@@ -2,6 +2,7 @@
 #define FILE_SELECTOR_H
 
 #include <QWidget>
+#include <QDropEvent>
 namespace ady{
 class FileSelectorPrivate;
 class FileSelector : public QWidget
@@ -24,6 +25,11 @@ public slots:
 
 signals:
     void fileChanged(const QString& path);
+
+protected:
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
 
 private:
     FileSelectorPrivate* d;

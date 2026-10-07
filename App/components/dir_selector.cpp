@@ -5,9 +5,24 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QFileInfo>
+#include <QMimeData>
+#include <QUrl>
 namespace ady{
 
 static QString s_lastDir;
+
+static bool checkDroppedDir(const QMimeData* mimeData, bool enabled, QString& dirPath)
+{
+    if (!enabled || !mimeData->hasUrls()) {
+        return false;
+    }
+    const QList<QUrl> urls = mimeData->urls();
+    if (urls.isEmpty()) {
+        return false;
+    }
+    dirPath = urls.first().toLocalFile();
+    return !dirPath.isEmpty() && QFileInfo(dirPath).isDir();
+}
 
 class DirSelectorPrivate{
 public:
@@ -38,6 +53,8 @@ DirSelector::DirSelector(QWidget *parent)
 
     connect(d->button,&QPushButton::clicked,this,&DirSelector::onSelectDir);
 
+    this->setAcceptDrops(true);
+    d->edit->setAcceptDrops(false);
 }
 
 
@@ -76,6 +93,40 @@ void DirSelector::onSelectDir(){
         d->edit->setText(folderPath);
         s_lastDir = QFileInfo(folderPath).path();
         emit dirChanged(folderPath);
+    }
+}
+
+void DirSelector::dragEnterEvent(QDragEnterEvent* event)
+{
+    QString dirPath;
+    if (checkDroppedDir(event->mimeData(), d->edit->isEnabled(), dirPath)) {
+        event->setDropAction(Qt::CopyAction);
+        event->acceptProposedAction();
+    } else {
+        event->ignore();
+    }
+}
+
+void DirSelector::dragMoveEvent(QDragMoveEvent* event)
+{
+    QString dirPath;
+    if (checkDroppedDir(event->mimeData(), d->edit->isEnabled(), dirPath)) {
+        event->acceptProposedAction();
+    } else {
+        event->ignore();
+    }
+}
+
+void DirSelector::dropEvent(QDropEvent* event)
+{
+    QString dirPath;
+    if (checkDroppedDir(event->mimeData(), d->edit->isEnabled(), dirPath)) {
+        d->edit->setText(dirPath);
+        s_lastDir = QFileInfo(dirPath).path();
+        emit dirChanged(dirPath);
+        event->acceptProposedAction();
+    } else {
+        event->ignore();
     }
 }
 

@@ -1,6 +1,7 @@
 #ifndef DIR_SELECTOR_H
 #define DIR_SELECTOR_H
 #include <QWidget>
+#include <QDropEvent>
 
 namespace ady{
 class DirSelectorPrivate;
@@ -21,6 +22,10 @@ public slots:
 signals:
     void dirChanged(const QString& path);
 
+protected:
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
 
 private:
     DirSelectorPrivate* d;
