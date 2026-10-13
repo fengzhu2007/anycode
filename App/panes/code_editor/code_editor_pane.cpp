@@ -336,6 +336,15 @@ bool CodeEditorPane::readFile(const QString& path){
 }
 
 bool CodeEditorPane::writeFile(const QString& path,bool autoSave){
+    if (ui->editor->isDiffViewActive()) {
+        // The editor is showing the read-only diff view (file content with
+        // deleted lines interleaved).  Never write that back to disk; the
+        // user leaves the view by typing or pressing Escape.
+        if (!autoSave) {
+            wToast::showText(tr("The diff view is read-only. Saving was skipped.","Editor"));
+        }
+        return false;
+    }
     QString error;
     auto ret = ui->editor->textDocument()->save(&error,Utils::FilePath::fromString(path),autoSave);
     if(ret==false){

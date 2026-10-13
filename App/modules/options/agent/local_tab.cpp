@@ -41,6 +41,10 @@ void LocalTab::apply(int *state){
         setting.m_proxyEnabled = ui->enableProxy->isChecked();
         changed = true;
     }
+    if(setting.m_autoFileDiff != ui->autoFileDiff->isChecked()){
+        setting.m_autoFileDiff = ui->autoFileDiff->isChecked();
+        changed = true;
+    }
 
     if(changed){
         instance->setAgentSettings(setting);
@@ -74,6 +78,7 @@ void LocalTab::initView(){
     }
     ui->runMode->setCurrentIndex(setting.m_runMode);
     ui->enableProxy->setChecked(setting.m_proxyEnabled);
+    ui->autoFileDiff->setChecked(setting.m_autoFileDiff);
 }
 
 }

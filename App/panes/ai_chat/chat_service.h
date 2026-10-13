@@ -133,7 +133,7 @@ public:
                        const QString &directory, const QString &preference);  // PATCH /session/{id}
     void setWorkingDirectories(const QStringList &directories);  // POST /directories (global)
     void compactSession(const QString &sessionId);  // POST /api/session/{id}/compact
-    void confirmChanges(const QString &sessionId);   // POST /session/{id}/changes/confirm
+    void confirmChanges(const QString &sessionId);   // POST /api/session/{id}/changes/confirm
     void revertSession(const QString &sessionId);    // POST /session/{id}/revert
     void revertCommitSession(const QString &sessionId);  // POST /session/{id}/revert/commit
 

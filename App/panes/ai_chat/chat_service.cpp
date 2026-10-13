@@ -773,6 +773,7 @@ void ChatService::setWorkingDirectories(const QStringList &directories)
     }
 
 
+
     lastDirectories = directories;
     QJsonObject body;
     QJsonArray dirsArray;
@@ -848,11 +849,11 @@ void ChatService::compactSession(const QString &sessionId)
     });
 }
 
-// ---- confirm changes: POST /session/{id}/changes/confirm ----
+// ---- confirm changes: POST /api/session/{id}/changes/confirm ----
 
 void ChatService::confirmChanges(const QString &sessionId)
 {
-    QString url = m_baseUrl + "/session/" + sessionId + "/changes/confirm";
+    QString url = m_baseUrl + "/api/session/" + sessionId + "/changes/confirm";
 
     QtConcurrent::run([url, sessionId](){
         CURL *curl = curl_easy_init();
@@ -867,10 +868,15 @@ void ChatService::confirmChanges(const QString &sessionId)
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L);
 
         CURLcode res = curl_easy_perform(curl);
+        long httpCode = 0;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
         curl_easy_cleanup(curl);
 
         if(res != CURLE_OK){
             qWarning() << "[ChatService] confirmChanges failed:" << curl_easy_strerror(res);
+        }else if(httpCode >= 400){
+            qWarning() << "[ChatService] confirmChanges request rejected, HTTP" << httpCode
+                       << "url:" << url;
         }else{
             qDebug() << "[ChatService] changes confirmed for session:" << sessionId;
         }

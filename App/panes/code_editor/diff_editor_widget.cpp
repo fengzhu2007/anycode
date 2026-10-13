@@ -324,6 +324,36 @@ int DiffEditorWidget::extraAreaWidth(int *markWidthPtr) const
 }
 
 //----------------------------------------------------------------------------
+// additionalExtraAreaWidth
+//
+// Reports the full width this widget reserves on top of the base extra area
+// (the base diff gutter column plus the optional old line-number column).
+// The base class uses this to sync the viewport margins, so the margins
+// always match the extended gutter and never flap back to the base width.
+//----------------------------------------------------------------------------
+int DiffEditorWidget::additionalExtraAreaWidth() const
+{
+    int width = CodeEditorView::additionalExtraAreaWidth();
+
+    if (!m_showOldLineNumbers)
+        return width;
+
+    const QFontMetrics fm(font());
+    const int digitW = fm.horizontalAdvance('9');
+
+    int maxOld = 1;
+    for (const auto &info : m_lineInfo) {
+        if (info.oldLineNo > maxOld) maxOld = info.oldLineNo;
+    }
+    const int oldDigits = QString::number(maxOld).length();
+    const int oldColW = digitW * oldDigits;
+    const int pad = 4;
+    const int sep = 1;
+
+    return width + pad + oldColW + pad + sep + pad;
+}
+
+//----------------------------------------------------------------------------
 // extraAreaPaintEvent
 //
 // When old line numbers are disabled, delegates to the base class which

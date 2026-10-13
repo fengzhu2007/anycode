@@ -40,6 +40,7 @@ protected:
     // Custom gutter: dual old/new line numbers + diff markers
     void extraAreaPaintEvent(QPaintEvent *e) override;
     int extraAreaWidth(int *markWidthPtr = nullptr) const override;
+    int additionalExtraAreaWidth() const override;
 
     // Reserved for word-level diff highlighting
     void paintDiffOverlay(QPainter *painter, const QRect &clip) override;

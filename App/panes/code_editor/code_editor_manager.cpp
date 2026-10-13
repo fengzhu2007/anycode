@@ -21,6 +21,7 @@
 #include <texteditorenvironment.h>
 #include <textsuggestion.h>
 #include "modules/options/options_settings.h"
+#include "modules/options/agent_settings.h"
 
 #include "code_lint.h"
 #include "../image_editor/image_editor_pane.h"
@@ -458,7 +459,9 @@ void CodeEditorManager::onFileChanged(const QString &path){
                 //reload file
                 pane->reload();
                 //fetch diff from openagent-cpp
-                d->agentDiff->fetchDiff(path);
+                if(OptionsSettings::getInstance()->agentSettings().m_autoFileDiff){
+                    d->agentDiff->fetchDiff(path);
+                }
             }else{
                 if(pane->isVisible()){
                     int state = pane->fileState();

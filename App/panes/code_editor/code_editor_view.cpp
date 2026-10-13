@@ -27,8 +27,10 @@
 #include <QPaintEvent>
 #include <QTextBlock>
 #include <QTextCursor>
+#include <QKeyEvent>
 #include <QMetaObject>
 #include <QMargins>
+#include <QStringList>
 
 
 namespace ady{
@@ -53,6 +55,16 @@ CodeEditorView::CodeEditorView(QWidget* parent)
 
     d->colorHoverHandler = new TextEditor::ColorPreviewHoverHandler;
     this->addHoverHandler(d->colorHoverHandler);
+
+    // A disk reload replaces the document, invalidating any active diff
+    // view.  Restore the view state so the editor becomes editable again;
+    // only put the saved text back when the reload failed and the document
+    // still holds the rebuilt diff content.
+    connect(textDocument(), &TextEditor::TextDocument::reloadFinished, this,
+            [this](bool success) {
+                if (m_diffViewActive)
+                    resetDiffViewState(!success);
+            });
 }
 
 CodeEditorView::~CodeEditorView(){
@@ -94,6 +106,46 @@ void CodeEditorView::resizeEvent(QResizeEvent *e)
         m_diffScrollBarController->setVisibleRange(viewport()->rect().height());
         m_diffScrollBarController->setMargin(document()->documentMargin());
     }
+}
+
+static bool isDiffViewEditingKey(const QKeyEvent *e)
+{
+    switch (e->key()) {
+    case Qt::Key_Backspace:
+    case Qt::Key_Delete:
+    case Qt::Key_Return:
+    case Qt::Key_Enter:
+    case Qt::Key_Tab:
+    case Qt::Key_Backtab:
+        return true;
+    default:
+        break;
+    }
+    if (e->modifiers() & Qt::ControlModifier) {
+        switch (e->key()) {
+        case Qt::Key_V:
+        case Qt::Key_X:
+        case Qt::Key_Z:
+        case Qt::Key_Y:
+            return true;
+        default:
+            break;
+        }
+    }
+    const QString text = e->text();
+    return !text.isEmpty() && text.at(0).isPrint();
+}
+
+void CodeEditorView::keyPressEvent(QKeyEvent *e)
+{
+    // Any key that would edit the text first leaves the read-only diff view
+    // (restoring the file content); Escape closes it explicitly.  Navigation,
+    // selection and copying keys pass through to the editor.
+    if (m_diffViewActive && (e->key() == Qt::Key_Escape || isDiffViewEditingKey(e))) {
+        resetDiffViewState(true);
+        return;
+    }
+    TextEditor::TextEditorWidget::keyPressEvent(e);
 }
 
 void CodeEditorView::rename(const QString& name){
@@ -198,54 +250,175 @@ void CodeEditorView::clearSemanticErrorMarks(){
 
 void CodeEditorView::setDiffHighlights(const cvs::DiffContent &content)
 {
-    m_lineInfo.clear();
+    // Never rebuild the document while it has unsaved edits — the diff view
+    // replaces the document content and would silently discard them.
+    if (document()->isModified())
+        return;
+
+    // Leave a previous diff view first: its rebuilt content must not be used
+    // as the "new file" source below.
+    if (m_diffViewActive)
+        resetDiffViewState(true);
 
     if (content.isEmpty()) {
         clearDiffHighlights();
         return;
     }
 
-    // Disable syntax highlighting — diff content is not valid source code.
+    // The document currently holds the complete new file (the pane reloaded
+    // it from disk right before the diff was fetched).  Build the diff view
+    // by interleaving deleted lines at their original positions, so a
+    // replaced line shows as a "-" line followed by its "+" replacement
+    // (git-diff style), while every other line keeps its line number.
+    const QString fileText = document()->toPlainText();
+    m_savedFileText = fileText;
+    m_savedReadOnly = isReadOnly();
+    m_savedLineNumbersVisible = lineNumbersVisible();
+    m_diffViewActive = true;
+
+    // Disable syntax highlighting — the diff view mixes old and new content.
     if (!m_savedHighlighter)
         m_savedHighlighter = textDocument()->takeSyntaxHighlighter();
 
-    // Build m_lineInfo from the diff hunks (diff-only mode — just the hunk
-    // lines without reading the full file from disk).
+    m_lineInfo.clear();
+    QString text;
     int docLine = 0;
+
+    QStringList fileLines = fileText.split('\n');
+    if (!fileLines.isEmpty() && fileLines.last().isEmpty())
+        fileLines.removeLast();
+
+    int fileIdx = 0;         // 0-based index into fileLines
+    int oldNewOffset = 0;    // oldLineNo = newLineNo + offset for unchanged lines
+
     const auto hunks = content.hunks();
     for (const auto &hunk : hunks) {
-        QString header = hunk.header().trimmed();
-        if (header.isEmpty()) {
-            header = QString("@@ -%1,%2 +%3,%4 @@")
-                         .arg(hunk.oldStart()).arg(hunk.oldCount())
-                         .arg(hunk.newStart()).arg(hunk.newCount());
+        const int hunkNewStart = hunk.newStart();
+
+        // Emit unchanged file lines before the hunk
+        while (fileIdx < hunkNewStart - 1 && fileIdx < fileLines.size()) {
+            LineInfo info;
+            info.type = cvs::DiffLine::Context;
+            info.newLineNo = fileIdx + 1;
+            info.oldLineNo = fileIdx + 1 + oldNewOffset;
+            m_lineInfo[docLine] = info;
+            text += fileLines.at(fileIdx) + '\n';
+            ++docLine;
+            ++fileIdx;
         }
-        m_lineInfo[docLine] = LineInfo{};
-        m_lineInfo[docLine].isHeader = true;
-        ++docLine;
 
         const auto lines = hunk.lines();
         for (const auto &line : lines) {
-            LineInfo info;
-            info.type = line.type();
-            info.oldLineNo = line.oldLineNo();
-            info.newLineNo = line.newLineNo();
-            m_lineInfo[docLine] = info;
-            ++docLine;
+            if (line.type() == cvs::DiffLine::Deletion) {
+                // Deleted line — no longer in the file; its content comes
+                // from the diff itself (the +/-/space prefix is stripped,
+                // the gutter marker is the visual cue).
+                QString contentText = line.content();
+                if (!contentText.isEmpty()) {
+                    const QChar first = contentText.at(0);
+                    if (first == '+' || first == '-' || first == ' ')
+                        contentText = contentText.mid(1);
+                }
+                LineInfo info;
+                info.type = cvs::DiffLine::Deletion;
+                info.oldLineNo = line.oldLineNo();
+                m_lineInfo[docLine] = info;
+                text += contentText + '\n';
+                ++docLine;
+            } else {
+                // Context / addition line — shown with the file content
+                if (fileIdx >= fileLines.size())
+                    continue;
+                LineInfo info;
+                info.type = line.type();
+                info.oldLineNo = line.oldLineNo();
+                info.newLineNo = line.newLineNo();
+                m_lineInfo[docLine] = info;
+                text += fileLines.at(fileIdx) + '\n';
+                ++docLine;
+                ++fileIdx;
+                // Track the offset for the unchanged lines after this hunk
+                if (info.newLineNo > 0 && info.oldLineNo > 0)
+                    oldNewOffset = info.oldLineNo - info.newLineNo;
+            }
         }
     }
 
+    // Emit remaining unchanged file lines after the last hunk
+    while (fileIdx < fileLines.size()) {
+        LineInfo info;
+        info.type = cvs::DiffLine::Context;
+        info.newLineNo = fileIdx + 1;
+        info.oldLineNo = fileIdx + 1 + oldNewOffset;
+        m_lineInfo[docLine] = info;
+        text += fileLines.at(fileIdx) + '\n';
+        ++docLine;
+        ++fileIdx;
+    }
+
+    // Rebuild the document in one go (block signals to avoid expensive
+    // layout passes for every intermediate step).
+    setUpdatesEnabled(false);
+    document()->blockSignals(true);
+
+    QTextCursor cursor(document());
+    cursor.select(QTextCursor::Document);
+    cursor.insertText(text);
+
+    document()->blockSignals(false);
+    setUpdatesEnabled(true);
+
+    // The rebuilt document is a read-only view, not file content: keep the
+    // modified flag clean and drop the undo history created by the rebuild.
+    document()->setModified(false);
+    document()->clearUndoRedoStacks();
+
+    setReadOnly(true);
+    setLineNumbersVisible(false);
+
+    cursor.movePosition(QTextCursor::Start);
+    setTextCursor(cursor);
+
     // Update viewport margins BEFORE applying highlights so the gutter is
-    // wide enough when the first paint event arrives.  Defer via timer to
-    // avoid re-entering the layout cascade from within this call.
+    // wide enough when the first paint event arrives.  This is safe to run
+    // synchronously: viewport margins and extraAreaWidth() stay consistent
+    // (see additionalExtraAreaWidth()), so the re-layout triggered by the
+    // margin change terminates instead of re-entering endlessly.
     updateDiffGutterWidth();
 
     applyLineHighlights();
     updateScrollBarMarkers();
+
+    document()->markContentsDirty(0, document()->characterCount());
+    viewport()->update();
 }
 
 void CodeEditorView::clearDiffHighlights()
 {
+    resetDiffViewState(true);
+}
+
+bool CodeEditorView::isDiffViewActive() const
+{
+    return m_diffViewActive;
+}
+
+void CodeEditorView::resetDiffViewState(bool restoreDocument)
+{
+    const bool wasActive = m_diffViewActive;
+    m_diffViewActive = false;
+
+    // Restore the file content unless the caller already replaced the
+    // document (e.g. the pane reloaded it from disk).
+    if (wasActive && restoreDocument && !m_savedFileText.isNull())
+        textDocument()->setPlainText(m_savedFileText);
+    m_savedFileText.clear();
+
+    if (wasActive) {
+        setReadOnly(m_savedReadOnly);
+        setLineNumbersVisible(m_savedLineNumbersVisible);
+    }
+
     m_lineInfo.clear();
 
     if (m_diffScrollBarController) {
@@ -375,24 +548,11 @@ void CodeEditorView::updateScrollBarMarkers()
 
 void CodeEditorView::updateDiffGutterWidth()
 {
-    if (m_lineInfo.isEmpty())
+    int extra = diffGutterExtraWidth();
+    if (extra <= 0)
         return;
 
     int baseWidth = TextEditor::TextEditorWidget::extraAreaWidth();
-    const QFontMetrics fm(font());
-    const int digitW = fm.horizontalAdvance('9');
-
-    int maxLineNo = 1;
-    for (const auto &info : m_lineInfo) {
-        if (info.newLineNo > maxLineNo) maxLineNo = info.newLineNo;
-        if (info.oldLineNo > maxLineNo) maxLineNo = info.oldLineNo;
-    }
-    const int digits = QString::number(maxLineNo).length();
-    const int lineColW = digitW * digits;
-    const int markerW  = digitW + 4;
-    const int pad      = 4;
-
-    int extra = pad + lineColW + pad + markerW + pad;
     int total = baseWidth + extra;
 
     QMargins desired{isLeftToRight() ? total : 0, 0, isLeftToRight() ? 0 : total, 0};
@@ -400,13 +560,19 @@ void CodeEditorView::updateDiffGutterWidth()
         setViewportMargins(desired.left(), desired.top(), desired.right(), desired.bottom());
 }
 
-int CodeEditorView::extraAreaWidth(int *markWidthPtr) const
+int CodeEditorView::additionalExtraAreaWidth() const
 {
-    int baseWidth = TextEditor::TextEditorWidget::extraAreaWidth(markWidthPtr);
+    return diffGutterExtraWidth();
+}
 
+int CodeEditorView::diffGutterExtraWidth() const
+{
     if (m_lineInfo.isEmpty())
-        return baseWidth;
+        return 0;
 
+    // The diff gutter draws its own line numbers (the new number, or the old
+    // one for an interleaved deleted line) plus one +/-/~ marker column, so
+    // it reserves room for both.
     const QFontMetrics fm(font());
     const int digitW = fm.horizontalAdvance('9');
 
@@ -420,12 +586,21 @@ int CodeEditorView::extraAreaWidth(int *markWidthPtr) const
     const int markerW  = digitW + 4;
     const int pad      = 4;
 
-    int extra = pad + lineColW + pad + markerW + pad;
-    return baseWidth + extra;
+    return pad + lineColW + pad + markerW + pad;
+}
+
+int CodeEditorView::extraAreaWidth(int *markWidthPtr) const
+{
+    int baseWidth = TextEditor::TextEditorWidget::extraAreaWidth(markWidthPtr);
+    return baseWidth + diffGutterExtraWidth();
 }
 
 void CodeEditorView::extraAreaPaintEvent(QPaintEvent *e)
 {
+    // Diff view: the gutter is fully custom (the base line numbers are
+    // hidden while the diff view is active) so every line can show its own
+    // number — the new line number, or the old one for an interleaved
+    // deleted line — next to its +/-/~ marker.
     if (m_lineInfo.isEmpty()) {
         TextEditor::TextEditorWidget::extraAreaPaintEvent(e);
         return;
@@ -461,19 +636,24 @@ void CodeEditorView::extraAreaPaintEvent(QPaintEvent *e)
         if (blockRect.bottom() >= e->rect().top()
             && blockRect.top() <= e->rect().bottom())
         {
-            int blockNo = block.blockNumber();
-            auto it = m_lineInfo.find(blockNo);
-
+            auto it = m_lineInfo.find(block.blockNumber());
             if (it != m_lineInfo.end()) {
                 const LineInfo &info = it.value();
-                const int top  = int(blockRect.top());
-                const int h    = int(blockRect.height());
+                const int top = int(blockRect.top());
+                const int h   = int(blockRect.height());
 
                 if (info.newLineNo > 0) {
                     painter.setPen(QColor(120, 120, 120));
                     painter.drawText(QRect(lineX, top, lineColW, h),
                                      Qt::AlignRight | Qt::AlignVCenter,
                                      QString::number(info.newLineNo));
+                } else if (info.oldLineNo > 0) {
+                    // Interleaved deleted line: show its old number so it can
+                    // be located in the original file.
+                    painter.setPen(QColor(150, 150, 150));
+                    painter.drawText(QRect(lineX, top, lineColW, h),
+                                     Qt::AlignRight | Qt::AlignVCenter,
+                                     QString::number(info.oldLineNo));
                 }
 
                 if (!info.isHeader) {
@@ -493,7 +673,6 @@ void CodeEditorView::extraAreaPaintEvent(QPaintEvent *e)
                         painter.drawText(QRect(markerX, top, markerW, h),
                                          Qt::AlignCenter, "~");
                         break;
-                    case cvs::DiffLine::Context:
                     default:
                         break;
                     }

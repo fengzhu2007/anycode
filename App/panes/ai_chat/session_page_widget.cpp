@@ -144,7 +144,11 @@ void SessionPageWidget::setupDiffPopup()
     m_diffListWidget = new FileDiffListWidget;
     m_diffPopup->setContentWidget(m_diffListWidget);
 
-    // Connect file diff list signals (per-item only, no bulk buttons)
+    // Connect per-item accept/reject to update button visibility
+    connect(m_diffListWidget, &FileDiffListWidget::fileAccepted,
+            this, &SessionPageWidget::updateDiffButtonsVisibility);
+    connect(m_diffListWidget, &FileDiffListWidget::fileRejected,
+            this, &SessionPageWidget::updateDiffButtonsVisibility);
 
     // fileChanged label click -> show popup
     ui->fileChanged->setCursor(Qt::PointingHandCursor);
@@ -201,14 +205,8 @@ void SessionPageWidget::setFileDiffs(const QList<FileDiffInfo> &diffs)
     m_currentDiffs.append(diffs);
     m_diffListWidget->appendDiffs(diffs);
 
-    bool hasDiffs = !m_currentDiffs.isEmpty();
-    ui->fileChanged->setVisible(hasDiffs);
-    ui->accept->setVisible(hasDiffs);
-    ui->reject->setVisible(hasDiffs);
-
-    if (hasDiffs) {
-        ui->fileChanged->setText(tr("File Changed List (%1)").arg(m_currentDiffs.size()));
-    }
+    ui->fileChanged->setText(tr("File Changed List (%1)").arg(m_currentDiffs.size()));
+    updateDiffButtonsVisibility();
 }
 
 void SessionPageWidget::onAcceptAll()
@@ -219,6 +217,7 @@ void SessionPageWidget::onAcceptAll()
     m_chatService->confirmChanges(m_sessionId);
     m_diffListWidget->markAllAccepted();
     m_currentDiffs.clear();
+    updateDiffButtonsVisibility();
 }
 
 void SessionPageWidget::onRejectAll()
@@ -229,6 +228,15 @@ void SessionPageWidget::onRejectAll()
     m_chatService->revertSession(m_sessionId);
     m_diffListWidget->markAllRejected();
     m_currentDiffs.clear();
+    updateDiffButtonsVisibility();
+}
+
+void SessionPageWidget::updateDiffButtonsVisibility()
+{
+    bool hasPending = m_diffListWidget && m_diffListWidget->hasPendingItems();
+    ui->fileChanged->setVisible(hasPending);
+    ui->accept->setVisible(hasPending);
+    ui->reject->setVisible(hasPending);
 }
 
 // ---- QML view setup ----

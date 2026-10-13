@@ -31,6 +31,7 @@ public:
     int m_port;
     int m_runMode;          // Terminal or QProcessMode
     bool m_proxyEnabled;    // 是否启用代理（复用网络设置中的代理配置）
+    bool m_autoFileDiff;
 };
 }
 
