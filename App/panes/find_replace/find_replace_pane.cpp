@@ -141,7 +141,7 @@ void FindReplacePane::runReplace(const QString& before,const QString& after,cons
         //qDebug()<<"scope"<<scope;
         FindReplaceProgress* progress = nullptr;
         if(scope==":"){
-            //current
+            //current document - replace directly in main thread
             auto instance = CodeEditorManager::getInstance();
             if(instance==nullptr){
                 return ;
@@ -150,12 +150,10 @@ void FindReplacePane::runReplace(const QString& before,const QString& after,cons
             if(pane==nullptr){
                 return ;
             }
-            auto doc = pane->editor()->document();
-            QString path = pane->path();
-            if(path.isEmpty()){
-                path = pane->windowTitle();
-            }
-            progress = new FindReplaceProgress(FindReplaceProgress::SearchAndReplace,before,after,flags,path,doc,filter,exclusion);
+            auto editor = pane->editor();
+            int replaceCount = editor->replaceAll(before,after,flags);
+            wToast::showText(tr("Replaced:%1 Replaced Files:%2").arg(replaceCount).arg(replaceCount>0?1:0));
+            return ;
         }else if(scope=="::"){
             //opened
             auto instance = CodeEditorManager::getInstance();

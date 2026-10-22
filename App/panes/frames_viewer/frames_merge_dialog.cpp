@@ -6,6 +6,8 @@
 #include <QPainter>
 #include <QFileDialog>
 #include <QDebug>
+#include <QVector>
+#include <cmath>
 namespace ady{
 
 FramesMergeDialog* FramesMergeDialog::instance = nullptr;
@@ -29,6 +31,8 @@ FramesMergeDialog::FramesMergeDialog(QWidget *parent)
 
     connect(ui->save,&QPushButton::clicked,this,&FramesMergeDialog::onSave);
     connect(ui->columns,QOverload<int>::of(&QSpinBox::valueChanged),this,&FramesMergeDialog::onColumnsChanged);
+    connect(ui->margin,QOverload<int>::of(&QSpinBox::valueChanged),this,&FramesMergeDialog::onColumnsChanged);
+    connect(ui->separation,QOverload<int>::of(&QSpinBox::valueChanged),this,&FramesMergeDialog::onColumnsChanged);
 }
 
 FramesMergeDialog::~FramesMergeDialog()
@@ -59,49 +63,62 @@ void FramesMergeDialog::setModel(FramesModel* model){
 void FramesMergeDialog::merge(){
     auto list = d->model->results();
     auto columns = ui->columns->value();
-    //qDebug()<<"columns"<<columns;
-    int width = 0;
-    int height = 0;
+    auto margin = ui->margin->value();           // 合并图四周保留的空白边距
+    auto separation = ui->separation->value();   // 图像之间上下/左右的间隔
     int total = list.size();
+    if(total == 0){
+        ui->image->load(QPixmap());
+        return;
+    }
+
     int rows = std::ceil(total * 1.0 / columns);
 
+    // 逐行统计：行高取该行最高图像，行宽为该行所有图像宽度加上图像之间的间隔
+    QVector<int> rowHeights(rows, 0);
+    int width = 0;
+    int height = 0;
     for(int i=0;i<rows;i++){
         int h = 0;
         int w = 0;
+        int count = 0;
         for(int j=0;j<columns;j++){
             int index = i * columns + j;
             if(index<total){
                 auto item = list.at(index);
                 auto img = item.image;
                 h = std::max(h,img.height());
+                if(count > 0){
+                    w += separation;
+                }
                 w += img.width();
+                count++;
             }
         }
+        rowHeights[i] = h;
         height += h;
         width = std::max(width,w);
     }
+    // 行与行之间的间隔，以及四周的边距
+    height += (rows - 1) * separation;
+    width += margin * 2;
+    height += margin * 2;
+
     d->image = QImage(width,height,QImage::Format_ARGB32);
     d->image.fill(Qt::transparent);
     QPainter painter(&d->image);
-    int offsetY = 0;
-    int offsetX = 0;
-    int hh = 0;
-    for(int i=0;i<total;i++){
-        if(i%columns==0){
-            hh = 0;
-            offsetX = 0;
+    int offsetY = margin;
+    for(int i=0;i<rows;i++){
+        int offsetX = margin;
+        for(int j=0;j<columns;j++){
+            int index = i * columns + j;
+            if(index<total){
+                auto item = list.at(index);
+                auto img = item.image;
+                painter.drawImage(offsetX, offsetY,img.toImage());
+                offsetX += img.width() + separation;
+            }
         }
-        auto item = list.at(i);
-        auto img = item.image;
-        hh = std::max(hh,img.height());
-
-
-        painter.drawImage(offsetX, offsetY,img.toImage());
-
-        offsetX += img.width();
-        if(i%columns==columns-1){
-            offsetY += hh;
-        }
+        offsetY += rowHeights[i] + separation;
     }
     painter.end();
     ui->image->load(QPixmap::fromImage(d->image));
