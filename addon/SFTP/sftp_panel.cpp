@@ -8,6 +8,7 @@
 #include <QMenu>
 #include <QCursor>
 #include <QLabel>
+#include <QRegularExpression>
 #include "interface/remote_file_item_model.h"
 #include "interface/NewFileDialog.h"
 #include "components/message_dialog.h"
@@ -442,9 +443,9 @@ void SFTPPanel::onActMkdir(){
 void SFTPPanel::onRename(const QModelIndex& index,QString newString)
 {
     //qDebug()<<"name:"<<newString;
-    QRegExp reg("^[^\?\\*|\"<>:/]{1,256}$");
-    //qDebug()<<"match:"<<reg.exactMatch(newString);
-    if(!reg.exactMatch(newString)){
+    QRegularExpression reg("^[^\?\\*|\"<>:/]{1,256}$");
+    //qDebug()<<"match:"<<reg.match(newString).hasMatch();
+    if(!reg.match(newString).hasMatch()){
         return ;
     }
     RemoteFileItemModel* model = static_cast<RemoteFileItemModel*>(ui->treeView->model());

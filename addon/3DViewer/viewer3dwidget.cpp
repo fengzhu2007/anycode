@@ -5,9 +5,6 @@
 #include <Qt3DCore/QNode>
 #include <Qt3DRender/QMesh>
 #include <Qt3DRender/QGeometryRenderer>
-#include <Qt3DRender/QGeometry>
-#include <Qt3DRender/QAttribute>
-#include <Qt3DRender/QBuffer>
 #include <Qt3DRender/QCamera>
 #include <Qt3DRender/QMaterial>
 #include <Qt3DRender/QRenderSettings>
@@ -16,6 +13,19 @@
 #include <Qt3DExtras/QOrbitCameraController>
 #include <Qt3DExtras/QForwardRenderer>
 #include <Qt3DCore/QTransform>
+
+// Qt6 起 QGeometry/QAttribute/QBuffer 从 Qt3DRender 迁移到 Qt3DCore，这里做统一别名以兼容 Qt5/Qt6
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <Qt3DCore/QGeometry>
+#include <Qt3DCore/QAttribute>
+#include <Qt3DCore/QBuffer>
+namespace Qt3DGeometry = Qt3DCore;
+#else
+#include <Qt3DRender/QGeometry>
+#include <Qt3DRender/QAttribute>
+#include <Qt3DRender/QBuffer>
+namespace Qt3DGeometry = Qt3DRender;
+#endif
 
 static void appendVec3(QByteArray& data, const QVector3D& v)
 {
@@ -81,7 +91,7 @@ void Viewer3DWidget::setupGrid()
 {
     Qt3DCore::QEntity* gridEntity = new Qt3DCore::QEntity(m_rootEntity);
 
-    Qt3DRender::QGeometry* geometry = new Qt3DRender::QGeometry(gridEntity);
+    Qt3DGeometry::QGeometry* geometry = new Qt3DGeometry::QGeometry(gridEntity);
 
     // Grid vertices (lines on XZ plane)
     QByteArray vertexData;
@@ -97,14 +107,14 @@ void Viewer3DWidget::setupGrid()
         appendVec3(vertexData, p4);
     }
 
-    Qt3DRender::QBuffer* vertexBuffer = new Qt3DRender::QBuffer(geometry);
+    Qt3DGeometry::QBuffer* vertexBuffer = new Qt3DGeometry::QBuffer(geometry);
     vertexBuffer->setData(vertexData);
 
-    Qt3DRender::QAttribute* posAttr = new Qt3DRender::QAttribute(geometry);
-    posAttr->setName(Qt3DRender::QAttribute::defaultPositionAttributeName());
-    posAttr->setVertexBaseType(Qt3DRender::QAttribute::Float);
+    Qt3DGeometry::QAttribute* posAttr = new Qt3DGeometry::QAttribute(geometry);
+    posAttr->setName(Qt3DGeometry::QAttribute::defaultPositionAttributeName());
+    posAttr->setVertexBaseType(Qt3DGeometry::QAttribute::Float);
     posAttr->setVertexSize(3);
-    posAttr->setAttributeType(Qt3DRender::QAttribute::VertexAttribute);
+    posAttr->setAttributeType(Qt3DGeometry::QAttribute::VertexAttribute);
     posAttr->setBuffer(vertexBuffer);
     posAttr->setByteStride(3 * sizeof(float));
     posAttr->setCount(vertexData.size() / (3 * sizeof(float)));
@@ -129,7 +139,7 @@ void Viewer3DWidget::setupAxes()
 {
     Qt3DCore::QEntity* axesEntity = new Qt3DCore::QEntity(m_rootEntity);
 
-    Qt3DRender::QGeometry* geometry = new Qt3DRender::QGeometry(axesEntity);
+    Qt3DGeometry::QGeometry* geometry = new Qt3DGeometry::QGeometry(axesEntity);
 
     // 3 axis lines: 6 vertices
     QByteArray vertexData;
@@ -145,14 +155,14 @@ void Viewer3DWidget::setupAxes()
     appendVec3(vertexData, origin);
     appendVec3(vertexData, zAxis);
 
-    Qt3DRender::QBuffer* vertexBuffer = new Qt3DRender::QBuffer(geometry);
+    Qt3DGeometry::QBuffer* vertexBuffer = new Qt3DGeometry::QBuffer(geometry);
     vertexBuffer->setData(vertexData);
 
-    Qt3DRender::QAttribute* posAttr = new Qt3DRender::QAttribute(geometry);
-    posAttr->setName(Qt3DRender::QAttribute::defaultPositionAttributeName());
-    posAttr->setVertexBaseType(Qt3DRender::QAttribute::Float);
+    Qt3DGeometry::QAttribute* posAttr = new Qt3DGeometry::QAttribute(geometry);
+    posAttr->setName(Qt3DGeometry::QAttribute::defaultPositionAttributeName());
+    posAttr->setVertexBaseType(Qt3DGeometry::QAttribute::Float);
     posAttr->setVertexSize(3);
-    posAttr->setAttributeType(Qt3DRender::QAttribute::VertexAttribute);
+    posAttr->setAttributeType(Qt3DGeometry::QAttribute::VertexAttribute);
     posAttr->setBuffer(vertexBuffer);
     posAttr->setByteStride(3 * sizeof(float));
     posAttr->setCount(6);

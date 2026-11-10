@@ -143,7 +143,7 @@ void FindReplaceDialog::setSearchScope(const QString& folder){
         }
     }
     //list<<QPair{folder,folder};
-    list.insert(2,QPair{folder,folder});
+    list.insert(2,QPair<QString,QString>(folder,folder));
     d->searchScodeModel->setDataSource(list);
     d->find->setSearchScope(2);
     d->replace->setSearchScope(2);

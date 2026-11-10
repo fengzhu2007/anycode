@@ -72,7 +72,11 @@ void ITDButton::setDescription(const QString& description){
 }
 
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void ITDButton::enterEvent(QEnterEvent *event){
+#else
 void ITDButton::enterEvent(QEvent *event){
+#endif
     QFrame::enterEvent(event);
     this->setProperty("state","hover");
     this->style()->polish(this);
@@ -117,7 +121,7 @@ void ITDButton::paintEvent(QPaintEvent *e)
     //QFrame::paintEvent(e);
     Q_UNUSED(e);
     QStyleOption opt;
-    opt.init(this);
+    opt.initFrom(this);
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Frame, &opt, &p, this);
 }

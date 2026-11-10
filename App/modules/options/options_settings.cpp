@@ -36,22 +36,25 @@ public:
 OptionsSettings::OptionsSettings():QObject() {
     d = new OptionsSettingsPrivate;
     d->data = CommonStorage().options();
-    auto options = d->data.find("options")->toObject();
+    //NOTE: use value() instead of find(): when the database has no "options" record
+    //(first run or a new data file), data is empty and find() returns end() which
+    //must never be dereferenced.
+    const QJsonObject options = d->data.value(QLatin1String("options")).toObject();
 
     if(options.contains(environmentKey)){
-        d->environmentSettings.fromJson(options.find(environmentKey)->toObject());
+        d->environmentSettings.fromJson(options.value(environmentKey).toObject());
     }
     if(options.contains(languageKey)){
-        d->languageSettings.fromJson(options.find(languageKey)->toObject());
+        d->languageSettings.fromJson(options.value(languageKey).toObject());
     }
     if(options.contains(aiKey)){
-        d->aiSettings.fromJson(options.find(aiKey)->toObject());
+        d->aiSettings.fromJson(options.value(aiKey).toObject());
     }
     if(options.contains(agentKey)){
-        d->agentSettings.fromJson(options.find(agentKey)->toObject());
+        d->agentSettings.fromJson(options.value(agentKey).toObject());
     }
     if(options.contains(networkKey)){
-        d->networkSettings.fromJson(options.find(networkKey)->toObject());
+        d->networkSettings.fromJson(options.value(networkKey).toObject());
     }
 
     {
@@ -61,7 +64,7 @@ OptionsSettings::OptionsSettings():QObject() {
             texteditorSettings = new TextEditor::TextEditorSettings;
         }
         if(options.contains(nameKey)){
-            texteditorSettings->fromJson(options.find(nameKey)->toObject());
+            texteditorSettings->fromJson(options.value(nameKey).toObject());
         }
     }
 }

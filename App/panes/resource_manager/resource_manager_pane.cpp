@@ -175,11 +175,12 @@ void ResourceManagerPane::initView(){
     d->actionAddToNewChat = new QAction(tr("Add To New Chat"),this);
     //d->actionUpload = new QAction(QIcon(":/Resource/icons/BatchCheckIn_16x.svg"),tr("Upload"),this);
 
-    d->actionCut->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_X));
-    d->actionCopy->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_C));
-    d->actionPaste->setShortcut(QKeySequence(Qt::CTRL+Qt::Key_V));
+    d->actionCut->setShortcut(QKeySequence(QStringLiteral("Ctrl+X")));
+    d->actionCopy->setShortcut(QKeySequence(QStringLiteral("Ctrl+C")));
+    d->actionPaste->setShortcut(QKeySequence(QStringLiteral("Ctrl+V")));
     d->actionRename->setShortcut(QKeySequence(Qt::Key_F2));
-    d->actionFind->setShortcut(QKeySequence(Qt::CTRL+Qt::SHIFT+Qt::Key_F));
+    // Qt6 删除了 operator+(Modifier, Modifier)，两个及以上修饰键只能用字符串形式描述
+    d->actionFind->setShortcut(QKeySequence(QStringLiteral("Ctrl+Shift+F")));
 
     connect(d->actionNew_Folder,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
     connect(d->actionNew_File,&QAction::triggered,this,&ResourceManagerPane::onActionTriggered);
@@ -246,6 +247,7 @@ bool ResourceManagerPane::onReceive(Event* e){
             return true;
         }
 
+
         //add to recent project
         RecentStorage().add(project->name,project->path,project->id);
 
@@ -262,19 +264,21 @@ bool ResourceManagerPane::onReceive(Event* e){
             }
         }
 
-        auto arr = proj.find("opened")->toArray();
-        if(arr.size()>0){
-            QStringList opendlist;
-            for(auto one:arr){
-                if(one.toString().isEmpty()==false){
-                    opendlist << one.toString();
+        auto result = proj.find("opened");
+        if(result!=proj.end()){
+            auto arr = result->toArray();
+            if(arr.size()>0){
+                QStringList opendlist;
+                for(auto one:arr){
+                    if(one.toString().isEmpty()==false){
+                        opendlist << one.toString();
+                    }
+                }
+                if(opendlist.length()>0){
+                    item->setOpenList(opendlist);
                 }
             }
-            if(opendlist.length()>0){
-                item->setOpenList(opendlist);
-            }
         }
-
         this->readFolder(item);
         item->setExpanded(true);
         return true;

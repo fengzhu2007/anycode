@@ -37,7 +37,12 @@ set(ANYCODE_SOURCES
 
 
 if(WIN32)
-  list(APPEND ANYCODE_CFILES copyright.rc)
+    # Windows 下的资源脚本（EXE 图标 + 版本信息）
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        list(APPEND ANYCODE_CFILES copyrightd.rc)
+    else()
+        list(APPEND ANYCODE_CFILES copyright.rc)
+    endif()
 elseif(APPLE)
     set(APP_ICON_PATH "${CMAKE_SOURCE_DIR}/src/logo.icns")
 endif()
@@ -46,6 +51,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(AnyCode
         MANUAL_FINALIZATION
         ${ANYCODE_SOURCES}
+        ${ANYCODE_CFILES}
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET anycode APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -108,6 +114,70 @@ endif()
 
 if(APPLE)
     file(COPY ${APP_ICON_PATH} DESTINATION ${CMAKE_BINARY_DIR}/AnyCode.app/Contents/Resources/)
+endif()
+
+
+# ---------------------------------------------------------------------------
+# Windows 运行时 Qt 插件部署
+#
+# Qt6 官方发行版是可重定位(relocatable)构建，QLibraryInfo 会从 Qt6Core.dll 的
+# 所在位置反推 prefix。本项目把 Qt 的 DLL 直接放在可执行文件同级目录（而不是
+# <prefix>/bin），导致 prefix 推导结果为空，插件搜索路径也随之变成空字符串，
+# 运行时报错：Could not find the Qt platform plugin "windows" in ""
+#
+# 这里在可执行文件旁生成 qt.conf，并把 Qt 插件复制到 <exe>/plugins 目录，
+# 使插件路径不再依赖 prefix 推导。
+# ---------------------------------------------------------------------------
+if(WIN32)
+    set(ANYCODE_QT_PLUGIN_DIRS
+        platforms
+        platforminputcontexts
+        imageformats
+        iconengines
+        styles
+        sqldrivers
+        tls
+        networkinformation
+        generic
+    )
+
+    # 定位 Qt 插件源目录：<qt>/bin/qmake.exe -> <qt>/plugins
+    set(ANYCODE_QT_PLUGINS_DIR "")
+    get_target_property(ANYCODE_QMAKE_LOCATION Qt${QT_VERSION_MAJOR}::qmake IMPORTED_LOCATION)
+    if(ANYCODE_QMAKE_LOCATION)
+        get_filename_component(_anycode_qt_bin_dir "${ANYCODE_QMAKE_LOCATION}" DIRECTORY)
+        get_filename_component(ANYCODE_QT_PLUGINS_DIR "${_anycode_qt_bin_dir}/../plugins" ABSOLUTE)
+    endif()
+
+    # qt.conf：插件相对可执行文件目录解析，与 prefix 推导无关
+    set(ANYCODE_QT_CONF "${CMAKE_CURRENT_BINARY_DIR}/qt.conf")
+    file(WRITE "${ANYCODE_QT_CONF}" "[Paths]\nPrefix = .\nPlugins = plugins\n")
+
+    add_custom_command(TARGET AnyCode POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${ANYCODE_QT_CONF}"
+            "$<TARGET_FILE_DIR:AnyCode>/qt.conf"
+        COMMENT "Deploying qt.conf"
+    )
+
+    if(ANYCODE_QT_PLUGINS_DIR AND IS_DIRECTORY "${ANYCODE_QT_PLUGINS_DIR}")
+        message(STATUS "Deploying Qt plugins from ${ANYCODE_QT_PLUGINS_DIR}")
+        foreach(_anycode_plugin_dir ${ANYCODE_QT_PLUGIN_DIRS})
+            file(GLOB _anycode_plugin_files "${ANYCODE_QT_PLUGINS_DIR}/${_anycode_plugin_dir}/*.dll")
+            if(_anycode_plugin_files)
+                add_custom_command(TARGET AnyCode POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E make_directory
+                        "$<TARGET_FILE_DIR:AnyCode>/plugins/${_anycode_plugin_dir}"
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        ${_anycode_plugin_files}
+                        "$<TARGET_FILE_DIR:AnyCode>/plugins/${_anycode_plugin_dir}"
+                    COMMENT "Deploying Qt plugin: ${_anycode_plugin_dir}"
+                )
+            endif()
+        endforeach()
+    else()
+        message(WARNING "Qt plugins directory not found, skip plugin deployment: '${ANYCODE_QT_PLUGINS_DIR}'")
+    endif()
 endif()
 
 

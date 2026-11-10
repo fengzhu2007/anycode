@@ -9,6 +9,7 @@
 #include <QCursor>
 #include <QLabel>
 #include <QLocale>
+#include <QRegularExpression>
 #include "interface/remote_file_item_model.h"
 #include "interface/NewFileDialog.h"
 #include "components/message_dialog.h"
@@ -455,8 +456,8 @@ void FTPPanel::onActMkdir(){
 
 void FTPPanel::onRename(const QModelIndex& index,QString newString)
 {
-    QRegExp reg("^[^\?\\*|\"<>:/]{1,256}$");
-    if(!reg.exactMatch(newString)){
+    QRegularExpression reg("^[^\?\\*|\"<>:/]{1,256}$");
+    if(!reg.match(newString).hasMatch()){
         return ;
     }
     RemoteFileItemModel* model = static_cast<RemoteFileItemModel*>(ui->treeView->model());

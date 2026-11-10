@@ -76,7 +76,7 @@ namespace ady {
     Qt::ItemFlags DirMappingModel::flags(const QModelIndex &index) const
     {
         if (!index.isValid())
-            return 0;
+            return Qt::NoItemFlags;
         Qt::ItemFlags flags = QAbstractItemModel::flags(index);
         //flags = flags | Qt::ItemIsDragEnabled ;
         int row = index.row();

@@ -118,30 +118,28 @@ namespace ady {
         }
     }
 
-    QStringList Utils::split(const QString& str,QRegExp sep,int limit)
+    QStringList Utils::split(const QString& str,const QRegularExpression& sep,int limit)
     {
         if(limit<=0){
             return str.split(sep);
         }else{
-            //int length = sep.length();
+            //Qt6 移除了 QRegExp，这里使用 QRegularExpression 实现按段数限制的分割
             QStringList lists;
-            QString stri = str;
-            int pos = 0;
-            //int start = 0;
-            while ((pos = sep.indexIn(stri)) != -1) {
-                //qDebug()<<"str:"<<stri;
-                //qDebug()<<"pos:"<<pos;
-                 lists.push_back(stri.left(pos));
-                 pos += sep.matchedLength();
-                 stri = stri.mid(pos);
-                 if(lists.length()==limit - 1){
-                     break;
-                 }
+            int offset = 0;
+            while(lists.length() < limit - 1){
+                QRegularExpressionMatch match = sep.match(str,offset);
+                if(!match.hasMatch()){
+                    break;
+                }
+                lists.push_back(str.mid(offset,match.capturedStart() - offset));
+                offset = match.capturedEnd();
+                if(match.capturedLength() == 0){
+                    //空匹配时退出，避免死循环
+                    break;
+                }
             }
-            lists.push_back(stri);
-            //qDebug()<<"lists:"<<lists;
+            lists.push_back(str.mid(offset));
             return lists;
-
         }
     }
 

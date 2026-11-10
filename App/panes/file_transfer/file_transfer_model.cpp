@@ -774,7 +774,7 @@ void FileTransferModel::removeProject(long long id){
 }
 
 void FileTransferModel::removeSite(long long id){
-    QMutexLocker(&d->mutex);
+    QMutexLocker locker(&d->mutex);
     int pTotal = d->root->childrenCount();
     for(int i=0;i<pTotal;i++){
         auto proj = d->root->childAt(i);
@@ -807,7 +807,7 @@ void FileTransferModel::removeSite(long long id){
 
 
 void FileTransferModel::removeAllItems(FileTransferModelItem::State state){
-    QMutexLocker(&d->mutex);
+    QMutexLocker locker(&d->mutex);
     int pTotal = d->root->childrenCount();
     for(int i=0;i<pTotal;i++){
          auto proj = d->root->childAt(i);
@@ -848,7 +848,7 @@ void FileTransferModel::removeAllItems(FileTransferModelItem::State state){
 
 
 void FileTransferModel::removeItems(QModelIndexList list,FileTransferModelItem::State state){
-    QMutexLocker(&d->mutex);
+    QMutexLocker locker(&d->mutex);
     FileTransferModelItem* site = nullptr;
     for(auto one:list){
          auto item = static_cast<FileTransferModelItem*>(one.internalPointer());
@@ -869,7 +869,7 @@ void FileTransferModel::removeItems(QModelIndexList list,FileTransferModelItem::
 
 
 void FileTransferModel::retryItems(QModelIndexList list){
-    QMutexLocker(&d->mutex);
+    QMutexLocker locker(&d->mutex);
     FileTransferModelItem* site = nullptr;
     for(auto one:list){
         auto item = static_cast<FileTransferModelItem*>(one.internalPointer());
@@ -895,7 +895,7 @@ void FileTransferModel::retryItems(QModelIndexList list){
 }
 
 void FileTransferModel::retryAllItems(){
-    QMutexLocker(&d->mutex);
+    QMutexLocker locker(&d->mutex);
     int pTotal = d->root->childrenCount();
     for(int i=0;i<pTotal;i++){
          auto proj = d->root->childAt(i);

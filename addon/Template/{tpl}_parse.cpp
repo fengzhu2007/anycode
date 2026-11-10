@@ -1,6 +1,7 @@
 #include "{tpl}_parse.h"
 #include <QDate>
 #include <QDebug>
+#include <QRegularExpression>
 namespace ady {
 QMap<QString,int> {TPL}Parse::monthNameMap;
 
@@ -74,7 +75,7 @@ bool {TPL}Parse::lineParse(QString& line,FileItem& entry)
 
 bool {TPL}Parse::parseAsUnix(QString &line, FileItem& entry)
 {
-    QStringList tokens = line.split(QRegExp("\\s+"));
+    QStringList tokens = line.split(QRegularExpression("\\s+"));
     int size = tokens.size();
     QString permission;
     if(size>0){
@@ -170,7 +171,7 @@ bool {TPL}Parse::parseAsMlsd(QString &line, FileItem& entry)
 
 bool {TPL}Parse::parseAsDos(QString &line, FileItem &entry)
 {
-    QStringList tokens = line.split(QRegExp("\\s+"));
+    QStringList tokens = line.split(QRegularExpression("\\s+"));
     int size = tokens.size();
     if(size<4){
         return false;

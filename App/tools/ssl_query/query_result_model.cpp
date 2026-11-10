@@ -2,6 +2,7 @@
 #include <QColor>
 #include <QDateTime>
 #include <QDebug>
+#include <algorithm>
 
 namespace ady{
 class QueryResultModelPrivate{
@@ -17,7 +18,7 @@ public:
         this->col = col;
         this->asc = asc;
     }
-    bool operator()(QueryResult& a,QueryResult& b)
+    bool operator()(const QueryResult& a,const QueryResult& b)
     {
         if(this->asc){
             return a.expireDate > b.expireDate;
@@ -168,7 +169,7 @@ QModelIndexList QueryResultModel::search(const QString& text){
 void QueryResultModel::sortAll(){
     if(d->list.size()>0){
         beginResetModel();
-        qSort(d->list.begin(),d->list.end(),ResultSorting(ExpireDate,false));
+        std::sort(d->list.begin(),d->list.end(),ResultSorting(ExpireDate,false));
         endResetModel();
     }
 }

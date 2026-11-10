@@ -23,7 +23,7 @@ ProjectSelectItemWidget::ProjectSelectItemWidget(QWidget* parent)
     ////layout->setMargin(0);
     //layout->setSpacing(0);
     //layout->addLayout(vLayout,1);
-    vLayout->setMargin(12);
+    vLayout->setContentsMargins(12, 12, 12, 12);
     vLayout->setSpacing(6);
     this->setLayout(vLayout);
     d->title = new QLabel(this);

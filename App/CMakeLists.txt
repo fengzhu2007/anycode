@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.10)
+# Qt6 要求 CMake >= 3.16
+cmake_minimum_required(VERSION 3.16)
 
 project(App)
 
@@ -17,24 +18,27 @@ set(COMPILER_INFO "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION} ${CMAK
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Qml Quick QuickWidgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Xml Sql Gui Network Concurrent LinguistTools Svg Qml Quick QuickWidgets)
 
-
-
-
-#message(STATUS "Qt5 : ${Qt5Widgets_PRIVATE_INCLUDE_DIRS}")
-
-if (TARGET Qt5::QuickPrivate)
-    message(STATUS "Qt5::QuickPrivate FOUND")
-    get_target_property(_priv_inc Qt5::QuickPrivate INTERFACE_INCLUDE_DIRECTORIES)
-    message(STATUS "  includes: ${_priv_inc}")
-else()
-    message(WARNING "Qt5::QuickPrivate NOT FOUND")
+# Qt6 中 QSvgWidget 位于独立的 Qt::SvgWidgets 模块，Qt5 则包含在 Qt::Svg 内
+# Qt6 中 QTextCodec 迁移到 Qt::Core5Compat 模块
+set(APP_EXTRA_QT_LIBS "")
+if(QT_VERSION_MAJOR EQUAL 6)
+    find_package(Qt6 REQUIRED COMPONENTS SvgWidgets Core5Compat)
+    list(APPEND APP_EXTRA_QT_LIBS Qt6::SvgWidgets Qt6::Core5Compat)
 endif()
 
 
 
-include_directories(SYSTEM "../3party/bin/x64/include")
+# 第三方库的头文件目录全部指向 3party 内的源码，配合下面的 in-tree 目标使用，
+# 不再依赖 ../3party/bin 下预先编译好的头文件（版本与源码保持一致）
+include_directories(SYSTEM "../3party/curl/include")
+include_directories(SYSTEM "../3party/libssh2/include")
+# libgit2 的目标只提供 PRIVATE 头文件目录，这里手工补上；
+# 构建目录下的 include 中有 configure_file 生成的 git2/experimental.h
+include_directories(SYSTEM "${CMAKE_BINARY_DIR}/3party/libgit2/include")
+include_directories(SYSTEM "../3party/libgit2/include")
+# 加密库改用 3party 内源码构建的 mbedtls（替代原 openssl）
+include_directories(SYSTEM "../3party/mbedtls/include")
 
-include_directories(SYSTEM "../libsvnpp/include")
 include_directories(SYSTEM "../dockingpane/src")
 include_directories(SYSTEM "../wRect/src")
 include_directories(SYSTEM "../texteditor")
@@ -54,22 +58,51 @@ include_directories(SYSTEM "../3party/tree-sitter/language")
 #message(STATUS "Include directories: ${dirs}")
 
 
-if(WIN32)
-find_library(CRYPTO_LIB libcrypto PATHS "../3party/bin/x64/lib")
-find_library(SSL_LIB libssl PATHS "../3party/bin/x64/lib")
-find_library(CURL_LIB libcurl_imp PATHS "../3party/bin/x64/lib")
-find_library(SSH2_LIB libssh2 PATHS "../3party/bin/x64/lib")
-find_library(Z_LIB zlib PATHS "../3party/bin/x64/lib")
-find_library(GIT2_LIB git2 PATHS "../3party/bin/x64/lib")
+# 加密库不再使用预编译的 openssl，改由 3party/CMakeLists.txt 中
+# add_subdirectory(mbedtls) 提供的 mbedtls / mbedx509 / mbedcrypto 目标
+set(MBEDTLS_LIBS mbedtls mbedx509 mbedcrypto)
 
+# ---------------------------------------------------------------------------
+# 其余第三方库同样由 3party/CMakeLists.txt 就地（in-tree）编译：
+# 这里直接链接 CMake 目标，既自动带上头文件目录，又自动建立构建顺序依赖，
+# 不再需要先用脚本把 curl / libssh2 / zlib / libgit2 预编译到 ../3party/bin 下
+# ---------------------------------------------------------------------------
+
+# curl：3party 中只开启了 BUILD_SHARED_LIBS，实际产物是 libcurl_shared；
+# CURL::libcurl 是该目标（或静态版）的别名，会跟随 3party 的开关自动选择
+set(CURL_LIB "")
+if(TARGET CURL::libcurl)
+    set(CURL_LIB CURL::libcurl)
+elseif(TARGET libcurl_shared)
+    set(CURL_LIB libcurl_shared)
+elseif(TARGET libcurl_static)
+    set(CURL_LIB libcurl_static)
 else()
-find_library(CRYPTO_LIB crypto PATHS "../3party/bin/x64/lib")
-find_library(SSL_LIB ssl PATHS "../3party/bin/x64/lib")
-find_library(CURL_LIB curl PATHS "../3party/bin/x64/lib")
-find_library(SSH2_LIB ssh2 PATHS "../3party/bin/x64/lib")
-find_library(Z_LIB z PATHS "../3party/bin/x64/lib")
-find_library(GIT2_LIB git2 PATHS "../3party/bin/x64/lib")
+    message(FATAL_ERROR "找不到 libcurl 目标：请确认顶层已 add_subdirectory(3party) 并参与构建")
+endif()
 
+# libssh2 在 3party 中是静态编译进 libcurl 的，只有 App 直接静态链接 libcurl 时才需要
+set(SSH2_LIB "")
+if(CURL_LIB STREQUAL "libcurl_static" AND TARGET libssh2_static)
+    set(SSH2_LIB libssh2_static)
+endif()
+
+# zlib：3party 中只构建静态库 zlibstatic（zlib.h 与生成的 zconf.h 由该目标带出）
+if(TARGET zlibstatic)
+    set(Z_LIB zlibstatic)
+elseif(TARGET zlib)
+    set(Z_LIB zlib)
+else()
+    message(FATAL_ERROR "找不到 zlib 目标：请确认顶层已 add_subdirectory(3party) 并参与构建")
+endif()
+
+# libgit2：3party 中的目标名是 libgit2package，产物为 git2.dll / git2.lib
+if(TARGET libgit2package)
+    set(GIT2_LIB libgit2package)
+elseif(TARGET git2)
+    set(GIT2_LIB git2)
+else()
+    message(FATAL_ERROR "找不到 libgit2 目标：请确认顶层已 add_subdirectory(3party) 并参与构建")
 endif()
 
 
@@ -92,7 +125,11 @@ set(RESOURCES
     r.qrc
 )
 
-qt5_add_resources(RESOURCE_ADDED ${RESOURCES})
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt_add_resources(RESOURCE_ADDED ${RESOURCES})
+else()
+    qt5_add_resources(RESOURCE_ADDED ${RESOURCES})
+endif()
 
 
 
@@ -100,20 +137,24 @@ set(TS_FILES
     translations/App_zh_CN.ts
 )
 
-qt5_create_translation(QM_FILES ${CMAKE_CURRENT_SOURCE_DIR} ${TS_FILES} OPTIONS -source-language zh_CN -no-obsolete)
-
-#qt5_add_translation(QM_FILES ${TS_FILES})
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt_add_translation(QM_FILES ${TS_FILES})
+    set(APP_LUPDATE_EXECUTABLE ${Qt6_LUPDATE_EXECUTABLE})
+else()
+    qt5_add_translation(QM_FILES ${TS_FILES})
+    set(APP_LUPDATE_EXECUTABLE ${Qt5_LUPDATE_EXECUTABLE})
+endif()
 
 # 添加自定义目标用于手动更新翻译（不会在每次构建时自动运行）
-#add_custom_target(update_translations
-#    COMMAND ${Qt5_LUPDATE_EXECUTABLE}
-#        -source-language zh_CN
-#        -no-obsolete
-#        ${CMAKE_CURRENT_SOURCE_DIR}
-#        -ts ${TS_FILES}
-#    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-#    COMMENT "Updating translations..."
-#)
+add_custom_target(update_translations
+    COMMAND ${APP_LUPDATE_EXECUTABLE}
+        -source-language zh_CN
+        -no-obsolete
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        -ts ${TS_FILES}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Updating translations..."
+)
 
 
 set(SOURCES
@@ -147,7 +188,6 @@ add_library(App SHARED
         cvs/repository.h cvs/repository.cpp
         cvs/error.h cvs/error.cpp
         cvs/git/git_repository.h cvs/git/git_repository.cpp
-        cvs/svn/svn_repository.h cvs/svn/svn_repository.cpp
         interface/form_panel.h interface/form_panel.cpp
 
         interface/remote_file_item_model.h interface/remote_file_item_model.cpp
@@ -437,7 +477,7 @@ add_library(App SHARED
 
 
 
-target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::QuickWidgets  Qt5::QuickPrivate  ${CRYPTO_LIB} ${SSL_LIB} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} $ libsvnpp dockingpane wRect texteditor libvterm ptyqt
+target_link_libraries(App PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Xml Qt${QT_VERSION_MAJOR}::Sql Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::QuickWidgets  ${APP_EXTRA_QT_LIBS}  ${MBEDTLS_LIBS} ${SSH2_LIB} ${Z_LIB} ${CURL_LIB} ${GIT2_LIB} dockingpane wRect texteditor libvterm ptyqt
     gatewap
     tree-sitter
     tree-sitter-json
@@ -484,6 +524,25 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}.dll        ${CMAKE_BINARY_DIR}/src/${PROJECT_NAME}.dll
     COMMENT "Copying file to binary directory"
 )
+
+# in-tree 共同编译出来的共享库（DLL）也要放到可执行文件目录，否则运行时会找不到依赖
+set(APP_RUNTIME_DLL_TARGETS
+    libcurl_shared
+    libgit2package
+    mbedtls
+    mbedx509
+    mbedcrypto
+)
+foreach(_dll_target ${APP_RUNTIME_DLL_TARGETS})
+    if(TARGET ${_dll_target})
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:${_dll_target}>
+                ${CMAKE_BINARY_DIR}/src
+            COMMENT "Copying ${_dll_target} runtime to binary directory"
+        )
+    endif()
+endforeach()
 else()
 
 

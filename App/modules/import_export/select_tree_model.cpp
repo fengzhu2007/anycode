@@ -131,7 +131,7 @@ QVariant SelectTreeModel::data(const QModelIndex &index, int role) const
 Qt::ItemFlags SelectTreeModel::flags(const QModelIndex &index) const{
 
     if (!index.isValid())
-        return 0;
+        return Qt::NoItemFlags;
     Qt::ItemFlags flags = QAbstractItemModel::flags(index);
     flags |= Qt::ItemIsUserCheckable;
     return flags;
@@ -153,7 +153,9 @@ QString SelectTreeModel::readFile(const QString& path){
         return tr("Open file failed");
     }
     QTextStream in(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     in.setCodec("UTF-8");
+#endif
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(in.readAll().toUtf8(),&error);
     if(error.error==QJsonParseError::NoError){

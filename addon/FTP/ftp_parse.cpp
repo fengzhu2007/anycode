@@ -76,7 +76,7 @@ bool FTPParse::lineParse(QString& line,FileItem& entry)
 bool FTPParse::parseAsUnix(QString &line, FileItem& entry)
 {
     //QStringList tokens = line.split(QRegExp("\\s+"));
-    QStringList tokens = Utils::split(line,QRegExp("\\s+"),8);
+    QStringList tokens = Utils::split(line,QRegularExpression("\\s+"),8);
     int size = tokens.size();
     QString permission;
     if(size>0){
@@ -180,7 +180,7 @@ bool FTPParse::parseAsMlsd(QString &line, FileItem& entry)
 
 bool FTPParse::parseAsDos(QString &line, FileItem &entry)
 {
-    QStringList tokens = Utils::split(line,QRegExp("\\s+"),3);
+    QStringList tokens = Utils::split(line,QRegularExpression("\\s+"),3);
    // qDebug()<<"line:"<<line;
     //qDebug()<<"tokens:"<<tokens;
     //QStringList tokens = line.split(QRegExp("\\s+"));
@@ -194,7 +194,7 @@ bool FTPParse::parseAsDos(QString &line, FileItem &entry)
     QString size_and_name = tokens.at(2);
     // qDebug()<<"size and name:"<<size_and_name;
     if(size_and_name.startsWith("<DIR>")){
-        QStringList arr = Utils::split(size_and_name,QRegExp("\\s{10}"),2);
+        QStringList arr = Utils::split(size_and_name,QRegularExpression("\\s{10}"),2);
         entry.type = FileItem::Dir;
         entry.size = 0;
         entry.name = arr.at(1);

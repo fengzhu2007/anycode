@@ -84,7 +84,7 @@ CommonRecord CommonStorage::toRecord(QSqlQuery& query)
     CommonRecord record;
     record.name = query.value(COL_NAME).toString();
     record.value = query.value(COL_VALUE).toString();
-    record.group = query.value(COL_GROUP).toLongLong();
+    record.group = query.value(COL_GROUP).toString();
     return record;
 }
 

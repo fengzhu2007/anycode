@@ -6,17 +6,13 @@
 #include <QTimeZone>
 #include <QMimeDatabase>
 #include <QCryptographicHash>
+#include <QMessageAuthenticationCode>
 #include "s3_response.h"
 #include "s3_list_object_response.h"
 #include "transfer/task.h"
-#include <openssl/hmac.h>
-#include <openssl/opensslconf.h>
 #include <locale.h>
 #include <common/utils.h>
 
-#ifdef Q_OS_WIN
-#include <hmac/hmac_local.h>
-#endif
 #include "s3_setting.h"
 
 
@@ -720,20 +716,7 @@ QString S3::fixUrl(QString& url,HttpParams& params)
 
 
 static QByteArray hash_hmac_sha256(const QByteArray& bytes,const QByteArray& key){
-    HMAC_CTX *ctx = HMAC_CTX_new();
-    HMAC_CTX_reset(ctx);
-    unsigned int len = 32;
-    int size = sizeof(char) * len;
-    unsigned char* result = (unsigned char*) new char[size];
-
-    HMAC_Init_ex(ctx, key.data(), key.length(), EVP_sha256(), NULL);
-    HMAC_Update(ctx, (unsigned char*)bytes.data(),bytes.length() );
-    HMAC_Final(ctx, result, &len);
-    HMAC_CTX_free(ctx);
-    QByteArray by;
-    by.append((const char *)result,len);
-    delete result;
-    return by;
+    return QMessageAuthenticationCode::hash(bytes, key, QCryptographicHash::Sha256);
 }
 
 QString S3::signHeaders(QString method,QString path, HttpParams& headers, HttpParams& params,const QString& hashPayload)
@@ -827,14 +810,14 @@ QString S3::urlEncode(const QString& text)
             (str[i] == '_') ||
             (str[i] == '.') ||
             (str[i] == '~'))
-            strTemp += str[i];
+            strTemp += QLatin1Char(str[i]);
         else if (str[i] == ' ')
-            strTemp += "%20";
+            strTemp += QStringLiteral("%20");
         else
         {
             strTemp += '%';
-            strTemp += toHex((unsigned char)str[i] >> 4);
-            strTemp += toHex((unsigned char)str[i] % 16);
+            strTemp += QChar(toHex((unsigned char)str[i] >> 4));
+            strTemp += QChar(toHex((unsigned char)str[i] % 16));
         }
     }
     return strTemp;

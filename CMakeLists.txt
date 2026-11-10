@@ -34,8 +34,6 @@ add_subdirectory(react-qt)
 
 add_subdirectory(App)
 
-add_subdirectory(libsvnpp)
-
 add_subdirectory(openagent-cpp)
 
 

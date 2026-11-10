@@ -30,7 +30,7 @@ public :
 
     void setupUi(QWidget* parent){
         auto layout = new QVBoxLayout();
-        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
         parent->setLayout(layout);
 
 

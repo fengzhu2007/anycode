@@ -45,7 +45,7 @@ public:
     static DockingPane* makePane(const QString& group,const QJsonObject& data);
 
     template<class T>
-    T* CodeEditorManager::open(DockingPaneManager* dockingManager,const QString& path){
+    T* open(DockingPaneManager* dockingManager,const QString& path){
         T* pane = dynamic_cast<T*>(this->get(path));
         if(pane==nullptr){
             pane = T::make(dockingManager);

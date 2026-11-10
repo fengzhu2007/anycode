@@ -118,7 +118,7 @@ void FindWidget::onSelectFolder(){
         }
         //insert front
         //list<<QPair{dir,dir};
-        list.insert(1,QPair{dir,dir});
+        list.insert(1,QPair<QString,QString>(dir,dir));
         model->setDataSource(list);
         ui->searchScope->setCurrentIndex(1);
     }

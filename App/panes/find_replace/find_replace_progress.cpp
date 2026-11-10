@@ -451,7 +451,9 @@ void FindReplaceProgress::searchFileRegExp(const QString& path){
     file.seek(0);
     int lineNr = 0;
     QTextStream stream(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     stream.setCodec("UTF-8");
+#endif
     QString line;
     QRegularExpressionMatch match;
     while (!stream.atEnd()) {

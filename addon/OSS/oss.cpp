@@ -4,16 +4,13 @@
 #include <QDir>
 #include <QDateTime>
 #include <QMimeDatabase>
+#include <QCryptographicHash>
+#include <QMessageAuthenticationCode>
 #include <common/utils.h>
 #include "oss_response.h"
 #include "transfer/task.h"
 #include "oss_setting.h"
-#include <openssl/hmac.h>
-#include <openssl/opensslconf.h>
 #include <locale.h>
-#ifdef Q_OS_WIN
-#include <hmac/hmac_local.h>
-#endif
 
 #include <QDebug>
 namespace ady {
@@ -712,24 +709,10 @@ HttpParams OSS::signHeaders(const HttpParams& options)
     //qDebug()<<"string_to_sign"<<string_to_sign;
     //qDebug()<<"data:"<<options;
     //qDebug()<<"sign:"<<string_to_sign.toUtf8();
-    HMAC_CTX *ctx = HMAC_CTX_new();
-    HMAC_CTX_reset(ctx);
-    unsigned int len = 20;
-    int size = sizeof(char) * len;
-    unsigned char* result = (unsigned char*) new char[size];
-
-    HMAC_Init_ex(ctx, this->password.toStdString().c_str(), this->password.length(), EVP_sha1(), NULL);
-    //HMAC_Update(ctx, (unsigned char*)string_to_sign.toStdString().c_str(),string_to_sign.length() );
-    auto bytearr = string_to_sign.toUtf8();
-    HMAC_Update(ctx, (unsigned char*)bytearr.data(),bytearr.length() );
-    HMAC_Final(ctx, result, &len);
-    HMAC_CTX_free(ctx);
-
-    QByteArray by;
-    by.append((const char *)result,size);
+    //HMAC-SHA1(secretKey, stringToSign)
+    QByteArray by = QMessageAuthenticationCode::hash(string_to_sign.toUtf8(), this->password.toUtf8(), QCryptographicHash::Sha1);
     QString Authorization = "OSS "+this->username+":"+by.toBase64();
     headers[AUTHORIZATION] = Authorization;
-    delete result;
     return headers;
 }
 

@@ -1,7 +1,6 @@
 #include "color_picker.h"
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QScreen>
 #include <QDebug>
 namespace ady{

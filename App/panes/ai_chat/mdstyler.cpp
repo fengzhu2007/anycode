@@ -1,6 +1,6 @@
 #include "MDStyler.h"
 
-#include <QtQuick/private/qquicktextedit_p_p.h>
+//#include <QtQuick/private/qquicktextedit_p_p.h>
 
 #include <QTextDocument>
 #include <QTextTable>
@@ -24,7 +24,7 @@ MDStyler::MDStyler(QObject *parent)
 
 void MDStyler::attach(QQuickTextDocument *doc)
 {
-    if (!doc) return;
+    /*if (!doc) return;
 
     for (const auto &p : m_targets) {
         if (p.data() == doc) return;
@@ -35,7 +35,7 @@ void MDStyler::attach(QQuickTextDocument *doc)
                 this, &MDStyler::scheduleRestyle);
     }
     m_targets.append(QPointer<QQuickTextDocument>(doc));
-    scheduleRestyle();
+    scheduleRestyle();*/
 }
 
 void MDStyler::detach(QQuickTextDocument *doc)
@@ -69,7 +69,7 @@ void MDStyler::restyle()
 
 void MDStyler::apply()
 {
-    if (m_applying) return;
+    /*if (m_applying) return;
     if (m_targets.isEmpty()) return;
 
     m_applying = true;
@@ -85,14 +85,14 @@ void MDStyler::apply()
             applyToDocument(doc);
     }
 
-    m_applying = false;
+    m_applying = false;*/
 }
 
 // ---------- 单文档处理 ----------
 
 void MDStyler::applyToDocument(QQuickTextDocument *qtd)
 {
-    QTextDocument *doc = qtd->textDocument();
+    /*QTextDocument *doc = qtd->textDocument();
     if (!doc) return;
 
     applyLineHeight(doc);
@@ -121,7 +121,7 @@ void MDStyler::applyToDocument(QQuickTextDocument *qtd)
                 it->setDirty();
         }
         //editPtr->update();
-    }
+    }*/
 
 }
 

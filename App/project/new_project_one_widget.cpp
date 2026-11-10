@@ -38,7 +38,7 @@ NewProjectOneWidget::NewProjectOneWidget(QWidget *parent) :
     connect(ui->save,&QPushButton::clicked,this,&NewProjectOneWidget::onSave);
     connect(ui->selectFile,&QPushButton::clicked,this,&NewProjectOneWidget::onSelectFolder);
 
-    ui->cvs->addItems(QStringList{QString::fromUtf8("Git"),QString::fromUtf8("SVN"),});
+    ui->cvs->addItems(QStringList{QString::fromUtf8("Git")});
     ui->cvs->setCurrentIndex(-1);
     ui->cvs->setItemDelegate(new ListItemDelegate(ui->cvs));
 
@@ -145,7 +145,7 @@ void NewProjectOneWidget::onSelectFolder(){
 void NewProjectOneWidget::paintEvent(QPaintEvent *e){
     Q_UNUSED(e);
     QStyleOption opt;
-    opt.init(this);
+    opt.initFrom(this);
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

@@ -111,7 +111,9 @@ BackupRestore::Error BackupRestore::save(const QString& directory,const QString&
     QJsonDocument doc;
     doc.setObject(d->data);
     QTextStream out(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     out.setCodec("UTF-8");
+#endif
     out <<doc.toJson(QJsonDocument::Indented);
     file.close();
     return None;
@@ -141,7 +143,9 @@ BackupRestore::Error BackupRestore::readFile(const QString& path){
         return Invalid_Json_File;
     }
     QTextStream in(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     in.setCodec("UTF-8");
+#endif
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(in.readAll().toUtf8(),&error);
     if(error.error==QJsonParseError::NoError){

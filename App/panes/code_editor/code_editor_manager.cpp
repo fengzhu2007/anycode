@@ -312,7 +312,9 @@ bool CodeEditorManager::readFileLines(const QString&path){
         return false;
     }
     QTextStream in(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     in.setCodec("UTF-8");
+#endif
     QString text = in.readAll();
     this->appendToEditor(path,text);
     return true;
@@ -620,14 +622,15 @@ void CodeEditorManager::editorContextMenu(CodeEditorView* editor,QMenu* contextM
         d->textWrappingAction->setCheckable(true);
 
 
-        d->undoAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
-        d->redoAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Y));
-        d->copyAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
-        d->cutAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_X));
-        d->pasteAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
-        d->selectAllAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_A));
-        d->autoFormatAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_K));
-        d->copyLineAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
+        // Qt6 弃用了 operator+(Modifier,Key)，改用字符串形式以兼容 Qt5/Qt6
+        d->undoAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+Z")));
+        d->redoAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+Y")));
+        d->copyAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+C")));
+        d->cutAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+X")));
+        d->pasteAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+V")));
+        d->selectAllAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+A")));
+        d->autoFormatAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+K")));
+        d->copyLineAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+D")));
 
         connect(d->undoAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
         connect(d->redoAction,&QAction::triggered,this,&CodeEditorManager::onEditorActionTrigger);
@@ -693,8 +696,8 @@ void CodeEditorManager::tabContextMenu(Editor* pane,QMenu* contextMenu){
         d->copyPathAction = new QAction(QIcon(":/Resource/icons/Copy_16x.svg"),tr("Copy Path(&U)"),this);
         d->openFolderAction = new QAction(tr("Open Folder(&O)"),this);
         d->floatTabAction = new QAction(tr("Float Tab(&F)"),this);
-        d->saveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
-        d->closeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F4));
+        d->saveAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+S")));
+        d->closeAction->setShortcut(QKeySequence(QStringLiteral("Ctrl+F4")));
         connect(d->saveAction,&QAction::triggered,this,&CodeEditorManager::onTabActionTrigger);
         connect(d->closeAction,&QAction::triggered,this,&CodeEditorManager::onTabActionTrigger);
         connect(d->closeOtherAction,&QAction::triggered,this,&CodeEditorManager::onTabActionTrigger);

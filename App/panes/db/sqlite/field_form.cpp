@@ -55,7 +55,7 @@ void FieldForm::initView(){
     if(driver){
         d->fieldTypes = driver->fieldTypes();
         QList<QPair<QString,QString>>list;
-        list.append(QPair{"",""});
+        list.append(QPair<QString,QString>("",""));
         for(auto one:d->fieldTypes){
             list.append({one.first,one.first});
         }

@@ -93,7 +93,7 @@ QVariant DiffFileModel::data(const QModelIndex &index, int role) const
 Qt::ItemFlags DiffFileModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-        return 0;
+        return Qt::NoItemFlags;
     Qt::ItemFlags flags = QAbstractItemModel::flags(index);
     return flags;
 }

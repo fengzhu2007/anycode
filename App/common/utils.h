@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 #include <QString>
+#include <QRegularExpression>
 #include "global.h"
 namespace ady {
     class ANYENGINE_EXPORT Utils
@@ -16,7 +17,7 @@ namespace ady {
         static void deleteFile(const QString& path);
         static bool isFilename(const QString& name);
         static QStringList split(const QString& str,const QString& sep,int limit=0);
-        static QStringList split(const QString& str,QRegExp sep,int limit=0);
+        static QStringList split(const QString& str,const QRegularExpression& sep,int limit=0);
         static bool copy(const QString& oDir,const QString& nDir);
         static QString stringToExpression(const QString &original);
 

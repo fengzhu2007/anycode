@@ -20,7 +20,7 @@ SiteItemWidget::SiteItemWidget(QWidget* parent)
     d->title = new QLabel(parent);
     d->tags = new wTags(parent);
     QVBoxLayout* layout = new QVBoxLayout();
-    layout->setMargin(10);
+    layout->setContentsMargins(10, 10, 10, 10);
     layout->setSpacing(6);
     this->setLayout(layout);
     layout->addWidget(d->title);

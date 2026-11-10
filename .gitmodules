@@ -7,26 +7,9 @@
 [submodule "3party/libgit2"]
 	path = 3party/libgit2
 	url = https://github.com/libgit2/libgit2.git
-[submodule "3party/openssl"]
-	path = 3party/openssl
-	url = https://github.com/openssl/openssl.git
-	branch = OpenSSL_1_1_1-stable
 [submodule "3party/zlib"]
 	path = 3party/zlib
 	url = https://github.com/madler/zlib.git
-[submodule "3party/subversion"]
-	path = 3party/subversion
-	url = https://github.com/apache/subversion.git
-[submodule "3party/apr"]
-	path = 3party/apr
-	url = https://github.com/apache/apr.git
-[submodule "3party/apr-util"]
-	path = 3party/apr-util
-	url = https://github.com/apache/apr-util.git
-	branch = 1.6.x
-[submodule "3party/libexpat"]
-	path = 3party/libexpat
-	url = https://github.com/libexpat/libexpat.git
 [submodule "dockingpane"]
 	path = dockingpane
 	url = https://github.com/fengzhu2007/dockingpane.git
@@ -36,12 +19,12 @@
 [submodule "texteditor"]
 	path = texteditor
 	url = https://github.com/fengzhu2007/texteditor.git
-[submodule "react-qt"]
-	path = react-qt
-	url = https://github.com/fengzhu2007/react-qt
 [submodule "browser-llm-gateway"]
 	path = browser-llm-gateway
 	url = https://gitee.com/fengzhu2007/browser-llm-gateway.git
 [submodule "openagent-cpp"]
 	path = openagent-cpp
 	url = https://github.com/fengzhu2007/openagent-cpp.git
+[submodule "3party/mbedtls"]
+	path = 3party/mbedtls
+	url = https://github.com/Mbed-TLS/mbedtls.git

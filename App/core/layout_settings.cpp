@@ -123,7 +123,9 @@ bool LayoutSettings::readFromFile(const QString& filename){
         return false;
     }
     QTextStream in(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     in.setCodec("UTF-8");
+#endif
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(in.readAll().toUtf8(),&error);
     if(error.error==QJsonParseError::NoError){
@@ -175,7 +177,9 @@ bool LayoutSettings::saveToFile(const QString& filename){
         return false;
     }
     QTextStream out(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     out.setCodec("UTF-8");
+#endif
     out <<doc.toJson(QJsonDocument::Indented);
     file.close();
     return true;

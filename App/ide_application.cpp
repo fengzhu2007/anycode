@@ -29,7 +29,7 @@ IDEApplication::IDEApplication(int &argc, char **argv):QApplication(argc,argv) {
             this->installTranslator(translator);
         }
     }
-    {
+    /*{
         QTranslator* translator = new QTranslator(this);
         if(translator->load(dir + QString("/translations/qt_%1.qm").arg(settings.m_language))){
             this->installTranslator(translator);
@@ -40,7 +40,7 @@ IDEApplication::IDEApplication(int &argc, char **argv):QApplication(argc,argv) {
         if(translator->load(dir + QString("/translations/qt_help_%1.qm").arg(settings.m_language))){
             this->installTranslator(translator);
         }
-    }
+    }*/
 
     //load installed addons from database
     AddonLoader::getInstance()->init();

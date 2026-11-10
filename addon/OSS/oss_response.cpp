@@ -26,22 +26,22 @@ namespace ady {
             while (!xml.atEnd()) {
                     QXmlStreamReader::TokenType type = xml.readNext();
                     if(type==QXmlStreamReader::StartElement){
-                        if(xml.name()=="CommonPrefixes"){
+                        if(xml.name()==QStringLiteral("CommonPrefixes")){
                             dirItemOpen = true;
                             item.modifyTime = "";
                             item.size = 0;
-                        }else if(xml.name()=="Contents"){
+                        }else if(xml.name()==QStringLiteral("Contents")){
                             fileItemOpen = true;
                             item.modifyTime = "";
                             item.size = 0;
                         }
-                        if(dirItemOpen==false && xml.name()=="Prefix"){
+                        if(dirItemOpen==false && xml.name()==QStringLiteral("Prefix")){
                             QString dir = xml.readElementText();
                             if(!dir.startsWith("/")){
                                 dir = "/" + dir;
                             }
                              this->params["dir"] =dir;
-                        }else if(dirItemOpen==true && xml.name()=="Prefix"){
+                        }else if(dirItemOpen==true && xml.name()==QStringLiteral("Prefix")){
                             QString dir = xml.readElementText();
                             if(!dir.startsWith("/")){
                                 dir = "/" + dir;
@@ -59,7 +59,7 @@ namespace ady {
                                 }
                             }
                         }else if(fileItemOpen==true){
-                            if(xml.name()=="Key"){
+                            if(xml.name()==QStringLiteral("Key")){
                                 QString dir = xml.readElementText();
                                 if(!dir.startsWith("/")){
                                     dir = "/" + dir;
@@ -68,19 +68,19 @@ namespace ady {
                                 item.type = FileItem::File;
                                 item.name = item.path;
                                 item.name = item.name.mid(item.name.lastIndexOf("/")+1);
-                            }else if(xml.name()=="LastModified"){
+                            }else if(xml.name()==QStringLiteral("LastModified")){
                                 QDateTime time = QDateTime::fromString(xml.readElementText(),Qt::ISODate);
                                 item.modifyTime = time.toString("yyyy-MM-dd HH:mm");
-                            }else if(xml.name()=="Size"){
+                            }else if(xml.name()==QStringLiteral("Size")){
                                 item.size = xml.readElementText().toInt();
                             }
                         }
 
                     }else if(type==QXmlStreamReader::EndElement){
-                        if(xml.name()=="CommonPrefixes"){
+                        if(xml.name()==QStringLiteral("CommonPrefixes")){
                             dirItemOpen = false;
                             lists.push_back(item);
-                        }else if(xml.name()=="Contents"){
+                        }else if(xml.name()==QStringLiteral("Contents")){
                             fileItemOpen = false;
                             if(item.path.endsWith("/")==false){
                                 lists.push_back(item);

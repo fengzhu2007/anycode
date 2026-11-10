@@ -25,7 +25,7 @@ ProjectItemWidget::ProjectItemWidget(QWidget* parent)
     QHBoxLayout* layout = new QHBoxLayout();
     QVBoxLayout* vLayout = new QVBoxLayout();
     layout->addLayout(vLayout,1);
-    vLayout->setMargin(12);
+    vLayout->setContentsMargins(12, 12, 12, 12);
     vLayout->setSpacing(6);
     this->setLayout(layout);
     d->title = new QLabel(this);

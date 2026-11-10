@@ -5,17 +5,12 @@
 #include <QDateTime>
 #include <QMimeDatabase>
 #include <QCryptographicHash>
+#include <QMessageAuthenticationCode>
 #include "cos_response.h"
 #include "cos_list_object_response.h"
 #include "transfer/task.h"
-#include <openssl/hmac.h>
-#include <openssl/opensslconf.h>
 #include <locale.h>
 #include <common/utils.h>
-
-#ifdef Q_OS_WIN
-#include <hmac/hmac_local.h>
-#endif
 
 
 #include <QDebug>
@@ -779,44 +774,12 @@ QString COS::signHeaders(QString method,QString path, HttpParams& headers, HttpP
     stringToSign += "\n";
     //qDebug()<<"stringToSign:"<<stringToSign;
 
-    QByteArray byte;
-    QString signKey;
+    // 签名密钥：HMAC-SHA1(secretKey, keyTime)，取十六进制串作为后续 HMAC 的密钥
+    QByteArray signKey = QMessageAuthenticationCode::hash(QByteArray::fromStdString(keyTime), this->password.toUtf8(), QCryptographicHash::Sha1).toHex();
+    //qDebug()<<"password:"<<password;
+    //qDebug()<<"signKey:"<<signKey;
 
-    {
-        HMAC_CTX *ctx = HMAC_CTX_new();
-        HMAC_CTX_reset(ctx);
-        unsigned int len = 20;
-        int size = sizeof(char) * len;
-        unsigned char* result = (unsigned char*) new char[size];
-
-        HMAC_Init_ex(ctx, this->password.toStdString().c_str(), this->password.length(), EVP_sha1(), NULL);
-        HMAC_Update(ctx, (unsigned char*)keyTime.c_str(),keyTime.length() );
-        HMAC_Final(ctx, result, &len);
-        HMAC_CTX_free(ctx);
-
-        byte.append((const char *)result,len);
-
-
-        signKey =byte.toHex();
-        //qDebug()<<"password:"<<password;
-        //qDebug()<<"signKey:"<<signKey;
-        delete result;
-    }
-
-
-    HMAC_CTX *ctx = HMAC_CTX_new();
-    HMAC_CTX_reset(ctx);
-    unsigned int len = 20;
-    int size = sizeof(char) * len;
-    unsigned char* result = (unsigned char*) new char[size];
-
-    HMAC_Init_ex(ctx, signKey.toStdString().c_str(), signKey.length(), EVP_sha1(), NULL);
-    HMAC_Update(ctx, (unsigned char*)stringToSign.toStdString().c_str(),stringToSign.length() );
-    HMAC_Final(ctx, result, &len);
-    HMAC_CTX_free(ctx);
-
-    QByteArray by;
-    by.append((const char *)result,size);
+    QByteArray by = QMessageAuthenticationCode::hash(stringToSign.toUtf8(), signKey, QCryptographicHash::Sha1);
     QString signature = by.toHex();
     QString Authorization = QString("q-sign-algorithm=sha1&q-ak=%1&q-sign-time=%2&q-key-time=%3&q-header-list=%4&q-url-param-list=%5&q-signature=%6")
             .arg(this->username)
@@ -825,7 +788,6 @@ QString COS::signHeaders(QString method,QString path, HttpParams& headers, HttpP
             .arg(headerList)
             .arg(paramList)
             .arg(signature);
-    delete result;
     //qDebug()<<"Authorization:"<<Authorization;
     return Authorization;
 
@@ -843,14 +805,14 @@ QString COS::urlEncode(const QString& text)
             (str[i] == '_') ||
             (str[i] == '.') ||
             (str[i] == '~'))
-            strTemp += str[i];
+            strTemp += QLatin1Char(str[i]);
         else if (str[i] == ' ')
-            strTemp += "%20";
+            strTemp += QStringLiteral("%20");
         else
         {
             strTemp += '%';
-            strTemp += toHex((unsigned char)str[i] >> 4);
-            strTemp += toHex((unsigned char)str[i] % 16);
+            strTemp += QChar(toHex((unsigned char)str[i] >> 4));
+            strTemp += QChar(toHex((unsigned char)str[i] % 16));
         }
     }
     return strTemp;

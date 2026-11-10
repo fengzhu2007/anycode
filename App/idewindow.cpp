@@ -112,7 +112,7 @@ Type::M_TOGGLE_NOTIFICATION,Type::M_OPEN_TERMINAL,Type::M_OPEN_RUN_TERMINAL});
     ui->statusbar->addWidget(StatusBarView::make(ui->statusbar),1);
     ui->statusbar->setContentsMargins({0,0,0,0});
     //qDebug()<<"status bar layout"<<ui->statusbar->layout()->margin();
-    ui->statusbar->layout()->setMargin(0);
+    ui->statusbar->layout()->setContentsMargins(0, 0, 0, 0);
     ui->statusbar->layout()->setSpacing(0);
 
 

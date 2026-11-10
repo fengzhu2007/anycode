@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QDateTime>
 #include <QMimeData>
+#include <algorithm>
 #include "common/utils.h"
 #include "common.h"
 namespace ady {
@@ -18,7 +19,7 @@ public:
         this->col = col;
         this->asc = asc;
     }
-    bool operator()(FileItem& a,FileItem& b)
+    bool operator()(const FileItem& a,const FileItem& b)
     {
         if(this->asc){
             if(a.type!=b.type){
@@ -169,7 +170,7 @@ bool RemoteFileItemModel::setData(const QModelIndex &index, const QVariant &valu
 Qt::ItemFlags RemoteFileItemModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-        return 0;
+        return Qt::NoItemFlags;
     Qt::ItemFlags flags = QAbstractItemModel::flags(index);
     flags = flags | Qt::ItemIsDragEnabled;
     if(index.column()==Name){
@@ -286,7 +287,7 @@ void RemoteFileItemModel::setList(QList<FileItem>& data)
         if((*iter).name.compare("..")==0){
             iter++;
         }
-        qSort(iter,data.end(),*m_sorting);
+        std::sort(iter,data.end(),*m_sorting);
     }
     m_data = data;
     endResetModel();
@@ -304,7 +305,7 @@ void RemoteFileItemModel::sortList(int col, Qt::SortOrder order)
         if((*iter).name.compare("..")==0){
             iter++;
         }
-        qSort(iter,m_data.end(),*m_sorting);
+        std::sort(iter,m_data.end(),*m_sorting);
     }
     endResetModel();
 }

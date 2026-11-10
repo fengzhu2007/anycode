@@ -8,7 +8,6 @@
 #include "panes/code_editor/diff_editor_widget.h"
 #include "panes/code_editor/code_editor_manager.h"
 #include "cvs/git/git_repository.h"
-#include "cvs/svn/svn_repository.h"
 #include "cvs/commit_model.h"
 #include "cvs/diff_file_model.h"
 #include "cvs/diff_content.h"
@@ -243,10 +242,7 @@ void VersionControlPane::onProjectChanged(int i){
             ui->actionRefresh->setEnabled(true);
             auto path =  d->current_path = item->path();
             QDir dir(path);
-            if(dir.exists(".svn")){
-                d->branch->hide();
-                d->repo = std::shared_ptr<cvs::Repository>(new cvs::SvnRepository);
-            }else if(dir.exists(".git")){
+            if(dir.exists(".git")){
                 d->repo = std::shared_ptr<cvs::Repository>(new cvs::GitRepository);
                 d->branch->show();
             }else{

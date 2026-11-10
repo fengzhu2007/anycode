@@ -71,7 +71,7 @@ bool SFTPParse::lineParse(QString& line,FileItem& entry)
 
 bool SFTPParse::parseAsUnix(QString &line, FileItem& entry)
 {
-    QStringList tokens = Utils::split(line,QRegExp("\\s+"),8);
+    QStringList tokens = Utils::split(line,QRegularExpression("\\s+"),8);
     //qDebug()<<"tokens:"<<tokens;
     int size = tokens.size();
     QString permission;
@@ -172,7 +172,7 @@ bool SFTPParse::parseAsUnix(QString &line, FileItem& entry)
 
 bool SFTPParse::parseAsDos(QString &line, FileItem &entry)
 {
-    QStringList tokens = line.split(QRegExp("\\s+"));
+    QStringList tokens = line.split(QRegularExpression("\\s+"));
     int size = tokens.size();
     if(size<4){
         return false;

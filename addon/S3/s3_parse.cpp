@@ -1,6 +1,7 @@
 #include "s3_parse.h"
 #include <QDate>
 #include <QDebug>
+#include <QRegularExpression>
 namespace ady {
 QMap<QString,int> S3Parse::monthNameMap;
 
@@ -74,7 +75,7 @@ bool S3Parse::lineParse(QString& line,FileItem& entry)
 
 bool S3Parse::parseAsUnix(QString &line, FileItem& entry)
 {
-    QStringList tokens = line.split(QRegExp("\\s+"));
+    QStringList tokens = line.split(QRegularExpression("\\s+"));
     int size = tokens.size();
     QString permission;
     if(size>0){
@@ -170,7 +171,7 @@ bool S3Parse::parseAsMlsd(QString &line, FileItem& entry)
 
 bool S3Parse::parseAsDos(QString &line, FileItem &entry)
 {
-    QStringList tokens = line.split(QRegExp("\\s+"));
+    QStringList tokens = line.split(QRegularExpression("\\s+"));
     int size = tokens.size();
     if(size<4){
         return false;

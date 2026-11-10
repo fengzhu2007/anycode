@@ -47,7 +47,6 @@ DirSelector::DirSelector(QWidget *parent)
     this->setLayout(layout);
     layout->addWidget(d->edit);
     layout->addWidget(d->button);
-    layout->setMargin(0);
     layout->setContentsMargins(0,0,0,0);
     layout->setSpacing(2);
 

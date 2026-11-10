@@ -114,7 +114,7 @@ void ReplaceWidget::onSelectFolder(){
             }
         }
         //insert front
-        list.insert(1,QPair{dir,dir});
+        list.insert(1,QPair<QString,QString>(dir,dir));
         //list<<QPair{dir,dir};
         model->setDataSource(list);
         ui->searchScope->setCurrentIndex(1);
