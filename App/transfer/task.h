@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QVariant>
 #include <QFile>
+#include <atomic>
 namespace ady {
 class FileTransferModelItem;
     class ANYENGINE_EXPORT Task {
@@ -32,7 +33,13 @@ class FileTransferModelItem;
         QMap<QString,QVariant> data;
         char status;
         QString errorMsg;
-        bool abort;
+        //中止标记会被传输线程轮询,必须使用原子类型避免数据竞争
+        std::atomic<bool> abort;
+
+        //进度上报节流状态,只由当前传输线程读写
+        long long notify_time = 0;//上次上报时间(ms)
+        long long notify_size = 0;//上次上报时已传输的字节数
+        float notify_progress = -1.0f;//上次上报的进度
 
 
 

@@ -11,6 +11,14 @@ class FTP_EXPORT FTP : public NetworkRequest
 public:
     const int COMMAND_TIMEOUT = 5;
     const int UNLINK_TIMEOUT = 2;
+    //大文件传输专用参数:总时长不设上限,改用低速探测 + 连接保活来判定链路是否假死
+    const int CONNECT_TIMEOUT = 15;
+    const long LOW_SPEED_LIMIT = 1024L;//byte/s
+    const long LOW_SPEED_TIME = 60L;//s
+    const long KEEPALIVE_IDLE = 60L;//s
+    const long FTP_RESPONSE_TIMEOUT = 30L;//s
+    const long ACCEPT_TIMEOUT_MS = 30L*1000L;//ms
+    const long BUFFER_SIZE = 256L*1024L;//byte
 
 
     explicit FTP(CURL* curl,long long id=0);
@@ -52,6 +60,10 @@ public:
 protected:
     void initEnv();
     NetworkResponse* sendCommand(const QString& command,bool pre_utf8=true);
+    //传输通道通用选项
+    void applyTransferOptions(Task* task);
+    //传输结束后复位,避免回调/指针残留到下一次命令
+    void resetTransferOptions();
 
 
 

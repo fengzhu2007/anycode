@@ -15,6 +15,7 @@ FTP_EXPORT ady::FormPanel* getFormPanel(QWidget* parent,QString,size_t n);
 FTP_EXPORT ady::NetworkRequest* getRequest(QString name);
 FTP_EXPORT int requestConnect(void* ptr);
 FTP_EXPORT ady::NetworkRequest* initRequest(long long id);
+FTP_EXPORT const char* addonInfo();
 
 #ifdef __cplusplus
 }

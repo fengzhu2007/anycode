@@ -7,7 +7,7 @@
 #include "site_list_model.h"
 #include "site_group_list_model.h"
 #include "site_type_list_model.h"
-#include "addon_loader.h"
+#include "addon_loader_helper.h"
 #include "interface/form_panel.h"
 #include "components/message_dialog.h"
 #include "components/list_item_delegate.h"
@@ -67,7 +67,7 @@ NewProjectTwoWidget::NewProjectTwoWidget(QWidget *parent) :
 
 
 
-    d->addons = AddonLoader::getInstance()->filter(AddonLoader::Default);
+    d->addons = AddonLoaderHelper().filter(AddonLoader::Default);
 
     //fill combobox
     auto model = new SiteTypeListModel(ui->type);

@@ -14,8 +14,7 @@ COS_EXPORT ady::FormPanel* getFormPanel(QWidget* parent,QString,size_t n);
 COS_EXPORT ady::NetworkRequest* getRequest(QString name);
 COS_EXPORT int requestConnect(void* ptr);
 COS_EXPORT ady::NetworkRequest* initRequest(long long id);
-COS_EXPORT int install();
-COS_EXPORT int uninstall();
+COS_EXPORT const char* addonInfo();
 #ifdef __cplusplus
 }
 #endif

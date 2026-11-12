@@ -8,6 +8,9 @@
 #include "cos_response.h"
 
 #include <QDebug>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QObject>
 
 
 size_t getFormPanelSize(QString name)
@@ -71,11 +74,20 @@ ady::NetworkRequest* initRequest(long long id){
     return ady::NetworkManager::getInstance()->newRequest<ady::COS>(id);
 }
 
-
-int install(){
-    return 0;
-}
-
-int uninstall(){
-    return 0;
+const char* addonInfo()
+{
+    static QByteArray json;
+    if(json.isEmpty()){
+        QJsonObject object;
+        object.insert("name",QStringLiteral("COS"));
+        object.insert("title",QStringLiteral("Tencent COS"));
+        object.insert("label",QStringLiteral("COS"));
+        object.insert("file",QStringLiteral("COS/COS"));
+        object.insert("export_type",QStringLiteral("RemoteConnector"));
+        object.insert("version",QStringLiteral("1.0"));
+        object.insert("author",QStringLiteral("Official"));
+        object.insert("description",QObject::tr("Tencent COS storage addon providing file browsing, upload and download."));
+        json = QJsonDocument(object).toJson(QJsonDocument::Compact);
+    }
+    return json.constData();
 }

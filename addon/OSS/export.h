@@ -13,6 +13,7 @@ OSS_EXPORT ady::FormPanel* getFormPanel(QWidget* parent,QString,size_t n);
 OSS_EXPORT ady::NetworkRequest* getRequest(QString name);
 OSS_EXPORT int requestConnect(void* ptr);
 OSS_EXPORT ady::NetworkRequest* initRequest(long long id);
+OSS_EXPORT const char* addonInfo();
 
 #ifdef __cplusplus
 }

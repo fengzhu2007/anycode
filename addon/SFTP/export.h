@@ -14,6 +14,7 @@ SFTP_EXPORT ady::FormPanel* getFormPanel(QWidget* parent,QString,size_t n);
 SFTP_EXPORT ady::NetworkRequest* getRequest(QString name);
 SFTP_EXPORT int requestConnect(void* ptr);
 SFTP_EXPORT ady::NetworkRequest* initRequest(long long id);
+SFTP_EXPORT const char* addonInfo();
 
 #ifdef __cplusplus
 }

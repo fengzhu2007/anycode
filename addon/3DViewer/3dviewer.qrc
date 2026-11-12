@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/3dviewer">
+        <file>qml/viewer3d.qml</file>
+        <file>qml/thumbnailrenderer3d.qml</file>
+    </qresource>
+</RCC>

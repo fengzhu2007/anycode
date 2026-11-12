@@ -1,6 +1,8 @@
 #include "network_request.h"
 #include "network_response.h"
 #include <QString>
+#include <QByteArray>
+#include <QDateTime>
 #include "transfer/task.h"
 //#include "transfer/TaskPoolModel.h"
 #include "panes/file_transfer/file_transfer_model.h"
@@ -37,22 +39,25 @@ namespace ady {
 
     QString NetworkRequest::escape(const QString& str)
     {
-        std::string sIn =str.toStdString();
-        std::string sOut;
-        for( size_t ix = 0; ix < sIn.size(); ix++ )
-            {
-                unsigned char buf[4];
-                memset( buf, 0, 4 );
-                if( isspace( (unsigned char)sIn[ix] )){
-                    buf[0] = '%';
-                    buf[1] = '2';
-                    buf[2] = '0';
-                }else{
-                    buf[0] = sIn[ix];
-                }
-                sOut += (char *)buf;
+        //ftp url path 转义:保留 unreserved 字符与 '/'，其余按 UTF-8 字节做百分号编码
+        //旧实现只处理空格，文件名中含 # ? % 等字符时会截断或请求错误路径
+        static const char hex[] = "0123456789ABCDEF";
+        const QByteArray in = str.toUtf8();
+        QByteArray out;
+        out.reserve(in.size() + 8);
+        const int size = in.size();
+        for(int i=0;i<size;i++){
+            const unsigned char ch = (unsigned char)in.at(i);
+            if((ch>='a'&&ch<='z') || (ch>='A'&&ch<='Z') || (ch>='0'&&ch<='9')
+                || ch=='-' || ch=='_' || ch=='.' || ch=='~' || ch=='/'){
+                out.append((char)ch);
+            }else{
+                out.append('%');
+                out.append(hex[ch>>4]);
+                out.append(hex[ch&0x0f]);
             }
-            return QString::fromUtf8(sOut.c_str());
+        }
+        return QString::fromLatin1(out);
     }
 
     void NetworkRequest::setHeaderHolder(QString* header)
@@ -212,47 +217,104 @@ size_t network_response_head(void *ptr, size_t size, size_t nmemb, void *stream)
     return realsize;
 }
 
+namespace {
+    //进度上报节流:回调里只做累加,按时间/进度步长限量触发跨线程事件
+    //否则大文件传输时每个数据块(16~64KB)都会产生一次 UI 事件,10GB 文件约 16 万次
+    constexpr long long PROGRESS_REPORT_INTERVAL = 200;//ms,最长上报间隔
+    constexpr long long PROGRESS_MIN_INTERVAL = 50;//ms,两次上报的最小间隔
+    constexpr float PROGRESS_REPORT_STEP = 0.005f;//0.5%,进度步长
+
+    inline bool shouldReportProgress(ady::Task* task,float progress)
+    {
+        const long long now = QDateTime::currentMSecsSinceEpoch();
+        if(progress>=1.0f){
+            //完成状态只报一次
+            if(task->notify_progress>=1.0f){
+                return false;
+            }
+            task->notify_progress = 1.0f;
+            task->notify_time = now;
+            return true;
+        }
+        const long long span = now - task->notify_time;
+        if(span>=PROGRESS_REPORT_INTERVAL
+            || (span>=PROGRESS_MIN_INTERVAL && progress - task->notify_progress >= PROGRESS_REPORT_STEP)){
+            task->notify_progress = progress;
+            task->notify_time = now;
+            return true;
+        }
+        return false;
+    }
+
+    inline void reportProgress(ady::Task* task,long long loaded,float progress,bool upload)
+    {
+        long long size = loaded - task->notify_size;
+        if(size<0){
+            size = 0;
+        }
+        task->notify_size = loaded;
+        ady::FileTransferModel::getInstance()->progress(task->siteid,task->id,progress,upload,size);
+    }
+}
+
 size_t network_read_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 {
-   curl_off_t nread;
    ady::Task* task = static_cast<ady::Task*>(stream);
-   //qDebug()<<"network_read_callback:"<<task->abort;
-   //qDebug()<<"network_read_callback:"<<size<<";"<<nmemb;
-   if(task->abort==true){
+   if(task==nullptr || task->file==nullptr){
        return 0;
    }
-
-   nread = task->file->read((char *)ptr,size * nmemb);
-   //size_t retcode = fread(ptr, size, nmemb, task->file);
-   //nread = (curl_off_t)retcode;
+   if(task->abort.load()){
+       return 0;
+   }
+   qint64 nread = task->file->read((char *)ptr,size * nmemb);
+   if(nread<=0){
+       //读失败交给 curl 报 CURLE_READ_ERROR，不能返回一个假成功值
+       return 0;
+   }
    task->readysize += nread;
-   float progress = task->readysize*1.0 / task->filesize;
-   //ady::TaskPoolModel::getInstance()->progressTask(task);
-   ady::FileTransferModel::getInstance()->progress(task->siteid,task->id,progress,true,size * nmemb);
-   return nread;
+   float progress = task->filesize>0 ? task->readysize*1.0f / task->filesize : 0.0f;
+   if(progress>1.0f){
+       progress = 1.0f;
+   }
+   if(shouldReportProgress(task,progress)){
+       reportProgress(task,task->readysize,progress,true);
+   }
+   return (size_t)nread;
 }
 
 size_t network_write_callback(void *ptr, size_t size, size_t nmemb, void *stream)
 {
     QFile* file = static_cast<QFile*>(stream);
-    //qDebug()<<"write size:"<<size * nmemb;
-    return file->write((char *)ptr,size * nmemb);
-
-    /*size_t written = fwrite(ptr, size, nmemb, (FILE*)stream);
-    return written;*/
+    if(file==nullptr){
+        return 0;
+    }
+    qint64 ret = file->write((char *)ptr,size * nmemb);
+    return ret>0 ? (size_t)ret : 0;
 }
 
 int network_progress_callback(void *p,curl_off_t dltotal, curl_off_t dlnow,curl_off_t ultotal, curl_off_t ulnow)
 {
+    (void)ultotal;
+    (void)ulnow;
     ady::Task* task = static_cast<ady::Task*>(p);
-    if(task->abort==true){
+    if(task==nullptr){
+        return 0;
+    }
+    if(task->abort.load()){
         return 1;
     }
-    task->filesize = dltotal;
-    long long size = dlnow - task->readysize;
-    task->readysize = dlnow;
-    float progress = task->readysize*1.0 / task->filesize;
-    ady::FileTransferModel::getInstance()->progress(task->siteid,task->id,progress,false,size);
-    //ady::TaskPoolModel::getInstance()->progressTask(task);
+    if(dltotal>0){
+        task->filesize = dltotal;
+    }
+    //未知文件大小时不计算百分比，避免除零与进度跳变
+    float progress = task->filesize>0 ? float(dlnow*1.0/task->filesize) : 0.0f;
+    if(progress>1.0f){
+        progress = 1.0f;
+    }else if(progress<0.0f){
+        progress = 0.0f;
+    }
+    if(shouldReportProgress(task,progress)){
+        reportProgress(task,dlnow,progress,false);
+    }
     return 0;
 }

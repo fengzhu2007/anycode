@@ -9,8 +9,7 @@ typedef QList<ady::MenuData> (*GetMenusFun)(QWidget*);
 extern "C" {
 #endif
 
-VIEWER3D_EXPORT bool install();
-VIEWER3D_EXPORT bool uninstall();
+VIEWER3D_EXPORT const char* addonInfo();
 VIEWER3D_EXPORT GetMenusFun getGetMenus();
 
 #ifdef __cplusplus

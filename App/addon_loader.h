@@ -3,11 +3,11 @@
 #include <QString>
 #include <QMap>
 #include <QList>
+#include <QByteArray>
 #include <QLibrary>
 #include <QJsonObject>
 #include <QAction>
 #include "global.h"
-#include "storage/addon_storage.h"
 
 class QTextDocument;
 class QMenu;
@@ -34,7 +34,7 @@ namespace ady {
             QMenu* menu;
         } ptr;
     };
-
+    class AddonLoaderPrivate;
     class  AddonLoader
     {
     private:
@@ -84,10 +84,10 @@ namespace ady {
 
 
 
-
+        ~AddonLoader();
         static AddonLoader* getInstance();
         void init();
-        QList<AddonRecord> filter(ExportType type);
+
         bool loadFile(const QString& file);
         bool load(AddonName name);
         bool load(const QString name);
@@ -99,8 +99,32 @@ namespace ady {
 
 
 
+        /*
+         * Addon metadata protocol
+         *
+         * An addon only exports the function below,it returns a UTF-8 json
+         * string which describes the addon.All database works are done here.
+         *
+         *  extern "C" const char* addonInfo();
+         *
+         * {
+         *   "name": "FTP",                 //unique name,aliases:typename/type_name/id
+         *   "title": "FTP",                //display name
+         *   "label": "FTP",                //short label
+         *   "file": "FTP/FTP",             //library path relative to addon dir
+         *   "export_type": "RemoteConnector", //int,string or string array
+         *   "version": "1.0",
+         *   "author": "Official",
+         *   "description": "..."
+         * }
+         *
+         * Invalid json,unknown keys,missing fields,absolute path and legacy
+         * fields are normalized by parseAddonRecord() before saving.
+         */
         bool install();
+        bool install(const QString& file);
         bool uninstall();
+        bool uninstall(const QString& name);
         TextEditor::LanguageLoader* createLanguageLoader(const QString& languageName, QTextDocument* doc);
 
 
@@ -109,24 +133,34 @@ namespace ady {
 
         QList<MenuData> getMenus(QWidget* parent);
 
-
-
+        //normalize the raw metadata json,an empty object is returned when invalid
+        static QJsonObject parseAddonJson(const QByteArray& data);
+        //convert the metadata json to a filled and validated record,export_type is 0 when not declared
 
 
         static void destory();
 
 
     private:
+        //guess export type from exported symbols when the metadata does not declare it
+        long long guessExportType();
+
         static AddonLoader* instance;
 
 
     protected:
-        QList<AddonRecord> m_addons;
+
         QMap<QString,QLibrary*> m_loadLists;
         QMap<QString,QString> m_nameList;
         QMap<QString,void*> m_langLoaderFuns;
         QMap<QString,void*> m_paneFuns;
         QLibrary* m_current;
+        QString m_currentFile;//relative addon entry of the current library,like "FTP/FTP"
+
+    private:
+        AddonLoaderPrivate* d;
+
+    friend class AddonLoaderHelper;
 
     };
 }

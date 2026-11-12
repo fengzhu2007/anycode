@@ -192,6 +192,45 @@ namespace ady {
         return response;
     }
 
+    void FTP::applyTransferOptions(Task* task)
+    {
+        Q_UNUSED(task);
+        //不设总时长上限:原实现按文件大小估算绝对超时,慢链路或服务器限速时必然中途断开
+        this->setOption(CURLOPT_NOSIGNAL,1L);
+        this->setOption(CURLOPT_CONNECTTIMEOUT,(long)CONNECT_TIMEOUT);
+        this->setOption(CURLOPT_TIMEOUT,0L);
+        //链路假死判定:持续低于 1KB/s 达 60 秒才中断,而不是无限等待
+        this->setOption(CURLOPT_LOW_SPEED_LIMIT,LOW_SPEED_LIMIT);
+        this->setOption(CURLOPT_LOW_SPEED_TIME,LOW_SPEED_TIME);
+        //连接保活,避免 NAT/防火墙回收长时间空闲连接
+        this->setOption(CURLOPT_TCP_KEEPALIVE,1L);
+        this->setOption(CURLOPT_TCP_KEEPIDLE,KEEPALIVE_IDLE);
+        this->setOption(CURLOPT_FTP_RESPONSE_TIMEOUT,FTP_RESPONSE_TIMEOUT);
+        this->setOption(CURLOPT_ACCEPTTIMEOUT_MS,ACCEPT_TIMEOUT_MS);
+        //默认读写缓冲偏小,大文件传输时回调次数过多
+        this->setOption(CURLOPT_BUFFERSIZE,BUFFER_SIZE);
+        this->setOption(CURLOPT_UPLOAD_BUFFERSIZE,BUFFER_SIZE);
+    }
+
+    void FTP::resetTransferOptions()
+    {
+        //清理传输期选项,防止 Task/文件指针悬空后被下一次命令复用
+        this->setOption(CURLOPT_XFERINFOFUNCTION,nullptr);
+        this->setOption(CURLOPT_XFERINFODATA,nullptr);
+        this->setOption(CURLOPT_NOPROGRESS,1L);
+        this->setOption(CURLOPT_READFUNCTION,nullptr);
+        this->setOption(CURLOPT_READDATA,nullptr);
+        this->setOption(CURLOPT_WRITEFUNCTION,nullptr);
+        this->setOption(CURLOPT_WRITEDATA,nullptr);
+        this->setOption(CURLOPT_UPLOAD,0L);
+        this->setOption(CURLOPT_INFILESIZE_LARGE,(curl_off_t)0);
+        this->setOption(CURLOPT_LOW_SPEED_LIMIT,0L);
+        this->setOption(CURLOPT_LOW_SPEED_TIME,0L);
+        //命令通道回到短超时,不能沿用传输通道的策略
+        this->setOption(CURLOPT_TIMEOUT,(long)COMMAND_TIMEOUT);
+        this->setOption(CURLOPT_CONNECTTIMEOUT,(long)COMMAND_TIMEOUT);
+    }
+
     NetworkResponse* FTP::listDir(const QString& dir,int page,int pageSize)
     {
         Q_UNUSED(page);
@@ -239,6 +278,9 @@ namespace ady {
             if(task->file->open(QIODevice::ReadOnly)){
                 task->filesize = fi.size();
                 task->readysize = 0l;
+                task->notify_size = 0;
+                task->notify_time = 0;
+                task->notify_progress = -1.0f;
                 QDateTime dt = fi.fileTime(QFileDevice::FileModificationTime);
                 //dt.setTimeZone(QTimeZone::utc());
                 //dt.setTimeZone()
@@ -265,12 +307,7 @@ namespace ady {
                 this->setOption(CURLOPT_INFILESIZE_LARGE,(curl_off_t)(task->filesize));
                 //this->setOption(CURLOPT_FTPPORT,"-");
                 this->setOption(CURLOPT_FTP_CREATE_MISSING_DIRS,CURLFTP_CREATE_DIR);
-                //this->setOption(CURLOPT_PORT,0);
-                this->setOption(CURLOPT_CONNECTTIMEOUT,COMMAND_TIMEOUT);
-                this->setOption(CURLOPT_TIMEOUT,(std::max)((int)task->filesize/1024*20,3));
-                //this->setOption(CURLOPT_NOSIGNAL,1);
-                //this->setOption(CURLOPT_FTP_SKIP_PASV_IP,1);
-                //qDebug()<<"timeout:"<<(std::max)((int)task->filesize/1024*20,3);
+                this->applyTransferOptions(task);
                 this->setOption(CURLOPT_POSTQUOTE, cmdlist);
                 response->setCommand("UPLOAD "+local);
                 this->errorCode = this->access(response);
@@ -294,16 +331,12 @@ namespace ady {
                 QString host = "ftp://" + this->host;
                 host += "/";
                 this->setOption(CURLOPT_URL, host.toStdString().c_str());
-                this->setOption(CURLOPT_READFUNCTION, nullptr);
-                this->setOption(CURLOPT_UPLOAD, 0L);
-                this->setOption(CURLOPT_READDATA, nullptr);
-                this->setOption(CURLOPT_INFILESIZE_LARGE, (curl_off_t)0);
                 this->setOption(CURLOPT_PORT,this->port);
                 this->setOption(CURLOPT_FTPPORT, nullptr);
                 this->setOption(CURLOPT_FTP_CREATE_MISSING_DIRS,CURLFTP_CREATE_DIR_NONE);
-                this->setOption(CURLOPT_TIMEOUT, COMMAND_TIMEOUT);
                 this->setOption(CURLOPT_POSTQUOTE, nullptr);
                 this->setOption(CURLOPT_QUOTE,nullptr);
+                this->resetTransferOptions();
                 if(precmdlist!=NULL){
                     curl_slist_free_all(precmdlist);
                 }
@@ -349,6 +382,10 @@ namespace ady {
         }else{
             task->file = new QFile(local);
             if(task->file->open(QIODevice::WriteOnly)){
+                task->readysize = 0l;
+                task->notify_size = 0;
+                task->notify_time = 0;
+                task->notify_progress = -1.0f;
                 QString url = QString("ftp://%1%2").arg(this->host).arg(this->escape(remote));
 
                 struct curl_slist *precmdlist = NULL;
@@ -363,7 +400,7 @@ namespace ady {
                 this->setOption(CURLOPT_XFERINFODATA, (void*)task);
                 this->setOption(CURLOPT_NOPROGRESS, 0L);
                 this->setOption(CURLOPT_URL, url.toStdString().c_str());
-                this->setOption(CURLOPT_TIMEOUT, 0);
+                this->applyTransferOptions(task);
 
                 response->setCommand("DOWNLOAD "+remote);
 
@@ -378,9 +415,8 @@ namespace ady {
                 host += "/";
                 this->setOption(CURLOPT_URL,host.toStdString().c_str());
                 this->setOption(CURLOPT_PORT,this->port);
-                this->setOption(CURLOPT_TIMEOUT,COMMAND_TIMEOUT);
-                this->setOption(CURLOPT_CONNECTTIMEOUT,COMMAND_TIMEOUT);
                 this->setOption(CURLOPT_QUOTE,nullptr);
+                this->resetTransferOptions();
                 if(precmdlist!=NULL){
                     curl_slist_free_all(precmdlist);
                 }

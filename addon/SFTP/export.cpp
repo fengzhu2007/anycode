@@ -7,6 +7,9 @@
 #include "sftp_response.h"
 
 #include <QDebug>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QObject>
 
 
 size_t getFormPanelSize(QString name)
@@ -74,4 +77,22 @@ int requestConnect(void* ptr)
 ady::NetworkRequest* initRequest(long long id){
     auto req = ady::NetworkManager::getInstance()->newRequest<ady::SFTP>(id);
     return req;
+}
+
+const char* addonInfo()
+{
+    static QByteArray json;
+    if(json.isEmpty()){
+        QJsonObject object;
+        object.insert("name",QStringLiteral("SFTP"));
+        object.insert("title",QStringLiteral("SFTP"));
+        object.insert("label",QStringLiteral("SFTP"));
+        object.insert("file",QStringLiteral("SFTP/SFTP"));
+        object.insert("export_type",QStringLiteral("RemoteConnector"));
+        object.insert("version",QStringLiteral("1.0"));
+        object.insert("author",QStringLiteral("Official"));
+        object.insert("description",QObject::tr("SFTP site addon providing secure file browsing, upload and download over SSH."));
+        json = QJsonDocument(object).toJson(QJsonDocument::Compact);
+    }
+    return json.constData();
 }

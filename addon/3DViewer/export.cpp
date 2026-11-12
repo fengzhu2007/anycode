@@ -1,39 +1,29 @@
 #include "export.h"
 #include "viewer3dwindow.h"
-#include "storage/addon_storage.h"
 
 #include <QDebug>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QObject>
 
 static QString id = "addon::3dviewer";
 
-bool install()
+const char* addonInfo()
 {
-    ady::AddonStorage db;
-    auto one = db.one(id);
-    if(one.id > 0){
-        one.status = 1;
-        one.export_type = ady::AddonLoader::Menu;
-        return db.update(one);
-    }else{
-        one.name = id;
-        one.title = QString{"3D Viewer"};
-        one.label = one.title;
-        one.file = "3DViewer/3DViewer";
-        one.status = 1;
-        one.is_system = 0;
-        one.export_type = ady::AddonLoader::Menu;
-        one.version = "1.0";
-        one.author = "Official";
-        one.description = QObject::tr("3D file viewer addon providing directory browsing, thumbnail generation and 3D visualization.");
-        return db.insert(one) > 0;
+    static QByteArray json;
+    if(json.isEmpty()){
+        QJsonObject object;
+        object.insert("name",id);
+        object.insert("title",QStringLiteral("3D Viewer"));
+        object.insert("label",QStringLiteral("3D Viewer"));
+        object.insert("file",QStringLiteral("3DViewer/3DViewer"));
+        object.insert("export_type",QStringLiteral("Menu"));
+        object.insert("version",QStringLiteral("1.0"));
+        object.insert("author",QStringLiteral("Official"));
+        object.insert("description",QObject::tr("3D model viewer addon with directory browsing, cached thumbnails and Qt Quick 3D preview."));
+        json = QJsonDocument(object).toJson(QJsonDocument::Compact);
     }
-}
-
-bool uninstall()
-{
-    ady::AddonStorage db;
-    db.del(id);
-    return true;
+    return json.constData();
 }
 
 GetMenusFun getGetMenus()
@@ -57,7 +47,7 @@ QList<ady::MenuData> getMenus(QWidget* parent)
     });
     menus.append(data);
 
-    // 分割线
+    //
     ady::MenuData sep;
     sep.menu_kind = ady::AddonLoader::Extend;
     sep.position = 1;

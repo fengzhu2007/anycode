@@ -468,6 +468,7 @@ add_library(App SHARED
         tools/image_clip/workflow_model.h tools/image_clip/workflow_model.cpp
         tools/template_command/template_command_dialog.h tools/template_command/template_command_dialog.cpp tools/template_command/template_command_dialog.ui
         panes/ai_chat/mdstyler.h panes/ai_chat/mdstyler.cpp
+        addon_loader_helper.h addon_loader_helper.cpp
 
 
 

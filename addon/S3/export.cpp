@@ -5,9 +5,11 @@
 #include "s3.h"
 #include "storage/site_storage.h"
 #include "s3_response.h"
-#include <storage/addon_storage.h>
 
 #include <QDebug>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QObject>
 
 const QString name = QLatin1String("S3");
 
@@ -71,33 +73,20 @@ ady::NetworkRequest* initRequest(long long id){
     return ady::NetworkManager::getInstance()->newRequest<ady::S3>(id);
 }
 
-int install(){
-    ady::AddonStorage addonStorage;
-    auto r = addonStorage.one(name);
-    r.title = QObject::tr("Amazon S3");
-    r.name = name;
-    r.label = name;
-    r.file = name + "/" + name;
-    r.status = 1;
-    r.is_system = 0;
-    r.export_type = 1;
-    if(r.id>0l){
-        //update
-        auto ret = addonStorage.update(r);
-        if(!ret){
-            return 1;//error
-        }
-    }else{
-        //insert
-        auto ret = addonStorage.insert(r);
-        if(ret==0l){
-            return 1;//error
-        }
+const char* addonInfo()
+{
+    static QByteArray json;
+    if(json.isEmpty()){
+        QJsonObject object;
+        object.insert("name",QStringLiteral("S3"));
+        object.insert("title",QStringLiteral("Amazon S3"));
+        object.insert("label",QStringLiteral("S3"));
+        object.insert("file",QStringLiteral("S3/S3"));
+        object.insert("export_type",QStringLiteral("RemoteConnector"));
+        object.insert("version",QStringLiteral("1.0"));
+        object.insert("author",QStringLiteral("Official"));
+        object.insert("description",QObject::tr("Amazon S3 storage addon providing file browsing, upload and download."));
+        json = QJsonDocument(object).toJson(QJsonDocument::Compact);
     }
-    return 0;
-}
-
-int uninstall(){
-    ady::AddonStorage().del(name);
-    return 0;
+    return json.constData();
 }

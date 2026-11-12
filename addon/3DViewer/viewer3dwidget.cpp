@@ -1,225 +1,183 @@
 #include "viewer3dwidget.h"
+#include "viewer3dconverter.h"
 
+#include <QDebug>
+#include <QMetaObject>
+#include <QQmlContext>
+#include <QQmlError>
+#include <QQuickItem>
+#include <QQuickWidget>
 #include <QVBoxLayout>
-#include <Qt3DCore/QEntity>
-#include <Qt3DCore/QNode>
-#include <Qt3DRender/QMesh>
-#include <Qt3DRender/QGeometryRenderer>
-#include <Qt3DRender/QCamera>
-#include <Qt3DRender/QMaterial>
-#include <Qt3DRender/QRenderSettings>
-#include <Qt3DExtras/QPhongMaterial>
-#include <Qt3DExtras/Qt3DWindow>
-#include <Qt3DExtras/QOrbitCameraController>
-#include <Qt3DExtras/QForwardRenderer>
-#include <Qt3DCore/QTransform>
-
-// Qt6 起 QGeometry/QAttribute/QBuffer 从 Qt3DRender 迁移到 Qt3DCore，这里做统一别名以兼容 Qt5/Qt6
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-#include <Qt3DCore/QGeometry>
-#include <Qt3DCore/QAttribute>
-#include <Qt3DCore/QBuffer>
-namespace Qt3DGeometry = Qt3DCore;
-#else
-#include <Qt3DRender/QGeometry>
-#include <Qt3DRender/QAttribute>
-#include <Qt3DRender/QBuffer>
-namespace Qt3DGeometry = Qt3DRender;
-#endif
-
-static void appendVec3(QByteArray& data, const QVector3D& v)
-{
-    float coords[3] = { v.x(), v.y(), v.z() };
-    data.append(reinterpret_cast<const char*>(coords), 3 * sizeof(float));
-}
 
 Viewer3DWidget::Viewer3DWidget(QWidget* parent)
     : QWidget(parent)
-    , m_3dWindow(nullptr)
-    , m_rootEntity(nullptr)
-    , m_camera(nullptr)
-    , m_cameraController(nullptr)
-    , m_meshContainer(nullptr)
 {
-    setupScene();
+    setObjectName(QStringLiteral("viewer3dWidget"));
+
+    m_quickWidget = new QQuickWidget(this);
+    m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    m_quickWidget->setClearColor(QColor(30, 34, 42));
+    m_quickWidget->rootContext()->setContextProperty(QStringLiteral("viewer"), this);
+    m_quickWidget->setSource(QUrl(QStringLiteral("qrc:/3dviewer/qml/viewer3d.qml")));
+
+    if (m_quickWidget->status() == QQuickWidget::Error) {
+        const QList<QQmlError> errors = m_quickWidget->errors();
+        for (const QQmlError& error : errors) {
+            qWarning() << "3DViewer qml:" << error.toString();
+        }
+        setOverlayMessage(tr("Qt Quick 3D scene can not be loaded."));
+    } else {
+        setOverlayMessage(tr("Select a model in the list to preview."));
+    }
+
+    auto* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->addWidget(m_quickWidget);
+    setLayout(layout);
 }
 
 Viewer3DWidget::~Viewer3DWidget()
 {
 }
 
-void Viewer3DWidget::setupScene()
+bool Viewer3DWidget::active() const
 {
-    m_3dWindow = new Qt3DExtras::Qt3DWindow();
-    m_3dWindow->defaultFrameGraph()->setClearColor(QColor(46, 46, 50));
-
-    // Root entity
-    m_rootEntity = new Qt3DCore::QEntity();
-    m_3dWindow->setRootEntity(m_rootEntity);
-
-    // Camera
-    m_camera = m_3dWindow->camera();
-    m_camera->lens()->setPerspectiveProjection(45.0f, 16.0f / 9.0f, 0.1f, 1000.0f);
-    m_camera->setPosition(QVector3D(5, 5, 5));
-    m_camera->setViewCenter(QVector3D(0, 0, 0));
-    m_camera->setUpVector(QVector3D(0, 1, 0));
-
-    // Orbit camera controller — 三维旋转
-    m_cameraController = new Qt3DExtras::QOrbitCameraController(m_rootEntity);
-    m_cameraController->setLinearSpeed(50.0f);
-    m_cameraController->setLookSpeed(180.0f);
-    m_cameraController->setCamera(m_camera);
-
-    // Mesh container
-    m_meshContainer = new Qt3DCore::QEntity(m_rootEntity);
-
-    // Grid & axes
-    setupGrid();
-    setupAxes();
-
-    // Embed Qt3DWindow into this widget
-    auto* container = QWidget::createWindowContainer(m_3dWindow, this);
-    container->setMinimumSize(400, 300);
-
-    auto* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(container);
-    setLayout(layout);
+    return m_active;
 }
 
-void Viewer3DWidget::setupGrid()
+QUrl Viewer3DWidget::modelSource() const
 {
-    Qt3DCore::QEntity* gridEntity = new Qt3DCore::QEntity(m_rootEntity);
-
-    Qt3DGeometry::QGeometry* geometry = new Qt3DGeometry::QGeometry(gridEntity);
-
-    // Grid vertices (lines on XZ plane)
-    QByteArray vertexData;
-    int gridSize = 10;
-    for(int i = -gridSize; i <= gridSize; ++i){
-        QVector3D p1((float)i, 0.0f, (float)-gridSize);
-        QVector3D p2((float)i, 0.0f, (float)gridSize);
-        appendVec3(vertexData, p1);
-        appendVec3(vertexData, p2);
-        QVector3D p3((float)-gridSize, 0.0f, (float)i);
-        QVector3D p4((float)gridSize, 0.0f, (float)i);
-        appendVec3(vertexData, p3);
-        appendVec3(vertexData, p4);
-    }
-
-    Qt3DGeometry::QBuffer* vertexBuffer = new Qt3DGeometry::QBuffer(geometry);
-    vertexBuffer->setData(vertexData);
-
-    Qt3DGeometry::QAttribute* posAttr = new Qt3DGeometry::QAttribute(geometry);
-    posAttr->setName(Qt3DGeometry::QAttribute::defaultPositionAttributeName());
-    posAttr->setVertexBaseType(Qt3DGeometry::QAttribute::Float);
-    posAttr->setVertexSize(3);
-    posAttr->setAttributeType(Qt3DGeometry::QAttribute::VertexAttribute);
-    posAttr->setBuffer(vertexBuffer);
-    posAttr->setByteStride(3 * sizeof(float));
-    posAttr->setCount(vertexData.size() / (3 * sizeof(float)));
-    geometry->addAttribute(posAttr);
-
-    Qt3DRender::QGeometryRenderer* renderer = new Qt3DRender::QGeometryRenderer(gridEntity);
-    renderer->setGeometry(geometry);
-    renderer->setPrimitiveType(Qt3DRender::QGeometryRenderer::Lines);
-
-    Qt3DCore::QTransform* transform = new Qt3DCore::QTransform(gridEntity);
-
-    Qt3DExtras::QPhongMaterial* material = new Qt3DExtras::QPhongMaterial(gridEntity);
-    material->setAmbient(QColor(70, 70, 80));
-    material->setDiffuse(QColor(70, 70, 80));
-
-    gridEntity->addComponent(renderer);
-    gridEntity->addComponent(transform);
-    gridEntity->addComponent(material);
+    return m_modelSource;
 }
 
-void Viewer3DWidget::setupAxes()
+bool Viewer3DWidget::wireframeMode() const
 {
-    Qt3DCore::QEntity* axesEntity = new Qt3DCore::QEntity(m_rootEntity);
-
-    Qt3DGeometry::QGeometry* geometry = new Qt3DGeometry::QGeometry(axesEntity);
-
-    // 3 axis lines: 6 vertices
-    QByteArray vertexData;
-    float axisLen = 2.0f;
-    QVector3D origin(0, 0, 0);
-    QVector3D xAxis(axisLen, 0, 0);
-    QVector3D yAxis(0, axisLen, 0);
-    QVector3D zAxis(0, 0, axisLen);
-    appendVec3(vertexData, origin);
-    appendVec3(vertexData, xAxis);
-    appendVec3(vertexData, origin);
-    appendVec3(vertexData, yAxis);
-    appendVec3(vertexData, origin);
-    appendVec3(vertexData, zAxis);
-
-    Qt3DGeometry::QBuffer* vertexBuffer = new Qt3DGeometry::QBuffer(geometry);
-    vertexBuffer->setData(vertexData);
-
-    Qt3DGeometry::QAttribute* posAttr = new Qt3DGeometry::QAttribute(geometry);
-    posAttr->setName(Qt3DGeometry::QAttribute::defaultPositionAttributeName());
-    posAttr->setVertexBaseType(Qt3DGeometry::QAttribute::Float);
-    posAttr->setVertexSize(3);
-    posAttr->setAttributeType(Qt3DGeometry::QAttribute::VertexAttribute);
-    posAttr->setBuffer(vertexBuffer);
-    posAttr->setByteStride(3 * sizeof(float));
-    posAttr->setCount(6);
-    geometry->addAttribute(posAttr);
-
-    Qt3DRender::QGeometryRenderer* renderer = new Qt3DRender::QGeometryRenderer(axesEntity);
-    renderer->setGeometry(geometry);
-    renderer->setPrimitiveType(Qt3DRender::QGeometryRenderer::Lines);
-
-    Qt3DCore::QTransform* transform = new Qt3DCore::QTransform(axesEntity);
-
-    Qt3DExtras::QPhongMaterial* material = new Qt3DExtras::QPhongMaterial(axesEntity);
-    material->setAmbient(QColor(200, 80, 80));
-    material->setDiffuse(QColor(200, 80, 80));
-
-    axesEntity->addComponent(renderer);
-    axesEntity->addComponent(transform);
-    axesEntity->addComponent(material);
+    return m_wireframeMode;
 }
 
-void Viewer3DWidget::loadFile(const QString& filePath)
+void Viewer3DWidget::setWireframe(bool on)
 {
-    clearMesh();
-
-    Qt3DCore::QEntity* meshEntity = new Qt3DCore::QEntity(m_meshContainer);
-
-    Qt3DRender::QMesh* mesh = new Qt3DRender::QMesh(meshEntity);
-    mesh->setSource(QUrl::fromLocalFile(filePath));
-
-    Qt3DExtras::QPhongMaterial* material = new Qt3DExtras::QPhongMaterial(meshEntity);
-    material->setAmbient(QColor(80, 100, 180));
-    material->setDiffuse(QColor(100, 140, 220));
-    material->setSpecular(QColor(60, 60, 60));
-    material->setShininess(32.0f);
-
-    Qt3DCore::QTransform* transform = new Qt3DCore::QTransform(meshEntity);
-    transform->setScale(1.0f);
-
-    meshEntity->addComponent(mesh);
-    meshEntity->addComponent(material);
-    meshEntity->addComponent(transform);
-}
-
-void Viewer3DWidget::clearMesh()
-{
-    if(!m_meshContainer)
+    if (m_wireframeMode == on) {
         return;
-    const Qt3DCore::QNodeVector children = m_meshContainer->childNodes();
-    for(Qt3DCore::QNode* child : children){
-        Qt3DCore::QEntity* entity = qobject_cast<Qt3DCore::QEntity*>(child);
-        if(entity)
-            entity->setParent(static_cast<Qt3DCore::QNode*>(nullptr));
+    }
+    m_wireframeMode = on;
+    emit wireframeModeChanged();
+}
+
+bool Viewer3DWidget::showGrid() const
+{
+    return m_showGrid;
+}
+
+void Viewer3DWidget::setShowGrid(bool on)
+{
+    if (m_showGrid == on) {
+        return;
+    }
+    m_showGrid = on;
+    emit showGridChanged();
+}
+
+QString Viewer3DWidget::overlayMessage() const
+{
+    return m_overlayMessage;
+}
+
+QString Viewer3DWidget::currentModelPath() const
+{
+    return m_modelPath;
+}
+
+QString Viewer3DWidget::boundsSummary() const
+{
+    return m_boundsSummary;
+}
+
+void Viewer3DWidget::loadModel(const QString& modelFilePath)
+{
+    QString error;
+    const QString loadPath = Viewer3DConverter::resolveLoadPath(modelFilePath, &error);
+    if (loadPath.isEmpty()) {
+        m_modelPath = modelFilePath;
+        setActive(false);
+        setOverlayMessage(error);
+        emit modelFailed(modelFilePath, error);
+        return;
+    }
+
+    m_modelPath = modelFilePath;
+    m_boundsSummary.clear();
+    setActive(true);
+    setOverlayMessage(QString());
+    setModelSource(QUrl::fromLocalFile(loadPath));
+}
+
+void Viewer3DWidget::clear()
+{
+    m_modelPath.clear();
+    m_boundsSummary.clear();
+    setActive(false);
+    setModelSource(QUrl());
+    setOverlayMessage(tr("Select a model in the list to preview."));
+}
+
+void Viewer3DWidget::fitView()
+{
+    QQuickItem* root = m_quickWidget != nullptr ? m_quickWidget->rootObject() : nullptr;
+    if (root == nullptr) {
+        return;
+    }
+    QMetaObject::invokeMethod(root, "fitCameraToModel");
+}
+
+void Viewer3DWidget::notifyModelStatus(int status, const QString& errorString)
+{
+    if (status == 1) {
+        setOverlayMessage(QString());
+        emit modelReady(m_modelPath);
+    } else if (status == 2) {
+        const QString message = errorString.isEmpty() ? tr("Failed to load the model.") : errorString;
+        setActive(false);
+        setOverlayMessage(message);
+        emit modelFailed(m_modelPath, message);
     }
 }
 
-void Viewer3DWidget::resetView()
+void Viewer3DWidget::reportModelBounds(double dx, double dy, double dz, double radius, double distance)
 {
-    m_camera->setPosition(QVector3D(5, 5, 5));
-    m_camera->setViewCenter(QVector3D(0, 0, 0));
+    Q_UNUSED(distance);
+    m_boundsSummary = tr("Size %1 x %2 x %3, radius %4")
+                          .arg(dx, 0, 'f', 2)
+                          .arg(dy, 0, 'f', 2)
+                          .arg(dz, 0, 'f', 2)
+                          .arg(radius, 0, 'f', 2);
+    emit boundsChanged(m_boundsSummary);
+}
+
+void Viewer3DWidget::setActive(bool active)
+{
+    if (m_active == active) {
+        return;
+    }
+    m_active = active;
+    emit activeChanged();
+}
+
+void Viewer3DWidget::setModelSource(const QUrl& url)
+{
+    if (m_modelSource == url) {
+        return;
+    }
+    m_modelSource = url;
+    emit modelSourceChanged();
+}
+
+void Viewer3DWidget::setOverlayMessage(const QString& message)
+{
+    if (m_overlayMessage == message) {
+        return;
+    }
+    m_overlayMessage = message;
+    emit overlayMessageChanged();
 }

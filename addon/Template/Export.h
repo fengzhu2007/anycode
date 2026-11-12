@@ -16,6 +16,7 @@ extern "C" {
 {TPL}_EXPORT ady::FormPanel* getFormPanel(QWidget* parent,QString,size_t n);
 {TPL}_EXPORT ady::NetworkRequest* getRequest(QString name);
 {TPL}_EXPORT int requestConnect(void* ptr);
+{TPL}_EXPORT const char* addonInfo();
 {TPL}_EXPORT GetMenusFun getGetMenus();
 
 #ifdef __cplusplus

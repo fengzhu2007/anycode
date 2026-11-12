@@ -14,8 +14,7 @@ S3_EXPORT ady::FormPanel* getFormPanel(QWidget* parent,QString,size_t n);
 S3_EXPORT ady::NetworkRequest* getRequest(QString name);
 S3_EXPORT int requestConnect(void* ptr);
 S3_EXPORT ady::NetworkRequest* initRequest(long long id);
-S3_EXPORT int install();
-S3_EXPORT int uninstall();
+S3_EXPORT const char* addonInfo();
 
 #ifdef __cplusplus
 }

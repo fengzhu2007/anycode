@@ -6,6 +6,7 @@
 #include "storage/addon_storage.h"
 #include <QCoreApplication>
 #include <QDir>
+#include <QDateTime>
 #include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
@@ -151,6 +152,69 @@ static bool extractZip(const QString& zipPath, const QString& destDir)
     return true;
 }
 
+static QStringList libraryFilters()
+{
+    QStringList filters;
+#ifdef Q_OS_WIN
+    filters << "*.dll";
+#elif defined(Q_OS_MAC)
+    filters << "*.dylib";
+#else
+    filters << "*.so";
+#endif
+    return filters;
+}
+
+//look for the addon library in the given directory and return its relative entry,like "FTP/FTP"
+static QString addonEntryOf(const QDir& dir,const QString& prefix,const QString& hint,const QDateTime& since)
+{
+    QString candidate;
+    QString matched;
+    const auto files = dir.entryList(libraryFilters(),QDir::Files);
+    for(const auto& file : files){
+        const QFileInfo info(dir.filePath(file));
+        if(info.lastModified() < since){
+            continue;
+        }
+        if(candidate.isEmpty()){
+            candidate = file;
+        }
+        if(info.baseName().compare(hint,Qt::CaseInsensitive)==0){
+            matched = file;
+            break;
+        }
+    }
+    const QString file = matched.isEmpty() ? candidate : matched;
+    if(file.isEmpty()){
+        return QString();
+    }
+    const QString name = QFileInfo(file).baseName();
+    return prefix.isEmpty() ? name : prefix + "/" + name;
+}
+
+//the library of a package usually sits in the directory named after itself
+static QString findAddonEntry(const QString& addonDir,const QString& hint,const QDateTime& since)
+{
+    QDir dir(addonDir);
+    if(dir.exists(hint)){
+        const QString entry = addonEntryOf(QDir(dir.filePath(hint)),hint,hint,since);
+        if(!entry.isEmpty()){
+            return entry;
+        }
+    }
+    const auto dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for(const auto& sub : dirs){
+        if(sub==hint){
+            continue;
+        }
+        const QString entry = addonEntryOf(QDir(dir.filePath(sub)),sub,hint,since);
+        if(!entry.isEmpty()){
+            return entry;
+        }
+    }
+    return addonEntryOf(dir,QString(),hint,since);
+}
+
 void AddonManagerDialog::onInstall()
 {
     QString filePath = ui->file->text();
@@ -177,32 +241,35 @@ void AddonManagerDialog::onInstall()
     ui->widget->start();
     ui->install->setEnabled(false);
 
+    const QDateTime startTime = QDateTime::currentDateTime();
+    ady::AddonLoader* loader = ady::AddonLoader::getInstance();
     bool ok = false;
     if(suffix == "zip"){
-        ok = extractZip(filePath, addonDir);
+        //the package is extracted and the library inside is registered
+        if(extractZip(filePath, addonDir)){
+            const QString entry = findAddonEntry(addonDir, fi.baseName(), startTime);
+            ok = !entry.isEmpty() && loader->install(entry);
+        }
     }else{
         //for dll file
         QString addonName = fi.baseName(); //e.g., FTP from FTP.dll
         QString addonSubDir = addonDir + "/" + addonName;
+        bool copied = true;
 
         //check if dll is already in addon directory
-        if(fi.absolutePath() == QDir(addonSubDir).absolutePath()){
-            //dll is in addon dir, load and call install directly
-            QString relPath = addonName + "/" + addonName; //e.g., "FTP/FTP"
-            ady::AddonLoader* loader = ady::AddonLoader::getInstance();
-            if(loader->loadFile(relPath)){
-                ok = loader->install();
-            }
-        }else{
+        if(fi.absolutePath() != QDir(addonSubDir).absolutePath()){
             //dll is not in addon dir, copy it
             QDir().mkpath(addonSubDir);
-            QString destPath = addonSubDir + "/" + fi.fileName();
-            ok = QFile::copy(filePath, destPath);
+            copied = QFile::copy(filePath, addonSubDir + "/" + fi.fileName());
+        }
+        if(copied){
+            ok = loader->install(addonName + "/" + addonName);
         }
     }
 
     ui->widget->stop();
     ui->install->setEnabled(true);
+    this->initView();
 
     if(ok){
         QMessageBox::information(this, tr("Success"), tr("Addon installed successfully. Please restart the application."));
@@ -232,12 +299,13 @@ void AddonManagerDialog::onEnable()
 void AddonManagerDialog::onUninstall()
 {
     if(d->currentName.isEmpty()) return;
-    AddonStorage storage;
-    auto record = storage.one(d->currentName);
-    if(record.id <= 0 || record.is_system) return;
-    storage.del(record.id);
+    //the addon only cleans up its own resources,the record is removed by the loader
+    if(!ady::AddonLoader::getInstance()->uninstall(d->currentName)){
+        QMessageBox::warning(this, tr("Error"), tr("Failed to uninstall addon."));
+        return;
+    }
     d->currentName.clear();
-    initView();
+    this->initView();
     QMessageBox::information(this, tr("Info"), tr("Changes will take effect after restart."));
 }
 }

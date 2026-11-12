@@ -92,19 +92,20 @@ QList<AddonRecord> AddonStorage::list(int status)
 
 bool AddonStorage::update(AddonRecord record)
 {
-    QString sql = QString("UPDATE [%1] SET [%2]=?,[%3]=?,[%4]=?,[%5]=?,[%6]=?,[%7]=?,[%8]=?,[%9]=?,[%10]=? WHERE [%11]=?").arg(TABLE_NAME).arg(COL_TITLE).arg(COL_TYPENAME).arg(COL_TYPELABEL).arg(COL_STATUS).arg(COL_IS_SYSTEM).arg(COL_EXPORT_TYPE).arg(COL_DESCRIPTION).arg(COL_AUTHOR).arg(COL_VERSION).arg(DatabaseHelper::COL_ID);
+    QString sql = QString("UPDATE [%1] SET [%2]=?,[%3]=?,[%4]=?,[%5]=?,[%6]=?,[%7]=?,[%8]=?,[%9]=?,[%10]=?,[%11]=? WHERE [%12]=?").arg(TABLE_NAME).arg(COL_TITLE).arg(COL_TYPENAME).arg(COL_TYPELABEL).arg(COL_FILE).arg(COL_STATUS).arg(COL_IS_SYSTEM).arg(COL_EXPORT_TYPE).arg(COL_DESCRIPTION).arg(COL_AUTHOR).arg(COL_VERSION).arg(DatabaseHelper::COL_ID);
     QSqlQuery query(DatabaseHelper::getDatabase()->get());
     query.prepare(sql);
     query.bindValue(0,record.title);
     query.bindValue(1,record.name);
     query.bindValue(2,record.label);
-    query.bindValue(3,record.status);
-    query.bindValue(4,record.is_system);
-    query.bindValue(5,record.export_type);
-    query.bindValue(6,record.description);
-    query.bindValue(7,record.author);
-    query.bindValue(8,record.version);
-    query.bindValue(9,record.id);
+    query.bindValue(3,record.file);
+    query.bindValue(4,record.status);
+    query.bindValue(5,record.is_system);
+    query.bindValue(6,record.export_type);
+    query.bindValue(7,record.description);
+    query.bindValue(8,record.author);
+    query.bindValue(9,record.version);
+    query.bindValue(10,record.id);
     bool ret = query.exec();
     this->error = query.lastError();
     return ret;

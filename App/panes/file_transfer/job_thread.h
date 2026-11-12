@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QList>
 #include <QFileInfo>
+#include <QMutex>
 #include "interface/file_item.h"
 namespace ady{
 class FileTransferModelItem;
@@ -34,6 +35,8 @@ private:
 protected:
     long long m_siteid;
     Task* m_task;
+    //m_task 会被 UI 线程(abort)与传输线程(run)同时访问
+    QMutex m_taskMutex;
 
 };
 }

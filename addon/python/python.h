@@ -15,8 +15,7 @@ PYTHON_EXPORT TextEditor::LanguageLoader *createLoader(QTextDocument *doc);
 extern "C" {
 #endif
 // Addon exported functions (resolved by AddonLoader via QLibrary)
-PYTHON_EXPORT bool install();
-PYTHON_EXPORT bool uninstall();
+PYTHON_EXPORT const char* addonInfo();
 PYTHON_EXPORT TextEditor::LanguageLoader* createLanguageLoader(QString languageName, QTextDocument* doc);
 #ifdef __cplusplus
 }

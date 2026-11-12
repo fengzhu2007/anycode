@@ -25,22 +25,29 @@ void JobThread::run(){
         }
         //Task* task = nullptr;
         if(item->type()==FileTransferModelItem::Job){
-            m_task = new Task(item);
-            int ret = NetworkManager::getInstance()->exec(m_task);
+            Task* task = new Task(item);
+            {
+                QMutexLocker locker(&m_taskMutex);
+                m_task = task;
+            }
+            int ret = NetworkManager::getInstance()->exec(task);
             //qDebug()<<"222222222222"<<ret;
 
             if(ret==0){
                 //ok
                 //model->removeItem(m_task->siteid,m_task->id);//ok remove task
-                emit finishTask(m_task->siteid,m_task->id);
+                emit finishTask(task->siteid,task->id);
             }else{
                 //error
                 //qDebug()<<"error:"<<m_task->errorMsg<<ret;
                 //model->setItemFailed(m_task->siteid,m_task->id,m_task->errorMsg);//ok remove task
-                emit errorTask(m_task->siteid,m_task->id,m_task->errorMsg);
+                emit errorTask(task->siteid,task->id,task->errorMsg);
             }
-            delete m_task;
-            m_task = nullptr;
+            {
+                QMutexLocker locker(&m_taskMutex);
+                m_task = nullptr;
+            }
+            delete task;
             //model->removeItem(item->parent()->id(),item->id());
         }else{
             //QList<FileTransferModelItem*> list;
@@ -78,12 +85,14 @@ void JobThread::run(){
 
 
 void JobThread::abort(){
+    QMutexLocker locker(&m_taskMutex);
     if(m_task!=nullptr){
         m_task->abort = true;
     }
 }
 
 void JobThread::abortTask(long long id){
+    QMutexLocker locker(&m_taskMutex);
     if(m_task!=nullptr && m_task->id==id){
         m_task->abort = true;
     }
@@ -107,14 +116,12 @@ QList<FileItem> JobThread::listRemote(long long siteid,const QString& destinatio
             bool status = response->status();
             if(!status){
                 *errorMsg = response->errorMsg;
+                if(errorMsg->isEmpty()){
+                    *errorMsg = tr("Server connect failed");
+                }
             }
             delete response;
             if(status==false){
-                if(response->errorMsg.isEmpty()){
-                    *errorMsg = tr("Server connect failed");
-                }else{
-                    *errorMsg = response->errorMsg;
-                }
                 return list;
             }
         }
